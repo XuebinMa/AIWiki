@@ -1,0 +1,78 @@
+---
+title: "Trust without verify: \"looks right\" is not \"is right\""
+slug: trust-then-verify
+sidebar_position: 1
+roles: [Engineer, Test Engineer]
+phase: Testing
+severity: High
+applies_to: "All Claude Code versions"
+tags: [verification loop, testing, edge cases]
+sources:
+  - { title: "Claude Code Best Practices (official)", url: "https://code.claude.com/docs/en/best-practices" }
+  - { title: "Agentic AI Coding: Best Practice Patterns (CodeScene)", url: "https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['Engineer', 'Test Engineer']} phase="Testing" severity="High" appliesTo="All Claude Code versions" />
+
+> In one sentence: the code I hand you reads as perfectly reasonable, so you glance at it and merge. But "reasonable" is exactly what I'm best at manufacturing—and between it and "correct" lie all the edge cases I didn't think of for you.
+
+## Symptom
+
+I give you an implementation: well named, cleanly structured, nicely commented, seemingly flawless. You read it, it looks right, you adopt it. Until some empty input, some concurrent case, some over-long string punches a hole in it—and by then it's already in production.
+
+## Why it happens
+
+I'm trained to **generate text that looks correct and reads smoothly.** That means I'm naturally good at producing plausible-looking code: on the surface, it almost always makes sense.
+
+But "reads reasonably" and "is correct for every input" are two different things. I have not actually run this code, and my coverage of edge cases depends on whether I happened to *think of* them—which I often don't, fully. In other words, **fluency is my default output; correctness is not.** Without a check in the loop that emits a pass/fail, what you're seeing is just fluency.
+
+## Consequences
+
+- Edge cases, error branches, and concurrency problems get missed, because they don't stand out at the "reads reasonably" level.
+- Problems are deferred to more expensive phases (integration, production) before surfacing.
+- You build up a trust in my output that's based on its "prose"—and that trust is unreliable.
+
+## Best practice
+
+**Give me a check I can run myself, one that emits a pass/fail signal, so the verification loop closes on its own.** (This is, alongside [rolling back](../05-implementation/over-correcting.mdx), the other line of defense against "looks reasonable.")
+
+The most effective form is tests, but it isn't limited to them—anything that produces a "pass / fail" works:
+
+- a set of unit / integration tests;
+- a build or a type check;
+- a comparable run result or screenshot.
+
+Once such a check exists, I can enter a self-consistent loop: **write the implementation → run the check → read the result → fix → run again**, until it genuinely passes rather than stopping at "looks like it passes." A particularly reliable approach is to **have me write the tests first (including edge cases), confirm the tests are sound, then have me write the implementation to turn them green**—that way I have nowhere to hide.
+
+## Example
+
+**Before:**
+
+```text
+You: implement parsePrice(str) that parses "￥1,299.00" into a number
+Me: (gives an implementation that reads just fine)
+You: (uses it directly)
+Production: parsePrice("") throws, parsePrice("1.2.3") returns NaN and lands in a bill
+```
+
+**After:**
+
+```text
+You: first write tests for parsePrice, covering: normal value, empty string, multiple decimal points, minus sign, very large number.
+Me: (writes the tests; several fail immediately)
+You: now change the implementation so all tests pass.
+Me: (iterates to all-green; the edge cases get forced out)
+```
+
+## Version notes
+
+:::note Applies to
+"Good at generating plausible-looking output" is an essential trait of large language models—**applies across versions and across models.** The stronger the model, the more plausible the output—which makes building an external verification loop *more* important, not less.
+:::
+
+## Further reading & sources
+
+- [Claude Code Best Practices (Anthropic, official)](https://code.claude.com/docs/en/best-practices)
+- [Agentic AI Coding: Best Practice Patterns for Speed with Quality (CodeScene)](https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality)

@@ -1,0 +1,18 @@
+{
+  "title": {
+    "message": "AIWiki",
+    "description": "The title in the navbar"
+  },
+  "logo.alt": {
+    "message": "AIWiki Logo",
+    "description": "The alt text of navbar logo"
+  },
+  "item.label.百科": {
+    "message": "Wiki",
+    "description": "Navbar item with label 百科"
+  },
+  "item.label.GitHub": {
+    "message": "GitHub",
+    "description": "Navbar item with label GitHub"
+  }
+}

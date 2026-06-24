@@ -1,0 +1,9 @@
+{
+  "label": "验收与发布",
+  "position": 8,
+  "link": {
+    "type": "generated-index",
+    "title": "验收与发布",
+    "description": "交付前的最后一关：验收标准、回归、发布与回滚。这一篇讲如何避免「demo 能跑就发布」，让 AI 参与把关而不是放行。"
+  }
+}

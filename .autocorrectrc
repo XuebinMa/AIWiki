@@ -1,0 +1,7 @@
+# AutoCorrect 配置
+# 关闭 `fullwidth`（半角标点 → 全角）这一条规则。原因：它会把 YAML frontmatter
+# 数组里的半角逗号（如 roles: [工程师, 架构师]）改成全角「，」，从而把两个数组项
+# 误并成一个字符串、破坏 frontmatter。正文中文标点本就按规范写全角，关掉它代价很小。
+# 其余规则保留：中英文之间加空格（space-word 等）、英文括号半角化（halfwidth-punctuation）仍生效。
+rules:
+  fullwidth: 0

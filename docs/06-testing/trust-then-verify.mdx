@@ -1,0 +1,78 @@
+---
+title: 信任但不验证：「看起来对」不等于「真的对」
+slug: trust-then-verify
+sidebar_position: 1
+roles: [工程师, 测试工程师]
+phase: 测试
+severity: 高
+applies_to: "Claude Code 全版本"
+tags: [验证闭环, 测试, 边界条件]
+sources:
+  - { title: "Claude Code Best Practices（官方）", url: "https://code.claude.com/docs/en/best-practices" }
+  - { title: "Agentic AI Coding: Best Practice Patterns（CodeScene）", url: "https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['工程师', '测试工程师']} phase="测试" severity="高" appliesTo="Claude Code 全版本" />
+
+> 一句话摘要：我交出的代码读起来很合理，你扫一眼就合并了。但「合理」是我最擅长制造的东西——它和「正确」之间，差着那些我没替你想到的边界条件。
+
+## 现象
+
+我给你一段实现，命名规范、结构清晰、注释到位，看上去无可挑剔。你读着觉得对，就采纳了。直到某个空输入、某个并发场景、某个超长字符串把它打穿——而那时它已经在生产环境里了。
+
+## 为什么会这样
+
+我被训练成**生成看起来正确、读起来流畅的文本**。这意味着我天然擅长产出「貌似合理」的代码：它在表面上几乎总是说得通的。
+
+但「读起来合理」和「在所有输入下都正确」是两回事。我没有真正运行过这段代码，对边界条件的覆盖取决于我有没有「想到」，而我经常想不全。换句话说，**流畅是我的默认输出，正确不是**——如果中间没有一个能给出「通过/失败」的检验，你看到的就只是流畅。
+
+## 后果
+
+- 边界条件、错误分支、并发问题被漏掉，因为它们在「读起来合理」的层面不显眼。
+- 问题被推迟到更贵的阶段（联调、上线）才暴露。
+- 你对我的输出建立起一种基于「文笔」的信任，而它并不可靠。
+
+## 最佳实践
+
+**给我一个能自己跑、能给出通过/失败信号的检验，让验证闭环自动闭合。**
+
+最有效的形式是测试（这正是[反复纠正](../05-implementation/over-correcting.mdx)之外，对付「貌似合理」的另一道防线），但不限于测试——任何能产出「pass / fail」的东西都行：
+
+- 一组单元测试 / 集成测试；
+- 一次构建（`build`）或类型检查；
+- 一个可对比的运行结果或截图。
+
+一旦有了这样的检验，我就能进入自洽的循环：**写实现 → 跑检验 → 读结果 → 修 → 再跑**，直到它真的通过，而不是停在「看起来通过」。一个特别可靠的做法是 **先让我写测试（包含边界用例）、确认测试合理、再让我写实现去让它们变绿**——这样我无处藏拙。
+
+## 示例
+
+**改之前：**
+
+```text
+你：实现一个 parsePrice(str)，把 "￥1,299.00" 解析成数字
+我：（给出实现，读起来很对）
+你：（直接用了）
+线上：parsePrice("") 抛异常，parsePrice("1.2.3") 返回 NaN 进了账单
+```
+
+**改之后：**
+
+```text
+你：先给 parsePrice 写测试，覆盖：正常值、空串、多个小数点、负号、超大数。
+我：（写出测试，其中几条立刻失败）
+你：现在改实现，让所有测试通过。
+我：（迭代到全绿，边界都被逼出来了）
+```
+
+## 版本说明
+
+:::note 适用版本
+「擅长生成貌似合理的输出」是大语言模型的本质特征，**全版本、且跨模型适用**。模型越强，貌似合理的程度越高——这反而让「建立外部验证闭环」更重要，而不是更不重要。
+:::
+
+## 延伸阅读与出处
+
+- [Claude Code Best Practices（Anthropic 官方）](https://code.claude.com/docs/en/best-practices)
+- [Agentic AI Coding: Best Practice Patterns for Speed with Quality（CodeScene）](https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality)

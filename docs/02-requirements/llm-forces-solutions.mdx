@@ -1,0 +1,79 @@
+---
+title: 需求缺口处，我倾向于硬猜而不是反问
+slug: llm-forces-solutions
+sidebar_position: 1
+roles: [项目经理, 工程师]
+phase: 需求分析
+severity: 高
+applies_to: "Claude Code 全版本"
+tags: [需求澄清, 假设, 提示设计]
+sources:
+  - { title: "Why Your AI Coding Agent Keeps Making Bad Decisions (The Gnar Company)", url: "https://www.thegnar.com/blog/why-your-ai-coding-agent-keeps-making-bad-decisions-and-how-to-fix-it" }
+  - { title: "Best Practices for Agent Workflows (Medium / Elisheba)", url: "https://medium.com/@elisheba.t.anderson/building-with-ai-coding-agents-best-practices-for-agent-workflows-be1d7095901b" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['项目经理', '工程师']} phase="需求分析" severity="高" appliesTo="Claude Code 全版本" />
+
+> 一句话摘要：当需求里缺了关键信息，你期待我停下来问你。但我的默认行为往往相反——我会替你做个假设，然后理直气壮地接着干。
+
+## 现象
+
+你给我一个需求：「做一个用户列表的导出功能。」你心里其实没定：导出 CSV 还是 Excel？要不要分页？权限怎么控制？你以为我会把这些问清楚。但我通常不会——我直接选了 CSV、导出全部、不加权限，然后交给你一个「完整」的实现。等你发现方向不对，活已经干完了。
+
+## 为什么会这样
+
+我在统计意义上**偏向于「给出一个解」，而不是「停下来要信息」**。面对信息缺失的场景，我很少主动暂停去索取缺失的关键输入；相反，我倾向于通过做假设、或选一个看似相关的方向，把问题「强行解决」掉。
+
+原因在于我的训练目标更接近「对给定输入产出一个有帮助的回应」，而「这道题信息不全、我应该拒绝作答并反问」这种行为在训练里被强化得远没有那么充分。**所以沉默地替你做主，是我的默认路径，主动反问不是。**
+
+## 后果
+
+- 我基于错误假设交付了一整套实现，返工成本远高于一开始问一句。
+- 假设被埋在代码里，你未必能一眼看出我「擅自决定」了什么。
+- 越是模糊的需求，我自由发挥的空间越大，跑偏的概率越高。
+
+## 最佳实践
+
+**把「先澄清再动手」显式地写成我的任务的一部分。** 不要假设我会自觉反问。
+
+- 在提示里直接要求：**「动手前，先列出你需要我确认的所有关键决策点，等我回答后再开始。」**
+- 采用 **探索 → 计划 → 实现 → 验证** 的分步法：先让我只做需求梳理和方案对比，明确叫停在「实现」之前，由你拍板后再继续。
+- 在 `CLAUDE.md` 里加一条长期约定，比如「需求不明确时，先提问，不要擅自假设」——这正是 [CLAUDE.md 按需生长](../05-implementation/claude-md-overload.mdx) 里「每条规则对应一个真实教训」的好例子。
+
+一句话：**与其指望我克服默认行为，不如把反问变成你明确下达的指令。**
+
+## 示例
+
+**改之前：**
+
+```text
+你：做一个用户列表的导出功能。
+我：（直接实现：CSV、导出全部、无权限校验）
+你：……我要的是 Excel，而且只能导出自己部门的。
+```
+
+**改之后：**
+
+```text
+你：我想做用户列表导出。动手前，先把你需要我确认的决策点列出来，等我回答再写。
+我：好的，我需要确认：
+    1) 导出格式（CSV / Excel）？
+    2) 导出范围（全部 / 当前筛选 / 按权限）？
+    3) 是否需要分页或行数上限？
+    4) 谁有权限导出？
+你：（逐条回答）
+我：（基于确认后的需求实现，一次到位）
+```
+
+## 版本说明
+
+:::note 适用版本
+「倾向硬猜而非反问」是大语言模型训练目标带来的共性倾向，**全版本、跨模型适用**。新版本在「不确定时主动澄清」上有所改善，但还远不能依赖——把反问写进指令，仍然是最稳的做法。
+:::
+
+## 延伸阅读与出处
+
+- [Why Your AI Coding Agent Keeps Making Bad Decisions (The Gnar Company)](https://www.thegnar.com/blog/why-your-ai-coding-agent-keeps-making-bad-decisions-and-how-to-fix-it)
+- [Building With AI Coding Agents: Best Practices for Agent Workflows](https://medium.com/@elisheba.t.anderson/building-with-ai-coding-agents-best-practices-for-agent-workflows-be1d7095901b)

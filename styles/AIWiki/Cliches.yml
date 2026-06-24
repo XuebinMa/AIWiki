@@ -1,0 +1,23 @@
+extends: existence
+message: "疑似套话 / AI 腔：'%s' —— 换成具体说法（见 STYLE-GUIDE.md「语气：像真人，不像 AI」）"
+level: error
+ignorecase: false
+nonword: true
+tokens:
+  # 中文套话开头
+  - '首先[，,、]'
+  - '其次[，,、]'
+  - '综上所述'
+  - '总而言之'
+  - '在当今[^。，]{0,10}时代'
+  - '值得注意的是'
+  # 中文空泛排比
+  - '不仅[^。]{0,30}而且'
+  - '既要[^。]{0,25}又要'
+  # 英文套话
+  - "It's worth noting"
+  - 'In conclusion,'
+  - "In today's"
+  - '\bMoreover,'
+  - '\bFurthermore,'
+  - '\bDelve\b'

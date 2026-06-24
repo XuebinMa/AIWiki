@@ -1,0 +1,42 @@
+{
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.wikiSidebar.category.需求分析": {
+    "message": "Requirements",
+    "description": "The label for category '需求分析' in sidebar 'wikiSidebar'"
+  },
+  "sidebar.wikiSidebar.category.需求分析.link.generated-index.title": {
+    "message": "Requirements",
+    "description": "The generated-index page title for category '需求分析' in sidebar 'wikiSidebar'"
+  },
+  "sidebar.wikiSidebar.category.需求分析.link.generated-index.description": {
+    "message": "Turning an idea into clear, unambiguous, verifiable requirements. This part covers where I tend to make decisions for you during the requirements phase—and how to make me ask first instead.",
+    "description": "The generated-index page description for category '需求分析' in sidebar 'wikiSidebar'"
+  },
+  "sidebar.wikiSidebar.category.编码实现": {
+    "message": "Implementation",
+    "description": "The label for category '编码实现' in sidebar 'wikiSidebar'"
+  },
+  "sidebar.wikiSidebar.category.编码实现.link.generated-index.title": {
+    "message": "Implementation",
+    "description": "The generated-index page title for category '编码实现' in sidebar 'wikiSidebar'"
+  },
+  "sidebar.wikiSidebar.category.编码实现.link.generated-index.description": {
+    "message": "The phase where code actually gets written—and where pitfalls cluster most densely. This part covers session management, the context window, CLAUDE.md, rolling back and correcting—the things that decide whether I'm a help or a burden.",
+    "description": "The generated-index page description for category '编码实现' in sidebar 'wikiSidebar'"
+  },
+  "sidebar.wikiSidebar.category.测试": {
+    "message": "Testing",
+    "description": "The label for category '测试' in sidebar 'wikiSidebar'"
+  },
+  "sidebar.wikiSidebar.category.测试.link.generated-index.title": {
+    "message": "Testing",
+    "description": "The generated-index page title for category '测试' in sidebar 'wikiSidebar'"
+  },
+  "sidebar.wikiSidebar.category.测试.link.generated-index.description": {
+    "message": "Code that I write and that \"looks right\" is not the same as code that is right. This part covers how to use tests to give me a verification loop I can run myself—one that emits a clear pass/fail signal.",
+    "description": "The generated-index page description for category '测试' in sidebar 'wikiSidebar'"
+  }
+}
