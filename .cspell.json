@@ -1,0 +1,48 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "ignorePaths": [
+    "node_modules/**",
+    "build/**",
+    ".docusaurus/**",
+    "styles/**",
+    "package-lock.json",
+    "terminology.md"
+  ],
+  "patterns": [
+    { "name": "cjk", "pattern": "[\\u3400-\\u9fff\\uf900-\\ufaff\\u3000-\\u303f\\uff00-\\uffef]+" },
+    { "name": "mermaid", "pattern": "/```mermaid[\\s\\S]*?```/g" }
+  ],
+  "ignoreRegExpList": ["cjk", "mermaid"],
+  "words": [
+    "Claude",
+    "Anthropic",
+    "Docusaurus",
+    "frontmatter",
+    "MDX",
+    "Mermaid",
+    "AIWiki",
+    "zhlint",
+    "autocorrect",
+    "cspell",
+    "Vale",
+    "admonition",
+    "admonitions",
+    "subagent",
+    "subagents",
+    "linter",
+    "linters",
+    "huacnlee",
+    "senshinji",
+    "Opus",
+    "Sonnet",
+    "Haiku",
+    "reviewdog",
+    "underspecified",
+    "Gnar",
+    "Elisheba",
+    "Usman",
+    "Tongyi",
+    "Qianwen"
+  ]
+}
