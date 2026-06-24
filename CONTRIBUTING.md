@@ -46,6 +46,7 @@
 - **中文是创作源**，先写好中文。
 - 英文译文放在 `i18n/en/docusaurus-plugin-content-docs/current/` 下，目录结构与 `docs/` 镜像。
 - 暂未翻译的条目，英文站点会自动回退显示中文，不影响构建。
+- **给某个阶段目录（分类）添加第一条条目时**，记得去 `i18n/en/docusaurus-plugin-content-docs/current.json` 补上该分类的英文 `label` 与 generated-index 的 `title` / `description`。分类名不随条目翻译走——漏了的话，英文站的侧边栏、面包屑、分类首页会显示中文（曾踩过这个坑）。
 
 ## 本地验证
 
