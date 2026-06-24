@@ -32,6 +32,18 @@ Claude Code · CLAUDE.md · Anthropic · Claude · Opus · Sonnet · Haiku · Do
 | 人类反馈强化学习 | RLHF | 缩写 RLHF 全文保留不译 |
 | 想法验证 | idea validation | |
 | 可行性 | feasibility | |
+| 最小权限 | least privilege | |
+| 权限（确认）| permission (prompt) | |
+| 过度授权 | over-permissioning | |
+| 提示注入 | prompt injection | |
+| 沙箱（隔离）| sandbox / sandboxing | |
+| 确认疲劳 | approval fatigue | |
+| 过度代理 | excessive agency | OWASP LLM Top 10 |
+| AI 代理 | AI agent | |
+| 过度设计 | over-engineering | |
+| 技术选型 | technology selection | |
+| 权衡 | trade-off | |
+| 技术债 | technical debt | |
 
 ## 枚举值映射（frontmatter 与 `<PitfallMeta>`）
 

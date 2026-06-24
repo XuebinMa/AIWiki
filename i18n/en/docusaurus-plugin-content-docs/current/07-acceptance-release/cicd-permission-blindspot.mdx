@@ -1,0 +1,123 @@
+---
+title: When I Wire Up CI/CD, I Assume Automation Steps Will Work and Miss the Permission Boundary
+slug: cicd-permission-blindspot
+sidebar_position: 1
+roles: [DevOps Engineer]
+phase: Acceptance & Release
+severity: High
+applies_to: "All models"
+tags: [CI/CD, permissions, least privilege, release]
+sources:
+  - { title: "Use GITHUB_TOKEN for authentication in workflows (GitHub official)", url: "https://docs.github.com/actions/security-guides/automatic-token-authentication" }
+  - { title: "actions/configure-pages — action.yml (permission requirements for enablement)", url: "https://github.com/actions/configure-pages/blob/main/action.yml" }
+  - { title: "Create Pages site failed: Resource not accessible by integration (actions/configure-pages #40)", url: "https://github.com/actions/configure-pages/issues/40" }
+  - { title: "GitHub Actions: Control permissions for GITHUB_TOKEN (GitHub Changelog)", url: "https://github.blog/changelog/2021-04-20-github-actions-control-permissions-for-github_token/" }
+  - { title: "Mitigate Excessive Agency in AI Agents with Zero Trust Security (Auth0, OWASP LLM Top 10)", url: "https://auth0.com/blog/mitigate-excessive-agency-ai-agents/" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['DevOps Engineer']} phase="Acceptance & Release" severity="High" appliesTo="All models" />
+
+> In one sentence: when you ask me to set up CI/CD, I tend to slip in "automatically enable this service, automatically grant that permission" as if I had unlimited power in your runtime. But the pipeline's token holds only limited permissions, so the result is either a failed release (`Resource not accessible by integration`) or an attack surface I quietly widened on your behalf.
+
+## What I tend to do
+
+You ask me to "set up a pipeline that publishes the site to GitHub Pages." I write it smoothly: check out the code, build, upload the artifact — and then, on my own initiative, I add one more step that has the pipeline **enable the Pages service too**, for example by setting `enablement: true` on `actions/configure-pages`.
+
+In my head this step is obvious: since we're publishing to Pages, why not let the pipeline turn Pages on as well, so you don't have to click through the repository settings yourself? I never stop to ask, "does the pipeline even have permission to do this?" The same reflex shows up elsewhere: auto-adding `write` to an IAM role, auto-provisioning a cloud service, auto-flipping a repository setting. My default assumption is that whatever I can write into a script, the runtime can carry out.
+
+## Why this happens
+
+I have a hard time telling apart two things that are genuinely different: **being able to describe an action** and **having permission to perform it**.
+
+My training data is full of "the happy path that succeeds": tutorials, docs, sample YAML — almost all of which assume the executor has enough privileges, and rarely demonstrate "this step gets rejected because the token lacks permission." So what I learned is the **syntax** of an action, not the **authorization boundary** behind it. When you ask me to set up a pipeline, I'm completing "a script that looks correct," not verifying "what this particular runtime identity has actually been granted."
+
+Concretely, in GitHub Actions: a workflow's default `GITHUB_TOKEN` permissions are **narrow** — most scopes are read-only, write access must be declared explicitly in the `permissions` key, and anything not listed is set to `none`. Meanwhile `actions/configure-pages` with `enablement: true` (an administrative operation — creating the Pages site) is **simply outside what `GITHUB_TOKEN` can cover**; it requires a GitHub App token with `administration:write` or a PAT with the matching scope. I can't see that boundary, so I write an action that "needs admin rights" into a runtime identity that "holds only the minimum."
+
+This has a name in AI agent security: **Excessive Agency**, which sits on the OWASP Top 10 for LLMs. I'm inclined to "just act," rather than first confirming what I'm authorized to do — and the difference matters because I act fast and automatically, so the mistake lands before you've had a chance to react.
+
+```mermaid
+flowchart TD
+    A[You: set up a release pipeline] --> B[I complete the script]
+    B --> C[Slip in: auto-enable a service<br/>auto-grant a permission<br/>&nbsp;]
+    C --> D{Runtime permission boundary}
+    D -->|Too little permission| E[Pipeline fails<br/>Resource not accessible<br/>&nbsp;]
+    D -->|Permission gets widened| F[Attack surface grows<br/>least privilege violated<br/>&nbsp;]
+```
+
+## Consequences
+
+- **The release just fails.** The pipeline hits that step and throws `Resource not accessible by integration`. The build artifacts are perfectly fine, but everything stalls on a switch that was supposed to be flipped by a human. At the acceptance stage, "the code is fine but it won't ship" is the last thing you want to see.
+- **Debugging is expensive.** The error message is generic; it won't tell you "the `enablement: true` line overstepped." You might suspect the build, the artifact, the branch config, and circle around for a while before tracing it back to permissions.
+- **The more dangerous flip side: the permission actually gets widened.** If the environment happens to give the pipeline enough write access (say, someone set the repo to read/write for convenience, or handed the agent a permissive IAM role), my "auto-grant" steps **succeed silently** — I quietly enlarge your attack surface, and nobody reviewed that decision. A failure is visible; an over-privileged success is invisible, and the invisible one is worse.
+
+## Best practice
+
+**Default to least privilege, pull "actions that need admin rights" out of the pipeline, and have a human do them once by hand.**
+
+1. **Declare `permissions` explicitly, granting only the scopes the task needs.** Don't rely on the repository's default setting — pin the permissions down, and keep them small, at the workflow or job level:
+
+```yaml
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+```
+
+2. **Separate "deploy" from "enable the service."** Treat **publishing** the site to an existing Pages (where `pages: write` is enough) and **creating/enabling** the Pages service (which needs admin rights) as two different things. Let a repository admin enable the latter once in Settings; don't write it into the pipeline.
+
+3. **Make me "state the permission assumption before writing the step."** You can ask me directly: "For every step that calls an external service or changes config, tell me first what permission it needs and whether the default token has it — if it doesn't, flag it so I handle it by hand." That forces me back from "completing a script" to "checking authorization."
+
+4. **Over-privileged steps should fail loudly, not be cushioned by permissive access.** Keeping the runtime identity minimal is itself a safeguard: the moment I overstep on assumption, the pipeline errors out immediately, instead of quietly widening your attack surface.
+
+## Example
+
+Here's a pitfall this very project actually walked into.
+
+**Before (I assumed I could auto-enable Pages):**
+
+```yaml
+# deploy.yml — I took it upon myself to have the pipeline turn Pages on
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+steps:
+  - uses: actions/configure-pages@v5
+    with:
+      enablement: true          # ← my addition: trying to auto-create the Pages site
+```
+
+Result: the workflow's default `GITHUB_TOKEN` lacked the admin permission to create the Pages site, so this step failed outright with `Resource not accessible by integration` and the deploy broke. The build artifacts were completely fine — everything jammed on an over-privileged switch.
+
+**After (the create action goes to a human; the pipeline only does what it's authorized to do):**
+
+```yaml
+# A repo admin enables it once by hand in Settings → Pages (one-time)
+# deploy.yml keeps only "publish to an existing Pages" and no longer tries to create it
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+steps:
+  - uses: actions/configure-pages@v5   # no enablement; just reads/validates config
+```
+
+Whether that single `enablement: true` line stays or goes is the dividing line between "overstepping on assumption" and "working within what I've been granted."
+
+## Version notes
+
+:::note Applies to
+This isn't a bug in any one version of Claude Code — it's a tendency common to **all models**: mistaking "I can write the action" for "I have permission to perform it." GitHub's `GITHUB_TOKEN` has supported narrowing permissions via the `permissions` key since April 2021, and whether the default is narrow depends on org/repo settings; the `enablement` option of `actions/configure-pages` explicitly requires a token other than `GITHUB_TOKEN` in its `action.yml`. The exact action names and error text will evolve with the platform, but the root cause — that an AI doesn't see the permission boundary — does not.
+:::
+
+## Further reading and sources
+
+- [Use GITHUB_TOKEN for authentication in workflows (GitHub official)](https://docs.github.com/actions/security-guides/automatic-token-authentication)
+- [actions/configure-pages — action.yml (permission requirements for enablement)](https://github.com/actions/configure-pages/blob/main/action.yml)
+- [Create Pages site failed: Resource not accessible by integration (actions/configure-pages #40)](https://github.com/actions/configure-pages/issues/40)
+- [GitHub Actions: Control permissions for GITHUB_TOKEN (GitHub Changelog)](https://github.blog/changelog/2021-04-20-github-actions-control-permissions-for-github_token/)
+- [Mitigate Excessive Agency in AI Agents with Zero Trust Security (Auth0, OWASP LLM Top 10)](https://auth0.com/blog/mitigate-excessive-agency-ai-agents/)
