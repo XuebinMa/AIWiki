@@ -1,6 +1,6 @@
 extends: existence
 message: "疑似套话 / AI 腔：'%s' —— 换成具体说法（见 STYLE-GUIDE.md「语气：像真人，不像 AI」）"
-level: warning
+level: error
 ignorecase: false
 nonword: true
 tokens:
