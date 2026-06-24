@@ -45,7 +45,7 @@ jobs:
       - name: 配置 Node（i18n 检查需要 docusaurus）
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: npm
 
       - name: 安装依赖
