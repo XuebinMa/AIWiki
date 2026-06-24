@@ -1,9 +1,9 @@
 ---
 name: aiwiki-entry-author
-description: 为 AIWiki 撰写或修订一条「误区」条目（docs/ 下的 .mdx）。当需要新增/改写误区条目、并保证第一人称 AI 声音、七段结构、frontmatter 规范与可核查出处时使用。
+description: 为 AiWiki 撰写或修订一条「误区」条目（docs/ 下的 .mdx）。当需要新增/改写误区条目、并保证第一人称 AI 声音、七段结构、frontmatter 规范与可核查出处时使用。
 ---
 
-# AIWiki 条目作者
+# AiWiki 条目作者
 
 把一个「使用 AI 时常见的误区」写成符合全站规范的百科条目。原则：**质量第一、轻量第二**——不开子代理，单遍写作，交给 linter 兜底。
 

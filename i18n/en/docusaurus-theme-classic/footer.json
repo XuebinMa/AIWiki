@@ -28,7 +28,7 @@
     "description": "The label of footer link with label=Issues linking to https://github.com/xuebinma/AIWiki/issues"
   },
   "copyright": {
-    "message": "© 2026 AIWiki. Content under CC BY-SA 4.0; sources are cited in each entry.",
+    "message": "© 2026 AiWiki. Content under CC BY-SA 4.0; sources are cited in each entry.",
     "description": "The footer copyright"
   }
 }

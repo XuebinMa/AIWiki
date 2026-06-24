@@ -2,7 +2,7 @@
 slug: /
 sidebar_position: 0
 title: What this book is
-description: AIWiki — an encyclopedia of AI usage pitfalls and best practices, written from the AI's own perspective. The first edition focuses on Claude Code and the software engineering lifecycle.
+description: AiWiki — an encyclopedia of AI usage pitfalls and best practices, written from the AI's own perspective. The first edition focuses on Claude Code and the software engineering lifecycle.
 ---
 
 # What this book is

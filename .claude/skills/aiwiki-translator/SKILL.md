@@ -1,9 +1,9 @@
 ---
 name: aiwiki-translator
-description: 把一条 AIWiki 中文误区条目（docs/ 下的 .mdx）翻译成英文镜像，输出到 i18n/en/ 对应路径。当需要为新增或修订的中文条目生成/更新英文版时使用。
+description: 把一条 AiWiki 中文误区条目（docs/ 下的 .mdx）翻译成英文镜像，输出到 i18n/en/ 对应路径。当需要为新增或修订的中文条目生成/更新英文版时使用。
 ---
 
-# AIWiki 译者（中 → 英，轻量）
+# AiWiki 译者（中 → 英，轻量）
 
 单遍把一条条目翻成英文：保术语一致、保结构、读起来像母语、绝不编造。原则：**质量第一、轻量第二**——不开 Agent Teams、不产出 docx/pdf，纯 MDX 进、MDX 出。
 
