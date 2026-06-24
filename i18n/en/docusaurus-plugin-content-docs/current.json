@@ -4,7 +4,7 @@
     "description": "The label for version current"
   },
   "sidebar.wikiSidebar.category.准备与协作": {
-    "message": "Setup & Collaboration",
+    "message": "🛠 Setup & Collaboration",
     "description": "The label for category '准备与协作' in sidebar 'wikiSidebar'"
   },
   "sidebar.wikiSidebar.category.准备与协作.link.generated-index.title": {
@@ -16,7 +16,7 @@
     "description": "The generated-index page description for category '准备与协作' in sidebar 'wikiSidebar'"
   },
   "sidebar.wikiSidebar.category.灵感与可行性": {
-    "message": "Ideation & Feasibility",
+    "message": "💡 Ideation & Feasibility",
     "description": "The label for category '灵感与可行性' in sidebar 'wikiSidebar'"
   },
   "sidebar.wikiSidebar.category.灵感与可行性.link.generated-index.title": {
@@ -28,7 +28,7 @@
     "description": "The generated-index page description for category '灵感与可行性' in sidebar 'wikiSidebar'"
   },
   "sidebar.wikiSidebar.category.需求分析": {
-    "message": "Requirements",
+    "message": "📋 Requirements",
     "description": "The label for category '需求分析' in sidebar 'wikiSidebar'"
   },
   "sidebar.wikiSidebar.category.需求分析.link.generated-index.title": {
@@ -40,7 +40,7 @@
     "description": "The generated-index page description for category '需求分析' in sidebar 'wikiSidebar'"
   },
   "sidebar.wikiSidebar.category.概要设计": {
-    "message": "Architecture",
+    "message": "🏗 Architecture",
     "description": "The label for category '概要设计' in sidebar 'wikiSidebar'"
   },
   "sidebar.wikiSidebar.category.概要设计.link.generated-index.title": {
@@ -52,7 +52,7 @@
     "description": "The generated-index page description for category '概要设计' in sidebar 'wikiSidebar'"
   },
   "sidebar.wikiSidebar.category.详细设计": {
-    "message": "Detailed Design",
+    "message": "📐 Detailed Design",
     "description": "The label for category '详细设计' in sidebar 'wikiSidebar'"
   },
   "sidebar.wikiSidebar.category.详细设计.link.generated-index.title": {
@@ -64,7 +64,7 @@
     "description": "The generated-index page description for category '详细设计' in sidebar 'wikiSidebar'"
   },
   "sidebar.wikiSidebar.category.编码实现": {
-    "message": "Implementation",
+    "message": "⌨️ Implementation",
     "description": "The label for category '编码实现' in sidebar 'wikiSidebar'"
   },
   "sidebar.wikiSidebar.category.编码实现.link.generated-index.title": {
@@ -76,7 +76,7 @@
     "description": "The generated-index page description for category '编码实现' in sidebar 'wikiSidebar'"
   },
   "sidebar.wikiSidebar.category.测试": {
-    "message": "Testing",
+    "message": "✅ Testing",
     "description": "The label for category '测试' in sidebar 'wikiSidebar'"
   },
   "sidebar.wikiSidebar.category.测试.link.generated-index.title": {
@@ -88,7 +88,7 @@
     "description": "The generated-index page description for category '测试' in sidebar 'wikiSidebar'"
   },
   "sidebar.wikiSidebar.category.验收与发布": {
-    "message": "Acceptance & Release",
+    "message": "🚀 Acceptance & Release",
     "description": "The label for category '验收与发布' in sidebar 'wikiSidebar'"
   },
   "sidebar.wikiSidebar.category.验收与发布.link.generated-index.title": {
