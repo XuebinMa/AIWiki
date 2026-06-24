@@ -1,0 +1,82 @@
+---
+title: CLAUDE.md 过载：规则写得越多，被遵守的越少
+slug: claude-md-overload
+sidebar_position: 2
+roles: [工程师, 架构师]
+phase: 编码实现
+severity: 中
+applies_to: "Claude Code 全版本"
+tags: [CLAUDE.md, 上下文管理, 配置]
+sources:
+  - { title: "Claude Code Best Practices（官方）", url: "https://code.claude.com/docs/en/best-practices" }
+  - { title: "MuhammadUsmanGM/claude-code-best-practices", url: "https://github.com/MuhammadUsmanGM/claude-code-best-practices" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['工程师', '架构师']} phase="编码实现" severity="中" appliesTo="Claude Code 全版本" />
+
+> 一句话摘要：你把所有想到的规范都写进 `CLAUDE.md`，希望我面面俱到。结果规则太多，我反而抓不住重点，把一半都漏掉了。
+
+## 现象
+
+`CLAUDE.md` 是我每次都会读的项目说明书。我常看到它被越写越长：编码风格、目录约定、命名规则、提交格式、几十条「务必」「禁止」……初衷是好的，但当它长到几百行时，你会发现我开始忽略其中一部分——而且未必是你觉得最不重要的那部分。
+
+## 为什么会这样
+
+我能稳定遵守的指令数量是有限的。经验上，当前的前沿模型能可靠跟随的指令大约在 **150–200 条量级**，而 Claude Code 自身的系统提示已经占掉了其中一部分。`CLAUDE.md` 里每多一条规则，都在和其它规则争夺这份有限的「注意力预算」。
+
+更关键的是：规则之间没有优先级标记时，我无法判断哪条是「红线」、哪条是「偏好」。写得越多，**真正重要的约束就越容易和琐碎条目一起被平均稀释**。这和[厨房水槽式会话](./kitchen-sink-session.mdx)是同一类问题——信噪比，只不过这次噪声来自配置文件本身。
+
+## 后果
+
+- 关键约束被漏掉，而你以为已经「写在规范里了」。
+- 文件越长，每次会话的固定开销越大，留给实际任务的窗口越小。
+- 你很难判断到底哪条规则在起作用、哪条形同虚设。
+
+## 最佳实践
+
+**让 `CLAUDE.md` 从小开始，按需生长。** 具体做法：
+
+1. 初始只写真正必要的少数几条（构建/测试命令、最核心的风格约定）。
+2. **每次我犯了某个错，再补一条对应的规则**——这样每条规则都有它存在的理由，而不是凭空预设。
+3. 定期回看：删掉那些「写了但其实从没被违反过」的条目。
+4. 不要在 `CLAUDE.md` 里到处用 `@文件引用`——每个引用都会把整个被引文件加载进上下文，是体积膨胀的常见来源。
+
+判断标准很简单：**如果一条规则你说不出「它是为了防止哪个具体错误」，它大概率不该在这里。**
+
+## 示例
+
+**改之前（节选，共 200+ 行）：**
+
+```markdown
+- 变量命名用 camelCase
+- 不要用 var
+- 注释要写完整句子
+- 函数不超过 50 行
+- 优先用 const
+- 每个文件顶部要有版权头
+- ……（还有 190 行）
+```
+
+**改之后（10 行，每条都对应一次真实教训）：**
+
+```markdown
+# 构建与测试
+- 改完代码跑 `npm test`，全绿再交。
+
+# 这个项目踩过的坑
+- 数据库迁移必须可回滚（上次漏了导致线上事故）。
+- 时间一律用 UTC 存储（混用时区出过 bug）。
+```
+
+## 版本说明
+
+:::note 适用版本
+「可靠遵循的指令数量有限」是当前所有前沿大模型的共性，**Claude Code 全版本适用**。随着模型能力提升，这个上限会上移，但「精简、有优先级、每条有理由」永远比「大而全」更可靠。
+:::
+
+## 延伸阅读与出处
+
+- [Claude Code Best Practices（Anthropic 官方）](https://code.claude.com/docs/en/best-practices)
+- [MuhammadUsmanGM/claude-code-best-practices](https://github.com/MuhammadUsmanGM/claude-code-best-practices)

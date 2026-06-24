@@ -1,0 +1,33 @@
+/**
+ * 全站样式。Infima 变量定制 + 误区条目排版微调。
+ */
+
+:root {
+  --ifm-color-primary: #2b6cb0;
+  --ifm-color-primary-dark: #2761a0;
+  --ifm-color-primary-darker: #245b97;
+  --ifm-color-primary-darkest: #1d4b7c;
+  --ifm-color-primary-light: #2f77c0;
+  --ifm-color-primary-lighter: #347dc7;
+  --ifm-color-primary-lightest: #4a8dd0;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-line-height-base: 1.75;
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #63b3ed;
+  --ifm-color-primary-dark: #4aa6e9;
+  --ifm-color-primary-darker: #3d9fe7;
+  --ifm-color-primary-darkest: #1b86d6;
+  --ifm-color-primary-light: #7cc0f1;
+  --ifm-color-primary-lighter: #89c7f3;
+  --ifm-color-primary-lightest: #b0daf8;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* 中文正文阅读体验 */
+.markdown p,
+.markdown li {
+  line-height: 1.85;
+}

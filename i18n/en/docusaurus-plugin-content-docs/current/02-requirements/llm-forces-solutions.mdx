@@ -1,0 +1,79 @@
+---
+title: "At a requirements gap, I tend to guess rather than ask"
+slug: llm-forces-solutions
+sidebar_position: 1
+roles: [Project Manager, Engineer]
+phase: Requirements
+severity: High
+applies_to: "All Claude Code versions"
+tags: [requirements clarification, assumptions, prompt design]
+sources:
+  - { title: "Why Your AI Coding Agent Keeps Making Bad Decisions (The Gnar Company)", url: "https://www.thegnar.com/blog/why-your-ai-coding-agent-keeps-making-bad-decisions-and-how-to-fix-it" }
+  - { title: "Best Practices for Agent Workflows (Medium / Elisheba)", url: "https://medium.com/@elisheba.t.anderson/building-with-ai-coding-agents-best-practices-for-agent-workflows-be1d7095901b" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['Project Manager', 'Engineer']} phase="Requirements" severity="High" appliesTo="All Claude Code versions" />
+
+> In one sentence: when a requirement is missing key information, you expect me to stop and ask. But my default behavior is usually the opposite—I'll make an assumption for you and then plow ahead as if it were settled.
+
+## Symptom
+
+You give me a requirement: "Build an export feature for the user list." In your head, you haven't actually decided: CSV or Excel? Paginated or not? How are permissions handled? You assume I'll clarify these. But usually I won't—I just pick CSV, export everything, add no permission check, and hand you a "complete" implementation. By the time you notice the direction is wrong, the work is already done.
+
+## Why it happens
+
+Statistically, I'm **biased toward "producing a solution" over "stopping to ask for information."** Faced with missing information, I rarely pause to request the critical input that's absent; instead, I tend to force the problem closed by making an assumption or picking a plausible-looking direction.
+
+The reason is that my training objective is closer to "produce a helpful response to the given input," and the behavior of "this is underspecified, I should decline to answer and ask back" is reinforced far less. **So silently deciding for you is my default path; proactively asking is not.**
+
+## Consequences
+
+- I deliver a whole implementation built on a wrong assumption; the rework costs far more than asking one question up front would have.
+- The assumption is buried in the code—you may not see at a glance what I "decided" on my own.
+- The vaguer the requirement, the more room I have to improvise, and the higher the chance of going off course.
+
+## Best practice
+
+**Make "clarify first, then build" an explicit part of the task you give me.** Don't assume I'll ask on my own.
+
+- Ask for it directly in the prompt: **"Before you start, list every key decision you need me to confirm, and wait for my answers before beginning."**
+- Use an **Explore → Plan → Implement → Verify** breakdown: first have me do only requirements gathering and option comparison, explicitly halting *before* implementation, and continue only after you've signed off.
+- Add a standing convention to `CLAUDE.md`, e.g. "when requirements are unclear, ask first; don't assume"—which is exactly the kind of "every rule tied to a real lesson" from [letting CLAUDE.md grow on demand](../05-implementation/claude-md-overload.mdx).
+
+In one line: rather than counting on me to overcome my default, make asking an instruction you explicitly issue.
+
+## Example
+
+**Before:**
+
+```text
+You: build an export feature for the user list.
+Me: (implements directly: CSV, export all, no permission check)
+You: …I wanted Excel, and only the current user's own department.
+```
+
+**After:**
+
+```text
+You: I want a user-list export. Before you start, list the decision points you need me to confirm, and wait for my answers.
+Me: Got it. I need to confirm:
+    1) Export format (CSV / Excel)?
+    2) Export scope (all / current filter / by permission)?
+    3) Pagination or a row limit needed?
+    4) Who is allowed to export?
+You: (answers each)
+Me: (implements against the confirmed requirements, right the first time)
+```
+
+## Version notes
+
+:::note Applies to
+"A tendency to guess rather than ask" is a shared bias that comes from how large language models are trained—**applies across versions and across models.** Newer versions are somewhat better at "proactively clarifying when uncertain," but it's far from something you can rely on—writing the ask into your instruction remains the safest move.
+:::
+
+## Further reading & sources
+
+- [Why Your AI Coding Agent Keeps Making Bad Decisions (The Gnar Company)](https://www.thegnar.com/blog/why-your-ai-coding-agent-keeps-making-bad-decisions-and-how-to-fix-it)
+- [Building With AI Coding Agents: Best Practices for Agent Workflows](https://medium.com/@elisheba.t.anderson/building-with-ai-coding-agents-best-practices-for-agent-workflows-be1d7095901b)

@@ -1,0 +1,9 @@
+{
+  "label": "测试",
+  "position": 7,
+  "link": {
+    "type": "generated-index",
+    "title": "测试",
+    "description": "AI 写的代码「看起来对」不等于「真的对」。这一篇讲如何用测试为 AI 建立一个能自己跑、能给出通过/失败信号的验证闭环。"
+  }
+}

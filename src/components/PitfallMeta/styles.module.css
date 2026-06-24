@@ -1,0 +1,50 @@
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1.5rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  border: 1px solid var(--ifm-color-emphasis-300);
+}
+
+.badgeLabel {
+  padding: 0.15rem 0.5rem;
+  background: var(--ifm-color-emphasis-200);
+  color: var(--ifm-color-emphasis-700);
+  font-weight: 600;
+}
+
+.badgeValue {
+  padding: 0.15rem 0.55rem;
+  background: var(--ifm-background-surface-color);
+}
+
+.phase .badgeValue {
+  color: var(--ifm-color-primary);
+  font-weight: 600;
+}
+
+.sevHigh .badgeValue {
+  color: #c53030;
+  font-weight: 600;
+}
+
+.sevMed .badgeValue {
+  color: #b7791f;
+  font-weight: 600;
+}
+
+.sevLow .badgeValue {
+  color: #2f855a;
+  font-weight: 600;
+}

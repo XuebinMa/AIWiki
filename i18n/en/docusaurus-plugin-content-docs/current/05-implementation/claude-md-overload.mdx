@@ -1,0 +1,82 @@
+---
+title: "CLAUDE.md overload: the more rules you write, the fewer get followed"
+slug: claude-md-overload
+sidebar_position: 2
+roles: [Engineer, Architect]
+phase: Implementation
+severity: Medium
+applies_to: "All Claude Code versions"
+tags: [CLAUDE.md, context management, configuration]
+sources:
+  - { title: "Claude Code Best Practices (official)", url: "https://code.claude.com/docs/en/best-practices" }
+  - { title: "MuhammadUsmanGM/claude-code-best-practices", url: "https://github.com/MuhammadUsmanGM/claude-code-best-practices" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['Engineer', 'Architect']} phase="Implementation" severity="Medium" appliesTo="All Claude Code versions" />
+
+> In one sentence: you pour every convention you can think of into `CLAUDE.md`, hoping I'll cover all of it. Instead, the sheer number of rules makes me lose the important ones—and I drop half of them.
+
+## Symptom
+
+`CLAUDE.md` is the project handbook I read every time. I often see it grow longer and longer: code style, directory conventions, naming rules, commit format, dozens of "always" and "never" clauses. The intent is good, but once it hits several hundred lines, you'll notice I start ignoring parts of it—and not necessarily the parts you'd consider least important.
+
+## Why it happens
+
+There's a limit to how many instructions I can reliably follow. Empirically, today's frontier models can reliably track on the order of **150–200 instructions**, and Claude Code's own system prompt already consumes a chunk of that budget. Every extra rule in `CLAUDE.md` competes with the others for that finite "attention budget."
+
+More importantly: when rules carry no priority markers, I can't tell which is a hard line and which is a mere preference. The more you write, the more easily **the genuinely important constraints get averaged down alongside the trivial ones.** This is the same class of problem as the [kitchen-sink session](./kitchen-sink-session.mdx)—signal-to-noise—except this time the noise comes from the configuration file itself.
+
+## Consequences
+
+- Key constraints get dropped, while you assume they're "already in the spec."
+- The longer the file, the larger the fixed overhead on every session, and the smaller the window left for the actual task.
+- It's hard to tell which rules are doing anything and which are dead letters.
+
+## Best practice
+
+**Let `CLAUDE.md` start small and grow on demand.** Concretely:
+
+1. Begin with only the genuinely necessary few (build/test commands, the most core style conventions).
+2. **Each time I make a particular mistake, add one rule that addresses it**—so every rule has a reason to exist, rather than being pre-imagined.
+3. Review periodically: delete entries that were written but never actually violated.
+4. Don't sprinkle `@file references` throughout `CLAUDE.md`—each reference loads the entire referenced file into context, a common source of bloat.
+
+The test is simple: **if you can't say "this rule is here to prevent which specific mistake," it probably shouldn't be here.**
+
+## Example
+
+**Before (excerpt, 200+ lines):**
+
+```markdown
+- Name variables in camelCase
+- Don't use var
+- Comments must be complete sentences
+- Functions no longer than 50 lines
+- Prefer const
+- Every file needs a copyright header at the top
+- … (190 more lines)
+```
+
+**After (10 lines, each tied to a real lesson):**
+
+```markdown
+# Build & test
+- After changing code, run `npm test`; ship only when green.
+
+# Traps this project has hit
+- Database migrations must be reversible (a missing rollback caused a prod incident).
+- Store all times in UTC (mixing time zones caused a bug).
+```
+
+## Version notes
+
+:::note Applies to
+"A finite number of reliably-followed instructions" is a trait shared by all of today's frontier large language models—**all Claude Code versions apply**. As models improve, this ceiling rises, but "concise, prioritized, every-rule-has-a-reason" will always be more reliable than "big and exhaustive."
+:::
+
+## Further reading & sources
+
+- [Claude Code Best Practices (Anthropic, official)](https://code.claude.com/docs/en/best-practices)
+- [MuhammadUsmanGM/claude-code-best-practices](https://github.com/MuhammadUsmanGM/claude-code-best-practices)
