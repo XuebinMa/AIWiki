@@ -34,7 +34,21 @@ const config = {
       onBrokenMarkdownLinks: 'warn',
     },
   },
-  themes: ['@docusaurus/theme-mermaid'],
+  themes: [
+    '@docusaurus/theme-mermaid',
+    // 本地全文搜索（构建即用、零外部依赖、支持中英）。导航栏出现搜索框 + Ctrl/Cmd-K。
+    // 后续 Algolia DocSearch 批下来再切换为官方搜索 + contextualSearch 分面。
+    [
+      require.resolve('@easyops-cn/docusaurus-search-local'),
+      {
+        hashed: true,
+        language: ['en', 'zh'],
+        docsRouteBasePath: '/',
+        indexBlog: false,
+        highlightSearchTermsOnTargetPage: true,
+      },
+    ],
+  ],
 
   presets: [
     [
