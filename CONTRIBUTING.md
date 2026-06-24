@@ -47,6 +47,7 @@
 - 英文译文放在 `i18n/en/docusaurus-plugin-content-docs/current/` 下，目录结构与 `docs/` 镜像。
 - 暂未翻译的条目，英文站点会自动回退显示中文，不影响构建。
 - **给某个阶段目录（分类）添加第一条条目时**，记得去 `i18n/en/docusaurus-plugin-content-docs/current.json` 补上该分类的英文 `label` 与 generated-index 的 `title` / `description`。分类名不随条目翻译走——漏了的话，英文站的侧边栏、面包屑、分类首页会显示中文（曾踩过这个坑）。
+- **改动 `docs/**/_category_.json` 的 `label`（包括加 / 换 emoji）后必做**：翻译键由 label 文本推导，改字即换键、旧译失配。先 `npm run write-translations -- --locale en` 生成新键，把英文文案搬到新键、删掉旧键，再 `npm run check:i18n` 确认通过（CI 同样会卡）。不要只改 `current.json` 里的 `message` 值而不动键名——那正是上次回退成中文的原因。
 
 ## 本地验证
 

@@ -11,6 +11,10 @@ on:
       - '.vale.ini'
       - 'styles/**'
       - '.cspell.json'
+      - 'sidebars.js'
+      - 'docusaurus.config.js'
+      - 'scripts/**'
+      - 'package.json'
   push:
     branches: [main]
 
@@ -37,3 +41,15 @@ jobs:
 
       - name: cspell（拼写）
         run: cspell --no-progress "docs/**/*.{md,mdx}" "i18n/**/*.{md,mdx}"
+
+      - name: 配置 Node（i18n 检查需要 docusaurus）
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: i18n（侧边栏分类翻译完整性，防回退成中文）
+        run: npm run check:i18n

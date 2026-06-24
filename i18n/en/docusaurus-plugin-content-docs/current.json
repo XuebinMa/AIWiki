@@ -3,100 +3,88 @@
     "message": "Next",
     "description": "The label for version current"
   },
-  "sidebar.wikiSidebar.category.准备与协作": {
+  "sidebar.wikiSidebar.category.🛠 准备与协作": {
     "message": "🛠 Setup & Collaboration",
-    "description": "The label for category '准备与协作' in sidebar 'wikiSidebar'"
+    "description": "The label for category '🛠 准备与协作' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.准备与协作.link.generated-index.title": {
+  "sidebar.wikiSidebar.category.🛠 准备与协作.link.generated-index.title": {
     "message": "Setup & Collaboration",
-    "description": "The generated-index page title for category '准备与协作' in sidebar 'wikiSidebar'"
+    "description": "The generated-index page title for category '🛠 准备与协作' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.准备与协作.link.generated-index.description": {
+  "sidebar.wikiSidebar.category.🛠 准备与协作.link.generated-index.description": {
     "message": "Before you write the first requirement: setting up the AI environment, the coding environment, and how several AI agents split the work. This part covers the prep that gets me into working shape.",
-    "description": "The generated-index page description for category '准备与协作' in sidebar 'wikiSidebar'"
+    "description": "The generated-index page description for category '🛠 准备与协作' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.灵感与可行性": {
+  "sidebar.wikiSidebar.category.💡 灵感与可行性": {
     "message": "💡 Ideation & Feasibility",
-    "description": "The label for category '灵感与可行性' in sidebar 'wikiSidebar'"
+    "description": "The label for category '💡 灵感与可行性' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.灵感与可行性.link.generated-index.title": {
+  "sidebar.wikiSidebar.category.💡 灵感与可行性.link.generated-index.title": {
     "message": "Ideation & Feasibility",
-    "description": "The generated-index page title for category '灵感与可行性' in sidebar 'wikiSidebar'"
+    "description": "The generated-index page title for category '💡 灵感与可行性' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.灵感与可行性.link.generated-index.description": {
+  "sidebar.wikiSidebar.category.💡 灵感与可行性.link.generated-index.description": {
     "message": "Where ideas come from, how to validate them, how to judge feasibility, how to do the research. This part covers how to work with me—before you build—to sharpen a vague notion into something worth doing.",
-    "description": "The generated-index page description for category '灵感与可行性' in sidebar 'wikiSidebar'"
+    "description": "The generated-index page description for category '💡 灵感与可行性' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.需求分析": {
+  "sidebar.wikiSidebar.category.📋 需求分析": {
     "message": "📋 Requirements",
-    "description": "The label for category '需求分析' in sidebar 'wikiSidebar'"
+    "description": "The label for category '📋 需求分析' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.需求分析.link.generated-index.title": {
+  "sidebar.wikiSidebar.category.📋 需求分析.link.generated-index.title": {
     "message": "Requirements",
-    "description": "The generated-index page title for category '需求分析' in sidebar 'wikiSidebar'"
+    "description": "The generated-index page title for category '📋 需求分析' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.需求分析.link.generated-index.description": {
+  "sidebar.wikiSidebar.category.📋 需求分析.link.generated-index.description": {
     "message": "Turning an idea into clear, unambiguous, verifiable requirements. This part covers where I tend to make decisions for you during the requirements phase—and how to make me ask first instead.",
-    "description": "The generated-index page description for category '需求分析' in sidebar 'wikiSidebar'"
+    "description": "The generated-index page description for category '📋 需求分析' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.概要设计": {
+  "sidebar.wikiSidebar.category.🏗 概要设计": {
     "message": "🏗 Architecture",
-    "description": "The label for category '概要设计' in sidebar 'wikiSidebar'"
+    "description": "The label for category '🏗 概要设计' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.概要设计.link.generated-index.title": {
+  "sidebar.wikiSidebar.category.🏗 概要设计.link.generated-index.title": {
     "message": "Architecture",
-    "description": "The generated-index page title for category '概要设计' in sidebar 'wikiSidebar'"
+    "description": "The generated-index page title for category '🏗 概要设计' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.概要设计.link.generated-index.description": {
+  "sidebar.wikiSidebar.category.🏗 概要设计.link.generated-index.description": {
     "message": "How to break the system apart, split it into modules, and settle technology choices. This part covers how to lean on my strength at comparing trade-offs at the architecture level—rather than letting me slap a single design on you.",
-    "description": "The generated-index page description for category '概要设计' in sidebar 'wikiSidebar'"
+    "description": "The generated-index page description for category '🏗 概要设计' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.详细设计": {
-    "message": "📐 Detailed Design",
-    "description": "The label for category '详细设计' in sidebar 'wikiSidebar'"
-  },
-  "sidebar.wikiSidebar.category.详细设计.link.generated-index.title": {
-    "message": "Detailed Design",
-    "description": "The generated-index page title for category '详细设计' in sidebar 'wikiSidebar'"
-  },
-  "sidebar.wikiSidebar.category.详细设计.link.generated-index.description": {
-    "message": "Pinning interfaces, data structures, and edge cases down on paper. This part covers how, in detailed design, to push me from a design that \"looks right\" to one that holds up under edge-case scrutiny.",
-    "description": "The generated-index page description for category '详细设计' in sidebar 'wikiSidebar'"
-  },
-  "sidebar.wikiSidebar.category.编码实现": {
+  "sidebar.wikiSidebar.category.⌨️ 编码实现": {
     "message": "⌨️ Implementation",
-    "description": "The label for category '编码实现' in sidebar 'wikiSidebar'"
+    "description": "The label for category '⌨️ 编码实现' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.编码实现.link.generated-index.title": {
+  "sidebar.wikiSidebar.category.⌨️ 编码实现.link.generated-index.title": {
     "message": "Implementation",
-    "description": "The generated-index page title for category '编码实现' in sidebar 'wikiSidebar'"
+    "description": "The generated-index page title for category '⌨️ 编码实现' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.编码实现.link.generated-index.description": {
+  "sidebar.wikiSidebar.category.⌨️ 编码实现.link.generated-index.description": {
     "message": "The phase where code actually gets written—and where pitfalls cluster most densely. This part covers session management, the context window, CLAUDE.md, rolling back and correcting—the things that decide whether I'm a help or a burden.",
-    "description": "The generated-index page description for category '编码实现' in sidebar 'wikiSidebar'"
+    "description": "The generated-index page description for category '⌨️ 编码实现' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.测试": {
+  "sidebar.wikiSidebar.category.✅ 测试": {
     "message": "✅ Testing",
-    "description": "The label for category '测试' in sidebar 'wikiSidebar'"
+    "description": "The label for category '✅ 测试' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.测试.link.generated-index.title": {
+  "sidebar.wikiSidebar.category.✅ 测试.link.generated-index.title": {
     "message": "Testing",
-    "description": "The generated-index page title for category '测试' in sidebar 'wikiSidebar'"
+    "description": "The generated-index page title for category '✅ 测试' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.测试.link.generated-index.description": {
+  "sidebar.wikiSidebar.category.✅ 测试.link.generated-index.description": {
     "message": "Code that I write and that \"looks right\" is not the same as code that is right. This part covers how to use tests to give me a verification loop I can run myself—one that emits a clear pass/fail signal.",
-    "description": "The generated-index page description for category '测试' in sidebar 'wikiSidebar'"
+    "description": "The generated-index page description for category '✅ 测试' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.验收与发布": {
+  "sidebar.wikiSidebar.category.🚀 验收与发布": {
     "message": "🚀 Acceptance & Release",
-    "description": "The label for category '验收与发布' in sidebar 'wikiSidebar'"
+    "description": "The label for category '🚀 验收与发布' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.验收与发布.link.generated-index.title": {
+  "sidebar.wikiSidebar.category.🚀 验收与发布.link.generated-index.title": {
     "message": "Acceptance & Release",
-    "description": "The generated-index page title for category '验收与发布' in sidebar 'wikiSidebar'"
+    "description": "The generated-index page title for category '🚀 验收与发布' in sidebar 'wikiSidebar'"
   },
-  "sidebar.wikiSidebar.category.验收与发布.link.generated-index.description": {
+  "sidebar.wikiSidebar.category.🚀 验收与发布.link.generated-index.description": {
     "message": "The last gate before shipping: acceptance criteria, regression, release, and rollback. This part covers how to avoid \"it runs in the demo, ship it,\" and make me help guard the gate instead of waving things through.",
-    "description": "The generated-index page description for category '验收与发布' in sidebar 'wikiSidebar'"
+    "description": "The generated-index page description for category '🚀 验收与发布' in sidebar 'wikiSidebar'"
   }
 }
