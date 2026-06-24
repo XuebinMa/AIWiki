@@ -26,6 +26,12 @@ Claude Code · CLAUDE.md · Anthropic · Claude · Opus · Sonnet · Haiku · Do
 | 上下文压缩 | compaction | 对应 `/compact` |
 | 注意力（稀释） | attention (dilution) | |
 | 一句话摘要 | In one sentence | 每条开头的摘要句式 |
+| 谄媚 | sycophancy | AI 倾向附和用户而非说真话 |
+| 确认偏误 | confirmation bias | |
+| 偏好模型 | preference model | RLHF 中给回答打分的模型 |
+| 人类反馈强化学习 | RLHF | 缩写 RLHF 全文保留不译 |
+| 想法验证 | idea validation | |
+| 可行性 | feasibility | |
 
 ## 枚举值映射（frontmatter 与 `<PitfallMeta>`）
 
