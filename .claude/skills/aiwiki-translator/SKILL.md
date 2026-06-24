@@ -26,4 +26,5 @@ description: 把一条 AIWiki 中文误区条目（docs/ 下的 .mdx）翻译成
    - [ ] 段落与中文一一对应，无漏译、无擅自合并
    - [ ] 所有 `sources` 链接与中文版一致
    - [ ] 元数据（角色 / 阶段 / 严重度 / 适用版本）与中文版语义相同
-5. 翻完跑英文向 linter（Vale / cspell）。
+5. **分类标签**：若该条目是其所在阶段目录在英文站的**第一条**（此前该目录没有条目），还要在 `i18n/en/docusaurus-plugin-content-docs/current.json` 补上该分类的英文 `label` 与 generated-index 的 `title` / `description`——否则英文站的侧边栏 / 面包屑 / 分类首页会回退显示中文。
+6. 翻完跑英文向 linter（Vale / cspell）。
