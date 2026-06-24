@@ -1,10 +1,10 @@
 // @ts-check
-// Docusaurus 配置（CommonJS）。站点：AIWiki —— 从 AI 视角写的使用误区百科。
+// Docusaurus 配置（CommonJS）。站点：AiWiki —— 从 AI 视角写的使用误区百科。
 const { themes: prismThemes } = require('prism-react-renderer');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'AIWiki',
+  title: 'AiWiki',
   tagline: 'AI 最理解 AI —— 从 AI 视角看你常踩的坑',
   favicon: 'img/logo.svg',
 
@@ -60,9 +60,9 @@ const config = {
     ({
       image: 'img/logo.svg',
       navbar: {
-        title: 'AIWiki',
+        title: 'AiWiki',
         logo: {
-          alt: 'AIWiki Logo',
+          alt: 'AiWiki Logo',
           src: 'img/logo.svg',
         },
         items: [
@@ -102,7 +102,7 @@ const config = {
             ],
           },
         ],
-        copyright: `© ${new Date().getFullYear()} AIWiki. 内容以 CC BY-SA 4.0 共享，引用来源已在各条目标注。`,
+        copyright: `© ${new Date().getFullYear()} AiWiki. 内容以 CC BY-SA 4.0 共享，引用来源已在各条目标注。`,
       },
       prism: {
         theme: prismThemes.github,

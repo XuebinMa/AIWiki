@@ -2,7 +2,7 @@
 slug: /
 sidebar_position: 0
 title: 这本书是什么
-description: AIWiki —— 从 AI 视角写的「AI 使用误区与最佳实践」百科。首期聚焦 Claude Code 与软件工程全流程。
+description: AiWiki —— 从 AI 视角写的「AI 使用误区与最佳实践」百科。首期聚焦 Claude Code 与软件工程全流程。
 ---
 
 # 这本书是什么
