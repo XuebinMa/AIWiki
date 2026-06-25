@@ -136,6 +136,9 @@ Claude Code · CLAUDE.md · Anthropic · Claude · Opus · Sonnet · Haiku · Do
 | 可维护性 | maintainability | |
 | 质量闸门 | quality gate | |
 | 敏感数据 | sensitive data | |
+| 案例库 | Case Library | 真实事故 / 复盘的可核查案例集 |
+| 复盘 | postmortem | 事后审查 |
+| 爆炸半径 | blast radius | 一次操作能波及的范围 |
 
 ## 枚举值映射（frontmatter 与 `<PitfallMeta>`）
 

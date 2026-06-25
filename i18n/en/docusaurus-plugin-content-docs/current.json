@@ -98,5 +98,17 @@
   "sidebar.wikiSidebar.category.📐 详细设计.link.generated-index.description": {
     "message": "Interfaces, data structures, and boundary conditions, down on paper. This part covers how, in detailed design, to turn my plausible-looking plans into ones that hold up under edge-case scrutiny.",
     "description": "The generated-index page description for category '📐 详细设计' in sidebar 'wikiSidebar'"
+  },
+  "sidebar.wikiSidebar.category.📓 案例库": {
+    "message": "📓 Case Library",
+    "description": "The label for category '📓 案例库' in sidebar 'wikiSidebar'"
+  },
+  "sidebar.wikiSidebar.category.📓 案例库.link.generated-index.title": {
+    "message": "Case Library",
+    "description": "The generated-index page title for category '📓 案例库' in sidebar 'wikiSidebar'"
+  },
+  "sidebar.wikiSidebar.category.📓 案例库.link.generated-index.description": {
+    "message": "Earlier sections cover \"how I might crash\"; this one collects \"people who actually crashed this way\" — public, verifiable incidents and postmortems, each mapped to the pitfall(s) it bears out. One bar for inclusion: it really happened, it has a reliable public source, and it maps to a pitfall in this book; hearsay and unverifiable rumor don't make it in. Read it as a crime-scene photo for the mechanism reasoning: first see \"why this happens\" in the phase entry, then come here for \"what it looked like when it actually happened, and what it cost.\"",
+    "description": "The generated-index page description for category '📓 案例库' in sidebar 'wikiSidebar'"
   }
 }

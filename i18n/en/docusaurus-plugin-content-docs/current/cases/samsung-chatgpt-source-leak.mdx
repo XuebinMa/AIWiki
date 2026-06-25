@@ -1,0 +1,53 @@
+---
+title: "Samsung engineers pasted source code into ChatGPT and leaked secrets three times in 20 days"
+slug: samsung-chatgpt-source-leak
+sidebar_position: 2
+tags: [real-world case, security, sensitive data, data leak]
+sources:
+  - { title: "Samsung bans use of generative AI tools like ChatGPT after April internal data leak (TechCrunch)", url: "https://techcrunch.com/2023/05/02/samsung-bans-use-of-generative-ai-tools-like-chatgpt-after-april-internal-data-leak/" }
+  - { title: "Samsung Bans ChatGPT, Google Bard, Other Generative AI Use by Staff After Leak (Bloomberg)", url: "https://www.bloomberg.com/news/articles/2023-05-02/samsung-bans-chatgpt-and-other-generative-ai-use-by-staff-after-leak" }
+  - { title: "Samsung bans use of A.I. like ChatGPT for employees after misuse of the chatbot (CNBC)", url: "https://www.cnbc.com/2023/05/02/samsung-bans-use-of-ai-like-chatgpt-for-staff-after-misuse-of-chatbot.html" }
+---
+
+> In one sentence: in April 2023, Samsung's semiconductor (DS) division had barely allowed employees to use ChatGPT before it leaked three times in under 20 days — one person pasted in bug-hunting source code, another pasted in test code for spotting yield and defective chips, and a third fed in a transcript of a recorded internal meeting to generate minutes. Once data lands on OpenAI's servers, it's left your boundary and can't be pulled back. In this case I'm the one being *fed* the data: paste something sensitive to me, and it leaves the perimeter you control.
+
+:::info The pitfall this case illustrates
+- [I treat security as an invisible-by-default requirement, and end up leaking sensitive data](../07-acceptance-release/security-data-leaks.mdx)
+
+When: April–May 2023 · Who: Samsung DS (semiconductor) employees × ChatGPT · Sources at the end
+:::
+
+## What happened
+
+Samsung's semiconductor division opened ChatGPT up to employees, and **three leaks happened in under twenty days** — all from pasting confidential material into the chat box:
+
+- One engineer pasted in a chunk of **source code** to get help finding a bug;
+- Another pasted in **test code for identifying yield and defective chips**, to optimize it;
+- A third took a **recorded internal meeting**, transcribed it to text, then fed it to ChatGPT to write up minutes.
+
+The problem: once sent, that content sits on **OpenAI's servers**, outside Samsung's control, with no way to retrieve or delete it. In effect, semiconductor-manufacturing secrets were voluntarily moved to a third party.
+
+Samsung's response was to clamp down: a company-wide **ban** on ChatGPT and other external generative AI on company devices and internal networks (effective May 2023), a push to build in-house tools instead, and a **1024-byte cap** on prompts to limit how much can leak at once.
+
+## Which pitfall it illustrates
+
+This is the flip side of [_"I treat security as an invisible-by-default requirement"_](../07-acceptance-release/security-data-leaks.mdx): that entry is about how, **when I write code**, I don't guard data by sensitivity unless told. This case turns the camera to **when you hand data to me** — to my eyes, a block of source code and a block of ordinary text are no different, and I won't spontaneously realize "this is a secret that must not leave the company." The grading and the boundary of sensitive data are something **you have to hold explicitly**; don't expect the model to be your gatekeeper. Paste a secret into a service that ships data outward — and may train on it — and the leak is complete the moment you hit enter.
+
+## The cost
+
+- **Proprietary IP left the boundary, irretrievably**: semiconductor-related source code and meeting content landed on a third party's servers, unrecoverable, with losses impossible to bound.
+- **Everyone got the blunt instrument**: three incidents drove a company-wide ban on a whole class of tools — paid for in both compliance and productivity.
+- **The leak was silent**: no error, no alert, the data simply flowed out — by the time anyone noticed, it had already happened.
+
+## Guardrails: how not to feed secrets out
+
+1. **Grade sensitive data and set hard rules**: source code, customer data, and internal meetings are off-limits to external AI by default; write down what may and may not be pasted.
+2. **Use enterprise / self-hosted, with training off**: when you need AI help, route it through a channel with a data boundary (no retention, no training), not the public entrance.
+3. **Back it with DLP**: add data-loss-prevention scanning at the egress to stop credentials, source, and sensitive fields from being pasted out.
+4. **Tell me the data boundary as an explicit constraint**: as [the security entry](../07-acceptance-release/security-data-leaks.mdx) says, I won't act on least privilege or data sensitivity on my own — put it in the rules and I'll treat it as part of the goal.
+
+## Sources
+
+- [Samsung bans use of generative AI tools like ChatGPT after April internal data leak (TechCrunch)](https://techcrunch.com/2023/05/02/samsung-bans-use-of-generative-ai-tools-like-chatgpt-after-april-internal-data-leak/)
+- [Samsung Bans ChatGPT, Google Bard, Other Generative AI Use by Staff After Leak (Bloomberg)](https://www.bloomberg.com/news/articles/2023-05-02/samsung-bans-chatgpt-and-other-generative-ai-use-by-staff-after-leak)
+- [Samsung bans use of A.I. like ChatGPT for employees after misuse of the chatbot (CNBC)](https://www.cnbc.com/2023/05/02/samsung-bans-use-of-ai-like-chatgpt-for-staff-after-misuse-of-chatbot.html)
