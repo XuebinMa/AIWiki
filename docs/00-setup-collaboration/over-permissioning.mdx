@@ -7,7 +7,7 @@ phase: 准备与协作
 severity: 高
 applies_to: "全模型通用"
 evidence: 官方文档
-tags: [权限, 最小权限, 安全, 提示注入, 运维工程师, 工程师, Gemini CLI, Codex CLI]
+tags: [权限, 最小权限, 安全, 提示注入, 运维工程师, 工程师, Gemini CLI, Codex CLI, Cursor]
 sources:
   - { title: "Configure permissions（Claude Code 官方）", url: "https://code.claude.com/docs/en/permissions" }
   - { title: "How we built Claude Code auto mode（Anthropic 官方）", url: "https://www.anthropic.com/engineering/claude-code-auto-mode" }
@@ -16,6 +16,7 @@ sources:
   - { title: "YOLO Mode: Hidden Risks in Claude Code Permissions（UpGuard）", url: "https://www.upguard.com/blog/yolo-mode-hidden-risks-in-claude-code-permissions" }
   - { title: "Gemini CLI — approval modes / configuration（官方文档）", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/get-started/configuration.md" }
   - { title: "Codex — approval presets (openai/codex source)", url: "https://github.com/openai/codex/blob/main/codex-rs/utils/approval-presets/src/lib.rs" }
+  - { title: "Cursor — Agent Security (official docs)", url: "https://cursor.com/docs/agent/security" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -115,6 +116,8 @@ flowchart LR
 **Gemini CLI（截至 2026-06）**：Gemini CLI 里这个一键全开叫 **YOLO 模式**（`--yolo` / `--approval-mode=yolo` / 交互中按 Ctrl+Y），同样是把所有工具调用自动批准。它还有个中间档 `auto_edit`：自动批准文件编辑，但 shell 命令仍要你确认——相当于「逐条确认」和「全自动」之间的折中。一个值得照搬的姿态：它默认把 sandbox-on 和 YOLO 绑在一起当「推荐自动化」配置，别只开 YOLO 不开 sandbox——那等于既拆了人工闸又没了环境闸。
 
 **Codex CLI（截至 2026-06）**：Codex 用三档审批预设（Read Only / Auto / Full Access），而且默认那档（Auto）就已经沙箱化（workspace-write + 网络关 + 按需审批）——和 Claude Code「沙箱默认关」正好相反，所以这里的危险动作是用户主动退出安全默认，而非忘了打开。一把全开的口子是 `--dangerously-bypass-approvals-and-sandbox`；企业可用 `requirements.toml` 禁掉它。
+
+**Cursor（截至 2026-06）**：Cursor 的「全开」是 **Auto-Run / YOLO**，靠 `permissions.json` 的 allowlist / denylist 把关。两点：① Cursor 在 1.3 **废弃了 denylist**——研究者演示了 Base64、子 shell、引号混淆等多种绕过，结论是 denylist 是错的工具、只能用 allowlist；② 当前默认 Run Mode（Auto-review）的分类器，官方明说是「非确定性、非安全边界」。
 
 ## 版本说明
 

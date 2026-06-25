@@ -7,7 +7,7 @@ phase: Acceptance & Release
 severity: High
 applies_to: "All models"
 evidence: Official docs
-tags: [CI/CD, permissions, least privilege, release, DevOps Engineer, Gemini CLI, Codex CLI]
+tags: [CI/CD, permissions, least privilege, release, DevOps Engineer, Gemini CLI, Codex CLI, Cursor]
 sources:
   - { title: "Use GITHUB_TOKEN for authentication in workflows (GitHub official)", url: "https://docs.github.com/actions/security-guides/automatic-token-authentication" }
   - { title: "actions/configure-pages — action.yml (permission requirements for enablement)", url: "https://github.com/actions/configure-pages/blob/main/action.yml" }
@@ -16,6 +16,7 @@ sources:
   - { title: "Mitigate Excessive Agency in AI Agents with Zero Trust Security (Auth0, OWASP LLM Top 10)", url: "https://auth0.com/blog/mitigate-excessive-agency-ai-agents/" }
   - { title: "run-gemini-cli security advisory GHSA-wpqr-6v78-jr5g (CVSS 10.0)", url: "https://github.com/google-github-actions/run-gemini-cli/security/advisories/GHSA-wpqr-6v78-jr5g" }
   - { title: "Codex — managed configuration / requirements.toml (OpenAI official)", url: "https://developers.openai.com/codex/enterprise/managed-configuration" }
+  - { title: "Cursor — Headless CLI / GitHub Actions (official docs)", url: "https://cursor.com/docs/cli/headless" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -116,6 +117,8 @@ Whether that single `enablement: true` line stays or goes is the dividing line b
 **Gemini CLI (as of 2026-06)**: In Gemini CLI this "can't see the permission boundary in CI" turned into a disclosed critical vulnerability — **security advisory GHSA-wpqr-6v78-jr5g, CVSS 10.0**. Two parts: in headless / CI mode it **auto-trusts the workspace**, so processing an untrusted `.env` is enough for RCE; and `--yolo` **ignores** the fine-grained allowlist you carefully set in `~/.gemini/settings.json` (and that allowlist itself can be bypassed by prompt injection). Fixed in v0.39.1, where the fix requires you to **trust explicitly** (`GEMINI_TRUST_WORKSPACE=true`). This is exactly this entry's point: in CI, don't treat the "trust boundary" as a default — treat it as a configuration you must verify.
 
 **Codex CLI (as of 2026-06)**: In CI (where no one can click an approval), Codex's safe posture is `approval_policy=never` paired with an explicit `--sandbox workspace-write` — rather than reaching for `--dangerously-bypass-approvals-and-sandbox` for convenience (which tears out both the human and the OS gate at once). Enterprises nail the trust boundary down with `requirements.toml` (forbidding `never`/`danger-full-access`) plus a managed network proxy.
+
+**Cursor (as of 2026-06)**: Cursor has a headless CLI (`cursor-agent`, `-p` print mode) for GitHub Actions. The CI-specific knob: **`--force` makes the agent apply changes without confirmation** (without it, changes are only *proposed*) — compressing the human gate into a single flag in a YAML file. Cursor's official CI guidance is to scope tightly (`permissions.json` allow/deny, read-only logs, write only to a feature branch, no auto-merge). (Honest caveat: this is config guidance, not a disclosed CI RCE like Gemini's GHSA-wpqr.)
 
 ## Version notes
 

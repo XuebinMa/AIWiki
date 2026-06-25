@@ -7,7 +7,7 @@ phase: Setup & Collaboration
 severity: High
 applies_to: "All models"
 evidence: Community case
-tags: [irreversible action, destructive operation, backup isolation, blast radius, least privilege, sandbox, devops engineer, engineer, architect, Gemini CLI, Codex CLI]
+tags: [irreversible action, destructive operation, backup isolation, blast radius, least privilege, sandbox, devops engineer, engineer, architect, Gemini CLI, Codex CLI, Cursor]
 sources:
   - { title: "AI-powered coding tool wiped out a software company's database in 'catastrophic failure' (Fortune)", url: "https://fortune.com/2025/07/23/ai-coding-tool-replit-wiped-database-called-it-a-catastrophic-failure/" }
   - { title: "Incident 1152: LLM-Driven Replit Agent Executed Unauthorized Destructive Commands During Code Freeze (AI Incident Database)", url: "https://incidentdatabase.ai/cite/1152/" }
@@ -15,6 +15,7 @@ sources:
   - { title: "Configure permissions (Claude Code official)", url: "https://code.claude.com/docs/en/permissions" }
   - { title: "Gemini CLI — Checkpointing (official docs)", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/checkpointing.md" }
   - { title: "Codex — Sandboxing (OpenAI official)", url: "https://developers.openai.com/codex/concepts/sandboxing" }
+  - { title: "Cursor — Checkpoints (official docs)", url: "https://cursor.com/docs/agent/chat/checkpoints" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -118,6 +119,8 @@ The difference isn't that I got smarter — it's that before that delete command
 **Gemini CLI (as of 2026-06)**: Gemini CLI's safety net is **Checkpointing**: before I use a tool to modify files, it snapshots the files and the conversation, and `/restore` rolls back the files, rewinds the conversation, and re-presents that tool call for your confirmation. The catch is that it's **off by default** — you have to set `general.checkpointing.enabled: true` in `.gemini/settings.json` for it to record (the command-line `--checkpointing` flag was removed in v0.11.0). Discovering it was never recording at the moment you want to undo is too late — same lesson as this entry: confirm the guardrail is on before you start, don't assume it's backstopping you.
 
 **Codex CLI (as of 2026-06)**: Codex's mechanical guardrail is an OS sandbox that's on by default (macOS Seatbelt, Linux Landlock/seccomp), confining writes to the workspace and cutting network access, so by default a destructive command can't reach outside the workspace or exfiltrate anything. The footgun is tearing that net down (`--sandbox danger-full-access`); also, on Windows the sandbox is still experimental and may silently fall back to broader permissions when it fails to initialize — you think the net is up when it isn't.
+
+**Cursor (as of 2026-06)**: Cursor's undo net is **Checkpoints** — it automatically snapshots *the agent's* file changes, and "Restore Checkpoint" returns you to that point in the conversation. But the docs are explicit: it's **not version control**, it **doesn't track manual edits**, and it's **session-scoped and auto-cleaned**. So for the OS- and DB-level irreversible operations this entry covers — wiping a DB, deleting a volume, erasing backups — Checkpoints offer **zero protection**; the only real backstop is Git plus isolated credentials.
 
 ## Version notes
 

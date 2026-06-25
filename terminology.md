@@ -187,6 +187,7 @@ Claude Code · Cursor · GitHub Copilot · Codex CLI · Gemini CLI · CLAUDE.md 
 | 全模型通用 | All models |
 | 通用 LLM | All LLMs |
 | Gemini CLI 特有 | Gemini CLI only |
+| Cursor 特有 | Cursor only |
 
 ### tool 工具 / agent（矩阵轴；按 harness 而非模型）
 

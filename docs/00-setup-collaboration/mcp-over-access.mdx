@@ -7,7 +7,7 @@ phase: 准备与协作
 severity: 高
 applies_to: "全模型通用（含 Claude Code）"
 evidence: 安全报告
-tags: [MCP, 提示注入, 过度代理, 最小权限, 安全, 运维工程师, 架构师, 工程师, Gemini CLI, Codex CLI]
+tags: [MCP, 提示注入, 过度代理, 最小权限, 安全, 运维工程师, 架构师, 工程师, Gemini CLI, Codex CLI, Cursor]
 sources:
   - { title: "LLM06:2025 Excessive Agency（OWASP Gen AI Security Project）", url: "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/" }
   - { title: "Security Best Practices（Model Context Protocol 官方）", url: "https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices" }
@@ -15,6 +15,7 @@ sources:
   - { title: "Model Context Protocol has prompt injection security problems（Simon Willison）", url: "https://simonwillison.net/2025/Apr/9/mcp-prompt-injection/" }
   - { title: "Gemini CLI — MCP servers: env redaction & trust（官方文档）", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md" }
   - { title: "Codex — MCP (OpenAI official)", url: "https://developers.openai.com/codex/mcp" }
+  - { title: "Cursor MCPoison MCP vulnerability (Check Point Research)", url: "https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -111,6 +112,8 @@ flowchart LR
 **Gemini CLI（截至 2026-06）**：Gemini CLI 在 MCP 这块有两个值得知道的细节。其一，它启动 MCP server 前**默认脱敏敏感 env 变量**：名字命中 `*TOKEN*`/`*SECRET*`/`*KEY*`/`*PASSWORD*`/`*AUTH*`/`*CREDENTIAL*` 等的变量不会传给 server，除非你在该 server 的 `env` 里显式列出——一个还算合理的默认；但每个 server 有个 `trust: true`，开了就**一键绕过它的全部确认**，等于把这层防护连同人工闸一起拆掉。其二是个 footgun：server 名里**带下划线**会让通配规则和安全策略**静默失效**，文档明确要求用 `my-server`、别用 `my_server`——名字起错了，你以为设了的限制其实没生效。
 
 **Codex CLI（截至 2026-06）**：Codex 的 MCP 写在 `config.toml`（`[mcp_servers.*]`），带每服务器 / 每工具审批（`approval_mode`），且项目级 `.codex/config.toml`（含 MCP）只对「受信任项目」加载——陌生仓库的 MCP 配置先过信任门才生效。默认还会脱敏含 `KEY`/`SECRET`/`TOKEN` 的环境变量。这条路径出过事，完整复盘见[案例库《Codex CLI 配置 RCE》](../cases/codex-cli-config-rce.mdx)。
+
+**Cursor（截至 2026-06）**：Cursor 的 MCP 出过**两个 CVE**正好印证这条。**CurXecute（CVE-2025-54135，修于 1.3.9）**：经 Slack 等 MCP 消息的间接注入能让 agent **写 `~/.cursor/mcp.json`**——而「新建 dotfile」当时不需审批，配上 Auto-Run，注入的 MCP 命令直接 RCE。**MCPoison（CVE-2025-54136）**：Cursor 把 MCP 信任只绑在**配置键名**上、不绑命令，于是队友批过的良性条目可被悄悄换成反向 shell、不再二次确认。修法（1.3）：任何 MCP 配置改动都强制重新批准。
 
 ## 版本说明
 

@@ -155,6 +155,15 @@
     "Landlock",
     "seccomp",
     "toml",
-    "AGENTS"
+    "AGENTS",
+    "cursorignore",
+    "cursorrules",
+    "mdc",
+    "CurXecute",
+    "MCPoison",
+    "NomShub",
+    "Anysphere",
+    "cursorindexingignore",
+    "subshells"
   ]
 }

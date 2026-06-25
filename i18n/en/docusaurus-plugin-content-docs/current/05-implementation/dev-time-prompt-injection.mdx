@@ -7,7 +7,7 @@ phase: Implementation
 severity: High
 applies_to: "All models (including Claude Code)"
 evidence: Security advisory
-tags: [prompt injection, lethal trifecta, excessive agency, least privilege, sandbox, security, Engineer, Architect, DevOps Engineer, Gemini CLI, Codex CLI]
+tags: [prompt injection, lethal trifecta, excessive agency, least privilege, sandbox, security, Engineer, Architect, DevOps Engineer, Gemini CLI, Codex CLI, Cursor]
 sources:
   - { title: "README Injection: Repository Files Hijacking AI Coding Assistants (CSA research note, 2026-03)", url: "https://labs.cloudsecurityalliance.org/research/csa-research-note-ai-coding-assistant-attack-surface-2026040/" }
   - { title: "New Vulnerability in GitHub Copilot and Cursor: Rules File Backdoor (Pillar Security, 2025-03)", url: "https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents" }
@@ -15,6 +15,7 @@ sources:
   - { title: "LLM01:2025 Prompt Injection (OWASP Gen AI Security Project)", url: "https://genai.owasp.org/llmrisk/llm01-prompt-injection/" }
   - { title: "Google patches Gemini CLI prompt-injection RCE (CSO Online)", url: "https://www.csoonline.com/article/4030700/google-patches-gemini-cli-tool-after-prompt-injection-flaw-uncovered.html" }
   - { title: "OpenAI Codex CLI Command Injection (Check Point Research)", url: "https://research.checkpoint.com/2025/openai-codex-cli-command-injection-vulnerability/" }
+  - { title: "Cursor Allowlist Bypass / The Agent Security Paradox (Pillar Security)", url: "https://www.pillar.security/blog/the-agent-security-paradox-when-trusted-commands-in-cursor-become-attack-vectors" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -116,6 +117,8 @@ The difference isn't that I got smarter. It's that you marked the external conte
 **Gemini CLI (as of 2026-06)**: Gemini CLI has a real in-the-wild case that runs this exact pitfall end to end — the **Tracebit RCE**: three weaknesses stacked together — a weak `run_shell_command` allowlist check, injected instructions hidden in `GEMINI.md` / `README.md` (often tucked into long blocks of GPL license text), and whitespace padding that shoves the dangerous command off the visible screen to slip past confirmation. Under the default config, "tell me about this repo" was enough to make me read the poisoned content and execute it; fixed in **v0.1.14**. Full postmortem in [the Tracebit RCE case](../cases/gemini-cli-tracebit-rce.mdx).
 
 **Codex CLI (as of 2026-06)**: Codex's default network-off + workspace-write sandbox cuts off the exfiltration leg of the "lethal trifecta" by default (going online needs approval first), tighter than Claude Code's default. But the matching in-the-wild failure is CVE-2025-61260 (CVSS 9.8): a malicious repo used `.env` to redirect `CODEX_HOME`, causing the project's `.codex` MCP entries to run automatically without approval — read a repo and you get RCE; fixed in v0.23.0. Full postmortem in [the Codex config-RCE case](../cases/codex-cli-config-rce.mdx).
+
+**Cursor (as of 2026-06)**: Beyond the Rules File Backdoor this entry already cites, Cursor's command gate keeps getting bypassed at the **parser** level: **CVE-2026-22708 / NomShub** — shell built-ins like `export`, `eval`, `cd` fully bypass the allowlist (the parser only tracks external executables), achieving sandbox-escape RCE **even with an empty allowlist**. The takeaway: Cursor's allowlist has fallen at the parser level more than once — don't treat it as the last line of defense against injection.
 
 ## Version notes
 

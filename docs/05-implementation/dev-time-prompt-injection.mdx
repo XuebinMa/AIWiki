@@ -7,7 +7,7 @@ phase: 编码实现
 severity: 高
 applies_to: "全模型通用（含 Claude Code）"
 evidence: 安全报告
-tags: [提示注入, 致命三件套, 过度代理, 最小权限, 沙箱, 安全, 工程师, 架构师, 运维工程师, Gemini CLI, Codex CLI]
+tags: [提示注入, 致命三件套, 过度代理, 最小权限, 沙箱, 安全, 工程师, 架构师, 运维工程师, Gemini CLI, Codex CLI, Cursor]
 sources:
   - { title: "README Injection: Repository Files Hijacking AI Coding Assistants（CSA 研究 note，2026-03）", url: "https://labs.cloudsecurityalliance.org/research/csa-research-note-ai-coding-assistant-attack-surface-2026040/" }
   - { title: "New Vulnerability in GitHub Copilot and Cursor: Rules File Backdoor（Pillar Security，2025-03）", url: "https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents" }
@@ -15,6 +15,7 @@ sources:
   - { title: "LLM01:2025 Prompt Injection（OWASP Gen AI Security Project）", url: "https://genai.owasp.org/llmrisk/llm01-prompt-injection/" }
   - { title: "Google patches Gemini CLI prompt-injection RCE（CSO Online）", url: "https://www.csoonline.com/article/4030700/google-patches-gemini-cli-tool-after-prompt-injection-flaw-uncovered.html" }
   - { title: "OpenAI Codex CLI Command Injection (Check Point Research)", url: "https://research.checkpoint.com/2025/openai-codex-cli-command-injection-vulnerability/" }
+  - { title: "Cursor Allowlist Bypass / The Agent Security Paradox (Pillar Security)", url: "https://www.pillar.security/blog/the-agent-security-paradox-when-trusted-commands-in-cursor-become-attack-vectors" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -111,6 +112,8 @@ flowchart TD
 **Gemini CLI（截至 2026-06）**：Gemini CLI 上有一个把这条坑跑通的在野案例 **Tracebit RCE**：三个弱点叠在一起——`run_shell_command` 的 allowlist 校验太弱、注入指令藏在 `GEMINI.md` / `README.md`（常被塞进 GPL 许可证大段文本）里、再用大量空白把危险命令挤出屏幕可视区骗过确认。默认配置下，一句「介绍下这个 repo」就足以让我读到投毒内容并执行；已在 **v0.1.14** 修。完整复盘见[案例库《Gemini CLI Tracebit RCE》](../cases/gemini-cli-tracebit-rce.mdx)。
 
 **Codex CLI（截至 2026-06）**：Codex 的默认网络关 + workspace-write 沙箱，把「致命三件套」的外带那条腿默认掐断（要联网得先批），比 Claude Code 默认更紧。但对应的在野失败是 CVE-2025-61260（CVSS 9.8）：恶意仓库用 `.env` 把 `CODEX_HOME` 重定向，使项目里的 `.codex` MCP 条目未经审批自动执行 → 读个仓库就 RCE，已在 v0.23.0 修。完整复盘见[案例库《Codex CLI 配置 RCE》](../cases/codex-cli-config-rce.mdx)。
+
+**Cursor（截至 2026-06）**：除了本条已提到的 Rules File Backdoor，Cursor 的命令闸还在**解析层**被反复绕过：**CVE-2026-22708 / NomShub**——`export`、`eval`、`cd` 等 shell 内建能完全绕过 allowlist（解析器只盯外部可执行文件），**即便 allowlist 为空也能沙箱逃逸 RCE**。结论：Cursor 的 allowlist 多次在解析层失守，别把它当注入的最后防线。
 
 ## 版本说明
 
