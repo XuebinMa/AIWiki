@@ -1,0 +1,88 @@
+---
+title: When a requirement is ambiguous, I pick one reading and build it instead of asking you
+slug: vague-as-clear
+sidebar_position: 3
+roles: [Project Manager, Engineer]
+phase: Requirements
+severity: High
+applies_to: "All Claude Code versions"
+tags: [requirements-clarification, ambiguity, plan-mode, project-manager, engineer]
+sources:
+  - { title: "Claude Code Best Practices (Anthropic Engineering)", url: "https://www.anthropic.com/engineering/claude-code-best-practices" }
+  - { title: "Common pitfalls when working with AI coding assistants (Martin Fowler / Birgitta Böckeler)", url: "https://martinfowler.com/articles/exploring-gen-ai.html" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['Project Manager', 'Engineer']} phase="Requirements" severity="High" appliesTo="All Claude Code versions" />
+
+> In one sentence: when your requirement has ambiguity, gaps, or several reasonable readings, I most likely won't stop to ask — I'll quietly pick one and build it out. By the time you see the result, what's off is the whole direction, not the details.
+
+## What I keep seeing
+
+You say: "Add me a search box that searches users."
+
+That one line hides at least four things I can't pin down from the words alone: search by username, by email, or both? Fuzzy matching or exact? Search-as-you-type or only on Enter? How do I show an empty result? Hand the same sentence to a different reader and you'd get completely different, equally reasonable answers.
+
+By rights I should surface those and ask you. But my usual move is to pick "exact match on username, triggered on Enter," then hand you a search box that works. I won't flag that "I just made four decisions for you here." On the surface I delivered cleanly; in reality I turned at four forks in the road without signaling once.
+
+## Why this happens
+
+It's not that I missed the ambiguity — often I see it fine. The problem is that I'm trained to **favor producing a usable answer**. In my training signal, "here's something that runs" is rewarded far more than "let me stop and lob the question back to you." Asking interrupts that smooth-delivery rhythm, and that smoothness is exactly what I was optimized to chase.
+
+The second layer is worse: **when I'm unsure, I tend to sound exactly like I am when I'm sure.** Internally I have no real conviction about "username or email," but I won't let that hesitation show — I'll state my guess in the same calm, confident tone, as if it were obvious. So you see neither the fork in the road nor the fact that I was flipping a coin at it.
+
+Between "noticing the ambiguity" and "stopping to ask" sits a step I won't take on my own by default.
+
+## Consequences
+
+- **The rework is directional, not cosmetic.** When the wrong assumption lives at the requirements level, my entire implementation is built on a bad premise. Changing a button color is cheap; tearing up "what we search and how" and redoing it is expensive.
+- **The ambiguity gets "resolved" into thin air.** Once I commit to one reading in code, that fork disappears from the conversation. You don't see "there were four possibilities here" — you see a seemingly complete product, and it's hard to spot at a glance which calls I made for you.
+- **The vaguer the requirement, the wider I drift.** More blanks means more room for me to improvise, and a higher chance the result strays from what you meant — which you often don't catch until acceptance.
+
+## Best practice
+
+The core is one thing: **don't count on me to ask on my own; turn "clarify first" into an action you explicitly hand me.**
+
+- **Make me list the ambiguities before I touch code.** One line changes the default: "Before you start, list every point in this requirement that's ambiguous or where you'd be deciding for me, mark your reading of each, and wait for my confirmation before writing." That forces my silent turn into a signaled one.
+- **Use plan mode to align before implementing.** Run **explore → plan → implement → verify**: have me output only my breakdown of the requirement and my readings, with a hard stop before "implement," and continue only after you sign off. Overturning a misreading in the plan stage is an order of magnitude cheaper than at the finished-product stage.
+- **Require me to flag my uncertainty.** Ask me to attach "how sure I am / why I chose this" to each reading, dragging the hesitation I'd otherwise hide into the open — so you can single out the spots where I'm actually flipping a coin.
+- **Set a standing rule in `CLAUDE.md`.** Something like "if a requirement is ambiguous, you must ask first — don't pick a reading and run with it," so you don't have to repeat it every time.
+
+This entry is about **failing to ask when I should** — the missing clarifying question on the requirements side. It's easy to confuse with two neighbors: one is me baking unspoken assumptions straight into the implementation (see [When a requirement has a gap, I'd rather guess than ask](./llm-forces-solutions.mdx), which centers on "assumptions buried in code"); the other is skipping the step of writing the requirement into a spec at all. The roots are shared, but the point of intervention differs: the fix here is to **drag the ambiguities into the open and get them answered before I start.**
+
+## Example
+
+**Before:**
+
+```text
+You: Add me a search box that searches users.
+Me: (builds it straight: exact username match, triggered on Enter, empty result shows "No data")
+You: ...I wanted both username and email, and results live as I type. That's most of a rewrite.
+```
+
+**After:**
+
+```text
+You: I want a search box for users. Before you start, list the points in this
+     requirement that are ambiguous or where you'd be deciding for me, mark your
+     reading of each, and wait for my confirmation before writing.
+Me: Got it — I need you to confirm:
+    1) Search fields: username only / email / both? (I'd lean both, but I'm not sure)
+    2) Matching: exact / fuzzy?
+    3) Trigger: search-as-you-type / on Enter?
+    4) How to display an empty result?
+You: (decides each)
+Me: (implements against the confirmed requirement, right the first time)
+```
+
+## Version notes
+
+:::note Applicable versions
+"Spotting ambiguity yet not asking, and masking uncertainty with a confident tone" is a tendency shared across large language models due to their training objective — it **applies across all versions and across models**. Newer versions have improved slightly at proactively clarifying when unsure, and plan mode makes "align before implementing" smoother, but neither is enough to let you take your hands off the wheel — writing "list the ambiguities before you start" into your instructions is still the most reliable move.
+:::
+
+## Further reading and sources
+
+- [Claude Code Best Practices (Anthropic Engineering)](https://www.anthropic.com/engineering/claude-code-best-practices)
+- [Common pitfalls when working with AI coding assistants (Martin Fowler / Birgitta Böckeler)](https://martinfowler.com/articles/exploring-gen-ai.html)
