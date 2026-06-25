@@ -5,7 +5,7 @@ sidebar_position: 5
 roles: [Engineer, Architect]
 phase: Detailed design
 severity: High
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 tags: [concurrency, race condition, detailed design, robustness, Engineer, Architect]
 sources:
   - { title: "Race condition — Wikipedia", url: "https://en.wikipedia.org/wiki/Race_condition" }
@@ -14,7 +14,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect']} phase="Detailed design" severity="High" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer', 'Architect']} phase="Detailed design" severity="High" appliesTo="All coding agents" />
 
 > In one sentence: I default to writing code as if it's "single-threaded, sequential, with no one touching it at the same time," so I miss race conditions, don't lock shared state, leave check-then-act non-atomic, and skip transactions or optimistic locking on the database. Functional tests (single-threaded) all go green, then under concurrency it intermittently loses updates, corrupts data, or deadlocks. This is about **concurrency correctness** — a specific, hidden class of defect — not the same as [missing branches at the implementation level](./missing-edge-cases.mdx) or [the overall robustness of a design](./plausible-but-brittle-design.mdx).
 
@@ -116,7 +116,7 @@ The test: the exception holds when "no concurrency / no sharing" is a fact you'v
 ## Version notes
 
 :::note Applicability
-"Defaulting to generating code as single-threaded sequential logic" is an inherent tendency of LLMs writing code, applying to **all Claude Code versions and across models**. Research shows even the strongest models still struggle significantly with concurrency reasoning (see [arXiv 2501.14326](https://arxiv.org/html/2501.14326v1)). The stronger the model, the prettier the sequential code, and the easier it is to forget it didn't consider concurrency by default — so "explicitly give a concurrency profile, mark critical sections, and verify with concurrency tests" won't go obsolete as models get stronger.
+"Defaulting to generating code as single-threaded sequential logic" is an inherent tendency of LLMs writing code, applying to **all models and coding agents**. Research shows even the strongest models still struggle significantly with concurrency reasoning (see [arXiv 2501.14326](https://arxiv.org/html/2501.14326v1)). The stronger the model, the prettier the sequential code, and the easier it is to forget it didn't consider concurrency by default — so "explicitly give a concurrency profile, mark critical sections, and verify with concurrency tests" won't go obsolete as models get stronger.
 :::
 
 ## Further reading & sources

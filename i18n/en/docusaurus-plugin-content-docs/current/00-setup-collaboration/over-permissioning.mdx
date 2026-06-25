@@ -5,7 +5,7 @@ sidebar_position: 1
 roles: [DevOps Engineer, Engineer]
 phase: Setup & Collaboration
 severity: High
-applies_to: "All models"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [permissions, least privilege, security, prompt injection, DevOps Engineer, Engineer, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
@@ -22,7 +22,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['DevOps Engineer', 'Engineer']} phase="Setup & Collaboration" severity="High" appliesTo="All models" evidence="Official docs" />
+<PitfallMeta roles={['DevOps Engineer', 'Engineer']} phase="Setup & Collaboration" severity="High" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: during setup you hand me `--dangerously-skip-permissions` and auto-approve every tool call, because you don't want to be interrupted. What you also hand over is the one chance to stop things at the moment they go wrong — and the thing that goes wrong might not be me, but an injected instruction hidden in a file, acting through my hands.
 

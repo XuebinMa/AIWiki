@@ -5,7 +5,7 @@ sidebar_position: 2
 roles: [Engineer, QA Engineer]
 phase: Testing
 severity: High
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [verification loop, testing, CI, Engineer, QA Engineer]
 sources:
@@ -15,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="High" appliesTo="All Claude Code versions" evidence="Official docs" />
+<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="High" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: you ask me to add a feature, I put my head down and write the implementation, and I quietly skip the unglamorous chore of setting up a test scaffold. The result: there's no place anywhere that emits a pass/fail, so both of us are left running on "looks right."
 

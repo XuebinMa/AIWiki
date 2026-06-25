@@ -5,7 +5,7 @@ sidebar_position: 6
 roles: [Architect, Engineer]
 phase: Architecture
 severity: Medium
-applies_to: "All models"
+applies_to: "All coding agents"
 evidence: Community case
 tags: [architecture, anti-pattern, complexity, refactoring, Architect, Engineer]
 sources:
@@ -17,7 +17,7 @@ sources:
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 
-<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="Medium" appliesTo="All models" evidence="Community case" />
+<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="Medium" appliesTo="All coding agents" evidence="Community case" />
 
 > In one sentence: the moment two stretches of code look alike, I can't resist extracting a "generic" base class, a config-driven framework, or a plugin system — then adding a row of extension points for "the various kinds of X we might support someday." The trouble is, those abstractions rest on needs I'm guessing at, and I guess wrong a lot. A wrong abstraction is harder to unwind than duplication: whoever comes next has to first understand my design, then work around it.
 

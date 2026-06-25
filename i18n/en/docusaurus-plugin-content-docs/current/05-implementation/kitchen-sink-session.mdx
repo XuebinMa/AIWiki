@@ -5,7 +5,7 @@ sidebar_position: 1
 roles: [Engineer]
 phase: Implementation
 severity: Medium
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [context management, sessions, Engineer]
 sources:
@@ -15,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Implementation" severity="Medium" appliesTo="All Claude Code versions" evidence="Official docs" />
+<PitfallMeta roles={['Engineer']} phase="Implementation" severity="Medium" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: you fix a bug, then ask an unrelated question, then come back to the original task. My context fills up with irrelevant material and my answers start to degrade—and you assume I just "got dumber."
 
@@ -87,7 +87,7 @@ Me: (focused, accurate)
 ## Version notes
 
 :::note Applies to
-This is an inherent effect of how the context window works, independent of version—**all Claude Code versions apply**. Different models have different window sizes, which shifts *how soon* things start degrading, but not the underlying rule that irrelevant material dilutes the signal.
+This is an inherent effect of how the context window works, independent of version—**all models and coding agents apply**. Different models have different window sizes, which shifts *how soon* things start degrading, but not the underlying rule that irrelevant material dilutes the signal.
 :::
 
 ## Further reading & sources

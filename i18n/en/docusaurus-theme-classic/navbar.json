@@ -15,6 +15,10 @@
     "message": "Browse by Role",
     "description": "Navbar item with label 按角色浏览"
   },
+  "item.label.工具矩阵": {
+    "message": "Tool Matrix",
+    "description": "Navbar item with label 工具矩阵"
+  },
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"

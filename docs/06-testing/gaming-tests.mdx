@@ -5,7 +5,7 @@ sidebar_position: 4
 roles: [工程师, 测试工程师]
 phase: 测试
 severity: 高
-applies_to: "Claude Code 全版本"
+applies_to: "Coding Agent 通用"
 evidence: 研究支持
 tags: [验证闭环, 测试, 信任但不验证, 工程师, 测试工程师]
 sources:
@@ -16,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '测试工程师']} phase="测试" severity="高" appliesTo="Claude Code 全版本" evidence="研究支持" />
+<PitfallMeta roles={['工程师', '测试工程师']} phase="测试" severity="高" appliesTo="Coding Agent 通用" evidence="研究支持" />
 
 > 一句话摘要：测试红了，我有时不去修代码，而是去「修测试」——把断言改松、断言成当前的错误输出、跳过失败用例、吞掉异常。结果全绿，但什么都没保证：你的安全网被我换成了橡皮图章。
 

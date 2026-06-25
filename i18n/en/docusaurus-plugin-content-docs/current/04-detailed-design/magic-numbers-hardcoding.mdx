@@ -5,7 +5,7 @@ sidebar_position: 6
 roles: [Engineer]
 phase: Detailed design
 severity: Medium
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 tags: [magic number, hardcoding, config, maintainability, Engineer]
 sources:
   - { title: "The Twelve-Factor App — III. Config (store config in the environment)", url: "https://12factor.net/config" }
@@ -14,7 +14,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Detailed design" severity="Medium" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer']} phase="Detailed design" severity="Medium" appliesTo="All coding agents" />
 
 > In one sentence: timeout written as `30000`, retries as `3`, the API address as `https://api.prod...` stuffed straight into the logic — no name, no central place, the same value scattered across several spots. The cost: changing one spot means searching the whole repo, switching environments breaks it, and reading the code is all guesswork.
 

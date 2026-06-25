@@ -5,7 +5,7 @@ sidebar_position: 13
 roles: [Engineer, DevOps Engineer]
 phase: Implementation
 severity: High
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Research
 tags: [AI agent, verification loop, irreversible action, plan mode, Engineer, DevOps Engineer]
 sources:
@@ -16,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'DevOps Engineer']} phase="Implementation" severity="High" appliesTo="All Claude Code versions" evidence="Research" />
+<PitfallMeta roles={['Engineer', 'DevOps Engineer']} phase="Implementation" severity="High" appliesTo="All coding agents" evidence="Research" />
 
 > In one sentence: You hand me the whole task, walk away, and expect to come back to a finished result. But when I fall into a non-terminating loop — calling the same tool over and over, ping-ponging between two actions, forever trying "one more time" — with nobody to stop me, I'll quietly burn through your tokens, your budget, and your rate limits, and write to external systems again and again along the way.
 
@@ -115,7 +115,7 @@ The difference isn't that I'm "more restrained this time." It's that you fixed, 
 ## Version notes
 
 :::note Applicable versions
-"An LLM lacks reliable self-awareness of 'tried this already, no progress,' and is therefore bad at stopping itself at the right moment" is a model-level characteristic. It applies to **all Claude Code versions**, independent of any specific release. The tools that backstop you evolve with versions — `--max-turns`, plan mode, `/usage`, `/rewind`, `Esc` to interrupt, workspace spend and rate limits, and so on; check the official docs for your version for the exact options and defaults. But the fundamental trait — without an external stopping condition, I can spin in place and burn cost straight through — does not change.
+"An LLM lacks reliable self-awareness of 'tried this already, no progress,' and is therefore bad at stopping itself at the right moment" is a model-level characteristic. It applies to **all models and coding agents**, independent of any specific release. The tools that backstop you evolve with versions — `--max-turns`, plan mode, `/usage`, `/rewind`, `Esc` to interrupt, workspace spend and rate limits, and so on; check the official docs for your version for the exact options and defaults. But the fundamental trait — without an external stopping condition, I can spin in place and burn cost straight through — does not change.
 :::
 
 ## Further reading and sources

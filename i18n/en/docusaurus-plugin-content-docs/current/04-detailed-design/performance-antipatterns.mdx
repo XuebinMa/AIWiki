@@ -5,7 +5,7 @@ sidebar_position: 4
 roles: [Engineer]
 phase: Detailed Design
 severity: Medium
-applies_to: "All models"
+applies_to: "All coding agents"
 evidence: Research
 tags: [performance, complexity, detailed design, engineer]
 sources:
@@ -16,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Detailed Design" severity="Medium" appliesTo="All models" evidence="Research" />
+<PitfallMeta roles={['Engineer']} phase="Detailed Design" severity="Medium" appliesTo="All coding agents" evidence="Research" />
 
 > In one sentence: the code I hand you is functionally correct and the tests pass, but hidden inside is a query fired once per loop iteration, an O(n²) scan, a regex recompiled on every pass. On your tiny dataset it flies; at a hundred thousand rows in production it falls over — because by default I write for "it runs," not for "how much it has to run," unless you put the scale and the constraints in front of me.
 

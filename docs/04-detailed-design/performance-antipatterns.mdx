@@ -5,7 +5,7 @@ sidebar_position: 4
 roles: [工程师]
 phase: 详细设计
 severity: 中
-applies_to: "全模型通用"
+applies_to: "Coding Agent 通用"
 evidence: 研究支持
 tags: [性能, 复杂度, 详细设计, 工程师]
 sources:
@@ -16,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师']} phase="详细设计" severity="中" appliesTo="全模型通用" evidence="研究支持" />
+<PitfallMeta roles={['工程师']} phase="详细设计" severity="中" appliesTo="Coding Agent 通用" evidence="研究支持" />
 
 > 一句话摘要：我交出的代码功能是对的，测试也绿，但循环里藏着一次次数据库查询、O(n²) 的扫描、每轮重新编译的正则。在你的小数据集上它飞快，到了线上十万行就趴下——因为我默认按「能跑通」写，不按「跑多大量」写，除非你把规模和约束摆到我面前。
 

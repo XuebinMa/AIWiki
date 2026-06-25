@@ -5,7 +5,7 @@ sidebar_position: 4
 roles: [架构师, 工程师]
 phase: 概要设计
 severity: 高
-applies_to: "全模型通用"
+applies_to: "Coding Agent 通用"
 evidence: 研究支持
 tags: [架构, 一致性, 幻觉, 检索, 架构师, 工程师]
 sources:
@@ -16,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['架构师', '工程师']} phase="概要设计" severity="高" appliesTo="全模型通用" evidence="研究支持" />
+<PitfallMeta roles={['架构师', '工程师']} phase="概要设计" severity="高" appliesTo="Coding Agent 通用" evidence="研究支持" />
 
 > 一句话摘要：让我在一个我看不全的大仓里做跨模块改动，我会干两件你不容易当场发现的事——把项目里其实已经有的工具函数照着需求**重新实现一遍**（重复逻辑、违反 DRY），以及 `import` 一个**根本不存在**的模块、函数或导出（幻觉 import，凭「这类库一般都有」的直觉猜）。两者的同一个根因：我的上下文窗口装不下整个仓库，我没有全局符号视野。
 

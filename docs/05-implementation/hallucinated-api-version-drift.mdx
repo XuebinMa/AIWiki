@@ -5,7 +5,7 @@ sidebar_position: 5
 roles: [工程师, 架构师]
 phase: 编码实现
 severity: 高
-applies_to: "全模型通用"
+applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [幻觉, 版本漂移, 检索, 文档源, API, 工程师, 架构师]
 sources:
@@ -16,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '架构师']} phase="编码实现" severity="高" appliesTo="全模型通用" evidence="官方文档" />
+<PitfallMeta roles={['工程师', '架构师']} phase="编码实现" severity="高" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
 > 一句话摘要：让我写某个高频迭代的库的调用时，我凭训练记忆补位——可能用了已废弃或已改签名的 API，把不同大版本的写法混在一起，甚至幻觉出一个根本不存在的方法。代码「看起来都对」，编译期未必拦得住，到运行时才崩。
 

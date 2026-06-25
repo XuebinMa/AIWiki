@@ -5,7 +5,7 @@ sidebar_position: 15
 roles: [工程师]
 phase: 编码实现
 severity: 中
-applies_to: "Claude Code 全版本"
+applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [git, 提交粒度, 提交信息, 原子提交, 代码评审, 工程师]
 sources:
@@ -15,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师']} phase="编码实现" severity="中" appliesTo="Claude Code 全版本" evidence="官方文档" />
+<PitfallMeta roles={['工程师']} phase="编码实现" severity="中" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
 > 一句话摘要：交给我连续干，我攒出来的常是一个几十文件、上千行的巨型提交，信息却写着「update code」。再加上我会把构建产物、`.env`、注释掉的死代码一股脑提交进去。结果是历史不可读：`git bisect`、回滚、code review 全失效，出了问题你定位不到是哪一次改动。
 

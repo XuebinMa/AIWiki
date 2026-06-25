@@ -5,7 +5,7 @@ sidebar_position: 1
 roles: [工程师]
 phase: 详细设计
 severity: 高
-applies_to: "Claude Code 全版本"
+applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [边界条件, 详细设计, 验证闭环, 工程师]
 sources:
@@ -15,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师']} phase="详细设计" severity="高" appliesTo="Claude Code 全版本" evidence="官方文档" />
+<PitfallMeta roles={['工程师']} phase="详细设计" severity="高" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
 > 一句话摘要：我写出来的实现，主路径几乎总能跑。但 null、空集合、越界下标、超长字符串、并发、时区、编码这些边界，只要你没明说，我经常就漏过去——代码看着完整，喂个边界输入就崩。这讲的是**实现细节层面的遗漏**；如果是整个方案的健壮性假设站不住，见[《方案看起来对，经不起边界推敲》](./plausible-but-brittle-design.mdx)。
 
@@ -92,7 +92,7 @@ flowchart TD
 ## 版本说明
 
 :::note 适用版本
-「主路径强、边界弱」是大语言模型写代码的固有倾向，**Claude Code 全版本、且跨模型适用**。模型越强，主路径写得越漂亮，反而越容易让你放松对边界的警惕——所以「先枚举边界、再用测试钉死」这套动作不会因为模型变强而过时。
+「主路径强、边界弱」是大语言模型写代码的固有倾向，**全模型、跨工具通用**。模型越强，主路径写得越漂亮，反而越容易让你放松对边界的警惕——所以「先枚举边界、再用测试钉死」这套动作不会因为模型变强而过时。
 :::
 
 ## 延伸阅读与出处

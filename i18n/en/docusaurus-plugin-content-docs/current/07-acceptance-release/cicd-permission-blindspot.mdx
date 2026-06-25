@@ -5,7 +5,7 @@ sidebar_position: 1
 roles: [DevOps Engineer]
 phase: Acceptance & Release
 severity: High
-applies_to: "All models"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [CI/CD, permissions, least privilege, release, DevOps Engineer, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
@@ -22,7 +22,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['DevOps Engineer']} phase="Acceptance & Release" severity="High" appliesTo="All models" evidence="Official docs" />
+<PitfallMeta roles={['DevOps Engineer']} phase="Acceptance & Release" severity="High" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: when you ask me to set up CI/CD, I tend to slip in "automatically enable this service, automatically grant that permission" as if I had unlimited power in your runtime. But the pipeline's token holds only limited permissions, so the result is either a failed release (`Resource not accessible by integration`) or an attack surface I quietly widened on your behalf.
 

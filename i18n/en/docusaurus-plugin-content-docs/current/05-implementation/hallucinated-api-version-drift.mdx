@@ -5,7 +5,7 @@ sidebar_position: 5
 roles: [Engineer, Architect]
 phase: Implementation
 severity: High
-applies_to: "All models"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [hallucination, version drift, retrieval, doc source, API, Engineer, Architect]
 sources:
@@ -16,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect']} phase="Implementation" severity="High" appliesTo="All models" evidence="Official docs" />
+<PitfallMeta roles={['Engineer', 'Architect']} phase="Implementation" severity="High" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: when you ask me to call into a fast-moving library, I fill the gaps from training memory—I may use an API that's deprecated or has a changed signature, mix usage from different major versions, or even hallucinate a method that doesn't exist. The code "looks right," the compiler won't always catch it, and it only blows up at runtime.
 

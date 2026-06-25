@@ -5,7 +5,7 @@ sidebar_position: 8
 roles: [Engineer, Architect]
 phase: Implementation
 severity: High
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [context management, style drift, refactoring, Engineer, Architect]
 sources:
@@ -15,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect']} phase="Implementation" severity="High" appliesTo="All Claude Code versions" evidence="Official docs" />
+<PitfallMeta roles={['Engineer', 'Architect']} phase="Implementation" severity="High" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: Halfway through a refactor that spans a dozen files, I lose track of where I am—which files I've changed, which I haven't, whether that rename actually propagated across the whole repo. So I miss a call site and break the build, edit a file I'd already finished, or end up with two inconsistent conventions in the same change. Don't make me use my memory as the to-do list.
 
@@ -104,7 +104,7 @@ In the second version, whichever step goes wrong, `git log` and that final searc
 ## Version notes
 
 :::note Applicable versions
-This is an inherent effect of the context window and compaction mechanisms, independent of any specific version, and it **applies to all Claude Code versions**. A model with a larger window pushes the "start losing track" threshold further out (it can hold a few more files before it gets muddled), but as long as the refactor is large enough and the session long enough, the root problem—tracking a continuously growing done set from memory—doesn't go away. Externalizing progress (commits / a list / search) is the fix that doesn't depend on window size.
+This is an inherent effect of the context window and compaction mechanisms, independent of any specific version, and it **applies across models and coding agents**. A model with a larger window pushes the "start losing track" threshold further out (it can hold a few more files before it gets muddled), but as long as the refactor is large enough and the session long enough, the root problem—tracking a continuously growing done set from memory—doesn't go away. Externalizing progress (commits / a list / search) is the fix that doesn't depend on window size.
 :::
 
 ## Further reading and sources
