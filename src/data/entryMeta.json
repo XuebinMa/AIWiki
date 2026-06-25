@@ -1,0 +1,898 @@
+{
+  "zh-Hans": {
+    "destructive-irreversible-actions": {
+      "severity": "高",
+      "roles": [
+        "运维工程师",
+        "工程师",
+        "架构师"
+      ]
+    },
+    "hooks-not-prompts": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "运维工程师"
+      ]
+    },
+    "mcp-over-access": {
+      "severity": "高",
+      "roles": [
+        "运维工程师",
+        "架构师",
+        "工程师"
+      ]
+    },
+    "no-versioned-docs": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "架构师"
+      ]
+    },
+    "over-permissioning": {
+      "severity": "高",
+      "roles": [
+        "运维工程师",
+        "工程师"
+      ]
+    },
+    "over-reliance-automation-bias": {
+      "severity": "高",
+      "roles": [
+        "项目经理",
+        "工程师",
+        "架构师"
+      ]
+    },
+    "process-in-claudemd-not-skill": {
+      "severity": "中",
+      "roles": [
+        "工程师",
+        "架构师"
+      ]
+    },
+    "settings-vs-claudemd": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "架构师"
+      ]
+    },
+    "skipping-plan-mode": {
+      "severity": "中",
+      "roles": [
+        "项目经理",
+        "工程师",
+        "架构师"
+      ]
+    },
+    "subagent-no-boundaries": {
+      "severity": "高",
+      "roles": [
+        "架构师",
+        "工程师"
+      ]
+    },
+    "ai-can-do-not-feasibility": {
+      "severity": "高",
+      "roles": [
+        "项目经理",
+        "架构师"
+      ]
+    },
+    "confidently-wrong-explanations": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "架构师"
+      ]
+    },
+    "fabricated-research-data": {
+      "severity": "高",
+      "roles": [
+        "项目经理",
+        "工程师"
+      ]
+    },
+    "nondeterministic-flip-flop": {
+      "severity": "中",
+      "roles": [
+        "项目经理",
+        "架构师",
+        "工程师"
+      ]
+    },
+    "sycophancy-idea-validation": {
+      "severity": "高",
+      "roles": [
+        "项目经理"
+      ]
+    },
+    "underestimating-effort": {
+      "severity": "中",
+      "roles": [
+        "项目经理",
+        "架构师",
+        "工程师"
+      ]
+    },
+    "implicit-assumptions": {
+      "severity": "高",
+      "roles": [
+        "项目经理",
+        "工程师",
+        "架构师"
+      ]
+    },
+    "llm-forces-solutions": {
+      "severity": "高",
+      "roles": [
+        "项目经理",
+        "工程师"
+      ]
+    },
+    "placeholder-fake-inputs": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "项目经理"
+      ]
+    },
+    "requirement-gold-plating": {
+      "severity": "中",
+      "roles": [
+        "项目经理",
+        "工程师"
+      ]
+    },
+    "skipping-specs": {
+      "severity": "中",
+      "roles": [
+        "项目经理",
+        "架构师",
+        "工程师"
+      ]
+    },
+    "vague-as-clear": {
+      "severity": "高",
+      "roles": [
+        "项目经理",
+        "工程师"
+      ]
+    },
+    "dependency-bloat": {
+      "severity": "中",
+      "roles": [
+        "架构师",
+        "工程师"
+      ]
+    },
+    "duplicate-logic-hallucinated-imports": {
+      "severity": "高",
+      "roles": [
+        "架构师",
+        "工程师"
+      ]
+    },
+    "no-memory-of-decisions": {
+      "severity": "高",
+      "roles": [
+        "架构师",
+        "工程师"
+      ]
+    },
+    "over-engineering-no-pushback": {
+      "severity": "中",
+      "roles": [
+        "架构师"
+      ]
+    },
+    "premature-abstraction": {
+      "severity": "中",
+      "roles": [
+        "架构师",
+        "工程师"
+      ]
+    },
+    "schema-design-sloppy": {
+      "severity": "高",
+      "roles": [
+        "架构师",
+        "工程师"
+      ]
+    },
+    "single-option-no-tradeoffs": {
+      "severity": "中",
+      "roles": [
+        "架构师",
+        "项目经理"
+      ]
+    },
+    "concurrency-races": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "架构师"
+      ]
+    },
+    "magic-numbers-hardcoding": {
+      "severity": "中",
+      "roles": [
+        "工程师"
+      ]
+    },
+    "missing-edge-cases": {
+      "severity": "高",
+      "roles": [
+        "工程师"
+      ]
+    },
+    "performance-antipatterns": {
+      "severity": "中",
+      "roles": [
+        "工程师"
+      ]
+    },
+    "plausible-but-brittle-design": {
+      "severity": "高",
+      "roles": [
+        "工程师"
+      ]
+    },
+    "style-drift": {
+      "severity": "中",
+      "roles": [
+        "工程师"
+      ]
+    },
+    "claude-md-overload": {
+      "severity": "中",
+      "roles": [
+        "工程师",
+        "架构师"
+      ]
+    },
+    "comment-doc-drift": {
+      "severity": "中",
+      "roles": [
+        "工程师"
+      ]
+    },
+    "compact-timing": {
+      "severity": "中",
+      "roles": [
+        "工程师"
+      ]
+    },
+    "context-rot": {
+      "severity": "中",
+      "roles": [
+        "工程师",
+        "架构师"
+      ]
+    },
+    "degenerative-debugging-loops": {
+      "severity": "高",
+      "roles": [
+        "工程师"
+      ]
+    },
+    "dev-time-prompt-injection": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "架构师",
+        "运维工程师"
+      ]
+    },
+    "git-hygiene": {
+      "severity": "中",
+      "roles": [
+        "工程师"
+      ]
+    },
+    "hallucinated-api-version-drift": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "架构师"
+      ]
+    },
+    "ignoring-file-state-overwrite": {
+      "severity": "高",
+      "roles": [
+        "工程师"
+      ]
+    },
+    "kitchen-sink-session": {
+      "severity": "中",
+      "roles": [
+        "工程师"
+      ]
+    },
+    "lost-track-in-refactor": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "架构师"
+      ]
+    },
+    "over-correcting": {
+      "severity": "高",
+      "roles": [
+        "工程师"
+      ]
+    },
+    "over-editing-scope-creep": {
+      "severity": "中",
+      "roles": [
+        "工程师"
+      ]
+    },
+    "runaway-agent-loops": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "运维工程师"
+      ]
+    },
+    "swallowing-errors": {
+      "severity": "高",
+      "roles": [
+        "工程师"
+      ]
+    },
+    "gaming-tests": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "测试工程师"
+      ]
+    },
+    "happy-path-only": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "测试工程师"
+      ]
+    },
+    "no-test-infrastructure": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "测试工程师"
+      ]
+    },
+    "over-mocking": {
+      "severity": "中",
+      "roles": [
+        "工程师",
+        "测试工程师"
+      ]
+    },
+    "tests-as-verification-loop": {
+      "severity": "中",
+      "roles": [
+        "工程师",
+        "测试工程师"
+      ]
+    },
+    "trust-then-verify": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "测试工程师"
+      ]
+    },
+    "cicd-permission-blindspot": {
+      "severity": "高",
+      "roles": [
+        "运维工程师"
+      ]
+    },
+    "demo-works-ship-it": {
+      "severity": "高",
+      "roles": [
+        "项目经理",
+        "工程师",
+        "测试工程师"
+      ]
+    },
+    "iterative-security-erosion": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "架构师",
+        "运维工程师"
+      ]
+    },
+    "license-ip-contamination": {
+      "severity": "高",
+      "roles": [
+        "架构师",
+        "工程师",
+        "项目经理"
+      ]
+    },
+    "missing-regression": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "测试工程师"
+      ]
+    },
+    "prompt-injection-release": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "架构师",
+        "运维工程师"
+      ]
+    },
+    "security-data-leaks": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "运维工程师",
+        "架构师"
+      ]
+    },
+    "tech-debt-wall": {
+      "severity": "高",
+      "roles": [
+        "架构师",
+        "工程师",
+        "项目经理"
+      ]
+    }
+  },
+  "en": {
+    "destructive-irreversible-actions": {
+      "severity": "High",
+      "roles": [
+        "DevOps Engineer",
+        "Engineer",
+        "Architect"
+      ]
+    },
+    "hooks-not-prompts": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "DevOps Engineer"
+      ]
+    },
+    "mcp-over-access": {
+      "severity": "High",
+      "roles": [
+        "DevOps Engineer",
+        "Architect",
+        "Engineer"
+      ]
+    },
+    "no-versioned-docs": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "Architect"
+      ]
+    },
+    "over-permissioning": {
+      "severity": "High",
+      "roles": [
+        "DevOps Engineer",
+        "Engineer"
+      ]
+    },
+    "over-reliance-automation-bias": {
+      "severity": "High",
+      "roles": [
+        "Project Manager",
+        "Engineer",
+        "Architect"
+      ]
+    },
+    "process-in-claudemd-not-skill": {
+      "severity": "Medium",
+      "roles": [
+        "Engineer",
+        "Architect"
+      ]
+    },
+    "settings-vs-claudemd": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "Architect"
+      ]
+    },
+    "skipping-plan-mode": {
+      "severity": "Medium",
+      "roles": [
+        "Project Manager",
+        "Engineer",
+        "Architect"
+      ]
+    },
+    "subagent-no-boundaries": {
+      "severity": "High",
+      "roles": [
+        "Architect",
+        "Engineer"
+      ]
+    },
+    "ai-can-do-not-feasibility": {
+      "severity": "High",
+      "roles": [
+        "Project Manager",
+        "Architect"
+      ]
+    },
+    "confidently-wrong-explanations": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "Architect"
+      ]
+    },
+    "fabricated-research-data": {
+      "severity": "High",
+      "roles": [
+        "Project Manager",
+        "Engineer"
+      ]
+    },
+    "nondeterministic-flip-flop": {
+      "severity": "Medium",
+      "roles": [
+        "Project Manager",
+        "Architect",
+        "Engineer"
+      ]
+    },
+    "sycophancy-idea-validation": {
+      "severity": "High",
+      "roles": [
+        "Project Manager"
+      ]
+    },
+    "underestimating-effort": {
+      "severity": "Medium",
+      "roles": [
+        "Project Manager",
+        "Architect",
+        "Engineer"
+      ]
+    },
+    "implicit-assumptions": {
+      "severity": "High",
+      "roles": [
+        "Project Manager",
+        "Engineer",
+        "Architect"
+      ]
+    },
+    "llm-forces-solutions": {
+      "severity": "High",
+      "roles": [
+        "Project Manager",
+        "Engineer"
+      ]
+    },
+    "placeholder-fake-inputs": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "Project Manager"
+      ]
+    },
+    "requirement-gold-plating": {
+      "severity": "Medium",
+      "roles": [
+        "Project Manager",
+        "Engineer"
+      ]
+    },
+    "skipping-specs": {
+      "severity": "Medium",
+      "roles": [
+        "Project Manager",
+        "Architect",
+        "Engineer"
+      ]
+    },
+    "vague-as-clear": {
+      "severity": "High",
+      "roles": [
+        "Project Manager",
+        "Engineer"
+      ]
+    },
+    "dependency-bloat": {
+      "severity": "Medium",
+      "roles": [
+        "Architect",
+        "Engineer"
+      ]
+    },
+    "duplicate-logic-hallucinated-imports": {
+      "severity": "High",
+      "roles": [
+        "Architect",
+        "Engineer"
+      ]
+    },
+    "no-memory-of-decisions": {
+      "severity": "High",
+      "roles": [
+        "Architect",
+        "Engineer"
+      ]
+    },
+    "over-engineering-no-pushback": {
+      "severity": "Medium",
+      "roles": [
+        "Architect"
+      ]
+    },
+    "premature-abstraction": {
+      "severity": "Medium",
+      "roles": [
+        "Architect",
+        "Engineer"
+      ]
+    },
+    "schema-design-sloppy": {
+      "severity": "High",
+      "roles": [
+        "Architect",
+        "Engineer"
+      ]
+    },
+    "single-option-no-tradeoffs": {
+      "severity": "Medium",
+      "roles": [
+        "Architect",
+        "Project Manager"
+      ]
+    },
+    "concurrency-races": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "Architect"
+      ]
+    },
+    "magic-numbers-hardcoding": {
+      "severity": "Medium",
+      "roles": [
+        "Engineer"
+      ]
+    },
+    "missing-edge-cases": {
+      "severity": "High",
+      "roles": [
+        "Engineer"
+      ]
+    },
+    "performance-antipatterns": {
+      "severity": "Medium",
+      "roles": [
+        "Engineer"
+      ]
+    },
+    "plausible-but-brittle-design": {
+      "severity": "High",
+      "roles": [
+        "Engineer"
+      ]
+    },
+    "style-drift": {
+      "severity": "Medium",
+      "roles": [
+        "Engineer"
+      ]
+    },
+    "claude-md-overload": {
+      "severity": "Medium",
+      "roles": [
+        "Engineer",
+        "Architect"
+      ]
+    },
+    "comment-doc-drift": {
+      "severity": "Medium",
+      "roles": [
+        "Engineer"
+      ]
+    },
+    "compact-timing": {
+      "severity": "Medium",
+      "roles": [
+        "Engineer"
+      ]
+    },
+    "context-rot": {
+      "severity": "Medium",
+      "roles": [
+        "Engineer",
+        "Architect"
+      ]
+    },
+    "degenerative-debugging-loops": {
+      "severity": "High",
+      "roles": [
+        "Engineer"
+      ]
+    },
+    "dev-time-prompt-injection": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "Architect",
+        "DevOps Engineer"
+      ]
+    },
+    "git-hygiene": {
+      "severity": "Medium",
+      "roles": [
+        "Engineer"
+      ]
+    },
+    "hallucinated-api-version-drift": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "Architect"
+      ]
+    },
+    "ignoring-file-state-overwrite": {
+      "severity": "High",
+      "roles": [
+        "Engineer"
+      ]
+    },
+    "kitchen-sink-session": {
+      "severity": "Medium",
+      "roles": [
+        "Engineer"
+      ]
+    },
+    "lost-track-in-refactor": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "Architect"
+      ]
+    },
+    "over-correcting": {
+      "severity": "High",
+      "roles": [
+        "Engineer"
+      ]
+    },
+    "over-editing-scope-creep": {
+      "severity": "Medium",
+      "roles": [
+        "Engineer"
+      ]
+    },
+    "runaway-agent-loops": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "DevOps Engineer"
+      ]
+    },
+    "swallowing-errors": {
+      "severity": "High",
+      "roles": [
+        "Engineer"
+      ]
+    },
+    "gaming-tests": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "QA Engineer"
+      ]
+    },
+    "happy-path-only": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "QA Engineer"
+      ]
+    },
+    "no-test-infrastructure": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "QA Engineer"
+      ]
+    },
+    "over-mocking": {
+      "severity": "Medium",
+      "roles": [
+        "Engineer",
+        "QA Engineer"
+      ]
+    },
+    "tests-as-verification-loop": {
+      "severity": "Medium",
+      "roles": [
+        "Engineer",
+        "QA Engineer"
+      ]
+    },
+    "trust-then-verify": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "Test Engineer"
+      ]
+    },
+    "cicd-permission-blindspot": {
+      "severity": "High",
+      "roles": [
+        "DevOps Engineer"
+      ]
+    },
+    "demo-works-ship-it": {
+      "severity": "High",
+      "roles": [
+        "Project Manager",
+        "Engineer",
+        "QA Engineer"
+      ]
+    },
+    "iterative-security-erosion": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "Architect",
+        "DevOps Engineer"
+      ]
+    },
+    "license-ip-contamination": {
+      "severity": "High",
+      "roles": [
+        "Architect",
+        "Engineer",
+        "Project Manager"
+      ]
+    },
+    "missing-regression": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "QA Engineer"
+      ]
+    },
+    "prompt-injection-release": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "Architect",
+        "DevOps Engineer"
+      ]
+    },
+    "security-data-leaks": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "DevOps Engineer",
+        "Architect"
+      ]
+    },
+    "tech-debt-wall": {
+      "severity": "High",
+      "roles": [
+        "Architect",
+        "Engineer",
+        "Project Manager"
+      ]
+    }
+  }
+}
