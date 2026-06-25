@@ -6,6 +6,7 @@ roles: [工程师, 测试工程师]
 phase: 测试
 severity: 高
 applies_to: "Claude Code 全版本"
+evidence: 官方文档
 tags: [验证闭环, 测试, CI, 工程师, 测试工程师]
 sources:
   - { title: "Best practices for Claude Code（Anthropic 官方）", url: "https://code.claude.com/docs/en/best-practices" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '测试工程师']} phase="测试" severity="高" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师', '测试工程师']} phase="测试" severity="高" appliesTo="Claude Code 全版本" evidence="官方文档" />
 
 > 一句话摘要：你让我加功能，我会埋头写实现，顺手跳过「搭测试脚手架」这件不出活的事。结果是：没有一处能跑出「通过/失败」的地方，我和你都只能凭「看起来对」过日子。
 

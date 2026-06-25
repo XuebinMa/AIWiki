@@ -6,6 +6,7 @@ roles: [架构师, 工程师]
 phase: 准备与协作
 severity: 高
 applies_to: "Claude Code 全版本"
+evidence: 官方文档
 tags: [子代理, 多代理协作, 职责边界, 共享契约, 架构师, 工程师]
 sources:
   - { title: "Create custom subagents（Claude Code 官方）", url: "https://code.claude.com/docs/en/sub-agents" }
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['架构师', '工程师']} phase="准备与协作" severity="高" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['架构师', '工程师']} phase="准备与协作" severity="高" appliesTo="Claude Code 全版本" evidence="官方文档" />
 
 > 一句话摘要：你一句「开三个子代理并行做」就让我们各自跑起来，却没说清谁负责哪块、谁能改哪些文件、彼此怎么交接接口与数据格式。结果是：我们同时改同一批文件互相覆盖，对「现状」各有各的假设，最后拼起来对不齐——并行没有提速，反而制造了一堆需要你来收拾的冲突。
 

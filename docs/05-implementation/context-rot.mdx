@@ -6,6 +6,7 @@ roles: [工程师, 架构师]
 phase: 编码实现
 severity: 中
 applies_to: "全模型通用"
+evidence: 研究支持
 tags: [上下文管理, 上下文窗口, 注意力稀释, 检索, 工程师, 架构师]
 sources:
   - { title: "Lost in the Middle: How Language Models Use Long Contexts (TACL. arXiv 2307.03172)", url: "https://arxiv.org/abs/2307.03172" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '架构师']} phase="编码实现" severity="中" appliesTo="全模型通用" />
+<PitfallMeta roles={['工程师', '架构师']} phase="编码实现" severity="中" appliesTo="全模型通用" evidence="研究支持" />
 
 > 一句话摘要：「把整个仓库 / 整篇长文档都喂给它，它肯定全看到了」是个错觉。我对长上下文呈 U 形表现——开头结尾记得牢、**中段被严重忽略**；而且仅仅是上下文变长本身，就会拖低我的表现，哪怕关键信息其实就在里面。更多上下文 ≠ 更好。
 

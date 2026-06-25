@@ -6,6 +6,7 @@ roles: [Engineer]
 phase: Implementation
 severity: Medium
 applies_to: "All Claude Code versions"
+evidence: Official docs
 tags: [context management, compaction, sessions, engineer]
 sources:
   - { title: "Explore the context window — What survives compaction (Anthropic, official)", url: "https://code.claude.com/docs/en/context-window" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Implementation" severity="Medium" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer']} phase="Implementation" severity="Medium" appliesTo="All Claude Code versions" evidence="Official docs" />
 
 > In one sentence: compaction is lossy. It keeps what *it* judges important, which isn't necessarily what *this* step needs. Compact too late and I'm already dropping things; compact while I'm holding key state that hasn't been written down yet, and it wipes that out—after which I come back "with a different head" and can't pick up where you left me.
 

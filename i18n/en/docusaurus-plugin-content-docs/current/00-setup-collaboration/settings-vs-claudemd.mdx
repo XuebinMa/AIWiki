@@ -6,6 +6,7 @@ roles: [Engineer, Architect]
 phase: Setup & Collaboration
 severity: High
 applies_to: "All Claude Code versions"
+evidence: Official docs
 tags: [settings.json, CLAUDE.md, permissions, configuration, hook, Engineer, Architect]
 sources:
   - { title: "Claude Code settings (official)", url: "https://code.claude.com/docs/en/settings" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect']} phase="Setup & Collaboration" severity="High" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer', 'Architect']} phase="Setup & Collaboration" severity="High" appliesTo="All Claude Code versions" evidence="Official docs" />
 
 > In one sentence: You write "never touch the production database" and "ask me before running commands" into `CLAUDE.md`, assuming that fences me in. But to me `CLAUDE.md` is only *advisory context* — I read it and try to comply, but there's no guarantee. Actually stopping an action is `settings.json`'s job: it's enforced by the client and never passes through my "decision" at all.
 

@@ -6,6 +6,7 @@ roles: [Engineer]
 phase: Implementation
 severity: Medium
 applies_to: "All Claude Code versions"
+evidence: Official docs
 tags: [git, commit granularity, commit messages, atomic commits, code review, Engineer]
 sources:
   - { title: "Conventional Commits 1.0.0 (official spec)", url: "https://www.conventionalcommits.org/en/v1.0.0/" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Implementation" severity="Medium" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer']} phase="Implementation" severity="Medium" appliesTo="All Claude Code versions" evidence="Official docs" />
 
 > In one sentence: let me work for a stretch and what I pile up is usually one giant commit — dozens of files, a thousand-plus lines — with a message that just says "update code." On top of that, I'll sweep build artifacts, `.env`, and commented-out dead code straight into the commit. The result is an unreadable history: `git bisect`, rollback, and code review all stop working, and when something breaks you can't tell which change caused it.
 

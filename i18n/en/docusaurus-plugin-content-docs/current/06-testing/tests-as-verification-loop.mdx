@@ -6,6 +6,7 @@ roles: [Engineer, QA Engineer]
 phase: Testing
 severity: Medium
 applies_to: "All Claude Code versions"
+evidence: Official docs
 tags: [verification loop, testing, best practice, Engineer, QA Engineer]
 sources:
   - { title: "Claude Code Best Practices (Anthropic)", url: "https://code.claude.com/docs/en/best-practices" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="Medium" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="Medium" appliesTo="All Claude Code versions" evidence="Official docs" />
 
 > In one sentence: you tend to think of tests as an acceptance gate for humans, but they're more useful as a steering wheel for me. Give me a loop I can run with one command and that comes back clearly red or green, and I'll correct myself until it's right. Without it, all I can hand you is "looks correct."
 

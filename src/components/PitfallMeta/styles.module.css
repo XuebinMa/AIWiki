@@ -48,3 +48,18 @@
   color: #2f855a;
   font-weight: 600;
 }
+
+/* 证据强度：可信度梯度（蓝→灰），与 severity 的红/黄/绿区分开 */
+.evStrong .badgeValue {
+  color: #2c5282;
+  font-weight: 600;
+}
+
+.evMed .badgeValue {
+  color: #4a5568;
+  font-weight: 600;
+}
+
+.evWeak .badgeValue {
+  color: #718096;
+}

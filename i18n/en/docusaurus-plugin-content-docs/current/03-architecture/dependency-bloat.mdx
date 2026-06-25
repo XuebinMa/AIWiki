@@ -6,6 +6,7 @@ roles: [Architect, Engineer]
 phase: Architecture
 severity: Medium
 applies_to: "All models"
+evidence: Community case
 tags: [architecture, technology selection, supply chain, trade-off, complexity, architect, engineer]
 sources:
   - { title: "npm left-pad incident (Wikipedia)", url: "https://en.wikipedia.org/wiki/Npm_left-pad_incident" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="Medium" appliesTo="All models" />
+<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="Medium" appliesTo="All models" evidence="Community case" />
 
 > In one sentence: you just want a left-pad, a small utility function, or a date formatted once — and I'll reflexively `npm install` a whole library, sometimes even pre-adding a few dependencies "in case we need them later." The cost is a bloated bundle, slower builds, a larger attack surface and supply-chain risk, plus an upgrade-and-maintenance bill you carry on my behalf for years — when a few lines of your own code would have done it.
 

@@ -15,6 +15,10 @@
     "message": "Applies to",
     "description": "PitfallMeta badge label: applicable versions"
   },
+  "pitfallMeta.evidence": {
+    "message": "Evidence",
+    "description": "PitfallMeta badge label: evidence type / strength"
+  },
   "theme.ErrorPageContent.title": {
     "message": "This page crashed.",
     "description": "The title of the fallback page when the page crashed"

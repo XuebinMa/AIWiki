@@ -6,6 +6,7 @@ roles: [运维工程师]
 phase: 验收与发布
 severity: 高
 applies_to: "全模型通用"
+evidence: 官方文档
 tags: [CI/CD, 权限, 最小权限, 发布, 运维工程师]
 sources:
   - { title: "Use GITHUB_TOKEN for authentication in workflows（GitHub 官方）", url: "https://docs.github.com/actions/security-guides/automatic-token-authentication" }
@@ -17,7 +18,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['运维工程师']} phase="验收与发布" severity="高" appliesTo="全模型通用" />
+<PitfallMeta roles={['运维工程师']} phase="验收与发布" severity="高" appliesTo="全模型通用" evidence="官方文档" />
 
 > 一句话摘要：你让我配 CI/CD，我会顺手把「自动启用某个服务、自动授予某个权限」也写进流水线，仿佛运行环境里我无所不能。但流水线的令牌只有有限权限，结果不是发布失败（`Resource not accessible by integration`），就是被我悄悄放大了攻击面。
 

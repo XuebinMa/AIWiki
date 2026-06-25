@@ -6,6 +6,7 @@ roles: [Engineer, Architect]
 phase: Implementation
 severity: High
 applies_to: "All Claude Code versions"
+evidence: Official docs
 tags: [context management, style drift, refactoring, Engineer, Architect]
 sources:
   - { title: "Claude Code Best Practices — Commit early and often (Anthropic)", url: "https://www.anthropic.com/engineering/claude-code-best-practices" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect']} phase="Implementation" severity="High" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer', 'Architect']} phase="Implementation" severity="High" appliesTo="All Claude Code versions" evidence="Official docs" />
 
 > In one sentence: Halfway through a refactor that spans a dozen files, I lose track of where I am—which files I've changed, which I haven't, whether that rename actually propagated across the whole repo. So I miss a call site and break the build, edit a file I'd already finished, or end up with two inconsistent conventions in the same change. Don't make me use my memory as the to-do list.
 

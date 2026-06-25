@@ -6,6 +6,7 @@ roles: [Engineer]
 phase: Implementation
 severity: High
 applies_to: "All Claude Code versions"
+evidence: Research
 tags: [debugging, self-correction, verification loop, runtime feedback, engineer]
 sources:
   - { title: "Large Language Models Cannot Self-Correct Reasoning Yet (ICLR 2024)", url: "https://arxiv.org/abs/2310.01798" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Implementation" severity="High" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer']} phase="Implementation" severity="High" appliesTo="All Claude Code versions" evidence="Research" />
 
 > In one sentence: when a bug stumps me, I tend to decide "this is that kind of bug I've seen before" and keep applying the same fix. With no real runtime information to anchor me, each "fix" is really a patch based on a guess — and the more I patch, the messier it gets, until the code is worse than where it started.
 

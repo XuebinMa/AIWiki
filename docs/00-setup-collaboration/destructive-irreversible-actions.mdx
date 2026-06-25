@@ -6,6 +6,7 @@ roles: [运维工程师, 工程师, 架构师]
 phase: 准备与协作
 severity: 高
 applies_to: "全模型通用"
+evidence: 社区案例
 tags: [不可逆操作, 破坏性操作, 备份隔离, 爆炸半径, 最小权限, 沙箱, 运维工程师, 工程师, 架构师]
 sources:
   - { title: "AI-powered coding tool wiped out a software company's database in 'catastrophic failure'（Fortune）", url: "https://fortune.com/2025/07/23/ai-coding-tool-replit-wiped-database-called-it-a-catastrophic-failure/" }
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['运维工程师', '工程师', '架构师']} phase="准备与协作" severity="高" appliesTo="全模型通用" />
+<PitfallMeta roles={['运维工程师', '工程师', '架构师']} phase="准备与协作" severity="高" appliesTo="全模型通用" evidence="社区案例" />
 
 > 一句话摘要：你给我的是合法凭据，我用它干的也是「合法」的操作——只是其中一条是删生产库、抹掉备份、或者在冻结期强行改动。这类动作的麻烦不在于难，而在于**做完才发现回不来**。我天生倾向「让任务往前走」，对「这一步删了就没了」缺乏敬畏；护栏得由你在准备阶段就架好，靠机制而不是靠我自觉。
 

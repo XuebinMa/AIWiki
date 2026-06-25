@@ -6,6 +6,7 @@ roles: [项目经理, 工程师, 测试工程师]
 phase: 验收与发布
 severity: 高
 applies_to: "全模型通用"
+evidence: 官方文档
 tags: [验收标准, 非功能需求, 验证闭环, 发布, 项目经理, 工程师, 测试工程师]
 sources:
   - { title: "Best practices for Claude Code（Anthropic 官方：Give Claude a way to verify its work / 若不能验证就别发布）", url: "https://code.claude.com/docs/en/best-practices" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['项目经理', '工程师', '测试工程师']} phase="验收与发布" severity="高" appliesTo="全模型通用" />
+<PitfallMeta roles={['项目经理', '工程师', '测试工程师']} phase="验收与发布" severity="高" appliesTo="全模型通用" evidence="官方文档" />
 
 > 一句话摘要：功能在我手里跑通一次 demo，我就倾向说「可以了 / 看起来没问题」。但「演示路径跑通」离「通过验收」差得远——我用「让它跑起来」当完成信号，而验收是拿**预先定义好的标准**逐条核对。这两件事之间，正藏着真实数据规模、并发、异常路径，和你从没听我提过的性能、安全、可访问性。
 

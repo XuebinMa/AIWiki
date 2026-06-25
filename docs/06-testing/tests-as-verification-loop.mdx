@@ -6,6 +6,7 @@ roles: [工程师, 测试工程师]
 phase: 测试
 severity: 中
 applies_to: "Claude Code 全版本"
+evidence: 官方文档
 tags: [验证闭环, 测试, 最佳实践, 工程师, 测试工程师]
 sources:
   - { title: "Claude Code Best Practices（Anthropic 官方）", url: "https://code.claude.com/docs/en/best-practices" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '测试工程师']} phase="测试" severity="中" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师', '测试工程师']} phase="测试" severity="中" appliesTo="Claude Code 全版本" evidence="官方文档" />
 
 > 一句话摘要：你常以为测试只是给人看的验收，其实它更是给我用的方向盘——给我一个能一条命令跑、红绿分明的闭环，我就能自纠到对；没有它，我只能交给你「看起来对」。
 

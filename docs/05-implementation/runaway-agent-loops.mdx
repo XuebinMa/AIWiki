@@ -6,6 +6,7 @@ roles: [工程师, 运维工程师]
 phase: 编码实现
 severity: 高
 applies_to: "Claude Code 全版本"
+evidence: 研究支持
 tags: [AI 代理, 验证闭环, 不可逆操作, 计划模式, 工程师, 运维工程师]
 sources:
   - { title: "Manage costs effectively（Claude Code 官方）", url: "https://code.claude.com/docs/en/costs" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '运维工程师']} phase="编码实现" severity="高" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师', '运维工程师']} phase="编码实现" severity="高" appliesTo="Claude Code 全版本" evidence="研究支持" />
 
 > 一句话摘要：你把任务整个丢给我、转身去忙别的，指望回来就收成果。但当我陷进非终止的循环——反复调同一个工具、在两个动作间来回横跳、永远「再试一次」——没人喊停，我就会安静地把你的 token、预算和速率配额一路烧穿，顺带对外部系统反复写。
 

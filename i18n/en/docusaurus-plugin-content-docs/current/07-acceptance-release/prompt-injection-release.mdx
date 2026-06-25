@@ -6,6 +6,7 @@ roles: [Engineer, Architect, DevOps Engineer]
 phase: Acceptance & Release
 severity: High
 applies_to: "All models (including LLM features built with Claude Code)"
+evidence: Security advisory
 tags: [prompt injection, excessive agency, lethal trifecta, least privilege, security, release, threat modeling, Engineer, Architect, DevOps Engineer]
 sources:
   - { title: "LLM01:2025 Prompt Injection (OWASP Gen AI Security Project)", url: "https://genai.owasp.org/llmrisk/llm01-prompt-injection/" }
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect', 'DevOps Engineer']} phase="Acceptance & Release" severity="High" appliesTo="All models (including LLM features built with Claude Code)" />
+<PitfallMeta roles={['Engineer', 'Architect', 'DevOps Engineer']} phase="Acceptance & Release" severity="High" appliesTo="All models (including LLM features built with Claude Code)" evidence="Security advisory" />
 
 > In one sentence: when the product I help you build has an LLM inside it — a support bot, an agent, the kind of feature that "reads user content / a web page / an email, then acts" — attackers will hide malicious instructions in content I'm going to read and trick that backend LLM into overstepping: leaking data, calling tools it shouldn't, bypassing the rules you set. During development I default to assuming "all input is benign," so I treat a release surface that should be modeled as an attack surface like an ordinary feature delivery.
 

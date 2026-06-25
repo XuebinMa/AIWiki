@@ -6,6 +6,7 @@ roles: [工程师]
 phase: 编码实现
 severity: 高
 applies_to: "Claude Code 全版本"
+evidence: 研究支持
 tags: [调试, 自我纠正, 验证闭环, 运行反馈, 工程师]
 sources:
   - { title: "Large Language Models Cannot Self-Correct Reasoning Yet (ICLR 2024)", url: "https://arxiv.org/abs/2310.01798" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师']} phase="编码实现" severity="高" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师']} phase="编码实现" severity="高" appliesTo="Claude Code 全版本" evidence="研究支持" />
 
 > 一句话摘要：一个 bug 卡住我时，我容易认定「这是我见过的那一类」，于是反复套同一个修法。没有真实运行信息做锚，我的每次「修」其实是凭假设瞎打补丁——越打越乱，最后代码比一开始还坏。
 

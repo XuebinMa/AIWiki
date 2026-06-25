@@ -6,6 +6,7 @@ roles: [Project Manager, Engineer, Architect]
 phase: Requirements
 severity: High
 applies_to: "All Claude Code versions"
+evidence: Community case
 tags: [requirements clarification, assumptions, prompt design, project manager, engineer, architect]
 sources:
   - { title: "Top 10 for LLM & Generative AI — LLM09: Misinformation / Overreliance (OWASP)", url: "https://genai.owasp.org/llmrisk/llm092025-misinformation/" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Project Manager', 'Engineer', 'Architect']} phase="Requirements" severity="High" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Project Manager', 'Engineer', 'Architect']} phase="Requirements" severity="High" appliesTo="All Claude Code versions" evidence="Community case" />
 
 > In one sentence: the requirement looked clear enough, so I just built it—but along the way I silently filled in a pile of premises you never stated (data format, scale, concurrency, defaults, target users, error handling, tech stack). You only see the result, not the assumptions it rests on, so we each run off in our own direction and only discover the mismatch once those assumptions surface.
 

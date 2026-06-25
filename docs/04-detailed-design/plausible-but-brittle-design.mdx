@@ -6,6 +6,7 @@ roles: [工程师]
 phase: 详细设计
 severity: 高
 applies_to: "Claude Code 全版本"
+evidence: 官方文档
 tags: [边界条件, 详细设计, 健壮性, 工程师]
 sources:
   - { title: "Fallacies of distributed computing — Wikipedia", url: "https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师']} phase="详细设计" severity="高" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师']} phase="详细设计" severity="高" appliesTo="Claude Code 全版本" evidence="官方文档" />
 
 > 一句话摘要：我给你一套设计，在常规输入下自洽、读起来很合理，你就采纳了。但它一上规模、一碰异常路径、一遇并发或失败重试就垮——问题不在某一行代码，而在方案隐含的健壮性假设站不住。这讲的是**设计层面的脆弱**；如果是写实现时漏了某个具体边界分支，见[《写实现时，我会漏掉那些你没明说的边界分支》](./missing-edge-cases.mdx)。
 

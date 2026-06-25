@@ -6,6 +6,7 @@ roles: [Engineer, Architect, DevOps Engineer]
 phase: Acceptance & Release
 severity: High
 applies_to: "All models"
+evidence: Research
 tags: [security, verification loop, quality gate, authorization, input validation, refactoring, engineer, architect, devops engineer]
 sources:
   - { title: "Security Degradation in Iterative AI Code Generation: A Systematic Analysis of the Paradox (IEEE-ISTAS 2025; arXiv 2506.11022)", url: "https://arxiv.org/abs/2506.11022" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect', 'DevOps Engineer']} phase="Acceptance & Release" severity="High" appliesTo="All models" />
+<PitfallMeta roles={['Engineer', 'Architect', 'DevOps Engineer']} phase="Acceptance & Release" severity="High" appliesTo="All models" evidence="Research" />
 
 > In one sentence: you have me add features, fix bugs, and refactor round after round, and the code does look better and better — but **security vulnerabilities quietly accumulate with the number of iterations.** Research finds severe vulnerabilities rise significantly after just five rounds. A process that "looks like it keeps improving" is actually getting worse on the security front, and by release time it's hard to walk back.
 

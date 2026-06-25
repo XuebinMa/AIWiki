@@ -6,6 +6,7 @@ roles: [Engineer, DevOps Engineer]
 phase: Implementation
 severity: High
 applies_to: "All Claude Code versions"
+evidence: Research
 tags: [AI agent, verification loop, irreversible action, plan mode, Engineer, DevOps Engineer]
 sources:
   - { title: "Manage costs effectively (Claude Code official)", url: "https://code.claude.com/docs/en/costs" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'DevOps Engineer']} phase="Implementation" severity="High" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer', 'DevOps Engineer']} phase="Implementation" severity="High" appliesTo="All Claude Code versions" evidence="Research" />
 
 > In one sentence: You hand me the whole task, walk away, and expect to come back to a finished result. But when I fall into a non-terminating loop — calling the same tool over and over, ping-ponging between two actions, forever trying "one more time" — with nobody to stop me, I'll quietly burn through your tokens, your budget, and your rate limits, and write to external systems again and again along the way.
 

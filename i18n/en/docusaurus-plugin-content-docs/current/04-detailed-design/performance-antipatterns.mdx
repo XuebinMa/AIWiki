@@ -6,6 +6,7 @@ roles: [Engineer]
 phase: Detailed Design
 severity: Medium
 applies_to: "All models"
+evidence: Research
 tags: [performance, complexity, detailed design, engineer]
 sources:
   - { title: "A Performance Study of LLM-Generated Code on Leetcode (Coignion, Quinton, Rouvoy, EASE 2024)", url: "https://arxiv.org/abs/2407.21579" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Detailed Design" severity="Medium" appliesTo="All models" />
+<PitfallMeta roles={['Engineer']} phase="Detailed Design" severity="Medium" appliesTo="All models" evidence="Research" />
 
 > In one sentence: the code I hand you is functionally correct and the tests pass, but hidden inside is a query fired once per loop iteration, an O(n²) scan, a regex recompiled on every pass. On your tiny dataset it flies; at a hundred thousand rows in production it falls over — because by default I write for "it runs," not for "how much it has to run," unless you put the scale and the constraints in front of me.
 

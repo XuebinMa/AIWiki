@@ -6,6 +6,7 @@ roles: [工程师, 架构师]
 phase: 准备与协作
 severity: 中
 applies_to: "Claude Code 全版本"
+evidence: 官方文档
 tags: [CLAUDE.md, skill, 上下文管理, 配置, 工程师, 架构师]
 sources:
   - { title: "Extend Claude with skills（官方）", url: "https://code.claude.com/docs/en/skills" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '架构师']} phase="准备与协作" severity="中" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师', '架构师']} phase="准备与协作" severity="中" appliesTo="Claude Code 全版本" evidence="官方文档" />
 
 > 一句话摘要：你把「发布的十二步流程」「数据库迁移的全套 SOP」整段写进了 `CLAUDE.md`，想着这样我什么时候都记得。结果它每次会话都常驻上下文，连「改个错别字」的任务也得先读一遍——而这些只在特定任务才用得上的步骤，本该做成按需加载的 skill。
 

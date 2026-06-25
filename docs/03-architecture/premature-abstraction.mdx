@@ -6,6 +6,7 @@ roles: [架构师, 工程师]
 phase: 概要设计
 severity: 中
 applies_to: "全模型通用"
+evidence: 社区案例
 tags: [架构, 反模式, 复杂度, 重构, 架构师, 工程师]
 sources:
   - { title: "The Wrong Abstraction — Sandi Metz", url: "https://sandimetz.com/blog/2016/1/20/the-wrong-abstraction" }
@@ -16,7 +17,7 @@ sources:
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 
-<PitfallMeta roles={['架构师', '工程师']} phase="概要设计" severity="中" appliesTo="全模型通用" />
+<PitfallMeta roles={['架构师', '工程师']} phase="概要设计" severity="中" appliesTo="全模型通用" evidence="社区案例" />
 
 > 一句话摘要：你这边刚出现两段长得像的代码，我就忍不住抽一个「通用」基类、配置化框架或插件机制，再为「将来可能要支持的多种 X」预留一排扩展点。问题是这些抽象建立在我猜的需求上，而我经常猜错——错误的抽象比重复更难拆，后来人得先读懂我的设计、再绕开它。
 

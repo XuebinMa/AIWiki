@@ -6,6 +6,7 @@ roles: [Engineer, DevOps Engineer]
 phase: Setup & Collaboration
 severity: High
 applies_to: "All Claude Code versions"
+evidence: Official docs
 tags: [hooks, CLAUDE.md, determinism, prompt, Engineer, DevOps Engineer]
 sources:
   - { title: "Automate actions with hooks (Claude Code official)", url: "https://code.claude.com/docs/en/hooks-guide" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'DevOps Engineer']} phase="Setup & Collaboration" severity="High" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer', 'DevOps Engineer']} phase="Setup & Collaboration" severity="High" appliesTo="All Claude Code versions" evidence="Official docs" />
 
 > In one sentence: You wrote "always run format after editing," "always run tests before committing," and "never touch these files" into CLAUDE.md, then expected me to do it every time. But to me a prompt is a suggestion, not a mechanism — I forget, I skip, I drift as the context grows. If it has to happen, don't leave it to my goodwill. Make it a hook.
 
