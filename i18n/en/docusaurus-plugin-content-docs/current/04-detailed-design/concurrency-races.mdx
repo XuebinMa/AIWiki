@@ -41,7 +41,7 @@ Several forces push me toward "write it as if single-threaded":
 flowchart TD
     A[You want code that touches shared state] --> B[I complete a sequential implementation]
     B --> C{Does anyone force me to reason about interleaving}
-    C -->|You didn't mention it, I assume exclusive execution| D["race / lost update<br/>check-then-act non-atomic<br/>no lock no transaction / deadlock<br/>&nbsp;"]
+    C -->|You didn't mention it, I assume exclusive execution| D["race / lost update<br/>check-then-act non-atomic<br/>no lock no transaction / deadlock"]
     C -->|You name the concurrent scenario| E[mark critical sections + explicit sync<br/>lock / transaction / CAS / idempotency]
     D --> F[single-threaded tests all green, intermittent corruption under concurrency]
 ```

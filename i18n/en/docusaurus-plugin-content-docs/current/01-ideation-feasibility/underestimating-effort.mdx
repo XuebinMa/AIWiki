@@ -40,7 +40,7 @@ flowchart TD
     A[You ask: how long / how hard] --> B[What I estimate: writing the main happy path]
     B --> C[Quote a number that's too small]
     C --> D[You schedule / promise / scope from it]
-    A -. Where real schedule lives .-> E{Outside the happy path<br/>&nbsp;}
+    A -. Where real schedule lives .-> E{Outside the happy path}
     E --> F[Errors / boundaries / integration / tests / review / rework / deploy / coordination]
     F -. Not in my optimistic view .-> G[Repeated overruns]
     D --> G

@@ -42,12 +42,12 @@ Trace this tendency down and it's my instinct to "reach for the most common solu
 
 ```mermaid
 flowchart TD
-    A[You raise a tiny need<br/>pad / deep-clone / format date<br/>&nbsp;] --> B{My default reach}
+    A[You raise a tiny need<br/>pad / deep-clone / format date] --> B{My default reach}
     B -->|reproduce frequent pattern| C[npm install a whole library]
-    B -->|future-proofing| D[pre-add dependencies<br/>we might need<br/>&nbsp;]
-    C --> E[bigger bundle, slower builds<br/>more transitive deps + attack surface<br/>&nbsp;]
+    B -->|future-proofing| D[pre-add dependencies<br/>we might need]
+    C --> E[bigger bundle, slower builds<br/>more transitive deps + attack surface]
     D --> E
-    E --> F[upgrade, security, license<br/>bills land on you<br/>&nbsp;]
+    E --> F[upgrade, security, license<br/>bills land on you]
 ```
 
 ## Consequences

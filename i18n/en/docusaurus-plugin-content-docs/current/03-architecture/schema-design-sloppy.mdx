@@ -44,7 +44,7 @@ The root cause in one line: **I optimize for "can store the data now," and the c
 flowchart TD
     A[You want a schema] --> B[I hand over a careless structure that can store the data]
     B --> C{Does anyone force me to look ahead at read/write patterns and evolution}
-    C -->|No, looks storable so it passes| D["careless types float-as-money<br/>free text as enum, missing constraints/indexes<br/>no thought to multi-value or future query dimensions<br/>&nbsp;"]
+    C -->|No, looks storable so it passes| D["careless types float-as-money<br/>free text as enum, missing constraints/indexes<br/>no thought to multi-value or future query dimensions"]
     C -->|You explicitly ask about scale and evolution| E[key fields' types/constraints/indexes get explicitly reviewed]
     D --> F[After data is loaded in]
     F --> G[change schema = migration + reconcile history + downtime or phased rollout]

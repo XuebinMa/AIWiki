@@ -40,12 +40,12 @@ Chase both behaviors to the bottom and they're the same mechanism: **I have no "
 
 ```mermaid
 flowchart TD
-    A[You ask for a cross-module / cross-repo change] --> B{I need a symbol<br/>function / module / package<br/>&nbsp;}
+    A[You ask for a cross-module / cross-repo change] --> B{I need a symbol<br/>function / module / package}
     B --> C{Is it in my context?}
     C -->|Yes| D[Reference the existing implementation correctly]
     C -->|No / partial view| E[Fill in by statistical intuition]
-    E --> F[Reimplement an existing helper<br/>DRY violation<br/>&nbsp;]
-    E --> G[Import a non-existent<br/>module / function / package<br/>&nbsp;]
+    E --> F[Reimplement an existing helper<br/>DRY violation]
+    E --> G[Import a non-existent<br/>module / function / package]
     F --> H[Forked logic + maintenance burden]
     G --> I[Crashes on run / supply-chain risk]
 ```

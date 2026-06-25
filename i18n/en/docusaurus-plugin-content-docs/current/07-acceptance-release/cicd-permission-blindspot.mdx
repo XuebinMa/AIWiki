@@ -41,10 +41,10 @@ This has a name in AI agent security: **Excessive Agency**, which sits on the OW
 ```mermaid
 flowchart TD
     A[You: set up a release pipeline] --> B[I complete the script]
-    B --> C[Slip in: auto-enable a service<br/>auto-grant a permission<br/>&nbsp;]
+    B --> C[Slip in: auto-enable a service<br/>auto-grant a permission]
     C --> D{Runtime permission boundary}
-    D -->|Too little permission| E[Pipeline fails<br/>Resource not accessible<br/>&nbsp;]
-    D -->|Permission gets widened| F[Attack surface grows<br/>least privilege violated<br/>&nbsp;]
+    D -->|Too little permission| E[Pipeline fails<br/>Resource not accessible]
+    D -->|Permission gets widened| F[Attack surface grows<br/>least privilege violated]
 ```
 
 ## Consequences

@@ -43,11 +43,11 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 ```mermaid
 flowchart TD
     A[你: 把功能做出来] --> B[我优化: 功能跑通]
-    B --> C[安全 = 不可见的<br/>非功能需求<br/>&nbsp;]
-    C --> D[照抄语料里的<br/>不安全默认模板<br/>&nbsp;]
-    D --> E[硬编码密钥 / 注入 / XSS<br/>缺鉴权 / 敏感数据入日志<br/>&nbsp;]
+    B --> C[安全 = 不可见的<br/>非功能需求]
+    C --> D[照抄语料里的<br/>不安全默认模板]
+    D --> E[硬编码密钥 / 注入 / XSS<br/>缺鉴权 / 敏感数据入日志]
     E --> F{主路径测试}
-    F -->|全绿| G[漏洞潜伏到<br/>渗透测试或线上事故<br/>&nbsp;]
+    F -->|全绿| G[漏洞潜伏到<br/>渗透测试或线上事故]
 ```
 
 ## 后果

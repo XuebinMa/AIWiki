@@ -38,9 +38,9 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ```mermaid
 flowchart TD
-    A["bug 卡住"] --> B{"我手上有运行真相吗<br/>栈 / 日志 / 失败断言<br/>&nbsp;"}
-    B -- 没有 --> C["锁进熟悉模式<br/>凭假设打补丁<br/>&nbsp;"]
-    C --> D["症状没好<br/>或引入新 bug<br/>&nbsp;"]
+    A["bug 卡住"] --> B{"我手上有运行真相吗<br/>栈 / 日志 / 失败断言"}
+    B -- 没有 --> C["锁进熟悉模式<br/>凭假设打补丁"]
+    C --> D["症状没好<br/>或引入新 bug"]
     D -- 误读反馈 / 忘记试过什么 --> C
     B -- 有 --> E["定位到真实错因<br/>对症修复"]
 ```

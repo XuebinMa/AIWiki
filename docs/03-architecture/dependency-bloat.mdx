@@ -42,12 +42,12 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ```mermaid
 flowchart TD
-    A[你提一个小需求<br/>补零 / 深拷贝 / 格式化日期<br/>&nbsp;] --> B{我的默认取法}
+    A[你提一个小需求<br/>补零 / 深拷贝 / 格式化日期] --> B{我的默认取法}
     B -->|复现高频写法| C[npm install 一整个库]
-    B -->|为将来预留| D[预先加上<br/>可能用到的依赖<br/>&nbsp;]
-    C --> E[体积膨胀 构建变慢<br/>传递依赖 + 攻击面变大<br/>&nbsp;]
+    B -->|为将来预留| D[预先加上<br/>可能用到的依赖]
+    C --> E[体积膨胀 构建变慢<br/>传递依赖 + 攻击面变大]
     D --> E
-    E --> F[升级 安全 许可<br/>的长期账落到你头上<br/>&nbsp;]
+    E --> F[升级 安全 许可<br/>的长期账落到你头上]
 ```
 
 ## 后果

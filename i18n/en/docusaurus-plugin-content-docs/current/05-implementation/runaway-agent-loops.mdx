@@ -38,11 +38,11 @@ This belongs to the same family as [degenerative debugging loops](./degenerative
 
 ```mermaid
 flowchart TD
-    A["Hand me the whole task<br/>auto-approve, walk away<br/>&nbsp;"] --> B{"Can I reliably judge<br/>'stop / done'?<br/>&nbsp;"}
-    B -- "No (my weak spot)" --> C["Optimistically try once more<br/>can't feel the mounting cost<br/>&nbsp;"]
-    C --> D["Repeat the same action<br/>or ping-pong between two<br/>&nbsp;"]
+    A["Hand me the whole task<br/>auto-approve, walk away"] --> B{"Can I reliably judge<br/>'stop / done'?"}
+    B -- "No (my weak spot)" --> C["Optimistically try once more<br/>can't feel the mounting cost"]
+    C --> D["Repeat the same action<br/>or ping-pong between two"]
     D -- "no external stop condition" --> C
-    D --> E["Burn tokens / budget / rate<br/>write to external systems repeatedly<br/>&nbsp;"]
+    D --> E["Burn tokens / budget / rate<br/>write to external systems repeatedly"]
     B -- "Yes (hard cap set externally)" --> F["Stop at the ceiling<br/>hand the call back to you"]
 ```
 

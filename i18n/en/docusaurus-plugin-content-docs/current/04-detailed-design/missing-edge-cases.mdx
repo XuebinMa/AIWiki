@@ -39,7 +39,7 @@ Concretely, three forces push me toward writing only the main path:
 flowchart TD
     A[Your description + normal examples] --> B[I complete a main-path implementation]
     B --> C{Were the edge branches pulled out?}
-    C -->|You didn't mention them, I didn't think of them| D["null / empty collection / out-of-range<br/>size=0 / time zone / encoding<br/>&nbsp;"]
+    C -->|You didn't mention them, I didn't think of them| D["null / empty collection / out-of-range<br/>size=0 / time zone / encoding"]
     C -->|You ask for them by name| E[Explicit handling + matching tests]
     D --> F[Main path runs, edge inputs crash]
 ```

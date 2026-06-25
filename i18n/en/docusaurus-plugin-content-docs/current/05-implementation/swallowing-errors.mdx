@@ -47,9 +47,9 @@ More insidious still: even when the tests do pass, that doesn't mean it was done
 ```mermaid
 flowchart TD
     A["error / red test"] --> B{"what am I optimizing"}
-    B -- runnable --> C["silence the signal<br/>empty catch / commented test / fallback default<br/>&nbsp;"]
-    C --> D["green on the surface<br/>error sinks deeper<br/>&nbsp;"]
-    B -- correct --> E["surface the error<br/>handle it or rethrow with context<br/>&nbsp;"]
+    B -- runnable --> C["silence the signal<br/>empty catch / commented test / fallback default"]
+    C --> D["green on the surface<br/>error sinks deeper"]
+    B -- correct --> E["surface the error<br/>handle it or rethrow with context"]
     E --> F["real signal reaches you"]
 ```
 

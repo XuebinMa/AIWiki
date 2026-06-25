@@ -40,7 +40,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 ```mermaid
 flowchart TD
     A[逐字对话历史] --> B{触发 /compact}
-    B --> C["结构化摘要<br/>保留: 意图 / 关键概念 / 改过的文件<br/>丢弃: 完整工具输出 / 中间推理<br/>&nbsp;"]
+    B --> C["结构化摘要<br/>保留: 意图 / 关键概念 / 改过的文件<br/>丢弃: 完整工具输出 / 中间推理"]
     C --> D[未落盘的方案被判为中间推理]
     D --> E[压完接不上, 换了个脑子]
 ```

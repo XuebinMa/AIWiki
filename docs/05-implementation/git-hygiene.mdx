@@ -49,11 +49,11 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 ```mermaid
 flowchart TD
     A[你: 把功能做完] --> B[我连续改了十几个文件]
-    B --> C[git add -A<br/>一把全收<br/>&nbsp;]
-    C --> D[巨型提交<br/>多个逻辑变更挤在一起<br/>&nbsp;]
-    C --> E[产物 / .env / 死代码<br/>一并进库<br/>&nbsp;]
-    D --> F[信息: update code<br/>没说为什么<br/>&nbsp;]
-    E --> G[历史不可读<br/>bisect / 回滚 / review 失效<br/>&nbsp;]
+    B --> C[git add -A<br/>一把全收]
+    C --> D[巨型提交<br/>多个逻辑变更挤在一起]
+    C --> E[产物 / .env / 死代码<br/>一并进库]
+    D --> F[信息: update code<br/>没说为什么]
+    E --> G[历史不可读<br/>bisect / 回滚 / review 失效]
     F --> G
 ```
 

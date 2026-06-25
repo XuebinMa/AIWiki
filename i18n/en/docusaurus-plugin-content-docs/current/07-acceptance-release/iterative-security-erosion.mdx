@@ -43,10 +43,10 @@ This isn't speculation: a systematic study quantified a "paradox" in multi-round
 
 ```mermaid
 flowchart TD
-    A[Round 1: implement, plant a small weakness] --> B[Rounds 2-3: add features<br/>new input path unvalidated<br/>&nbsp;]
-    B --> C[Rounds 4-5: refactor<br/>standard secure call replaced by homegrown<br/>&nbsp;]
+    A[Round 1: implement, plant a small weakness] --> B[Rounds 2-3: add features<br/>new input path unvalidated]
+    B --> C[Rounds 4-5: refactor<br/>standard secure call replaced by homegrown]
     C --> D[every round green, feature more complete]
-    D --> E[security posture actually degrading<br/>severe vulnerabilities accumulating<br/>&nbsp;]
+    D --> E[security posture actually degrading<br/>severe vulnerabilities accumulating]
     E -.security gate every round + whole-of-code audit before release.-> F[stop the erosion before it piles up]
 ```
 

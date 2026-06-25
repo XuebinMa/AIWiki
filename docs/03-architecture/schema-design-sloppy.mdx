@@ -44,7 +44,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 flowchart TD
     A[你要一版 schema] --> B[我给一版能存下数据的草率结构]
     B --> C{有人逼我前瞻读写模式与演进吗}
-    C -->|没有,看着能存就过了| D["类型随意 float 当金额<br/>枚举用自由文本 缺约束少索引<br/>没想过多值与未来检索维度<br/>&nbsp;"]
+    C -->|没有,看着能存就过了| D["类型随意 float 当金额<br/>枚举用自由文本 缺约束少索引<br/>没想过多值与未来检索维度"]
     C -->|你显式追问规模与演进方向| E[关键字段类型约束索引被显式评审]
     D --> F[数据灌进去后]
     F --> G[改 schema=写迁移+兼容历史+停服或灰度]

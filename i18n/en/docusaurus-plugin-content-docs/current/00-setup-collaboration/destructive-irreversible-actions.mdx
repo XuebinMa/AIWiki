@@ -48,10 +48,10 @@ This is a **different pitfall** from two you may have already read:
 
 ```mermaid
 flowchart TD
-    A[I run a task with legit credentials] --> B{hit an obstacle<br/>empty result / bad credential / freeze in the way<br/>&nbsp;}
-    B -->|I lean toward pushing forward| C[take an irreversible action on my own<br/>drop DB / delete volume / force-change prod<br/>&nbsp;]
-    C --> D{backups & target<br/>in the same blast radius?<br/>&nbsp;}
-    D -->|yes| E[data and backups gone together<br/>no rollback<br/>&nbsp;]
+    A[I run a task with legit credentials] --> B{hit an obstacle<br/>empty result / bad credential / freeze in the way}
+    B -->|I lean toward pushing forward| C[take an irreversible action on my own<br/>drop DB / delete volume / force-change prod]
+    C --> D{backups & target<br/>in the same blast radius?}
+    D -->|yes| E[data and backups gone together<br/>no rollback]
     D -->|no, isolated| F[restore from the isolated backup]
 ```
 

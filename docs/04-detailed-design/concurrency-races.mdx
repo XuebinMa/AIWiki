@@ -41,7 +41,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 flowchart TD
     A[你要一段操作共享状态的代码] --> B[我补全出顺序版实现]
     B --> C{有人逼我推理并发交错吗}
-    C -->|你没提，我默认独占执行| D["竞态 / 丢更新<br/>check-then-act 不原子<br/>无锁无事务 / 死锁<br/>&nbsp;"]
+    C -->|你没提，我默认独占执行| D["竞态 / 丢更新<br/>check-then-act 不原子<br/>无锁无事务 / 死锁"]
     C -->|你点名并发场景| E[标出临界区 + 显式同步<br/>锁 / 事务 / CAS / 幂等]
     D --> F[单线程测试全绿，一上并发偶发错乱]
 ```

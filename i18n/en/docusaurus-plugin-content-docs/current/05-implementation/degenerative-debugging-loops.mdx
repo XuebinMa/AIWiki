@@ -38,9 +38,9 @@ Multi-step execution adds another layer. MIRAGE-Bench sorts an agent's "hallucin
 
 ```mermaid
 flowchart TD
-    A["bug is stuck"] --> B{"do I have runtime truth?<br/>stack / logs / failing assertion<br/>&nbsp;"}
-    B -- no --> C["lock into a familiar pattern<br/>patch on assumptions<br/>&nbsp;"]
-    C --> D["symptom not fixed<br/>or new bug introduced<br/>&nbsp;"]
+    A["bug is stuck"] --> B{"do I have runtime truth?<br/>stack / logs / failing assertion"}
+    B -- no --> C["lock into a familiar pattern<br/>patch on assumptions"]
+    C --> D["symptom not fixed<br/>or new bug introduced"]
     D -- misread feedback / forgot what was tried --> C
     B -- yes --> E["localize the real cause<br/>fix to the point"]
 ```

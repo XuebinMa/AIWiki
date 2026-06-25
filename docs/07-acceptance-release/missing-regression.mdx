@@ -40,11 +40,11 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ```mermaid
 flowchart TD
-    A[你: 改 A 功能] --> B[我改了共享代码<br/>calculateTotal<br/>&nbsp;]
+    A[你: 改 A 功能] --> B[我改了共享代码<br/>calculateTotal]
     B --> C{这段代码还被谁依赖}
-    C -->|我看到的: A| D[验证 A 通过<br/>汇报: 完成<br/>&nbsp;]
-    C -->|我没看到的: B| E[退款/对账/报表<br/>悄悄被改坏<br/>&nbsp;]
-    E --> F[上线后用户撞见<br/>本来好好的功能坏了<br/>&nbsp;]
+    C -->|我看到的: A| D[验证 A 通过<br/>汇报: 完成]
+    C -->|我没看到的: B| E[退款/对账/报表<br/>悄悄被改坏]
+    E --> F[上线后用户撞见<br/>本来好好的功能坏了]
 ```
 
 ## 后果

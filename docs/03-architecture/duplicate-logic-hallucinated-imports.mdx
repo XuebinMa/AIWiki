@@ -40,12 +40,12 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ```mermaid
 flowchart TD
-    A[你让我做跨模块/跨仓改动] --> B{我需要一个符号<br/>函数 / 模块 / 包<br/>&nbsp;}
+    A[你让我做跨模块/跨仓改动] --> B{我需要一个符号<br/>函数 / 模块 / 包}
     B --> C{它在我的上下文里吗?}
     C -->|在| D[正确引用既有实现]
     C -->|不在 / 看不全| E[按统计直觉补位]
-    E --> F[重复实现已有的工具<br/>违反 DRY<br/>&nbsp;]
-    E --> G[import 不存在的<br/>模块 / 函数 / 包<br/>&nbsp;]
+    E --> F[重复实现已有的工具<br/>违反 DRY]
+    E --> G[import 不存在的<br/>模块 / 函数 / 包]
     F --> H[逻辑分叉 + 维护负担]
     G --> I[运行即崩 / 供应链风险]
 ```

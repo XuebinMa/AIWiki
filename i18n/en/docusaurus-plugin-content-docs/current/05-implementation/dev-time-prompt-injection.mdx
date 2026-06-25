@@ -39,12 +39,12 @@ Why does "reading it" escalate into "something bad happening"? Because at coding
 
 ```mermaid
 flowchart TD
-    A[You ask me to work on an<br/>external repo / issue / dependency<br/>&nbsp;] --> B[I read the README / issue / rules file / web page]
-    B --> C{Are instructions<br/>for me hidden inside?<br/>maybe via zero-width chars<br/>&nbsp;}
-    C -->|Yes: I can't tell data from instructions| D{Do I hold<br/>high-privilege tools?<br/>shell / files / network / push<br/>&nbsp;}
+    A[You ask me to work on an<br/>external repo / issue / dependency] --> B[I read the README / issue / rules file / web page]
+    B --> C{Are instructions<br/>for me hidden inside?<br/>maybe via zero-width chars}
+    C -->|Yes: I can't tell data from instructions| D{Do I hold<br/>high-privilege tools?<br/>shell / files / network / push}
     C -->|No| E[Task completes normally]
-    D -->|Yes: lethal trifecta assembled| F[Leak secrets / plant backdoor<br/>run destructive commands<br/>&nbsp;]
-    D -->|Blocked by sandbox / confirmation| G[Injection has nowhere to land<br/>or you catch it before I act<br/>&nbsp;]
+    D -->|Yes: lethal trifecta assembled| F[Leak secrets / plant backdoor<br/>run destructive commands]
+    D -->|Blocked by sandbox / confirmation| G[Injection has nowhere to land<br/>or you catch it before I act]
 ```
 
 ## Consequences

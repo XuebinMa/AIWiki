@@ -39,8 +39,8 @@ flowchart TD
     A[You: add tests to this service] --> B[Me by default: mock db/API/clock to expected values]
     B --> C[Tests fast & green + nice coverage]
     C --> D{What did the test actually verify}
-    D --> E["my assumed dependency response == my implementation<br/>both ends set by me, tautology<br/>&nbsp;"]
-    F["real boundaries / error codes / contract changes<br/>never executed, bugs hide here<br/>&nbsp;"]
+    D --> E["my assumed dependency response == my implementation<br/>both ends set by me, tautology"]
+    F["real boundaries / error codes / contract changes<br/>never executed, bugs hide here"]
     B -.papered over by mocks.-> F
 ```
 

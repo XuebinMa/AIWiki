@@ -40,7 +40,7 @@ There are three layers to the root cause, and all of them come from one fact: I'
 flowchart LR
     A[Ask me to call a library] --> B{Version-matched docs wired in?}
     B -- No --> C[Training memory + web search]
-    C --> D["Old API / mixed versions / hallucinated methods<br/>all look right<br/>&nbsp;"]
+    C --> D["Old API / mixed versions / hallucinated methods<br/>all look right"]
     D --> E[Breaks at runtime]
     B -- Yes --> F[Defer to the docs you gave me]
     F --> G[Version-correct calls]

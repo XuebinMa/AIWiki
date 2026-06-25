@@ -42,7 +42,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 ```mermaid
 flowchart LR
     A[外部不可信内容<br/>issue / 网页 / 文件] -->|藏有注入指令| B[我读到并被诱导]
-    B --> C{我手里有<br/>高权限 MCP 工具?<br/>&nbsp;}
+    B --> C{我手里有<br/>高权限 MCP 工具?}
     C -->|是| D[借我的手调用工具]
     C -->|否| E[注入无处落地]
     D --> F[泄露密钥 / 改生产库 / 对外外传]

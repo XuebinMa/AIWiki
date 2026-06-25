@@ -49,11 +49,11 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ```mermaid
 flowchart TD
-    A[你给的需求<br/>只描述功能<br/>&nbsp;] --> B[我按最直白写法实现]
+    A[你给的需求<br/>只描述功能] --> B[我按最直白写法实现]
     B --> C[小数据测试全绿]
     C --> D{你以为没问题}
     D --> E[线上真实规模]
-    E --> F[N+1 / O 的平方<br/>循环内重复编译<br/>同步阻塞 IO<br/>&nbsp;]
+    E --> F[N+1 / O 的平方<br/>循环内重复编译<br/>同步阻塞 IO]
     F --> G[慢 超时 内存爆]
 ```
 

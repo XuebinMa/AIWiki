@@ -54,9 +54,9 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ```mermaid
 flowchart TD
-    A[一条约束] --> B{它是想拦住一个动作<br/>&nbsp;还是告诉我一个事实?}
-    B -->|拦住动作| C[settings.json permissions<br/>客户端强制执行<br/>&nbsp;]
-    B -->|告诉事实| D[CLAUDE.md<br/>建议性上下文<br/>&nbsp;]
+    A[一条约束] --> B{它是想拦住一个动作还是告诉我一个事实?}
+    B -->|拦住动作| C[settings.json permissions<br/>客户端强制执行]
+    B -->|告诉事实| D[CLAUDE.md<br/>建议性上下文]
     C --> E[不经过我决定 必然生效]
     D --> F[经过我决定 可能被漏读或稀释]
 ```

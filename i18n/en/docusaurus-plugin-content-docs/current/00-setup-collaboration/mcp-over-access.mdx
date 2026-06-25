@@ -42,7 +42,7 @@ The security community sums up the conditions you need into a "lethal trifecta":
 ```mermaid
 flowchart LR
     A[Untrusted external content<br/>issue / web page / file] -->|carries injected instruction| B[I read it and get tricked]
-    B --> C{Do I hold a<br/>high-privilege MCP tool?<br/>&nbsp;}
+    B --> C{Do I hold a<br/>high-privilege MCP tool?}
     C -->|Yes| D[Invoked through my hands]
     C -->|No| E[Injection has nowhere to land]
     D --> F[Leak secrets / alter prod DB / exfiltrate]
