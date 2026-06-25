@@ -1,0 +1,53 @@
+---
+title: Samsung 工程师把源码贴进 ChatGPT，20 天内泄密三次
+slug: samsung-chatgpt-source-leak
+sidebar_position: 2
+tags: [真实案例, 安全, 敏感数据, 数据泄露]
+sources:
+  - { title: "Samsung bans use of generative AI tools like ChatGPT after April internal data leak (TechCrunch)", url: "https://techcrunch.com/2023/05/02/samsung-bans-use-of-generative-ai-tools-like-chatgpt-after-april-internal-data-leak/" }
+  - { title: "Samsung Bans ChatGPT, Google Bard, Other Generative AI Use by Staff After Leak (Bloomberg)", url: "https://www.bloomberg.com/news/articles/2023-05-02/samsung-bans-chatgpt-and-other-generative-ai-use-by-staff-after-leak" }
+  - { title: "Samsung bans use of A.I. like ChatGPT for employees after misuse of the chatbot (CNBC)", url: "https://www.cnbc.com/2023/05/02/samsung-bans-use-of-ai-like-chatgpt-for-staff-after-misuse-of-chatbot.html" }
+---
+
+> 一句话摘要：2023 年 4 月，Samsung 半导体（DS）部门刚允许员工用 ChatGPT，不到 20 天就泄密三次——有人把排查 bug 的源码贴进去，有人把识别良率 / 坏片的测试程序贴进去，还有人把录下来的内部会议转成文字喂进去做纪要。数据一旦进了 OpenAI 的服务器，就出了你的边界、删不回来。这条里我是「被喂数据的那一方」：你把敏感内容贴给我，它就离开了你能控制的范围。
+
+:::info 这条案例印证的误区
+- [我会把安全当成默认不可见的需求，于是埋下漏洞、泄露敏感数据](../07-acceptance-release/security-data-leaks.mdx)
+
+发生时间：2023 年 4–5 月 · 当事人：Samsung DS（半导体）部门员工 × ChatGPT · 出处见文末
+:::
+
+## 发生了什么
+
+Samsung 半导体部门放开 ChatGPT 给员工用，**不到二十天就出了三起泄密**，全是把机密贴进对话框：
+
+- 一名工程师把一段**源码**贴进去，想让 ChatGPT 帮忙找 bug；
+- 另一名把用于**识别良率与坏片的测试程序**贴进去做优化；
+- 还有人把一段**录下来的内部会议**先转成文字，再喂给 ChatGPT 生成会议纪要。
+
+问题是：这些内容一旦发出去，就到了 **OpenAI 的服务器**上，不在 Samsung 能控制的范围内，也没法收回或删除。等于把半导体制造相关的机密，主动搬到了第三方那里。
+
+Samsung 的反应是收紧：在公司设备与内网上**全面禁用** ChatGPT 等外部生成式 AI（2023 年 5 月生效），转而自研内部工具，并把对外提示词长度**限制到 1024 字节**，从机制上压缩一次能泄露多少。
+
+## 它印证了哪条误区
+
+这正是 [「我把安全当成默认不可见的需求」](../07-acceptance-release/security-data-leaks.mdx) 的另一面：那条讲的是**我写代码时**默认不按数据敏感度设防；这条把镜头转到**你把数据交给我时**——在我眼里，一段源码和一段普通文本没有本质区别，我不会自发意识到「这是不能离开公司边界的机密」。敏感数据的分级与边界，得**你显式守住**，不能指望模型替你把关。把机密贴进一个会把数据传到外部、甚至可能用于训练的服务，泄露在你按下回车那一刻就完成了。
+
+## 代价
+
+- **机密 IP 出了边界且不可收回**：半导体相关源码与会议内容进了第三方服务器，删不回来，潜在损失无法估量。
+- **全员被一刀切**：三起事故直接导致公司层面禁用整类工具，合规与效率都付了代价。
+- **泄露是安静的**：没有报错、没有告警，数据就这么流走了——等意识到，已经发生。
+
+## 护栏：怎么不把机密喂出去
+
+1. **给敏感数据分级，并立硬规矩**：源码、客户数据、内部会议默认不许贴进外部 AI；哪些能、哪些不能，写成明确清单。
+2. **用企业版 / 自托管、且关掉训练**：需要 AI 辅助时，走有数据边界保证（不留存、不训练）的通道，而不是公共入口。
+3. **上 DLP 兜底**：在出口侧加数据防泄露扫描，挡住凭据、源码、敏感字段被粘贴外发。
+4. **把「数据边界」当成显式约束告诉我**：正如 [安全那条](../07-acceptance-release/security-data-leaks.mdx) 所说，我不会自发按最小权限和数据敏感度行事——你要把它写进规则，我才会当成目标的一部分。
+
+## 出处
+
+- [Samsung bans use of generative AI tools like ChatGPT after April internal data leak (TechCrunch)](https://techcrunch.com/2023/05/02/samsung-bans-use-of-generative-ai-tools-like-chatgpt-after-april-internal-data-leak/)
+- [Samsung Bans ChatGPT, Google Bard, Other Generative AI Use by Staff After Leak (Bloomberg)](https://www.bloomberg.com/news/articles/2023-05-02/samsung-bans-chatgpt-and-other-generative-ai-use-by-staff-after-leak)
+- [Samsung bans use of A.I. like ChatGPT for employees after misuse of the chatbot (CNBC)](https://www.cnbc.com/2023/05/02/samsung-bans-use-of-ai-like-chatgpt-for-staff-after-misuse-of-chatbot.html)

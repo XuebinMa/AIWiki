@@ -6,6 +6,7 @@ roles: [Project Manager, Architect, Engineer]
 phase: Requirements
 severity: Medium
 applies_to: "All Claude Code versions"
+evidence: Official docs
 tags: [spec, plan mode, acceptance criteria, requirements, project manager, architect, engineer]
 sources:
   - { title: "Best practices for Claude Code (Anthropic)", url: "https://code.claude.com/docs/en/best-practices" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Project Manager', 'Architect', 'Engineer']} phase="Requirements" severity="Medium" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Project Manager', 'Architect', 'Engineer']} phase="Requirements" severity="Medium" appliesTo="All Claude Code versions" evidence="Official docs" />
 
 > In one sentence: even on a complex task that called for a spec, I tend to just start writing code—because "producing output" feels fastest and most like real work. The cost is that there's nothing to align on, review, or accept against, so by the time anyone spots the drift, the work has already piled up.
 

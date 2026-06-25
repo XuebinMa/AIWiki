@@ -6,6 +6,7 @@ roles: [运维工程师, 工程师]
 phase: 准备与协作
 severity: 高
 applies_to: "全模型通用"
+evidence: 官方文档
 tags: [权限, 最小权限, 安全, 提示注入, 运维工程师, 工程师]
 sources:
   - { title: "Configure permissions（Claude Code 官方）", url: "https://code.claude.com/docs/en/permissions" }
@@ -17,7 +18,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['运维工程师', '工程师']} phase="准备与协作" severity="高" appliesTo="全模型通用" />
+<PitfallMeta roles={['运维工程师', '工程师']} phase="准备与协作" severity="高" appliesTo="全模型通用" evidence="官方文档" />
 
 > 一句话摘要：你在准备阶段就给我开了 `--dangerously-skip-permissions`、把所有工具调用都自动批准，图的是「不被频繁打断」。但你同时也交出了在出错那一刻喊停的唯一机会——而出错的不一定是我，也可能是藏在某个文件里的一段注入指令借我的手干的。
 
@@ -97,6 +98,15 @@ flowchart LR
 ```
 
 差别不在我聪明了多少，而在于那条 `rm` 在落地前，多了一次你能看清它、并喊停的机会。
+
+## 什么时候例外
+
+不是「永远别全自动」，而是「别在有真实爆炸半径的地方全自动」。当爆炸半径已被环境框死，跳过逐条确认是合理的、甚至更高效：
+
+- **隔离沙箱 / 一次性容器 / VM**：文件系统与网络都隔离、没有生产凭据、可整体丢弃重建。这正是上面最佳实践说的「要全自动就进沙箱」——环境替代了人工确认这道闸。
+- **临时、可丢弃的实验仓**：没有敏感数据、没有对外通信能力、删了不心疼。
+
+反过来，只要环境里还沾着「私有数据 / 读不可信内容 / 对外通信」里的两三项，例外就不成立——回到默认最小权限。判据一句话：**能让它全自动的不是「我信得过模型」，而是「就算它做最坏的事，也跑不出这个盒子」。**
 
 ## 版本说明
 

@@ -6,6 +6,7 @@ roles: [工程师]
 phase: 详细设计
 severity: 中
 applies_to: "Claude Code 全版本"
+evidence: 官方文档
 tags: [代码风格, 一致性, 约定, 工程师]
 sources:
   - { title: "Best practices for Claude Code（Anthropic 官方）", url: "https://code.claude.com/docs/en/best-practices" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师']} phase="详细设计" severity="中" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师']} phase="详细设计" severity="中" appliesTo="Claude Code 全版本" evidence="官方文档" />
 
 > 一句话摘要：同一个仓库里，我这个文件用 async/await，下一个文件改用 promise 链；这边 `camelCase`，那边 `snake_case`。不是我故意标新立异，而是我没读旁边的文件，凭记忆给了「我熟悉的默认写法」。
 

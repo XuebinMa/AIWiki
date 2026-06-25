@@ -6,6 +6,7 @@ roles: [Project Manager, Architect, Engineer]
 phase: Ideation & Feasibility
 severity: Medium
 applies_to: "All sampling-based chat models (a general trait)"
+evidence: Research
 tags: [non-determinism, feasibility, technology selection, uncertainty, Project Manager, Architect, Engineer]
 sources:
   - { title: "Anthropic API — Messages (temperature parameter)", url: "https://docs.anthropic.com/en/api/messages" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Project Manager', 'Architect', 'Engineer']} phase="Ideation & Feasibility" severity="Medium" appliesTo="All sampling-based chat models (a general trait)" />
+<PitfallMeta roles={['Project Manager', 'Architect', 'Engineer']} phase="Ideation & Feasibility" severity="Medium" appliesTo="All sampling-based chat models (a general trait)" evidence="Research" />
 
 > In one sentence: ask me the same "should we use it / is this path viable" judgment call again a couple of days later, or with slightly different wording, and I may hand you the **opposite** conclusion—stated just as confidently both times. What looks like "a stable answer" is really one roll of the dice.
 

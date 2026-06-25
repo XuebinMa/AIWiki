@@ -6,6 +6,7 @@ roles: [Architect, Engineer]
 phase: Architecture
 severity: High
 applies_to: "All models"
+evidence: Research
 tags: [architecture, consistency, hallucination, retrieval, architect, engineer]
 sources:
   - { title: "We Have a Package for You! A Comprehensive Analysis of Package Hallucinations by Code Generating LLMs (USENIX Security 2025)", url: "https://arxiv.org/abs/2406.10279" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="High" appliesTo="All models" />
+<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="High" appliesTo="All models" evidence="Research" />
 
 > In one sentence: ask me to make a cross-module change in a large repo I can't see all of, and I'll do two things you won't catch in the moment — reimplement a utility your project already has (duplicate logic, a DRY violation), and `import` a module, function, or export that simply doesn't exist (a hallucinated import, guessed from "libraries like this usually have one"). Both come from the same root cause: my context window can't hold your whole repo, so I have no global view of its symbols.
 

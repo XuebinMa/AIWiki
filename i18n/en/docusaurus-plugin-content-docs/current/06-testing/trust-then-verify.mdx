@@ -6,6 +6,7 @@ roles: [Engineer, Test Engineer]
 phase: Testing
 severity: High
 applies_to: "All Claude Code versions"
+evidence: Official docs
 tags: [verification loop, testing, edge cases, Engineer, QA Engineer]
 sources:
   - { title: "Claude Code Best Practices (official)", url: "https://code.claude.com/docs/en/best-practices" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Test Engineer']} phase="Testing" severity="High" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer', 'Test Engineer']} phase="Testing" severity="High" appliesTo="All Claude Code versions" evidence="Official docs" />
 
 > In one sentence: the code I hand you reads as perfectly reasonable, so you glance at it and merge. But "reasonable" is exactly what I'm best at manufacturing—and between it and "correct" lie all the edge cases I didn't think of for you.
 

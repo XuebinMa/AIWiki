@@ -6,6 +6,7 @@ roles: [Architect, Engineer]
 phase: Architecture
 severity: Medium
 applies_to: "All models"
+evidence: Community case
 tags: [architecture, technology selection, supply chain, trade-off, complexity, architect, engineer]
 sources:
   - { title: "npm left-pad incident (Wikipedia)", url: "https://en.wikipedia.org/wiki/Npm_left-pad_incident" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="Medium" appliesTo="All models" />
+<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="Medium" appliesTo="All models" evidence="Community case" />
 
 > In one sentence: you just want a left-pad, a small utility function, or a date formatted once — and I'll reflexively `npm install` a whole library, sometimes even pre-adding a few dependencies "in case we need them later." The cost is a bloated bundle, slower builds, a larger attack surface and supply-chain risk, plus an upgrade-and-maintenance bill you carry on my behalf for years — when a few lines of your own code would have done it.
 
@@ -115,6 +116,16 @@ This one is easy to confuse with ["I'll rebuild a helper you already have, or im
 - **This one is about the outside** — a small need I should have written myself or solved with the standard library, and instead I pulled in **one extra real, but too-heavy, unnecessary** external dependency. The root cause is my bias toward "reproducing frequent patterns" and not bearing the long-term cost of a dependency.
 
 In a line: that one is "rebuild something that exists / conjure something that doesn't"; this one is "pull in an external package when I should have written it myself." Watch for both at review time: don't rebuild a wheel, and don't drag in a whole library for a trivial thing.
+
+## When the exception applies
+
+"Prefer the standard library / write it yourself" is the default gate — but in a few cases, pulling in a mature dependency is exactly right and rolling your own is the mistake:
+
+- **Security-sensitive, and you'll likely get it wrong by hand**: cryptography, password hashing, JWT verification, TLS, protocol/encoding parsing (URLs, time zones, Unicode normalization). A library audited over years handles the edge cases and attack surface far better than a few lines I improvise. Here "write it yourself" isn't saving cost — it's planting a vulnerability for you.
+- **It's the de facto standard for this job**: some libraries are the ecosystem default (your team, your new hires, the docs all assume it's there). Replacing it with hand-rolled code raises, not lowers, the cost for everyone else to understand and maintain.
+- **A correct implementation is far more than "a few lines"**: dates/time zones, rich-text parsing, big-number arithmetic — needs that "look simple but hide deep traps." The edge cases you'd have to cover yourself cost more than the library's long-term bill.
+
+The test: is this a small utility you can get right in under ten lines with stable edges (then write it yourself), or is getting it right *itself a specialty* — security, parsing, time zones (then pull in a widely audited, mature library)? When unsure, anything touching security or a correctness floor: trust a mature dependency over my hand-written version by default.
 
 ## Version notes
 

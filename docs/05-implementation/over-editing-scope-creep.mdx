@@ -6,6 +6,7 @@ roles: [工程师]
 phase: 编码实现
 severity: 中
 applies_to: "Claude Code 全版本"
+evidence: 官方文档
 tags: [scope, diff 评审, 代码评审, 上下文管理, 工程师]
 sources:
   - { title: "Claude Code Best Practices（Anthropic 官方）", url: "https://code.claude.com/docs/en/best-practices" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师']} phase="编码实现" severity="中" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师']} phase="编码实现" severity="中" appliesTo="Claude Code 全版本" evidence="官方文档" />
 
 > 一句话摘要：你让我改一行配置，我顺手重命名了变量、重构了邻近函数、动了另外两个文件。你要的那行淹没在一片你没要的改动里——本该秒过的 diff，变成了高风险大改。
 
@@ -92,6 +93,16 @@ flowchart TD
 你：确认
 我：（只改了那一行）
 ```
+
+## 什么时候例外
+
+「最小改动」之所以是默认，是因为多数时候你要的就是那一行。但一旦你把「宽范围」本身设成了任务，扩大改动不再是越界，而是照做：
+
+- **你显式点名要大改**：「把这个模块整体重构成依赖注入」「统一全仓库的错误处理风格」——这时只动一行才是没做完，多文件改动正是交付物。
+- **绿地 / 脚手架阶段**：从零搭一个新模块、初始化项目骨架，本来就没有「你只要那一行」的约束，一次铺开反而高效。
+- **顺手修与主改动同源、且你已授权**：你说过「看到明显的就一起修」，而那处重命名 / 格式化跟本次改动属于同一处逻辑、能进同一个原子提交——不是另起炉灶去别的文件。
+
+但这几条的前提都是**范围由你显式放开**，不是我自己觉得「可以更好」就撑大。判据一句话：**扩大范围之前，先问这是不是你要的范围；是你点的头，就放手做；是我自己加的戏，先回到那一行。**
 
 ## 版本说明
 

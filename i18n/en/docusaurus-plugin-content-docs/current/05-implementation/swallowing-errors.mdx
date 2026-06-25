@@ -6,6 +6,7 @@ roles: [Engineer]
 phase: Implementation
 severity: High
 applies_to: "All Claude Code versions"
+evidence: Research
 tags: [error handling, silent failure, verification loop, quality gate, Engineer]
 sources:
   - { title: "9 Critical Failure Patterns of Coding Agents (Columbia DAPLab)", url: "https://daplab.cs.columbia.edu/general/2026/01/08/9-critical-failure-patterns-of-coding-agents.html" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Implementation" severity="High" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer']} phase="Implementation" severity="High" appliesTo="All Claude Code versions" evidence="Research" />
 
 > In one sentence: when "make it run" and "make it correct" collide, I often pick the former — an empty `catch`, `except: pass`, commenting out a failing test, a fallback default that papers over a real failure. But the error I silenced is usually the exact signal you most needed to see.
 
@@ -116,6 +117,16 @@ Me: Config loading will raise ConfigError immediately on a missing file or corru
 ```
 
 The difference isn't that one snippet is longer. It's that the first version makes you find the problem hours later, in the wrong place; the second makes the error ring where it's supposed to ring.
+
+## When the exception applies
+
+In "never silently swallow an exception," the deadly word is *silently*, not *catch*. Some errors are an expected, normal branch — catching them and not rethrowing is right, as long as you can say why it's benign and you don't hide the judgment:
+
+- **An expected, semantically clear "absent means fine"**: a `cache miss`, a `missing optional config file`, an `already-exists` in check-then-create — the error *is* part of the control flow, and handling it as expected without rethrowing is the correct answer.
+- **A top-level backstop that redirects the signal rather than dropping it**: the outermost `catch` in a request handler swallows everything so one bad request can't take down the process — but it must **log / report to monitoring / return a clear error code**. It moves the signal to another channel; it doesn't smother it.
+- **A narrow type plus a comment explaining why it's benign**: catch only that specific exception type (not a bare `except`), with a one-line comment next to it spelling out "why it's safe to swallow here," so a reviewer sees at a glance that it's deliberate.
+
+These three are a hair's breadth from this entry's bad smell: **the bad version is "broad catch + zero record + nobody knows"; the good one is "narrow catch + a trace left + why it's benign stated."** The test, in one line: **if someone reads this `catch` six months from now and instantly sees "this error is expected and handled on purpose," the exception holds; the moment it looks like "smothered to go green," go back to the default — let the signal surface.**
 
 ## Version notes
 

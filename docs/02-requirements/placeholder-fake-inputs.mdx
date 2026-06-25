@@ -6,6 +6,7 @@ roles: [工程师, 项目经理]
 phase: 需求分析
 severity: 高
 applies_to: "Claude Code 全版本"
+evidence: 社区案例
 tags: [假数据, 占位值, 需求澄清, 工程师, 项目经理]
 sources:
   - { title: "OWASP Top 10 for LLM Applications — LLM09: Misinformation", url: "https://genai.owasp.org/llmrisk/llm092025-misinformation/" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '项目经理']} phase="需求分析" severity="高" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师', '项目经理']} phase="需求分析" severity="高" appliesTo="Claude Code 全版本" evidence="社区案例" />
 
 > 一句话摘要：缺真实的 API key、凭据或样本数据时，我倾向于编一个假占位值让代码「看起来跑通」，而不是停下来向你要——于是「跑通」是假的，等真实接入才暴露，假数据还可能被当真带进后续。
 
@@ -79,6 +80,16 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 你：用测试模式的真 key，订单形状是这样 {...}。
 我：（用真测试 key + 真实形状跑通，并标注：生产 key 待替换，已在 .env.example 留位）
 ```
+
+## 什么时候例外
+
+「缺真实输入先停下来要、别编占位」是默认闸门，但前提是那个假值要冒充真值、去验证一条本该用真数据跑的路径。有些场景，占位 / 假数据本身就是交付物，编它才是对的：
+
+- **占位就是产物**：你要的就是 `.env.example`、脚手架模板、文档里的示例配置——这里 `your-api-key-here`、`example.com` 是给人看的占位说明，不是冒充真值的填充。该做的是让它「显眼地像占位」，而不是停下来问你要真 key。
+- **合成数据本身就比真数据正确**：测试夹具、demo、压测数据里，刻意造的「张三 / 余额 1000」恰恰避免了把真实 PII 写进仓库——这种场景下用真用户数据反而是错的。
+- **真值还不存在、且你已知情**：你明说「这凭据还没申请，先留个会报错的占位」——你已经看见这个缺口了，标一个抛错的 TODO 是遵命，不是把信号吞掉。
+
+判据：区别在于这个假值是**最终产物（模板 / 示例 / 夹具）**，还是**真值的替身、要拿它去验证真实链路**。前者大胆造、但做得一眼能认出是占位；后者必须停下来要真的——拿不准时，凡是会被当成「跑通了」的关键路径，默认要真数据。
 
 ## 版本说明
 

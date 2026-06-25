@@ -6,6 +6,7 @@ roles: [Architect, Engineer]
 phase: Architecture
 severity: High
 applies_to: "All models"
+evidence: Community case
 tags: [architecture, ADR, context, style drift, architect, engineer]
 sources:
   - { title: "Architecture Decision Record (Martin Fowler bliki, with Michael Nygard's original framing)", url: "https://martinfowler.com/bliki/ArchitectureDecisionRecord.html" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="High" appliesTo="All models" />
+<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="High" appliesTo="All models" evidence="Community case" />
 
 > In one sentence: the trade-offs already settled in this project — "why we picked A over B," "why this layer can't call that one directly" — I don't remember them. Every session I'm a cold start. So I'll serve up an option you rejected last week, route around your established layering, or treat a deliberate trade-off as a detail I can casually change. Don't count on me to "recall" it; I have no cross-session memory. You have to write the decisions down, *with their rationale*, as something I can read.
 

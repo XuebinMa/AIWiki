@@ -6,6 +6,7 @@ roles: [Engineer, QA Engineer]
 phase: Testing
 severity: High
 applies_to: "All Claude Code versions"
+evidence: Official docs
 tags: [verification loop, testing, CI, Engineer, QA Engineer]
 sources:
   - { title: "Best practices for Claude Code (Anthropic)", url: "https://code.claude.com/docs/en/best-practices" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="High" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="High" appliesTo="All Claude Code versions" evidence="Official docs" />
 
 > In one sentence: you ask me to add a feature, I put my head down and write the implementation, and I quietly skip the unglamorous chore of setting up a test scaffold. The result: there's no place anywhere that emits a pass/fail, so both of us are left running on "looks right."
 
@@ -87,6 +88,16 @@ You: Now add CSV export — write tests covering field order and empty data firs
 Me: (tests first, implementation to all-green; from now on, if anyone reorders the fields,
      CI lights up red immediately)
 ```
+
+## When the exception applies
+
+Setting up test infrastructure first is the default, but in a few cases not setting it up is the right call:
+
+- **A throwaway spike or one-off script**: a demo written to check feasibility, a data migration you run once and delete — it won't be changed a second time, so the "will be changed a hundred times" safety net has nothing to protect, and standing up a framework and CI is pure overhead. Running it once and eyeballing the result is enough.
+- **The project already has infrastructure**: the test library, runner, and CI are all there and you're just adding a feature — then this isn't "setting up infrastructure," it's using it; this pitfall doesn't apply, and you write tests the [trust, then verify](./trust-then-verify.mdx) way.
+- **It genuinely can't be stood up, and a cheaper check exists**: for some one-off glue code, an isolated test setup costs far more than the code itself, while a type check / build / a script that diffs one expected output already gives a red/green signal — use that lightweight check instead of forcing up a whole framework.
+
+The test: the exception holds when this code **won't outlive this one use, or the infrastructure already exists**. The moment it enters the repo and gets changed repeatedly, fall back to the default: even one smoke test that genuinely passes beats zero.
 
 ## Version notes
 

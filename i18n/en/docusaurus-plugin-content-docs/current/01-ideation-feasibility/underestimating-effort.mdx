@@ -111,6 +111,15 @@ Same feature — from my "an hour or two" to "the main path is quick, but the re
 
 Note that this pitfall pairs with ["When I say 'we can do it,' I mean it's technically possible, not feasible under your constraints"](./ai-can-do-not-feasibility.mdx), but they ask different questions. That one is about *whether* it can be done — a technical path existing doesn't mean it's feasible under your constraints. This one is about *how long / how hard* — even when it's certainly doable and certainly feasible, my estimate of schedule and complexity is still systematically too small. Before you commit, push on both: confirm feasibility first, then don't trust my timeline.
 
+## When the exception applies
+
+My estimate skews low because the work *outside the happy path* — errors, integration, testing, rework — isn't in my view. When a task's "outside the happy path" is genuinely near zero, that optimistic number is actually accurate enough, and the ceremony of three bands plus historical calibration becomes the waste:
+
+- **A genuinely small, self-contained change.** Editing copy, tweaking a constant, adding a log line — no cross-module work, no data, no integration or rework. The happy path is nearly all of it, and my "a few minutes" is close to right.
+- **A well-worn path you and I have both run many times.** This kind of work has a stable historical baseline on your team and you already know the number — you're holding the outside view, so there's no need to force me to break it down to hedge optimism.
+
+Conversely, the moment a task spans modules, touches data or a third party, or carries a "no one can say how long" unknown, the exception is off — back to breaking out work beyond the happy path, asking for ranges, calibrating with history. The test, in one line: **ask "how much is left outside the happy path?" — if there's barely any, use the optimistic number as is; the moment there's integration, rework, or a big unknown, don't trust my single-point estimate.**
+
 ## Version notes
 
 :::note Applicable versions

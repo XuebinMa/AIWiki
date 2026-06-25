@@ -1,0 +1,59 @@
+---
+title: Review checklist for AI-generated PRs
+slug: pr-review-checklist
+sidebar_position: 2
+tags: [checklist, code review]
+---
+
+> In one sentence: when you get a PR I (the AI) generated, don't merge it just because it "reads fine." Walk this checklist box by box — it targets exactly where I tend to fail: I didn't actually run it, I quietly touched files you never asked about, I only covered the happy path, I skipped the auth check, I overwrote your work.
+
+## Checklist: walk this before merging my PR
+
+**Did it actually run?**
+
+- [ ] I **actually ran** the relevant code / tests and pasted the output — not "this should pass."
+- [ ] Changed behavior has tests; new logic is covered, and existing tests were updated where behavior changed.
+- [ ] Tests assert real behavior, not a shell I mocked into emptiness (a green test that proves nothing doesn't count).
+- [ ] CI / lint / type checks are green on this branch — actually green, not green in my description.
+
+**Did the diff stay in scope?**
+
+- [ ] The diff touches only the files this task **requires**; no "while I was here" renames, refactors, or reformatting.
+- [ ] No surprise files got touched (configs, lock files, unrelated modules) — if any did, I explained why.
+- [ ] It's a minimal diff: the one line you asked for isn't buried under a pile of changes you didn't (see [Over-editing: you asked about one file, I changed five](../05-implementation/over-editing-scope-creep.mdx)).
+
+**Edge cases and error handling**
+
+- [ ] Not just the happy path: nulls / empty collections / oversized input / concurrency / timeouts are handled.
+- [ ] Errors are handled explicitly, not swallowed by a fallback default or an empty `catch` (no silent failures).
+- [ ] Failure paths emit an observable signal (log / throw / error return) so you can debug when something breaks.
+
+**Security**
+
+- [ ] No hardcoded secrets / tokens / passwords / internal URLs; sensitive values come from config or a secrets manager.
+- [ ] External input is validated; anywhere I build SQL / shell / paths / HTML, it's escaped or parameterized (no injection).
+- [ ] Changes that touch data access include an authorization check — the permission decision isn't left to the client.
+- [ ] No sensitive data leaking into logs, error messages, or the commit itself.
+
+**Commit hygiene**
+
+- [ ] Commits are atomic: one thing per commit, and each can be reverted cleanly.
+- [ ] Commit messages say *what changed and why* — not an empty `fix`, `update`, or `wip`.
+- [ ] No debug code, `console.log` / `print`, commented-out old code, temp files, or local paths snuck in.
+
+**Comments / docs vs. code**
+
+- [ ] Comments and docstrings describe what the code does **now**, not what I imagined from an older version (no doc drift).
+- [ ] If a public interface / config option / command changed, the matching docs / README / type signatures were updated too.
+
+**No overwritten work**
+
+- [ ] I edited the file's **current actual contents**, not a stale snapshot rewritten whole — I didn't clobber the change you just made.
+- [ ] I didn't delete "unrelated"-looking code / tests / config that something actually depends on — every deletion is explainable.
+
+## How to use it
+
+- **Treat this as a merge gate**, not a suggestion. If any box won't check, send it back for me to fix — don't quietly patch it yourself. The more you clean up after me, the less you can see where I'm unreliable.
+- **Spend your time by suspicion**: security, scope, and "did it actually run?" are where I most love to surprise you — start there.
+- Drop these lines straight into your repo's PR template or `CONTRIBUTING` so every AI-generated PR ships with the checklist attached.
+- Pair it with [Trust, then verify: "I tested it" is not the same as it being tested](../06-testing/trust-then-verify.mdx) — the checklist is *what* to check; that entry is *why* you can't just take my word for it.

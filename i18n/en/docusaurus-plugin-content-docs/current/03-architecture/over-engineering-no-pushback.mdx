@@ -6,6 +6,7 @@ roles: [Architect]
 phase: Architecture
 severity: Medium
 applies_to: "All models"
+evidence: Research
 tags: [architecture, tech selection, over-engineering, trade-offs, Architect]
 sources:
   - { title: "Towards Understanding Sycophancy in Language Models (Anthropic)", url: "https://www.anthropic.com/research/towards-understanding-sycophancy-in-language-models" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Architect']} phase="Architecture" severity="Medium" appliesTo="All models" />
+<PitfallMeta roles={['Architect']} phase="Architecture" severity="Medium" appliesTo="All models" evidence="Research" />
 
 > In one sentence: ask me for a high-level design and I'll likely hand you something that "looks complete" — microservices, a message queue, a cache layer, the works. And whatever stack you mention in passing, I'll take it as given and build around it, rarely telling you "you don't actually need this here." The result is an architecture sized for ten times your scale, plus a pile of complexity you're carrying before you've hit any of the problems it solves.
 
@@ -91,6 +92,16 @@ Me: Simplest option: a monolith + one PostgreSQL table; notifications via DB pol
 ```
 
 Same requirements, a different way of asking, and I go from "rounding out the case for your Kafka" to "doing the math on whether that spend is worth it."
+
+## When the exception applies
+
+"Simplest design first" is the default gate — but "simpler is always better" is not the rule. In some settings, the rigor that looks like overkill is necessary engineering, not gold plating:
+
+- **Systems where failure is severe**: medical, financial settlement, aviation, industrial control. Here redundancy, graceful degradation, audit logging, and observability aren't "future-proofing" — they're the safety floor you need now. Cutting it down to "a monolith and one table" is the real dereliction.
+- **Scale or compliance is a known premise, not one I imagined**: you've told me outright "this must handle a million concurrent users" or "this is regulated and must meet data-residency and audit requirements." Designing for that scale and those constraints answers a fact, not a future I invented for you.
+- **A long-lived foundation that's very expensive to change once**: a core platform dozens of teams will depend on and that must run for a decade — thinking the interface boundaries and extension points through in v1 is far cheaper than tearing it out later.
+
+The test: does this complexity map to **a constraint you actually know** — consequences, scale, compliance, lifespan — or **a future I imagined for you**? The former is engineering; the latter is over-engineering. When unsure, ask for the simplest design first, then go line by line: "which real constraint does each piece of complexity answer?"
 
 ## Version notes
 

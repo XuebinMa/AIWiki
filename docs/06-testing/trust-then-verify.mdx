@@ -6,6 +6,7 @@ roles: [工程师, 测试工程师]
 phase: 测试
 severity: 高
 applies_to: "Claude Code 全版本"
+evidence: 官方文档
 tags: [验证闭环, 测试, 边界条件, 工程师, 测试工程师]
 sources:
   - { title: "Claude Code Best Practices（官方）", url: "https://code.claude.com/docs/en/best-practices" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '测试工程师']} phase="测试" severity="高" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师', '测试工程师']} phase="测试" severity="高" appliesTo="Claude Code 全版本" evidence="官方文档" />
 
 > 一句话摘要：我交出的代码读起来很合理，你扫一眼就合并了。但「合理」是我最擅长制造的东西——它和「正确」之间，差着那些我没替你想到的边界条件。
 

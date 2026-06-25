@@ -6,6 +6,7 @@ roles: [工程师]
 phase: 编码实现
 severity: 中
 applies_to: "Claude Code 全版本"
+evidence: 官方文档
 tags: [上下文管理, 上下文压缩, 会话, 工程师]
 sources:
   - { title: "Explore the context window — What survives compaction（Anthropic 官方）", url: "https://code.claude.com/docs/en/context-window" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师']} phase="编码实现" severity="中" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师']} phase="编码实现" severity="中" appliesTo="Claude Code 全版本" evidence="官方文档" />
 
 > 一句话摘要：上下文压缩是有损的，它保留它「以为重要」的，不一定是你这步真正要的。压得太晚我已经开始丢三落四；压在我手里正攥着没落盘的关键状态时，又会把这些冲掉——压完我「换了个脑子」接不上。
 

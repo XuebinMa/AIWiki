@@ -6,6 +6,7 @@ roles: [Architect, Project Manager]
 phase: Architecture
 severity: Medium
 applies_to: "All models"
+evidence: Community case
 tags: [architecture, technology selection, trade-off, ADR, Architect, Project Manager]
 sources:
   - { title: "Thinking, Fast and Slow — WYSIATI (What You See Is All There Is)", url: "https://en.wikipedia.org/wiki/Thinking,_Fast_and_Slow" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Architect', 'Project Manager']} phase="Architecture" severity="Medium" appliesTo="All models" />
+<PitfallMeta roles={['Architect', 'Project Manager']} phase="Architecture" severity="Medium" appliesTo="All models" evidence="Community case" />
 
 > In one sentence: when you ask me to choose, I hand you **one** option I think is best — written with confidence and fully fleshed out — but I rarely lay out the other two or three candidates, their pros and cons, or "which one to pick when." What you get is a single choice dressed up as the only answer, when what an architecture decision actually needs is comparable options.
 
@@ -108,6 +109,16 @@ Me:
 ```
 
 Same question, asked differently, and I shift from "making the call for you" back to "showing you the math, then letting you make the call."
+
+## When the exception applies
+
+"Give 2–3 candidates plus a trade-off matrix" is the default gate for high-cost decisions — not a rule that *every* choice deserves a spread of alternatives. How reversible and how expensive a decision is determines whether it's worth a trade-off table:
+
+- **A reversible trifle you can swap in one line**: which logging library, `dayjs` vs. `date-fns`, which indentation — get it wrong and you change it back in minutes. Forcing three options and a five-dimension matrix on that is ceremony, not rigor.
+- **An overwhelming ecosystem default already exists**: when nearly everyone in this language/framework uses one option with little debate, just give that one and say "this is the de facto standard" — that's more honest than pretending there are three paths.
+- **Constraints have already pinned the answer**: you've ruled that "only the team's existing stack" or "only an approved vendor" is allowed, so the candidate set is down to one. Laying out "rejected alternatives" here is going through the motions.
+
+The test: how **expensive and how reversible** is this decision? The moment it touches a database, a public API, or a core framework — a one-way door — force the alternatives out no matter how tedious. Only when it's cheap, reversible, and has an overwhelming default is handing you a single recommendation the right move. When unsure how reversible it is, default to treating it as the least reversible and lay out the alternatives.
 
 ## Version notes
 

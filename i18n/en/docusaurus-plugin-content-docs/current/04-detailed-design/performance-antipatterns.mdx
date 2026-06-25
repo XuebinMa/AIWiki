@@ -6,6 +6,7 @@ roles: [Engineer]
 phase: Detailed Design
 severity: Medium
 applies_to: "All models"
+evidence: Research
 tags: [performance, complexity, detailed design, engineer]
 sources:
   - { title: "A Performance Study of LLM-Generated Code on Leetcode (Coignion, Quinton, Rouvoy, EASE 2024)", url: "https://arxiv.org/abs/2407.21579" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Detailed Design" severity="Medium" appliesTo="All models" />
+<PitfallMeta roles={['Engineer']} phase="Detailed Design" severity="Medium" appliesTo="All models" evidence="Research" />
 
 > In one sentence: the code I hand you is functionally correct and the tests pass, but hidden inside is a query fired once per loop iteration, an O(n²) scan, a regex recompiled on every pass. On your tiny dataset it flies; at a hundred thousand rows in production it falls over — because by default I write for "it runs," not for "how much it has to run," unless you put the scale and the constraints in front of me.
 
@@ -102,6 +103,16 @@ Me: Fetch all customers in one batch query, then map in memory — queries drop 
 ```
 
 Same requirement; add three things — scale, a ban on the anti-pattern, and a demand for measurements — and I go from "I can write it but it won't scale" to "I'll do the math on this cost for you."
+
+## When the exception applies
+
+Writing for scale is the default, but in a few cases the plain form is the right one, and forcing an optimization is the "premature optimization" Knuth warned about:
+
+- **Cold paths**: a cron job that runs once a day, config loaded once at startup, an error-handling branch — even an O(n²) there, multiplied by "almost never executed," rounds to nothing. Spending engineering here is cooling code that was never hot.
+- **A hard, small upper bound on size**: input drawn from a fixed enum, 7 days in a week, 52 cards in a deck — n is forever constant-scale, and a plain nested loop is shorter and more readable than a batch query or index; the added complexity is pure liability.
+- **Readability outweighs the few microseconds here**: on a path that isn't hot, a straightforward loop beats code contorted to save time — no one feels the slowness, but everyone pays the unreadability on every maintenance pass.
+
+The test: first decide whether this is a hot path (executed at high frequency, or n that grows unbounded with real data). **Optimize only if it's hot; if it's cold or n has a small upper bound, put simplicity and readability first** — but base that call on "I know it's cold," not on "I never thought about whether it's hot."
 
 ## Version notes
 

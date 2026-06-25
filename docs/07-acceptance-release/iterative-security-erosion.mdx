@@ -6,6 +6,7 @@ roles: [工程师, 架构师, 运维工程师]
 phase: 验收与发布
 severity: 高
 applies_to: "全模型通用"
+evidence: 研究支持
 tags: [安全, 验证闭环, 质量闸门, 鉴权, 输入校验, 重构, 工程师, 架构师, 运维工程师]
 sources:
   - { title: "Security Degradation in Iterative AI Code Generation: A Systematic Analysis of the Paradox (IEEE-ISTAS 2025. arXiv 2506.11022)", url: "https://arxiv.org/abs/2506.11022" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '架构师', '运维工程师']} phase="验收与发布" severity="高" appliesTo="全模型通用" />
+<PitfallMeta roles={['工程师', '架构师', '运维工程师']} phase="验收与发布" severity="高" appliesTo="全模型通用" evidence="研究支持" />
 
 > 一句话摘要：你让我一轮轮加功能、修 bug、重构，代码看着是越改越像样了——但**安全漏洞会随迭代轮次悄悄累积**。研究发现，仅五轮迭代后严重漏洞显著上升。一个「看起来一直在变好」的过程，安全面其实在变差，到发布时已积重难返。
 

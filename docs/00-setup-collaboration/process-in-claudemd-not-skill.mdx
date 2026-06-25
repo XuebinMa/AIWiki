@@ -6,6 +6,7 @@ roles: [工程师, 架构师]
 phase: 准备与协作
 severity: 中
 applies_to: "Claude Code 全版本"
+evidence: 官方文档
 tags: [CLAUDE.md, skill, 上下文管理, 配置, 工程师, 架构师]
 sources:
   - { title: "Extend Claude with skills（官方）", url: "https://code.claude.com/docs/en/skills" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '架构师']} phase="准备与协作" severity="中" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师', '架构师']} phase="准备与协作" severity="中" appliesTo="Claude Code 全版本" evidence="官方文档" />
 
 > 一句话摘要：你把「发布的十二步流程」「数据库迁移的全套 SOP」整段写进了 `CLAUDE.md`，想着这样我什么时候都记得。结果它每次会话都常驻上下文，连「改个错别字」的任务也得先读一遍——而这些只在特定任务才用得上的步骤，本该做成按需加载的 skill。
 
@@ -125,6 +126,15 @@ flowchart TD
 ## 与《CLAUDE.md 过载》的区别
 
 [《CLAUDE.md 过载》](../05-implementation/claude-md-overload.mdx)讲的是「规则太多、被平均稀释」——是**数量**问题，解法是删减、加优先级；本条讲的是「这段流程根本不该常驻」——是**位置**问题，解法是换一层（搬进 skill 按需加载）。两者常一起出现：整段流程塞进 `CLAUDE.md`，往往正是把它推向过载的那一手。
+
+## 什么时候例外
+
+「流程做成 skill」是为了让不相关的任务不为它买单。当「按需」省不下什么、或「抽屉」本身有成本时，把流程留在 `CLAUDE.md` 反而更合适：
+
+- **几乎每个任务都要走的短流程。** 三五行、且这个仓库里基本每次都用得上的约定（比如「每次改完都按这套提交规范」）——它本来就该常驻，做成 skill 等于给一个永远要展开的东西套一层按需的壳，反添一次加载开销。
+- **小到 skill 的间接成本不划算。** 个人仓、临时项目，建目录、起 `SKILL.md`、记住去调它，这套开销比直接在 `CLAUDE.md` 留几行还高；流程短、又只有你一个人用时，就别拆。
+
+判据一句话：**先问「这段流程是不是几乎每次会话都要用」——是、且短，留 `CLAUDE.md`；只在某类任务才触发、又长，才搬进 skill。**
 
 ## 版本说明
 

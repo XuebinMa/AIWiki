@@ -6,6 +6,7 @@ roles: [Engineer]
 phase: Implementation
 severity: Medium
 applies_to: "All Claude Code versions"
+evidence: Official docs
 tags: [scope, diff review, code review, context window, Engineer]
 sources:
   - { title: "Claude Code Best Practices (Anthropic official)", url: "https://code.claude.com/docs/en/best-practices" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Implementation" severity="Medium" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer']} phase="Implementation" severity="Medium" appliesTo="All Claude Code versions" evidence="Official docs" />
 
 > In one sentence: you asked me to change one line of config, and along the way I renamed variables, refactored a nearby function, and touched two other files. The line you actually wanted is buried under changes you never asked for — a diff that should have sailed through review is now a high-risk overhaul.
 
@@ -92,6 +93,16 @@ Me: I'll change only utils.ts line 42, const MAX_RETRY = 3 → 5, nothing else. 
 You: confirmed
 Me: (changed only that line)
 ```
+
+## When the exception applies
+
+"Minimal change" is the default because most of the time the one line is all you want. But once you've made "wide scope" the task itself, expanding the change isn't overreach — it's doing what you asked:
+
+- **You explicitly asked for the big change**: "refactor this whole module to dependency injection," "unify the error-handling style across the repo" — here, touching only one line means the job's not done; the multi-file change *is* the deliverable.
+- **Greenfield / scaffolding stage**: standing up a new module from scratch, or initializing a project skeleton, never carried a "you only want that one line" constraint in the first place — laying it all out in one pass is the efficient move.
+- **A drive-by fix from the same source as the main change, already authorized**: you said "fix the obvious ones while you're in there," and that rename / reformat belongs to the same logical change and can go in the same atomic commit — not a side trip into another file.
+
+But every one of these rests on **scope you opened up explicitly**, not me stretching it because I figured "this could be better." The test, in one line: **before widening the scope, ask whether this is the scope you wanted; if you nodded, run with it; if it's my own embellishment, go back to the one line.**
 
 ## Version notes
 

@@ -6,6 +6,7 @@ roles: [Engineer, DevOps Engineer, Architect]
 phase: Acceptance & Release
 severity: High
 applies_to: "All models"
+evidence: Security advisory
 tags: [security, sensitive data, authorization, input validation, least privilege, Engineer, DevOps Engineer, Architect]
 sources:
   - { title: "OWASP Top 10:2021 (Top 10 Web Application Security Risks)", url: "https://owasp.org/Top10/" }
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'DevOps Engineer', 'Architect']} phase="Acceptance & Release" severity="High" appliesTo="All models" />
+<PitfallMeta roles={['Engineer', 'DevOps Engineer', 'Architect']} phase="Acceptance & Release" severity="High" appliesTo="All models" evidence="Security advisory" />
 
 > In one sentence: you ask me to "make the feature work," so I focus only on making it work. Security is a non-functional requirement that is invisible by default — unless you ask for it explicitly, I won't reason in terms of least privilege, data sensitivity tiers, or defense in depth. The result: hardcoded keys committed to the repo, endpoints left unauthenticated, and sensitive data written into logs and error messages.
 
@@ -137,6 +138,7 @@ This entry covers **traditional application security vulnerabilities and sensiti
 
 ## Further reading and sources
 
+- Real-world case: [Samsung engineers pasted source code into ChatGPT and leaked secrets three times in 20 days](../cases/samsung-chatgpt-source-leak.mdx)
 - [OWASP Top 10:2021 (Top 10 Web Application Security Risks)](https://owasp.org/Top10/)
 - [OWASP Top 10 for LLM Applications 2025](https://genai.owasp.org/llm-top-10/)
 - [OWASP Cheat Sheet Series (Logging / Secrets Management / SQL Injection Prevention)](https://cheatsheetseries.owasp.org/)

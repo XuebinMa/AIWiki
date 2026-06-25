@@ -6,6 +6,7 @@ roles: [项目经理, 工程师]
 phase: 需求分析
 severity: 高
 applies_to: "Claude Code 全版本"
+evidence: 官方文档
 tags: [需求澄清, 歧义, 计划模式, 项目经理, 工程师]
 sources:
   - { title: "Claude Code Best Practices (Anthropic Engineering)", url: "https://www.anthropic.com/engineering/claude-code-best-practices" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['项目经理', '工程师']} phase="需求分析" severity="高" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['项目经理', '工程师']} phase="需求分析" severity="高" appliesTo="Claude Code 全版本" evidence="官方文档" />
 
 > 一句话摘要：你的需求里有歧义、缺口或好几种合理解读时，我大概率不会停下来问你，而是默默挑一种实现下去——等你看到成品，跑偏的是整个方向，不是细节。
 
@@ -74,6 +75,15 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 你：（逐条拍板）
 我：（基于确认后的需求实现，一次到位）
 ```
+
+## 什么时候例外
+
+「歧义先问、别擅自挑一种实现」是默认闸门，但前提是这需求有个你心里已有的「对的答案」等我命中。有些场景，模糊是你刻意留的，让我自己拐弯反而是对的：
+
+- **目标就是探索、不是交付**：你说「随便给我几种做这个功能的思路」「先做个能玩的原型，方向我还没定」——这里你要的正是我对岔路各拐一种、把可能性摊给你看，停下来反问反而打断了发散。
+- **明确授权我用判断、别打断**：你说「细节你定，按惯例来，别为小歧义停下来问我」——你已经把拐弯权交给我了，此时按合理默认往前走是遵命，不是擅自。
+
+判据：区别在于这需求**有没有一个你确知、等我命中的答案**。有，就先把歧义逼到台面问清楚；如果你要的本就是开放探索、或已显式授权我替你拿主意，那就大胆挑一种实现——但把「我替你拐了哪几个弯」标出来，方便你回看。
 
 ## 版本说明
 

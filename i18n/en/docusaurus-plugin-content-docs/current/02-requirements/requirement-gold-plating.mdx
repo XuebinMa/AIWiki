@@ -92,6 +92,16 @@ You: Neither for now.
 Me: Done—delivering one button + CSV.
 ```
 
+## When the exception applies
+
+"Don't add anything you didn't explicitly ask for" is the default gate — but what it blocks is **surplus features**, not the **floor of correctness and safety**. A few things you "never named" that I'm being diligent, not gold-plating, to add:
+
+- **The baseline of correctness and security**: an auth check, input validation, SQL-injection protection, error handling, not writing secrets into the logs. Even unlisted, these are part of "doing this thing right" — leaving them out is the dereliction.
+- **You've explicitly delegated judgment**: you say "add the robustness you think is needed, don't wait for me to itemize it." Filling in the edges with ordinary engineering sense here is following orders, not overstepping.
+- **A personal throwaway you'll definitely discard**: a one-off script, run only by you, with zero cost to change. Writing a bit of extra validation or a small convenience here is too cheap to be worth gating.
+
+The test: is the extra thing the **floor required to get this right** (then add it), or a **new feature / new scope you didn't ask for and unrelated to the core need** (that's gold plating — list it, don't build it)? When unsure, fill in security and correctness by default; on feature scope, build only the one thing you spelled out.
+
 ## Version notes
 
 :::note Applies to

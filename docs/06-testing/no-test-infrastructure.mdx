@@ -6,6 +6,7 @@ roles: [工程师, 测试工程师]
 phase: 测试
 severity: 高
 applies_to: "Claude Code 全版本"
+evidence: 官方文档
 tags: [验证闭环, 测试, CI, 工程师, 测试工程师]
 sources:
   - { title: "Best practices for Claude Code（Anthropic 官方）", url: "https://code.claude.com/docs/en/best-practices" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '测试工程师']} phase="测试" severity="高" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师', '测试工程师']} phase="测试" severity="高" appliesTo="Claude Code 全版本" evidence="官方文档" />
 
 > 一句话摘要：你让我加功能，我会埋头写实现，顺手跳过「搭测试脚手架」这件不出活的事。结果是：没有一处能跑出「通过/失败」的地方，我和你都只能凭「看起来对」过日子。
 
@@ -83,6 +84,16 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 你：现在加 CSV 导出，先写测试覆盖字段顺序和空数据，再写实现让它们变绿。
 我：（测试先行，实现到全绿；以后任何人改字段顺序，CI 立刻亮红）
 ```
+
+## 什么时候例外
+
+「先搭测试设施」是默认，但有几种情况，不搭才是对的：
+
+- **写完即弃的探针 / 一次性脚本**：为验证可行性临时写的 demo、跑一遍就删的数据迁移——它根本不会被改第二次，那张「未来改一百次」的安全网没有对象，建框架配 CI 是纯开销。靠你跑一遍肉眼确认就够了。
+- **项目已经有现成设施**：测试库、runner、CI 都在，你只是加个功能——这时不是「搭设施」，是直接用，本条不适用，照[信任但不验证](./trust-then-verify.mdx)写测试即可。
+- **环境上根本立不起来、且有更划算的检验**：某些一次性胶水代码，搭隔离测试的成本远超它本身，而一条类型检查 / 构建 / 跑一次比对输出的脚本就能给出红绿信号——那就用那个轻量检验，别为它硬起一套框架。
+
+判据：例外成立，前提是这段代码**活不过这一次，或设施已存在**。只要它会进仓库、会被反复修改，就回到默认：哪怕只有一个真跑通的冒烟测试，也好过零。
 
 ## 版本说明
 

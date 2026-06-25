@@ -6,6 +6,7 @@ roles: [工程师, 运维工程师, 架构师]
 phase: 验收与发布
 severity: 高
 applies_to: "全模型通用"
+evidence: 安全报告
 tags: [安全, 敏感数据, 鉴权, 输入校验, 最小权限, 工程师, 运维工程师, 架构师]
 sources:
   - { title: "OWASP Top 10:2021（Web 应用十大安全风险）", url: "https://owasp.org/Top10/" }
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '运维工程师', '架构师']} phase="验收与发布" severity="高" appliesTo="全模型通用" />
+<PitfallMeta roles={['工程师', '运维工程师', '架构师']} phase="验收与发布" severity="高" appliesTo="全模型通用" evidence="安全报告" />
 
 > 一句话摘要：你让我「把功能做出来」，我就只盯着功能跑通——安全是默认不可见的非功能需求，除非你显式要求，我不会主动按最小权限、敏感数据分级、纵深防御去想。结果是硬编码的密钥进了仓库、该鉴权的接口裸奔、敏感信息写进了日志和报错。
 
@@ -135,6 +136,7 @@ def charge(req, current_user):
 
 ## 延伸阅读与出处
 
+- 真实案例：[Samsung 工程师把源码贴进 ChatGPT，20 天内泄密三次](../cases/samsung-chatgpt-source-leak.mdx)
 - [OWASP Top 10:2021（Web 应用十大安全风险）](https://owasp.org/Top10/)
 - [OWASP Top 10 for LLM Applications 2025](https://genai.owasp.org/llm-top-10/)
 - [OWASP Cheat Sheet Series（Logging / Secrets Management / SQL Injection Prevention）](https://cheatsheetseries.owasp.org/)

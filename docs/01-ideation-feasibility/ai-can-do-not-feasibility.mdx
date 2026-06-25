@@ -6,6 +6,7 @@ roles: [项目经理, 架构师]
 phase: 灵感与可行性
 severity: 高
 applies_to: "Claude Code 全版本"
+evidence: 社区案例
 tags: [可行性, 技术选型, 权衡, 过度设计, 项目经理, 架构师]
 sources:
   - { title: "Feasibility study — Wikipedia (TELOS: Technical / Economic / Legal / Operational / Scheduling)", url: "https://en.wikipedia.org/wiki/Feasibility_study" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['项目经理', '架构师']} phase="灵感与可行性" severity="高" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['项目经理', '架构师']} phase="灵感与可行性" severity="高" appliesTo="Claude Code 全版本" evidence="社区案例" />
 
 > 一句话摘要：你问「这个能不能做」，我大概率答「能」——但我说的是「技术上能实现」，不是「在你的预算、时延、合规、团队和数据约束下可行」。把我那句乐观的「能做」直接当成可行性结论，你就跳过了真正决定成败的那些约束。
 
@@ -96,6 +97,15 @@ flowchart TD
 ```
 
 同一个功能，从「能做」变成「在你的约束下，这几处可能不可行，先验证它们」。
+
+## 什么时候例外
+
+逼我拆维度、说约束，是因为「能实现」和「在约束下可行」之间隔着预算、合规、规模这些东西。当这些约束本来就不存在时，把我那句「能做」直接当结论，是合理的：
+
+- **给自己用的一次性原型 / spike。** 没有预算线、没有合规边界、不上规模、数据就在你本地——「技术上存在路径」和「你的约束下可行」此刻几乎重合，再走五维尽调是空转。
+- **目的就是探路，做不成也无损。** 你要的本就是「先跑通看看」，失败的代价只是几小时——这时该追的是「最快怎么验证」，不是「在什么约束下不可行」。
+
+反过来，只要预算、时延、合规、数据出境、规模里有任何一项真的会卡你，例外立刻失效——回到分维度证伪。判据一句话：**先问「除了技术，还有没有哪条现实约束真的会决定成败」——有，就别信那句『能做』，逐维追问；一条都没有，才可以拿它当结论。**
 
 ## 版本说明
 

@@ -6,6 +6,7 @@ roles: [项目经理, 工程师, 架构师]
 phase: 需求分析
 severity: 高
 applies_to: "Claude Code 全版本"
+evidence: 社区案例
 tags: [需求澄清, 假设, 提示设计, 项目经理, 工程师, 架构师]
 sources:
   - { title: "Top 10 for LLM & Generative AI — LLM09: Misinformation / Overreliance (OWASP)", url: "https://genai.owasp.org/llmrisk/llm092025-misinformation/" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['项目经理', '工程师', '架构师']} phase="需求分析" severity="高" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['项目经理', '工程师', '架构师']} phase="需求分析" severity="高" appliesTo="Claude Code 全版本" evidence="社区案例" />
 
 > 一句话摘要：需求看起来够清楚，我就直接做了——但实现里我默默补进了一堆你没说的前提（数据格式、规模、并发、默认值、目标用户、错误处理、技术栈）。你只看到结果，看不到它建在哪些假设上，于是我们各跑各的，等假设浮现才发现错位。
 
@@ -78,6 +79,16 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 ```
 
 差别不在代码量，在于**那串假设从「埋进代码」变成了「摆上桌面」**——错位在动手前就被你拦下了。
+
+## 什么时候例外
+
+「实现前先把假设摆上台面」是默认闸门，但前提是那些缺口真的是我在猜。有些场景，缺口已有权威答案、或代价低到不值得停，照默认走是对的：
+
+- **缺口由权威来源唯一确定**：要补的值早就写死在已有的 API 契约、数据库 schema、`CLAUDE.md` 的约定里——我是在**应用已知答案**，不是替你赌。把它当「待确认假设」一条条念出来，是噪音不是严谨。
+- **改起来零成本的小事**：改个错别字、加行日志、调个常量——一句话能说清 diff、错了几秒就改回来。为它先列一串假设，是为流程而流程。
+- **你显式授权我用判断**：你说「常规的你按惯例定，别为这些停下来问」——按合理默认往前走是遵命，不是默默做主。
+
+判据：区别在于这个缺口的答案是**你（或某份权威产物）已经确定、我去命中**，还是**我没依据、只能猜**。前者照默认填、顶多一句话带过；后者必须先摆上台面——拿不准答案算不算「已确定」时，默认当成我在猜，先列出来确认。
 
 ## 版本说明
 

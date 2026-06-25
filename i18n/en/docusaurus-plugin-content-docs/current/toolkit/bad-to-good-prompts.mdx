@@ -1,0 +1,143 @@
+---
+title: Bad prompt → good prompt, side by side
+slug: bad-to-good-prompts
+sidebar_position: 5
+tags: [template, prompting]
+---
+
+> In one sentence: same request, different wording, wildly different output from me. Below are 6 pairs — each is "how you tend to phrase it → I'll probably go sideways" next to "phrase it like this → I'll get it right the first time." Patch your prompt against the matching one.
+
+It's not that I can't parse what you say. It's that I'll quietly fill in the parts you left out — and the direction I fill in is often not the one you wanted. This page lays out the six most common phrasings where I guess wrong. Each pair gives the bad version, one line on why it traps me, then the good version. Grab the one that fits what you're doing and copy it.
+
+Quick test for whether a prompt is good: hand it to a teammate who's never seen your project. Can they start without asking a question? If yes, I probably can too.
+
+---
+
+## 1. Vague requirement: you think you were clear, but you left a dozen forks in the road
+
+```text
+Bad: Add search to the user list.
+```
+
+**Why it fails me**: which fields to search, fuzzy match or not, search-as-you-type or hit-enter, how to show an empty result — for every gap you leave, I pick one behavior and don't tell you I picked it. By the time you see the result, what's off is the direction, not the details. See [when a requirement is ambiguous, I pick one reading and build it](../02-requirements/vague-as-clear.mdx).
+
+```text
+Good: Add a search box to the user list page.
+- Search the name and email fields, substring match, case-insensitive.
+- Auto-trigger 300ms after the user stops typing (debounce), no Enter key.
+- On no results, show "No matching users", not an empty table.
+- Reuse the existing <SearchInput> component, don't write a new one.
+```
+
+Block off every fork where I might turn the wrong way. You don't have to write a spec — but anywhere a second reader would give a different answer, say one line about it.
+
+---
+
+## 2. No constraints given: skip security / deps / style, and I default to whatever was most common in training
+
+```text
+Bad: Write a function that stores the uploaded avatar to S3.
+```
+
+**Why it fails me**: I don't know your security lines or your engineering conventions, so I'll fill in a set of "most common on the internet" defaults — maybe hardcode a key, `pip install` an SDK your team has never used, write in a style that clashes with the rest of your codebase. Those aren't bugs; they're decisions I made for you that you never agreed to.
+
+```text
+Good: Write a function that stores the uploaded avatar to S3. Constraints:
+- Read credentials from env vars (AWS_* already set), never hardcode.
+- Allow jpg/png only, cap at 5MB, check the MIME type before storing —
+  don't trust the file extension.
+- Use the boto3 we already depend on, don't add a new dependency.
+- Match the existing style in services/: functional, throw StorageError explicitly.
+```
+
+Security, dependencies, and style are the three kinds of default I'm most likely to fill in wrong and make you redo. Cheaper to hand them over up front than to catch them in review.
+
+---
+
+## 3. No plan requested before a big change: tell me to just do it, and I'll dive straight into editing
+
+```text
+Bad: Switch the whole auth module from sessions to JWT.
+```
+
+**Why it fails me**: this touches many files and can break login. If you don't have me lay out an approach first, I'll think-as-I-edit — and by the time you notice the plan is wrong, I've already churned half the module, and rolling back costs more than aligning would have up front. See [skipping plan mode](../00-setup-collaboration/skipping-plan-mode.mdx).
+
+```text
+Good: I want to move auth from sessions to JWT. Don't write code yet —
+use plan mode to give me an approach: which files change, how tokens get
+issued and refreshed, how existing sessions migrate cleanly, what the
+gotchas are. I'll confirm before you touch anything.
+```
+
+For any change that's hard to undo once it's wrong, ask for a plan first and code second. Let me draw you the route; two minutes of you blocking a wrong direction beats me running half an hour down it and having to tear it out.
+
+---
+
+## 4. No verification requested: say only "implement", and I'll hand you code that merely looks runnable
+
+```text
+Bad: Implement password strength validation.
+```
+
+**Why it fails me**: "implement" means "write it" to me, not "prove it's correct." I'll hand you code that reads reasonably, but whether the edge cases (empty string, very long, Unicode, all spaces) are handled — I didn't check, and neither do you. It may split open on the first real input.
+
+```text
+Good: Implement password strength validation: ≥12 chars, must include
+upper, lower, and a digit. Also:
+- Write jest unit tests covering: valid, too short, missing digit, empty
+  string, all-spaces, very long.
+- Run `npm test` and paste me the result; fix anything red until all green.
+```
+
+Spell out what "done" means as verifiable actions — which tests to write, which command to run, what result you expect to see. Otherwise what I hand you is "looks done", not "is done".
+
+---
+
+## 5. Unbounded scope: one open-ended instruction, and I'll change more and more
+
+```text
+Bad: While you're in there, clean this file up — optimize whatever you can.
+```
+
+**Why it fails me**: "optimize whatever you can" is a permission slip with no edges. I'll rename variables, restructure things, "fix" stuff I assume is a problem — and a change that should've been 3 lines becomes a 200-line diff, mixed with things you didn't ask for and can't review quickly. See [over-editing and scope creep](../05-implementation/over-editing-scope-creep.mdx).
+
+```text
+Good: parseConfig in this file has a bug: it throws on an empty object.
+Fix only that one function so an empty object returns the default config.
+Don't touch other functions, don't reformat, don't rename — minimal diff.
+```
+
+Give me a clear boundary, and say what *not* to do. The smaller the scope, the less I'll improvise, and the faster you can review. Want several things done? Split them into separate asks, each one bounded.
+
+---
+
+## 6. Dumping huge context: paste the whole file / whole log at me instead of the relevant slice
+
+````text
+Bad: [pastes the entire 2000-line server.js]
+There's a bug in here somewhere, help me find it.
+````
+
+**Why it fails me**: my attention gets diluted by the irrelevant parts. The longer the context, the more easily I skip the middle, and the 20 lines that actually matter drown in the noise — you'd think more is clearer, but it's often the opposite.
+
+````text
+Good: UserService.login() returns 200 instead of 401 on a wrong password.
+Relevant code (server.js:142-180):
+
+```js
+async function login(req, res) {
+  // ... these 40 lines ...
+}
+```
+
+The 3 key lines from the error log:
+[paste those 3 lines]
+
+Help me pin down why the status code is wrong. I'll send more context if you need it.
+````
+
+Give me the relevant slice, not the whole block. Include line numbers and a minimal reproducible snippet; if I'm missing something, I'll ask — that beats me hunting through two thousand lines for a needle.
+
+---
+
+These six aren't for memorizing. One rule covers them: **anywhere I might guess for you, say it up front** — the fields, the constraints, whether to plan first, what counts as verified, where to stop editing, which slice to look at. Squeeze out the room to guess, and my output finally gets steady.

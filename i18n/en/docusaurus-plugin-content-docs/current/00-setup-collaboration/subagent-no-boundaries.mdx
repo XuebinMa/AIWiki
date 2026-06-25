@@ -6,6 +6,7 @@ roles: [Architect, Engineer]
 phase: Setup & Collaboration
 severity: High
 applies_to: "All Claude Code versions"
+evidence: Official docs
 tags: [subagent, multi-agent collaboration, responsibility boundaries, shared contract, architect, engineer]
 sources:
   - { title: "Create custom subagents (Claude Code official)", url: "https://code.claude.com/docs/en/sub-agents" }
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Architect', 'Engineer']} phase="Setup & Collaboration" severity="High" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Architect', 'Engineer']} phase="Setup & Collaboration" severity="High" appliesTo="All Claude Code versions" evidence="Official docs" />
 
 > In one sentence: "spin up three subagents and do it in parallel" sets us all running, but you never said who owns which part, who's allowed to touch which files, or how we hand off interfaces and data formats to each other. The result: we edit the same files and overwrite each other, we each assume a different version of "the current state," and the pieces don't line up when assembled. Parallelism didn't speed anything up — it manufactured a pile of conflicts for you to clean up.
 
@@ -106,6 +107,15 @@ You: (all three outputs agree on fields, no file conflicts, integration passes s
 ```
 
 The difference isn't that the subagents got smarter. It's that you did the coordinator's job — deciding who touches what, and what to align on — before going parallel, so the assembly afterward doesn't make you the human reconciliation desk.
+
+## When the exception applies
+
+What you must define first is the *contract*, not the *ceremony*. When the task's structure already guarantees no collision, that written-down shared contract can be skipped — an interface that doesn't exist needs no alignment:
+
+- **A read-only, independent fan-out.** Send three subagents to research three libraries, read three unrelated parts of the code, each write a report — they don't write to disk, don't share output, so there's no last-write-wins and no fields to align.
+- **Structurally disjoint output.** Each generates a standalone file, imports nothing from the others, touches no shared definition (three independent scripts, say) — boundaries are already pinned by how the task is split, and writing a contract would be duplicated work.
+
+Conversely, the moment they land in the same files, or have to consume each other's interfaces or data formats, the exception is off — back to "define the contract and file scopes before going parallel." The test, in one line: **ask "will their outputs touch the same file, or need to align on the same interface?" — if yes, define the contract first; only when they're structurally unrelated can you go parallel bare.**
 
 ## Version notes
 

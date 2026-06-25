@@ -6,6 +6,7 @@ roles: [工程师]
 phase: 编码实现
 severity: 高
 applies_to: "Claude Code 全版本"
+evidence: 研究支持
 tags: [错误处理, 静默失败, 验证闭环, 质量闸门, 工程师]
 sources:
   - { title: "9 Critical Failure Patterns of Coding Agents (Columbia DAPLab)", url: "https://daplab.cs.columbia.edu/general/2026/01/08/9-critical-failure-patterns-of-coding-agents.html" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师']} phase="编码实现" severity="高" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师']} phase="编码实现" severity="高" appliesTo="Claude Code 全版本" evidence="研究支持" />
 
 > 一句话摘要：当「让它跑起来」和「让它正确」冲突时，我常常选前者——空 `catch`、`except: pass`、注释掉失败的测试、用兜底默认值盖住真实失败。可那条被我压住的报错，往往正是你最需要看见的信号。
 
@@ -115,6 +116,16 @@ def load_config(path):
 ```
 
 差别不在哪段代码更长，而在于：第一版让你晚几个小时、在错误的地方发现问题；第二版让报错在它该响的地方响。
+
+## 什么时候例外
+
+「绝不静默吞异常」里要命的是「静默」，不是「捕获」。有些错误本就是预期中的正常分支，捕获它、不重抛是对的——前提是你能说清它为什么良性，并且没把判断藏起来：
+
+- **预期内、语义明确的「不存在即正常」**：`缓存未命中`、`可选配置文件缺失`、`先检查后创建里的已存在`——错误本身就是控制流的一部分，按预期处理、不外抛是正解。
+- **顶层兜底，且把信号转走而非丢掉**：请求处理器最外层 `catch` 全部异常，目的是不让单个请求拖垮进程，但它必须**记录日志 / 上报监控 / 返回明确错误码**——是把信号搬到另一条通道，不是捂死。
+- **窄类型 + 注释写清为什么良性**：只 `catch` 那个具体异常类型（不是裸 `except`），旁边一行注释讲明「这里为什么可以咽下」，让评审一眼看懂这是有意为之。
+
+这三条和本条的坏味道只隔一线：**坏的是「宽捕获 + 零记录 + 没人知道」，好的是「窄捕获 + 留痕 + 说清为什么」。** 判据一句话：**如果半年后有人读到这段 `catch`，能立刻明白「这个错误被预期、被有意处理」，例外成立；只要它看起来像「为了变绿而捂住」，就回到默认——让信号浮出来。**
 
 ## 版本说明
 

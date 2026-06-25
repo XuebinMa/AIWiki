@@ -6,6 +6,7 @@ roles: [Project Manager, Engineer, Architect]
 phase: Requirements
 severity: High
 applies_to: "All Claude Code versions"
+evidence: Community case
 tags: [requirements clarification, assumptions, prompt design, project manager, engineer, architect]
 sources:
   - { title: "Top 10 for LLM & Generative AI — LLM09: Misinformation / Overreliance (OWASP)", url: "https://genai.owasp.org/llmrisk/llm092025-misinformation/" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Project Manager', 'Engineer', 'Architect']} phase="Requirements" severity="High" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Project Manager', 'Engineer', 'Architect']} phase="Requirements" severity="High" appliesTo="All Claude Code versions" evidence="Community case" />
 
 > In one sentence: the requirement looked clear enough, so I just built it—but along the way I silently filled in a pile of premises you never stated (data format, scale, concurrency, defaults, target users, error handling, tech stack). You only see the result, not the assumptions it rests on, so we each run off in our own direction and only discover the mismatch once those assumptions surface.
 
@@ -83,6 +84,16 @@ Me: (implements against the confirmed assumptions, right the first time)
 ```
 
 The difference isn't in the amount of code—it's that **the string of assumptions moved from "buried in the code" to "on the table,"** and you caught the mismatch before I started.
+
+## When the exception applies
+
+"Put the assumptions on the table before implementing" is the default gate — but it assumes the gaps are genuinely ones I'm guessing at. In some settings the gap already has an authoritative answer, or the cost is too low to stop for, and going with the default is right:
+
+- **The gap is fixed by an authoritative source**: the value to fill is already pinned down in an existing API contract, a database schema, a convention in `CLAUDE.md`. I'm **applying a known answer**, not betting on your behalf. Reciting it as an "assumption to confirm" is noise, not rigor.
+- **A trifle that's free to change**: fixing a typo, adding a log line, tweaking a constant — a one-sentence diff you can revert in seconds. Listing a string of assumptions first is process for its own sake.
+- **You've explicitly delegated judgment**: you say "decide the routine stuff by convention, don't stop to ask me about these." Proceeding on reasonable defaults is following orders, not quietly deciding for you.
+
+The test: is the answer to this gap **already settled — by you or by some authoritative artifact — for me to hit**, or **something I have no basis for and can only guess at**? Fill the former by default, with at most a one-line mention; surface the latter first. When unsure whether the answer counts as "settled," default to treating it as a guess and list it for confirmation.
 
 ## Version notes
 

@@ -6,6 +6,7 @@ roles: [工程师]
 phase: 编码实现
 severity: 中
 applies_to: "Claude Code 全版本"
+evidence: 官方文档
 tags: [git, 提交粒度, 提交信息, 原子提交, 代码评审, 工程师]
 sources:
   - { title: "Conventional Commits 1.0.0（规范官网）", url: "https://www.conventionalcommits.org/en/v1.0.0/" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师']} phase="编码实现" severity="中" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师']} phase="编码实现" severity="中" appliesTo="Claude Code 全版本" evidence="官方文档" />
 
 > 一句话摘要：交给我连续干，我攒出来的常是一个几十文件、上千行的巨型提交，信息却写着「update code」。再加上我会把构建产物、`.env`、注释掉的死代码一股脑提交进去。结果是历史不可读：`git bisect`、回滚、code review 全失效，出了问题你定位不到是哪一次改动。
 
@@ -128,6 +129,16 @@ $ git log
 ```
 
 差别不在我变细心了，而在于那个巨型提交落地之前，多了一道「先拆分、先报清单、你能喊停」的流程——`.env` 和 `dist/` 也在它进库之前就被挡下了。
+
+## 什么时候例外
+
+「小而原子、信息讲清为什么」是默认，但提交粒度的价值来自「将来有人要读这段历史」。当这个前提不成立时，强求原子提交反而是浪费：
+
+- **一次性 spike / 探针分支，注定整条被压扁**：你只是想验证一个想法能不能成，分支用完即弃、合进主干时统一 `squash` 成一个提交。中间过程的粒度无人会读，攒成一坨临时提交反而省事。
+- **WIP 检查点，纯为自己存盘**：长任务里我每隔一阵 `commit -m "wip"` 只为有个能 `reset` 回去的锚点，不打算让它进入正式历史——合并前会 `rebase` 重新整理。
+- **机器生成、整体替换的产物**：锁文件、`generated/` 目录这类一次性整片重生成的内容，拆开提交没有语义价值，一个「regenerate X」的提交反而最清楚。
+
+但这几条全都假设「这段历史是私有的、且会在进主干前被重写或压扁」。判据一句话：**只要这些提交会以原样进入别人 `git bisect`、`git blame`、code review 的视野，例外就不成立**——回到小而原子、讲清为什么。
 
 ## 版本说明
 

@@ -6,6 +6,7 @@ roles: [Project Manager, Engineer, Architect]
 phase: Setup & Collaboration
 severity: Medium
 applies_to: "All Claude Code versions"
+evidence: Official docs
 tags: [plan mode, collaboration stance, rework, project manager, engineer, architect]
 sources:
   - { title: "Best practices for Claude Code · Explore first, then plan, then code (Anthropic official)", url: "https://code.claude.com/docs/en/best-practices" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Project Manager', 'Engineer', 'Architect']} phase="Setup & Collaboration" severity="Medium" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Project Manager', 'Engineer', 'Architect']} phase="Setup & Collaboration" severity="Medium" appliesTo="All Claude Code versions" evidence="Official docs" />
 
 > In one sentence: for a task that isn't quite trivial, instead of having me enter plan mode to investigate, draft a plan, and wait for your sign-off, you just say "go." I dive down one path, and only after I've changed a pile of files do you notice I misread you. The cost of that rework is far higher than the two minutes it would have taken to glance at a plan.
 
@@ -97,6 +98,15 @@ Me: (execute the confirmed plan, right the first time)
 ```
 
 The difference isn't that I got smarter this time. It's that the directional misunderstanding was seen and straightened out while it was still one sentence — instead of after it grew into eight files.
+
+## When the exception applies
+
+Plan mode exists for "I might guess your intent wrong." When there's no ambiguity at all, or a wrong guess costs almost nothing, skipping it and just letting me go is the right call — wrapping it in plan mode only adds a round-trip:
+
+- **You can describe the final diff in one sentence.** Fixing a typo, adding a log line, renaming a variable, a mechanical change to your exact instruction — intent is unambiguous, and a plan would just restate that one sentence.
+- **A reversible, tightly-scoped small change.** The blast radius is one or two files, a mistake is obvious at a glance, rollback costs near zero — correcting after the fact is faster than aligning up front, so act first and look.
+
+Conversely, the moment a task is ambiguous, spans multiple files, or carries a directional decision ("switch the auth scheme," "add multi-tenancy"), the exception is off — back to planning first. The test, in one line: **if you can describe the final diff in one sentence, skip the plan; if you can't, plan first.**
 
 ## Version notes
 

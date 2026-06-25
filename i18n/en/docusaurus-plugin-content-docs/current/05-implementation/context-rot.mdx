@@ -6,6 +6,7 @@ roles: [Engineer, Architect]
 phase: Implementation
 severity: Medium
 applies_to: "All models"
+evidence: Research
 tags: [context management, context window, attention dilution, retrieval, engineer, architect]
 sources:
   - { title: "Lost in the Middle: How Language Models Use Long Contexts (TACL; arXiv 2307.03172)", url: "https://arxiv.org/abs/2307.03172" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect']} phase="Implementation" severity="Medium" appliesTo="All models" />
+<PitfallMeta roles={['Engineer', 'Architect']} phase="Implementation" severity="Medium" appliesTo="All models" evidence="Research" />
 
 > In one sentence: "feed it the whole repo / the whole long doc and it surely saw all of it" is an illusion. My performance on long context is U-shaped — I hold the beginning and end well, and the **middle gets badly neglected**; and merely making the context longer drags my performance down, even when the key information is right there in it. More context ≠ better.
 
@@ -82,6 +83,16 @@ Me: (with curated relevant snippets + the pinned key constraint, get it right fi
 ```
 
 The difference isn't that I tried harder this time — it's that you picked out the relevant information and put the key constraint where my attention can reach it, instead of betting I'd fish it out of the middle of a huge block.
+
+## When the exception applies
+
+"Few and relevant" is the default, not an absolute. A few cases where feeding more is actually right:
+
+- **The task genuinely needs a global view and the total stays within the effective window**: cross-file refactors, global consistency checks — where the information is tightly linked and dropping any piece loses something. The key is judging the *effective* length, not what the window nominally holds.
+- **You've wired up retrieval + re-ranking + structured summaries**: you're not dumping raw text but compressing the long material into a structured summary / index first, then pulling snippets on demand — the cost of length is hedged by engineering. Here "it's all there" means an organized whole, not a bucket tipped in.
+- **Key information sits at both ends and is repeated up top**: the ends of the U are the high ground; deliberately placing key constraints at the head and tail, repeating once if needed, can keep them alive even in a longer context.
+
+The test: the exception holds only when you've actively managed the length (curation / retrieval / pinning / summarizing), rather than letting "I read it all anyway" stand in for "thinking about what to feed."
 
 ## Version notes
 

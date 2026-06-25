@@ -6,6 +6,7 @@ roles: [运维工程师, 架构师, 工程师]
 phase: 准备与协作
 severity: 高
 applies_to: "全模型通用（含 Claude Code）"
+evidence: 安全报告
 tags: [MCP, 提示注入, 过度代理, 最小权限, 安全, 运维工程师, 架构师, 工程师]
 sources:
   - { title: "LLM06:2025 Excessive Agency（OWASP Gen AI Security Project）", url: "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/" }
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['运维工程师', '架构师', '工程师']} phase="准备与协作" severity="高" appliesTo="全模型通用（含 Claude Code）" />
+<PitfallMeta roles={['运维工程师', '架构师', '工程师']} phase="准备与协作" severity="高" appliesTo="全模型通用（含 Claude Code）" evidence="安全报告" />
 
 > 一句话摘要：你给我接 MCP server 时图省事，一把授予整库读写、生产数据库、密钥、对外发请求的工具。问题不只是「我可能误用」——你每多给我一个高权限 MCP 工具，就多开一条提示注入的攻击路径：我读到的某条 issue、某个网页里藏的恶意指令，可能借我手里的工具把数据送出去。
 

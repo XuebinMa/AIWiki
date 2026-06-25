@@ -6,6 +6,7 @@ roles: [工程师]
 phase: 编码实现
 severity: 中
 applies_to: "Claude Code 全版本"
+evidence: 研究支持
 tags: [注释, 文档, 文档漂移, 可维护性, 代码评审, 工程师]
 sources:
   - { title: "Fengcai Wen et al. — A Large-Scale Empirical Study on Code-Comment Inconsistencies (ICPC 2019)", url: "https://www.inf.usi.ch/lanza/Downloads/Wen2019a.pdf" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师']} phase="编码实现" severity="中" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师']} phase="编码实现" severity="中" appliesTo="Claude Code 全版本" evidence="研究支持" />
 
 > 一句话摘要：我能生成读起来很全、很专业的注释和文档，但「读起来对」不等于「跟代码对得上」。它们可能一开始就不准，或者你改了代码我没同步——错的注释比没有注释更坑，因为它让后来人（和下一轮的我）基于谎言做判断。
 

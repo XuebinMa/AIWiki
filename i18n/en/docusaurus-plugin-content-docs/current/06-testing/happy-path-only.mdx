@@ -6,6 +6,7 @@ roles: [Engineer, QA Engineer]
 phase: Testing
 severity: High
 applies_to: "All Claude Code versions"
+evidence: Official docs
 tags: [Testing, boundary conditions, happy path, verification loop, Engineer, QA Engineer]
 sources:
   - { title: "Claude Code Best Practices (official)", url: "https://code.claude.com/docs/en/best-practices" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="High" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="High" appliesTo="All Claude Code versions" evidence="Official docs" />
 
 > In one sentence: most of the tests I write for you verify that "it works when everything is fine." Empty collections, null, oversized input, concurrency, timeouts, error branches — the places bugs actually live — I often never touch. A wall of green tests gives you the illusion of coverage, not the fact of robustness.
 
@@ -95,6 +96,16 @@ Me: (iterates to all-green; the boundaries get forced out one by one)
 ```
 
 Same function: "add tests" yields a green illusion of the happy path; "list the boundaries first, then write one test per class" yields tests that actually touched the painful spots.
+
+## When the exception applies
+
+Testing the boundaries is the default, but in a few cases covering only the happy path is a reasonable trade:
+
+- **A throwaway spike or prototype**: a demo thrown together to check whether an approach is viable — it never ships and gets deleted after use, so one smoke test through the happy path answers your question, and filling in the boundaries is running a physical on code you're about to discard.
+- **The boundaries are already guarded elsewhere**: this function's input is validated upstream, or the type system already blocks invalid values, so re-testing the same boundaries at this layer is redundant — as long as that line of defense genuinely exists and is itself tested.
+- **You want the thinnest regression anchor**: pin a single happy-path case onto untested legacy code to catch "the whole thing broke" level regressions — that's a zero-to-one step, not the finish line.
+
+The test: the exception holds when this code **either won't outlive this one use (throwaway) or has its boundaries covered elsewhere**. The moment it ships and is the only guard on the bug-prone boundary/error paths, fall back to the default: list the boundaries first, then write one test per class.
 
 ## Version notes
 

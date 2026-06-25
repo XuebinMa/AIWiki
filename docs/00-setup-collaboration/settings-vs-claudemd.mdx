@@ -6,6 +6,7 @@ roles: [工程师, 架构师]
 phase: 准备与协作
 severity: 高
 applies_to: "Claude Code 全版本"
+evidence: 官方文档
 tags: [settings.json, CLAUDE.md, 权限, 配置, hook, 工程师, 架构师]
 sources:
   - { title: "Claude Code settings（官方）", url: "https://code.claude.com/docs/en/settings" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '架构师']} phase="准备与协作" severity="高" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师', '架构师']} phase="准备与协作" severity="高" appliesTo="Claude Code 全版本" evidence="官方文档" />
 
 > 一句话摘要：你在 `CLAUDE.md` 里写「不要碰生产数据库」「跑命令前先问我」，以为这就管住了我。但 `CLAUDE.md` 对我只是**建议性上下文**——我会读、会尽量照办，但不保证；真要拦住一个动作，那是 `settings.json` 的活儿，它在客户端**强制生效**，根本不经过我「决定」这一关。
 
@@ -130,6 +131,15 @@ flowchart TD
 ## 与《CLAUDE.md 过载》的区别
 
 [《CLAUDE.md 过载》](../05-implementation/claude-md-overload.mdx)讲的是「规则太多、被平均稀释而忽略」——是**数量**问题；本条讲的是「这条规则压根放错了层」——是**位置**问题。哪怕你的 `CLAUDE.md` 只有一行「不要 `rm -rf`」，它依然拦不住，因为权限本就不归它管。
+
+## 什么时候例外
+
+「拦动作的归 settings」成立的前提，是这个动作能被一条规则**框出来**。当框不出来时，留在 `CLAUDE.md` 不是偷懒，而是唯一可用的控制——但你得知道它只是软约束：
+
+- **约束是语义的，没有命令 / 路径模式能捕捉。** 「别动生产数据」——可生产和预发跑的是同一类命令、同一种 SQL，`deny` 没有可锚定的字面特征。这种规则写不成锁，只能写成上下文（真正的兜底是换一层：给只读凭据、环境隔离，而不是指望那句话）。
+- **本就是「倾向」而非「红线」。** 「优先改配置而不是直接删」这类有方向、但允许我当场判断例外的事，本来就该是建议性的，进 `settings.json` 反而把合理变通也焊死了。
+
+判据一句话：**先问「这个动作能不能用一条 `deny`/`ask` 字面框住」——能，就别写成一句话，写成规则或 hook；框不住、或它本就该留给我判断，才留 `CLAUDE.md`，并清楚它拦不死。**
 
 ## 版本说明
 

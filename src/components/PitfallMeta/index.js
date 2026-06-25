@@ -21,6 +21,23 @@ const severityClass = {
   low: styles.sevLow,
 };
 
+// 证据类型 → 可信度档配色。强（官方/研究/安全披露）、中（社区/经验）、弱（推测待验证）。
+// 用蓝到灰的梯度，避免与 severity 的红/黄/绿撞色。
+const evidenceClass = {
+  官方文档: styles.evStrong,
+  研究支持: styles.evStrong,
+  安全报告: styles.evStrong,
+  社区案例: styles.evMed,
+  经验观察: styles.evMed,
+  推测待验证: styles.evWeak,
+  'Official docs': styles.evStrong,
+  Research: styles.evStrong,
+  'Security advisory': styles.evStrong,
+  'Community case': styles.evMed,
+  Experience: styles.evMed,
+  Unverified: styles.evWeak,
+};
+
 function Badge({ label, value, className }) {
   return (
     <span className={`${styles.badge} ${className || ''}`}>
@@ -30,7 +47,7 @@ function Badge({ label, value, className }) {
   );
 }
 
-export default function PitfallMeta({ roles = [], phase, severity, appliesTo }) {
+export default function PitfallMeta({ roles = [], phase, severity, appliesTo, evidence }) {
   return (
     <div className={styles.meta}>
       {phase && (
@@ -59,6 +76,13 @@ export default function PitfallMeta({ roles = [], phase, severity, appliesTo }) 
           label={<Translate id="pitfallMeta.appliesTo">适用版本</Translate>}
           value={appliesTo}
           className={styles.version}
+        />
+      )}
+      {evidence && (
+        <Badge
+          label={<Translate id="pitfallMeta.evidence">证据</Translate>}
+          value={evidence}
+          className={evidenceClass[evidence] || styles.evMed}
         />
       )}
     </div>

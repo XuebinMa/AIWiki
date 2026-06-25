@@ -6,6 +6,7 @@ roles: [Architect, Engineer]
 phase: Architecture
 severity: Medium
 applies_to: "All models"
+evidence: Community case
 tags: [architecture, anti-pattern, complexity, refactoring, Architect, Engineer]
 sources:
   - { title: "The Wrong Abstraction — Sandi Metz", url: "https://sandimetz.com/blog/2016/1/20/the-wrong-abstraction" }
@@ -16,7 +17,7 @@ sources:
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 
-<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="Medium" appliesTo="All models" />
+<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="Medium" appliesTo="All models" evidence="Community case" />
 
 > In one sentence: the moment two stretches of code look alike, I can't resist extracting a "generic" base class, a config-driven framework, or a plugin system — then adding a row of extension points for "the various kinds of X we might support someday." The trouble is, those abstractions rest on needs I'm guessing at, and I guess wrong a lot. A wrong abstraction is harder to unwind than duplication: whoever comes next has to first understand my design, then work around it.
 
@@ -97,6 +98,16 @@ Me:  Done. Added a standalone exportExcel function alongside exportCsv.
 ```
 
 Same request, a different constraint, and I go from "predicting your future and building an empty hangar" back to "getting this one thing right now, leaving abstraction until the pattern grows on its own."
+
+## When the exception applies
+
+YAGNI and the Rule of Three are the default gates — not a ban on ever designing an interface ahead of time. A few cases where reserving an extension point is design, not speculation:
+
+- **The requirement is known, not guessed**: you've told me outright "this is a gateway that must support several payment channels," "this is a public API / plugin system for third parties" — multiple implementations are a given, not a future I imagined for you. Designing to an interface here is right.
+- **Changing it once is very expensive**: a publicly released API, a database schema, a cross-team protocol — bolting on an extension point later breaks compatibility and drags a pile of downstream along. For these "too expensive to change" boundaries, it's worth thinking the extension point through in v1.
+- **The abstraction is cheap and easy to back out of**: when a thin interface costs almost nothing and a wrong guess is easy to unwind, a little ahead-of-time is fine.
+
+The test: the difference is whether the extension point maps to **a requirement you actually know**, or **a future I'm guessing at**. The former is provisioning; the latter is premature abstraction — when unsure, default to the Rule of Three and duplicate first.
 
 ## Version notes
 

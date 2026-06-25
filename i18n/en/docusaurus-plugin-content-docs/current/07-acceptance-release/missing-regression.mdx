@@ -6,6 +6,7 @@ roles: [Engineer, QA Engineer]
 phase: Acceptance & Release
 severity: High
 applies_to: "All models"
+evidence: Community case
 tags: [regression testing, verification loop, side effects, release, engineer, qa engineer]
 sources:
   - { title: "Regression testing (Wikipedia)", url: "https://en.wikipedia.org/wiki/Regression_testing" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Acceptance & Release" severity="High" appliesTo="All models" />
+<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Acceptance & Release" severity="High" appliesTo="All models" evidence="Community case" />
 
 > In one sentence: you ask me to change feature A, I do it, and A really does work — but I never look back at the code, table, or interface A depends on, which feature B also uses. I quietly broke B. Both of us are watching "is A there?", and nobody checks "is B still fine?". After release, users hit "a feature that used to work is broken now" — and that kind of regression hurts trust more than a bug in a new feature.
 
@@ -91,6 +92,15 @@ In reality, refunds, reconciliation, and reports all still call it the old way a
 > Me: A codebase search finds 4 callers of `calculateTotal()`: checkout (the one to change), refunds, reconciliation, and report export. The last three don't pass a coupon. I'll give `coupon` a default of `null` so existing callers keep their behavior; here's the change plan, plus regression cases I'm adding for all 4 paths...
 
 Same change. The only difference is whether I **looked at the whole dependency graph first and brought every caller into verification**. The first version waits for a user to report "refunds are miscalculated" after release; the second turns B green before the merge.
+
+## When the exception applies
+
+"Always run regression after a change" guards against "touched shared code, broke a B somewhere else." If a change **has no B at all** — nothing depends on it and it won't stick around — that regression ritual is just spinning:
+
+- **A one-off script you delete after running**: a single data migration, a throwaway report export, a bulk edit of test fixtures — nothing calls it, and it's discarded once it runs. It has no "existing callers," so there's nothing to regress; forcing me to build a suite is buying lifetime insurance for code that lives for minutes.
+- **A brand-new module with zero downstream**: fresh code that no caller touches yet — right now its blast radius is the empty set. What matters is whether it's correct on its own, not "did I break someone else." The moment it starts being reused, this exception is void.
+
+The test: ask "**does anything depend on this right now, and will it ever be reused?**" Only when both are "no" does the exception apply and you can skip regression. If either is "yes" — even "maybe later" — fall back to the default: list the blast radius first, then let the regression suite catch B for both of us.
 
 ## Version notes
 

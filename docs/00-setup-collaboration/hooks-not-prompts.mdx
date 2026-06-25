@@ -6,6 +6,7 @@ roles: [工程师, 运维工程师]
 phase: 准备与协作
 severity: 高
 applies_to: "Claude Code 全版本"
+evidence: 官方文档
 tags: [hooks, CLAUDE.md, 确定性, 提示词, 工程师, 运维工程师]
 sources:
   - { title: "Automate actions with hooks（Claude Code 官方）", url: "https://code.claude.com/docs/en/hooks-guide" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '运维工程师']} phase="准备与协作" severity="高" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师', '运维工程师']} phase="准备与协作" severity="高" appliesTo="Claude Code 全版本" evidence="官方文档" />
 
 > 一句话摘要：你在 CLAUDE.md 里写了「改完代码必须跑 format」「提交前必须跑测试」「这些文件不许动」，然后指望我每次都照做。但提示词对我只是「建议」，不是「机制」——我会忘、会忽略、上下文一长就漂。要它必然发生，就别交给我的自觉，做成 hook。
 
@@ -115,6 +116,16 @@ harness：exit 2，拦截 →「Blocked: .env matches protected pattern」
 ```
 
 差别不在我变得更自律，而在于「必须发生」的那几件事，被移出了我的自觉范围，交给了一个不会忘、不会漂的执行者。
+
+## 什么时候例外
+
+「该做成 hook」的前提是「必须每次发生」。当这个前提本身不成立，留在提示词里反而是对的：
+
+- **要求本身就是软的、靠判断的。** 「优先复用已有工具函数」「命名跟着模块走」——这类需要我当场权衡、偶尔可以变通的事，做成 hook 只会把合理的例外也一并拒掉，反而碍事。
+- **规则还在快速变动、或只用一次。** 探索期天天改的临时约定、一次性脚本里的检查，hook 的维护成本（写、调、跟着改）高过它买到的那点可靠性，先写进提示词更划算。
+- **没有可用的拦截点。** 我要管的东西命不中任何确定性触发点（不对应某次工具调用、某个文件路径），硬塞进 hook 也拦不住，只能靠提示词承载。
+
+判据一句话：**先问「漏一次会不会出事」——会出事且能挂上确定性触发点，做成 hook；不会出事、或根本挂不上钩，才留提示词。**
 
 ## 版本说明
 

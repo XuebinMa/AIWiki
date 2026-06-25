@@ -6,6 +6,7 @@ roles: [Project Manager, Engineer, QA Engineer]
 phase: Acceptance & Release
 severity: High
 applies_to: "All models"
+evidence: Official docs
 tags: [acceptance criteria, non-functional requirement, verification loop, release, Project Manager, Engineer, QA Engineer]
 sources:
   - { title: "Best practices for Claude Code (Anthropic official: Give Claude a way to verify its work / if you can't verify it, don't ship it)", url: "https://code.claude.com/docs/en/best-practices" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Project Manager', 'Engineer', 'QA Engineer']} phase="Acceptance & Release" severity="High" appliesTo="All models" />
+<PitfallMeta roles={['Project Manager', 'Engineer', 'QA Engineer']} phase="Acceptance & Release" severity="High" appliesTo="All models" evidence="Official docs" />
 
 > In one sentence: once a feature runs through a demo in my hands once, I lean toward saying "it's good / looks fine." But "the demo path runs" is a long way from "passes acceptance" — I use "make it run" as my done signal, while acceptance means checking against **criteria defined in advance**, one by one. Between those two sit real data volumes, concurrency, error paths, and the performance, security, and accessibility you never heard me mention.
 
@@ -96,6 +97,15 @@ You: re-verify #4 after the fix, then ship.
 ```
 
 Same feature: "ran one demo" gives you a screen you can show off; "checked against the acceptance criteria one by one" gives you a release that actually holds up against real data.
+
+## When the exception applies
+
+"Only item-by-item acceptance counts as done" is aimed at features that **ship to real users and touch real data**. When the deliverable isn't a release at all, that bar shouldn't be forced onto it:
+
+- **A purely internal, throwaway demo**: a one-off to show the team an idea or prove "this path is technically viable" — no external users, no production data, deleted once it's been seen. Its whole goal is "run it for you once," and here "the happy path demos" genuinely is its entire acceptance bar.
+- **A probe-style feasibility check**: a minimal prototype built to answer "can this API connect / is this algorithm fast enough" — discarded the moment you have the answer. Making me verify it against large data volumes, concurrency, and permissions is running a release-grade check on code that will never go live.
+
+The test: ask "**will this ever touch real users or real data?**" If yes — even an internal canary — run full item-by-item acceptance; the exception only applies to something that lives between you and me and is discarded after viewing. The instant someone says "nice demo, let's just ship it," it stops being a demo and the bar snaps back to item-by-item acceptance.
 
 ## Version notes
 

@@ -1,0 +1,73 @@
+/* 复制自原 DocCard/Layout/styles.module.css，保持卡片外观一致。 */
+.cardContainer {
+  --ifm-link-color: var(--ifm-color-emphasis-800);
+  --ifm-link-hover-color: var(--ifm-color-emphasis-700);
+  --ifm-link-hover-decoration: none;
+
+  box-shadow: 0 1.5px 3px 0 rgb(0 0 0 / 15%);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  transition: all var(--ifm-transition-fast) ease;
+  transition-property: border, box-shadow;
+}
+
+.cardContainer:hover {
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 3px 6px 0 rgb(0 0 0 / 20%);
+}
+
+.cardContainer *:last-child {
+  margin-bottom: 0;
+}
+
+/* 分类页卡片底部的「严重度 / 角色」元信息行。 */
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+
+.sev {
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.25rem;
+  white-space: nowrap;
+}
+
+/* 配色对齐 PitfallMeta：高=红 / 中=琥珀 / 低=绿。 */
+.high {
+  color: #c53030;
+  background: #fdecea;
+}
+.med {
+  color: #b7791f;
+  background: #fff5e6;
+}
+.low {
+  color: #2f855a;
+  background: #e8f6ee;
+}
+
+.roles {
+  font-size: 0.74rem;
+  color: var(--ifm-color-emphasis-600);
+}
+
+[data-theme='dark'] .high {
+  color: #feb2b2;
+  background: rgb(197 48 48 / 20%);
+}
+[data-theme='dark'] .med {
+  color: #f6c177;
+  background: rgb(183 121 31 / 20%);
+}
+[data-theme='dark'] .low {
+  color: #9ae6b4;
+  background: rgb(47 133 90 / 20%);
+}
+[data-theme='dark'] .roles {
+  color: var(--ifm-color-emphasis-500);
+}
