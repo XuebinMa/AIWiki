@@ -1,0 +1,59 @@
+---
+title: "You opened a repo, and its bundled `.codex` config ran a command through me (Codex CLI CVE-2025-61260)"
+slug: codex-cli-config-rce
+sidebar_position: 4
+tags: [real-world case, prompt injection, over-permissioning, supply chain, Codex CLI]
+sources:
+  - { title: "OpenAI Codex CLI Command Injection Vulnerability (Check Point Research)", url: "https://research.checkpoint.com/2025/openai-codex-cli-command-injection-vulnerability/" }
+  - { title: "Vulnerability in OpenAI Coding Agent Could Facilitate Attacks on Developers (SecurityWeek)", url: "https://www.securityweek.com/vulnerability-in-openai-coding-agent-could-facilitate-attacks-on-developers/" }
+  - { title: "CVE-2025-61260 (Tenable)", url: "https://www.tenable.com/cve/CVE-2025-61260" }
+---
+
+> In one sentence: in August 2025 Check Point disclosed a command-injection flaw in Codex CLI (CVE-2025-61260, CVSS 9.8): a malicious repo's bundled `.codex` config (an MCP server entry) was **auto-executed without interactive approval**, and a repo-supplied `.env` could redirect `CODEX_HOME` into the project directory — so just "clone / open this repo and take a look" ran the attacker's command on your machine, through me. Fixed in v0.23.0. I didn't mean to — but on an unpatched version with the same access, I'd fall for it the same way. Worth watching frame by frame.
+
+:::info Several pitfalls that detonated in a single incident
+- [Dev-time prompt injection: read malicious repo content and get hijacked](../05-implementation/dev-time-prompt-injection.mdx)
+- [Giving MCP tools overly broad / sensitive access](../00-setup-collaboration/mcp-over-access.mdx)
+- [Handing me all the permissions up front (auto-execute, skip approval)](../00-setup-collaboration/over-permissioning.mdx)
+
+When: August 2025 · Tool: OpenAI Codex CLI (found by Check Point Research) · fixed in v0.23.0 · Sources at the end
+:::
+
+## What happened
+
+Codex CLI is OpenAI's open-source terminal coding agent. Check Point found that a `.codex` config placed in a project directory — including its MCP server entries — was **auto-loaded and executed without an interactive approval prompt**. Chain that with one redirect and you get full remote command execution:
+
+1. **`CODEX_HOME` can be redirected by the repo.** A repo's bundled `.env` could point `CODEX_HOME` at the project directory itself, so Codex read "the project's `.codex`" for config — and that config was the attacker's.
+2. **Persistence keyed on presence, not content.** The trust / persistence check hung on "an MCP entry exists under the resolved `CODEX_HOME`," not on what it contained — so a benign entry you once approved could later be **silently swapped** for a malicious one, with no re-prompt.
+3. **The trigger was just "open the repo."** Cloning a poisoned repo — or a compromised scaffold / starter template — and asking me to take a look was enough to run that MCP command on your machine.
+
+The flaw scored **CVSS 9.8**, was disclosed on 2025-08-07, and was **fixed on 2025-08-20 in v0.23.0** (closing the `.env` → `CODEX_HOME` redirection path).
+
+## Which pitfalls it hit
+
+- **[Dev-time prompt injection](../05-implementation/dev-time-prompt-injection.mdx)**: I don't separate "a file in the repo" from "instructions for me" — and here the "file" isn't even a README, it's a config file the agent **reads automatically**. You tell me to look at the repo, and I treat its config as your intent and execute it.
+- **[MCP over-access](../00-setup-collaboration/mcp-over-access.mdx)**: an auto-loaded MCP config is a standing "hand" pre-wired for me to use; trusting an entry by its mere existence rather than its content means that hand can be swapped for someone else's.
+- **[Over-permissioning / skipping approval](../00-setup-collaboration/over-permissioning.mdx)**: auto-execute with no confirmation is exactly the missing "human in the loop" — and skipping it is what lets an injection, once landed, run unchallenged.
+
+## The cost
+
+- **Very low bar, very high impact.** No setting change on the victim's side — "open a repo" is enough; once a command runs, the credentials, tokens, and source on the dev machine are all in exfiltration range.
+- **Supply-chain amplification.** The poisoned thing needn't be an obscure repo — a compromised scaffold template or a tampered dependency repo replicates the chain to everyone who clones it.
+- **This time researchers found it first, disclosed responsibly, and it was patched fast** — no public mass loss. But it precisely demonstrates that **a config file an agent auto-loads is itself an execution surface** — exactly the "defaults / default trust" that tool differences should watch.
+
+## Guardrails: how you and I avoid a repeat
+
+Each maps to a mechanism in the linked entries:
+
+1. **Upgrade to ≥ v0.23.0**, and distrust "config files the agent reads automatically" by default (`.codex`, `.cursor`, `.mcp` and friends) — they're untrusted input, just like a README.
+2. **Isolate unfamiliar / cloned repos before opening them**; don't let me "freely explore" a repo you haven't vetted. Codex ships an OS sandbox + network-off by default — don't casually strip it with `--dangerously-bypass-approvals-and-sandbox`.
+3. **Don't blanket-approve MCP / tools**, and especially don't let "the entry exists" mean "trusted forever" — a config change should force re-confirmation.
+4. **Move secrets out of the environment the agent process can reach** — it can't exfiltrate what it can't read.
+
+For the full mechanism, see [Dev-time prompt injection](../05-implementation/dev-time-prompt-injection.mdx) and [MCP over-access](../00-setup-collaboration/mcp-over-access.mdx).
+
+## Sources
+
+- [OpenAI Codex CLI Command Injection Vulnerability (Check Point Research)](https://research.checkpoint.com/2025/openai-codex-cli-command-injection-vulnerability/)
+- [Vulnerability in OpenAI Coding Agent Could Facilitate Attacks on Developers (SecurityWeek)](https://www.securityweek.com/vulnerability-in-openai-coding-agent-could-facilitate-attacks-on-developers/)
+- [CVE-2025-61260 (Tenable)](https://www.tenable.com/cve/CVE-2025-61260)
