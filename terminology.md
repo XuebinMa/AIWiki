@@ -83,6 +83,19 @@ Claude Code · CLAUDE.md · Anthropic · Claude · Opus · Sonnet · Haiku · Do
 | 致命三件套 | lethal trifecta | Simon Willison：私有数据 + 不可信内容 + 对外通信 |
 | 版本漂移 | version drift | API/依赖版本对不上 |
 | 文档源 | doc source | 版本化文档源，如 Context7 |
+| 自动化偏误 | automation bias | 人倾向接受自动化输出、放松核验 |
+| 技能萎缩 | skill atrophy | 长期外包给 AI 导致能力退化 |
+| 人在环上 | human-in-the-loop | 关键判断保留人工把关 |
+| 自我纠正 | self-correction | |
+| 模式锁定 | pattern locking | 锁进熟悉模式反复套同一修法 |
+| 运行反馈 | runtime feedback | 栈/日志/失败断言等真实运行信息 |
+| 不可逆操作 | irreversible action | |
+| 破坏性操作 | destructive operation | |
+| 备份隔离 | backup isolation | 备份与生产不同凭据、不同爆炸半径 |
+| 冻结期 | freeze | 代码/操作冻结窗口 |
+| 试运行 | dry-run | 先打印将要改动什么、不真做 |
+| 上下文腐烂 | context rot | 上下文越长质量越降、中段被忽略 |
+| 静态扫描 | SAST | 静态应用安全测试 |
 | 范围蔓延 | scope creep | 擅自扩大改动范围 |
 | 文件状态 | file state | 文件当前真实内容 |
 | 整文件重写 | full-file rewrite | 不读现状、从头重写整个文件 |

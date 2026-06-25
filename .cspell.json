@@ -96,6 +96,12 @@
     "demoable",
     "pytest",
     "replayable",
-    "xfail"
+    "xfail",
+    "ISTAS",
+    "METR",
+    "Replit",
+    "TACL",
+    "Zenity",
+    "bcrypt"
   ]
 }
