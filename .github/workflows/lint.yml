@@ -53,3 +53,9 @@ jobs:
 
       - name: i18n（侧边栏分类翻译完整性，防回退成中文）
         run: npm run check:i18n
+
+      - name: 中英镜像完整性（每条 docs 都要有 i18n/en 对应）
+        run: npm run check:mirror
+
+      - name: 构建（两 locale；连带校验 MDX / import / 死内链）
+        run: npm run build

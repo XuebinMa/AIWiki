@@ -56,7 +56,14 @@
 ```bash
 npm run start                  # 预览中文，检查徽章、Mermaid、排版
 npm run start -- --locale en   # 预览英文
-npm run build                  # 全量构建必须无报错（onBrokenLinks 设为 throw）
+
+# 以下五道与 CI 一致，提交前应全过：
+autocorrect --lint .                              # 中英混排空格 / 标点
+vale docs i18n                                    # 套话 / AI 腔（error 级硬闸门）
+cspell "docs/**/*.{md,mdx}" "i18n/**/*.{md,mdx}"  # 拼写
+npm run check:i18n                                # 侧边栏分类翻译完整性
+npm run check:mirror                              # 中英镜像完整性（每条 docs 都要有 i18n/en 对应）
+npm run build                                     # 全量构建无报错（onBrokenLinks 设为 throw，连带校验 MDX/import/死内链）
 ```
 
 并人工通读：无错别字、语义清晰、语气自然、所有出处链接可访问。
