@@ -31,3 +31,19 @@
 .markdown li {
   line-height: 1.85;
 }
+
+/* 首页角色 CTA：把角色入口前置，承担新访客分流 */
+.role-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 1.5rem 0 0.5rem;
+}
+.role-cta .button {
+  flex: 1 1 240px;
+  text-align: center;
+}
+.role-cta__all {
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+}

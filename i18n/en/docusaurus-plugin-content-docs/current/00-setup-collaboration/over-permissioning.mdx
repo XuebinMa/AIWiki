@@ -99,6 +99,15 @@ Me: (runs inside the boundary, rebuilds)
 
 The difference isn't that I got smarter. It's that the `rm` got one more chance — for you to see it clearly and stop it — before it landed.
 
+## When the exception applies
+
+It's not "never go full-auto" — it's "don't go full-auto where there's a real blast radius." When the blast radius is already boxed in by the environment, skipping per-action confirmation is reasonable, even more efficient:
+
+- **An isolated sandbox / throwaway container / VM**: filesystem and network isolated, no production credentials, disposable and easy to rebuild. This is exactly what the best practice above means by "put full-auto in a sandbox" — the environment replaces the human-confirmation gate.
+- **A temporary, disposable scratch repo**: no sensitive data, no outbound-communication capability, nothing you'd mourn if it's wiped.
+
+Conversely, the moment the environment still carries two or three of "private data / reads untrusted content / can talk outward," the exception is off — back to least privilege by default. The test, in one line: **what makes full-auto safe isn't "I trust the model," it's "even if it does the worst thing, it can't get out of this box."**
+
 ## Version Notes
 
 :::note Applies to

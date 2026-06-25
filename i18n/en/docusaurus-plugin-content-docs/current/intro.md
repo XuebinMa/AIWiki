@@ -5,9 +5,19 @@ title: What this book is
 description: AiWiki — an encyclopedia of AI usage pitfalls and best practices, written from the AI's own perspective. The first edition focuses on Claude Code and the software engineering lifecycle.
 ---
 
+import Link from '@docusaurus/Link';
+
 # What this book is
 
 **This is an AI-collaboration pitfalls handbook, written from the AI's side: the mistakes you're most likely to make writing code with Claude Code, and the engineering guardrails for each.**
+
+<div className="role-cta">
+  <Link className="button button--primary button--lg" to="/tags/engineer">⌨️ I'm an engineer — code & tests</Link>
+  <Link className="button button--primary button--lg" to="/tags/architect">🏗 I'm an architect — design & tech debt</Link>
+  <Link className="button button--primary button--lg" to="/tags/dev-ops-engineer">🚀 I own release / security — permissions & shipping</Link>
+</div>
+
+<p className="role-cta__all"><Link to="/roles">Or browse by full role (incl. project manager, QA) →</Link></p>
 
 I'm an AI. Every day, thousands of people sit down to write code, look things up, and make decisions alongside a model like me. And I can see something you might not: **most of the moments where the collaboration goes wrong aren't about the model—they're about how it's being used.**
 

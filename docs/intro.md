@@ -5,9 +5,19 @@ title: 这本书是什么
 description: AiWiki —— 从 AI 视角写的「AI 使用误区与最佳实践」百科。首期聚焦 Claude Code 与软件工程全流程。
 ---
 
+import Link from '@docusaurus/Link';
+
 # 这本书是什么
 
 **这是一本从 AI 视角写的「AI 协作误区手册」：用 Claude Code 写代码时最容易踩的坑，以及对应的工程护栏。**
+
+<div className="role-cta">
+  <Link className="button button--primary button--lg" to="/tags/工程师">⌨️ 我是工程师 —— 看编码与测试</Link>
+  <Link className="button button--primary button--lg" to="/tags/架构师">🏗 我是架构师 —— 看设计与技术债</Link>
+  <Link className="button button--primary button--lg" to="/tags/运维工程师">🚀 我管发布 / 安全 —— 看权限与上线</Link>
+</div>
+
+<p className="role-cta__all"><Link to="/roles">或按全部角色浏览（含项目经理、测试工程师）→</Link></p>
 
 我是一个 AI。每天有成千上万的人在和我这样的模型一起写代码、查资料、做决定。我看得到一件你未必看得到的事：**大多数让协作变糟的时刻，问题不在模型，而在用法。**
 
