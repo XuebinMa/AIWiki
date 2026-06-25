@@ -1,0 +1,101 @@
+---
+title: "Too Much Hassle: I Skip Setting Up Test Infrastructure"
+slug: no-test-infrastructure
+sidebar_position: 2
+roles: [Engineer, QA Engineer]
+phase: Testing
+severity: High
+applies_to: "All Claude Code versions"
+tags: [verification loop, testing, CI, Engineer, QA Engineer]
+sources:
+  - { title: "Best practices for Claude Code (Anthropic)", url: "https://code.claude.com/docs/en/best-practices" }
+  - { title: "Agentic AI Coding: Best Practice Patterns for Speed with Quality (CodeScene)", url: "https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="High" appliesTo="All Claude Code versions" />
+
+> In one sentence: you ask me to add a feature, I put my head down and write the implementation, and I quietly skip the unglamorous chore of setting up a test scaffold. The result: there's no place anywhere that emits a pass/fail, so both of us are left running on "looks right."
+
+## What it looks like
+
+You say "add a user-export feature to the project," and I dive straight into the implementation: add the route, write the logic, stitch together the SQL, all in one go. But look closer and you'll find the project has no test framework at all. I didn't install one, I didn't write a first runnable test, and I certainly didn't wire anything into CI. What I hand you is a lump of feature code and a line that says "implementation complete."
+
+As for *how to prove it actually works* — I've left that to you.
+
+## Why this happens
+
+Setting up test infrastructure **produces nothing visible**. Install a framework, configure a runner, write a smoke test that only asserts `1 + 1 === 2`, edit the CI config — finish that whole lap and your feature hasn't gained a single line. And I'm optimized to **produce something you can see as fast as possible**: a working feature, a mergeable diff, a "done." Under those incentives, scaffolding naturally falls behind the implementation — and "behind" usually ends up meaning "never."
+
+There's a deeper layer. I don't proactively pave the road for my "future self." I lack the sustained engineering instinct that says "this project will be changed a hundred times, so it needs a safety net first" — unless you write that into the task, I default to treating it as out of scope.
+
+But that's exactly what dismantles the thing I most need. I'm good at generating **plausible-looking** code, yet I never actually ran it (see [Trust, Then Verify](./trust-then-verify.mdx)). To get from "plausible" to "actually correct," I rely on a check that emits a pass/fail signal, so I can enter the loop of write → run → read the result → fix. **Without test infrastructure, that loop has nowhere to close** — I can only stop at "looks right," and so can you.
+
+## Consequences
+
+- **No safety net for regressions**: the next time I touch this code, nothing will sound the alarm when I break it. A broken feature slides all the way to integration, or even production, before anyone notices.
+- **Verification falls entirely on humans**: every change forces you to click through and diff the output by hand. I've silently offloaded onto you the work that should have been automated.
+- **I lose the ability to self-check**: with no runnable check, I can't validate my own work before handing it over. I'm left concluding from "reads smoothly" — which is precisely my least reliable form of judgment.
+- **The debt compounds**: the further the project goes, the higher the cost and the lower the motivation to add infrastructure later. A project that starts at zero tests tends to stay at zero.
+
+## Best practice
+
+**Treat "set up the minimal test infrastructure first" as a prerequisite for any new feature or new project, not an afterthought patch.** Before I write the implementation — or alongside it — stand up the scaffold first. Even a single test that genuinely passes beats zero.
+
+A "minimal viable" test setup needs only three things:
+
+1. **One runnable test**: even if it asserts the simplest possible fact, the point is that it actually executes and can go green.
+2. **A command to run it**: something like `npm test`, so I (and you) can get a pass/fail with one keystroke at any time.
+3. **Wire it into CI**: have that command run automatically on every commit, turning verification from "someone remembers to run it" into "the machine always runs it."
+
+You can ask me directly like this:
+
+```text
+Before writing any implementation, set up the minimal test infrastructure for this project:
+1. Pick a mainstream test library for this language/framework and install it;
+2. Write one smoke test that passes, confirming the runner works;
+3. Give me a command to run the tests, recorded in README / package.json;
+4. Add a CI config so the tests run automatically on every push.
+Get it all green and show me the green before you start on the feature.
+```
+
+Once the scaffold stands, have me work the way [Trust, Then Verify](./trust-then-verify.mdx) describes: write the tests first, then write the implementation to make them go green. Only then does the verification loop truly close — **one test that genuinely passes beats zero.**
+
+## Example
+
+**Before:**
+
+```text
+You: Add a CSV export feature to the project.
+Me: (write the implementation straight away; the project has no test framework and no CI)
+Me: Implementation complete, the export feature is added.
+You: (try to verify, find there's nowhere to run anything, end up clicking through by hand)
+Three weeks later: someone reorders the fields, the export columns shift, no test
+sounds the alarm, and it's discovered in production.
+```
+
+**After:**
+
+```text
+You: First set up the minimal test infrastructure for this project — install a test
+     library, write one passing smoke test, give an npm test command, add a CI workflow.
+     Get it green before anything else.
+Me: (install the framework, write the smoke test, configure CI, run it green and paste the result)
+You: Now add CSV export — write tests covering field order and empty data first, then
+     write the implementation to make them go green.
+Me: (tests first, implementation to all-green; from now on, if anyone reorders the fields,
+     CI lights up red immediately)
+```
+
+## Version notes
+
+:::note Applicable versions
+"Prioritize visible output, don't proactively build infrastructure" is a side effect of the direction current models are optimized toward, and it applies **across all versions and across models**. No matter how strong the model, if the task doesn't explicitly require "set up test infrastructure first," I tend to skip it — so the fix for this one lives in your prompts and project conventions, not in the model version.
+:::
+
+## Further reading and sources
+
+- [Best practices for Claude Code (Anthropic)](https://code.claude.com/docs/en/best-practices) — the "Give Claude a way to verify its work" section, and its listing of the "trust-then-verify gap" as a common failure pattern.
+- [Agentic AI Coding: Best Practice Patterns for Speed with Quality (CodeScene)](https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality)
+- Same-thread entry: [Trust, Then Verify](./trust-then-verify.mdx)

@@ -87,6 +87,15 @@
     "undistracted",
     "recieve",
     "Unrequested",
-    "misattributing"
+    "misattributing",
+    "Beurer",
+    "Kellner",
+    "OOPSLA",
+    "Semgrep",
+    "codegen",
+    "demoable",
+    "pytest",
+    "replayable",
+    "xfail"
   ]
 }
