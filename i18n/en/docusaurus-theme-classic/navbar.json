@@ -11,6 +11,10 @@
     "message": "Wiki",
     "description": "Navbar item with label 百科"
   },
+  "item.label.按角色浏览": {
+    "message": "Browse by Role",
+    "description": "Navbar item with label 按角色浏览"
+  },
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
