@@ -7,10 +7,11 @@ phase: 编码实现
 severity: 中
 applies_to: "Claude Code 全版本"
 evidence: 官方文档
-tags: [CLAUDE.md, 上下文管理, 配置, 工程师, 架构师]
+tags: [CLAUDE.md, 上下文管理, 配置, 工程师, 架构师, Gemini CLI]
 sources:
   - { title: "Claude Code Best Practices（官方）", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "MuhammadUsmanGM/claude-code-best-practices", url: "https://github.com/MuhammadUsmanGM/claude-code-best-practices" }
+  - { title: "Gemini CLI — hierarchical GEMINI.md & /memory（官方文档）", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/gemini-md.md" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -70,6 +71,10 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 - 数据库迁移必须可回滚（上次漏了导致线上事故）。
 - 时间一律用 UTC 存储（混用时区出过 bug）。
 ```
+
+## 工具差异
+
+Gemini CLI 把这个坑放大了一档（Gemini CLI，截至 2026-06）：它的上下文是**层级式全量拼接**进每个 prompt——全局 `~/.gemini/GEMINI.md` + 项目根 `./GEMINI.md` + 你所在子目录的 `src/GEMINI.md` 一起塞进去，比扁平加载更容易堆到过载。两个对策：用 `/memory show` 看我**真正**收到的拼接结果（而不是你以为的那份），再把局部规则下沉到对应子目录的 `GEMINI.md` 里，让它只在相关路径下生效，控制总 footprint。
 
 ## 版本说明
 

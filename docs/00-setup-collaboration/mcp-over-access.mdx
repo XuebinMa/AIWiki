@@ -7,12 +7,13 @@ phase: 准备与协作
 severity: 高
 applies_to: "全模型通用（含 Claude Code）"
 evidence: 安全报告
-tags: [MCP, 提示注入, 过度代理, 最小权限, 安全, 运维工程师, 架构师, 工程师]
+tags: [MCP, 提示注入, 过度代理, 最小权限, 安全, 运维工程师, 架构师, 工程师, Gemini CLI]
 sources:
   - { title: "LLM06:2025 Excessive Agency（OWASP Gen AI Security Project）", url: "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/" }
   - { title: "Security Best Practices（Model Context Protocol 官方）", url: "https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices" }
   - { title: "MCP Security Cheat Sheet（OWASP Cheat Sheet Series）", url: "https://cheatsheetseries.owasp.org/cheatsheets/MCP_Security_Cheat_Sheet.html" }
   - { title: "Model Context Protocol has prompt injection security problems（Simon Willison）", url: "https://simonwillison.net/2025/Apr/9/mcp-prompt-injection/" }
+  - { title: "Gemini CLI — MCP servers: env redaction & trust（官方文档）", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -103,6 +104,10 @@ flowchart LR
 ```
 
 差别不在我变聪明了，而在于注入指令落到我手里时，那只「手」要么够不到危险动作，要么在动手前还得过你这一关。
+
+## 工具差异
+
+Gemini CLI 在 MCP 这块有两个值得知道的细节（Gemini CLI，截至 2026-06）。其一，它启动 MCP server 前**默认脱敏敏感 env 变量**：名字命中 `*TOKEN*`/`*SECRET*`/`*KEY*`/`*PASSWORD*`/`*AUTH*`/`*CREDENTIAL*` 等的变量不会传给 server，除非你在该 server 的 `env` 里显式列出——一个还算合理的默认；但每个 server 有个 `trust: true`，开了就**一键绕过它的全部确认**，等于把这层防护连同人工闸一起拆掉。其二是个 footgun：server 名里**带下划线**会让通配规则和安全策略**静默失效**，文档明确要求用 `my-server`、别用 `my_server`——名字起错了，你以为设了的限制其实没生效。
 
 ## 版本说明
 

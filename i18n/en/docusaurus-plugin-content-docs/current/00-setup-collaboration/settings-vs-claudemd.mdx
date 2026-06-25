@@ -7,11 +7,12 @@ phase: Setup & Collaboration
 severity: High
 applies_to: "All Claude Code versions"
 evidence: Official docs
-tags: [settings.json, CLAUDE.md, permissions, configuration, hook, Engineer, Architect]
+tags: [settings.json, CLAUDE.md, permissions, configuration, hook, Engineer, Architect, Gemini CLI]
 sources:
   - { title: "Claude Code settings (official)", url: "https://code.claude.com/docs/en/settings" }
   - { title: "How Claude remembers your project (official memory docs)", url: "https://code.claude.com/docs/en/memory" }
   - { title: "Configure permissions (official)", url: "https://code.claude.com/docs/en/permissions" }
+  - { title: "Gemini CLI — GEMINI.md context (official docs)", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/gemini-md.md" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -131,6 +132,10 @@ The difference isn't that I became more obedient; it's that this time the "can I
 ## How this differs from CLAUDE.md Overload
 
 [CLAUDE.md Overload](../05-implementation/claude-md-overload.mdx) is about "too many rules, averaged into dilution and ignored" — a *quantity* problem. This entry is about "the rule is in the wrong layer entirely" — a *placement* problem. Even if your `CLAUDE.md` had a single line, "never `rm -rf`," it still wouldn't stop me, because permissions were never its job.
+
+## Tool differences
+
+In Gemini CLI the same line holds, only the filenames change (Gemini CLI, as of 2026-06). My project-memory file is `GEMINI.md` (the name is configurable in settings), and it's the same kind of thing as `CLAUDE.md` — **advisory context** I read and try to honor, not an enforcement layer. To actually stop an action, that's `.gemini/settings.json`: it's enforced by the client and never passes through my judgment. So the same rule of thumb carries over: anything meant to be enforced doesn't go in `GEMINI.md`, it goes in `.gemini/settings.json`.
 
 ## Version notes
 

@@ -7,10 +7,11 @@ phase: Implementation
 severity: Medium
 applies_to: "All Claude Code versions"
 evidence: Official docs
-tags: [CLAUDE.md, context management, configuration, Engineer, Architect]
+tags: [CLAUDE.md, context management, configuration, Engineer, Architect, Gemini CLI]
 sources:
   - { title: "Claude Code Best Practices (official)", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "MuhammadUsmanGM/claude-code-best-practices", url: "https://github.com/MuhammadUsmanGM/claude-code-best-practices" }
+  - { title: "Gemini CLI — hierarchical GEMINI.md & /memory (official docs)", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/gemini-md.md" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -70,6 +71,10 @@ The test is simple: **if you can't say "this rule is here to prevent which speci
 - Database migrations must be reversible (a missing rollback caused a prod incident).
 - Store all times in UTC (mixing time zones caused a bug).
 ```
+
+## Tool differences
+
+Gemini CLI dials this pitfall up a notch (Gemini CLI, as of 2026-06): its context is **concatenated hierarchically in full** into every prompt — the global `~/.gemini/GEMINI.md` + the project-root `./GEMINI.md` + the `src/GEMINI.md` for whatever subdirectory you're in, all stuffed together, which overloads more easily than flat loading. Two countermeasures: run `/memory show` to see the concatenated result I **actually** receive (not the one you imagine), and push local rules down into the matching subdirectory's `GEMINI.md` so they only apply under the relevant path, keeping the total footprint down.
 
 ## Version notes
 

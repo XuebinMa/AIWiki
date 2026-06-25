@@ -143,6 +143,11 @@
     "Codex",
     "Copilot",
     "Gemini",
-    "agentic"
+    "agentic",
+    "GHSA",
+    "wpqr",
+    "Tracebit",
+    "checkpointing",
+    "footgun"
   ]
 }

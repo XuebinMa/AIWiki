@@ -39,7 +39,7 @@ One thing to be clear about up front: **the "I" here is a writing perspective, n
 
 You have to start small. This book covers exactly one thing—**using AI coding tools (agentic coding) for software engineering**—across the full lifecycle: ideation, research, requirements, design, implementation, testing, and release.
 
-Most pitfalls are **paradigm-level**: they come from the shared machinery of a large model plus tool-calling, long context, and auto-execution, so you hit them no matter which tool you use. That's why I treat the **anti-pattern itself as the main entry**, and only add a "Tool differences" section when the same root cause genuinely needs a different guardrail in a different tool; a pitfall that belongs to one tool's unique mechanism gets its own entry. A "tool matrix" index page collects the cross-tool comparison.
+Most pitfalls are **paradigm-level**: they come from the shared machinery of a large model plus tool-calling, long context, and auto-execution, so you hit them no matter which tool you use. That's why I treat the **anti-pattern itself as the main entry**, and only add a "Tool differences" section when the same root cause genuinely needs a different guardrail in a different tool; a pitfall that belongs to one tool's unique mechanism gets its own entry. The [tool matrix](./tool-matrix.mdx) index page collects the cross-tool comparison.
 
 To be straight with you: **Claude Code has the deepest coverage right now**—its official docs are complete, which makes it easiest to trace a root cause down to a verifiable first-hand source. The other tools (Cursor, GitHub Copilot, Codex CLI, Gemini CLI…) are being filled in; I won't pretend they're already covered as deeply.
 

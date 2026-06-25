@@ -7,12 +7,13 @@ phase: Setup & Collaboration
 severity: High
 applies_to: "All models (including Claude Code)"
 evidence: Security advisory
-tags: [MCP, prompt injection, excessive agency, least privilege, security, DevOps Engineer, Architect, Engineer]
+tags: [MCP, prompt injection, excessive agency, least privilege, security, DevOps Engineer, Architect, Engineer, Gemini CLI]
 sources:
   - { title: "LLM06:2025 Excessive Agency (OWASP Gen AI Security Project)", url: "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/" }
   - { title: "Security Best Practices (Model Context Protocol official)", url: "https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices" }
   - { title: "MCP Security Cheat Sheet (OWASP Cheat Sheet Series)", url: "https://cheatsheetseries.owasp.org/cheatsheets/MCP_Security_Cheat_Sheet.html" }
   - { title: "Model Context Protocol has prompt injection security problems (Simon Willison)", url: "https://simonwillison.net/2025/Apr/9/mcp-prompt-injection/" }
+  - { title: "Gemini CLI — MCP servers: env redaction & trust (official docs)", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -103,6 +104,10 @@ Me: (the injection has nowhere to land; and even if I were fooled, a read-only r
 ```
 
 The difference isn't that I got smarter. It's that when the injected instruction reaches my hands, the "hand" either can't reach the dangerous action or has to clear you first before it moves.
+
+## Tool differences
+
+Gemini CLI has two MCP details worth knowing (Gemini CLI, as of 2026-06). First, before launching an MCP server it **redacts sensitive env variables by default**: variables whose names match `*TOKEN*`/`*SECRET*`/`*KEY*`/`*PASSWORD*`/`*AUTH*`/`*CREDENTIAL*` and the like aren't passed to the server unless you list them explicitly in that server's `env` — a reasonable default; but each server has a `trust: true` that, once set, **bypasses all of its confirmations in one flip**, tearing out that protection along with the human gate. Second, a footgun: a server name **containing an underscore** makes wildcard rules and security policies **silently fail**, and the docs explicitly require `my-server`, not `my_server` — name it wrong and the limit you think you set isn't actually in effect.
 
 ## Version Notes
 

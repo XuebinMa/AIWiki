@@ -7,11 +7,12 @@ phase: 准备与协作
 severity: 中
 applies_to: "Claude Code 全版本"
 evidence: 官方文档
-tags: [计划模式, 协作姿势, 返工, 项目经理, 工程师, 架构师]
+tags: [计划模式, 协作姿势, 返工, 项目经理, 工程师, 架构师, Gemini CLI]
 sources:
   - { title: "Best practices for Claude Code · Explore first, then plan, then code（Anthropic 官方）", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "Choose a permission mode · Analyze before you edit with plan mode（Claude Code 官方）", url: "https://code.claude.com/docs/en/permission-modes" }
   - { title: "Common workflows · Plan before editing（Claude Code 官方）", url: "https://code.claude.com/docs/en/common-workflows" }
+  - { title: "Plan mode is now available in Gemini CLI（Google Developers Blog）", url: "https://developers.googleblog.com/plan-mode-now-available-in-gemini-cli/" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -98,6 +99,10 @@ claude --permission-mode plan
 ```
 
 差别不在我这次更聪明，而在于那个方向性误解在还只是一句话的时候，就被你看见并掰正了——而不是等它长成八个文件。
+
+## 工具差异
+
+Gemini CLI 也有一等的 **Plan Mode**（只读、写工具被禁，Shift+Tab 循环切换或 `--approval-mode=plan` 启动），机制和这里说的一样（Gemini CLI，截至 2026-06）。差别在姿态：它**对新用户默认开**，正好和本条描述的「默认 opt-in、要你主动进」相反。好消息是更安全的姿态更接近默认值；但闸门再近，人还是会手动把它关掉图省事——这条误区的根因（我的默认冲动是立刻产出）不因默认值变了而消失。
 
 ## 版本说明
 
