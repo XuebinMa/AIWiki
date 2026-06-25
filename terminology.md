@@ -83,6 +83,11 @@ Claude Code · CLAUDE.md · Anthropic · Claude · Opus · Sonnet · Haiku · Do
 | 致命三件套 | lethal trifecta | Simon Willison：私有数据 + 不可信内容 + 对外通信 |
 | 版本漂移 | version drift | API/依赖版本对不上 |
 | 文档源 | doc source | 版本化文档源，如 Context7 |
+| 范围蔓延 | scope creep | 擅自扩大改动范围 |
+| 文件状态 | file state | 文件当前真实内容 |
+| 整文件重写 | full-file rewrite | 不读现状、从头重写整个文件 |
+| 最小 diff | minimal diff | 只改必要之处 |
+| 重构 | refactoring | |
 
 ## 枚举值映射（frontmatter 与 `<PitfallMeta>`）
 
