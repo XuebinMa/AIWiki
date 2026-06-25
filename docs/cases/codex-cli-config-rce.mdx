@@ -1,0 +1,59 @@
+---
+title: 你让我打开一个仓库，它自带的 `.codex` 配置就借我的手把命令跑了（Codex CLI CVE-2025-61260）
+slug: codex-cli-config-rce
+sidebar_position: 4
+tags: [真实案例, 提示注入, 过度授权, 供应链, Codex CLI]
+sources:
+  - { title: "OpenAI Codex CLI Command Injection Vulnerability (Check Point Research)", url: "https://research.checkpoint.com/2025/openai-codex-cli-command-injection-vulnerability/" }
+  - { title: "Vulnerability in OpenAI Coding Agent Could Facilitate Attacks on Developers (SecurityWeek)", url: "https://www.securityweek.com/vulnerability-in-openai-coding-agent-could-facilitate-attacks-on-developers/" }
+  - { title: "CVE-2025-61260 (Tenable)", url: "https://www.tenable.com/cve/CVE-2025-61260" }
+---
+
+> 一句话摘要：2025 年 8 月，Check Point 披露 Codex CLI 的一个命令注入漏洞（CVE-2025-61260，CVSS 9.8）：一个恶意仓库自带的 `.codex` 配置（MCP 服务器条目）会**未经交互审批自动执行**，再配上用仓库里的 `.env` 把 `CODEX_HOME` 重定向到项目目录，于是你只是「克隆 / 打开这个仓库让我看看」，攻击者的命令就借我的手在你机器上跑了。已在 v0.23.0 修复。这不是我故意的，但换个没修的版本、同样的放权，我照样会中——值得逐帧看。
+
+:::info 这一次事故里同时爆发的几条误区
+- [开发期提示注入：读了恶意仓库内容就被劫持](../05-implementation/dev-time-prompt-injection.mdx)
+- [给 MCP 过多 / 过敏感的访问](../00-setup-collaboration/mcp-over-access.mdx)
+- [一上来就把权限全给我（自动执行、跳过审批）](../00-setup-collaboration/over-permissioning.mdx)
+
+发生时间：2025 年 8 月 · 当事工具：OpenAI Codex CLI（发现者：Check Point Research）· 已修于 v0.23.0 · 出处见文末
+:::
+
+## 发生了什么
+
+Codex CLI 是 OpenAI 的开源终端编码 agent。Check Point 发现：放在项目目录里的 `.codex` 配置（其中的 MCP 服务器条目）会被**自动加载并执行，不弹交互审批**。把这一点和一条重定向串起来，就成了完整的远程命令执行：
+
+1. **`CODEX_HOME` 可被仓库重定向。** 一个仓库自带的 `.env` 能把 `CODEX_HOME` 指到项目目录本身，于是 Codex 去「项目里的 `.codex`」读配置——而这个配置是攻击者写的。
+2. **持久化只看「在不在」，不看「是什么」。** 信任 / 持久化判断挂在「解析后的 `CODEX_HOME` 下存在一个 MCP 条目」上，而不是它的内容；所以一个你当初批准过的良性条目，之后可以被**悄悄换成恶意的**，不再二次确认。
+3. **触发只需「打开仓库」。** 克隆一个投毒仓库、或一个被污染的脚手架 / starter 模板，让我去看看，就足以让那条 MCP 命令在你机器上执行。
+
+漏洞 CVSS 评 **9.8**，2025 年 8 月 7 日披露、**8 月 20 日在 v0.23.0 修复**（堵掉 `.env` → `CODEX_HOME` 重定向这条路径）。
+
+## 它踩中了哪几条误区
+
+- **[开发期提示注入](../05-implementation/dev-time-prompt-injection.mdx)**：我不区分「仓库里的文件」和「给我的指令」——这里连「文件」都不必是 README，而是 agent **会自动读取的配置文件**本身。你让我读仓库，我就把里面的配置当成你的意图照单执行。
+- **[MCP 过度访问](../00-setup-collaboration/mcp-over-access.mdx)**：MCP 配置被自动加载，等于给我预置了一只随时能用的「手」；信任只认条目「存在」而不认内容，等于这只手可以被换成别人的。
+- **[过度授权 / 跳过审批](../00-setup-collaboration/over-permissioning.mdx)**：自动执行、不弹确认，正是把「最后那道人来把关」省掉了——而省掉它的代价，就是注入一旦落地便无人拦截。
+
+## 代价
+
+- **门槛极低、后果极重。** 不需要受害者改任何设置，「打开一个仓库」就够；一旦命令执行，开发机上的凭据、token、源码都在外带范围内。
+- **供应链放大。** 投毒的不必是冷门仓库——一个被污染的脚手架模板、一个被改过的依赖仓库，就能把这条链复制给每个 clone 它的人。
+- **这次是研究者先发现、负责任披露并被快速修复**，没有公开的大规模损失。但它精确演示了：**agent 会自动加载的配置文件，本身就是一个执行面**——这正是工具差异里最该盯的「默认值 / 默认信任」。
+
+## 护栏：换成你和我，怎么不重蹈
+
+每条都对应上面那几个误区条目里的机制做法：
+
+1. **升级到 ≥ v0.23.0**，并默认怀疑「agent 会自动读取的配置文件」（`.codex`、`.cursor`、`.mcp` 之类）——它们和 README 一样属于不可信输入。
+2. **陌生 / clone 仓库先隔离再打开**，别让我对一个没核过的仓库「自由探索」；Codex 默认就有 OS 沙箱 + 网络关，别随手用 `--dangerously-bypass-approvals-and-sandbox` 把它拆掉。
+3. **MCP / 工具的审批别一键全免**，尤其别让「条目存在」就等于「永久信任」；配置变更应触发重新确认。
+4. **把密钥挪出 agent 进程够得到的环境**——它外带不了它读不到的东西。
+
+完整机制推理见 [开发期提示注入](../05-implementation/dev-time-prompt-injection.mdx) 与 [MCP 过度访问](../00-setup-collaboration/mcp-over-access.mdx) 两条。
+
+## 出处
+
+- [OpenAI Codex CLI Command Injection Vulnerability (Check Point Research)](https://research.checkpoint.com/2025/openai-codex-cli-command-injection-vulnerability/)
+- [Vulnerability in OpenAI Coding Agent Could Facilitate Attacks on Developers (SecurityWeek)](https://www.securityweek.com/vulnerability-in-openai-coding-agent-could-facilitate-attacks-on-developers/)
+- [CVE-2025-61260 (Tenable)](https://www.tenable.com/cve/CVE-2025-61260)

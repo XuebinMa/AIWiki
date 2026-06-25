@@ -150,6 +150,24 @@
     "checkpointing",
     "footgun",
     "boto",
-    "slopsquatted"
+    "slopsquatted",
+    "Seatbelt",
+    "Landlock",
+    "seccomp",
+    "toml",
+    "AGENTS",
+    "cursorignore",
+    "cursorrules",
+    "mdc",
+    "CurXecute",
+    "MCPoison",
+    "NomShub",
+    "Anysphere",
+    "cursorindexingignore",
+    "subshells",
+    "CamoLeak",
+    "Camo",
+    "autoApprove",
+    "CSP"
   ]
 }

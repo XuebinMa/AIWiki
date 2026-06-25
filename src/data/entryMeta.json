@@ -1,5 +1,12 @@
 {
   "zh-Hans": {
+    "cursor-ignore-best-effort": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "运维工程师"
+      ]
+    },
     "destructive-irreversible-actions": {
       "severity": "高",
       "roles": [
@@ -455,6 +462,13 @@
     }
   },
   "en": {
+    "cursor-ignore-best-effort": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "DevOps Engineer"
+      ]
+    },
     "destructive-irreversible-actions": {
       "severity": "High",
       "roles": [

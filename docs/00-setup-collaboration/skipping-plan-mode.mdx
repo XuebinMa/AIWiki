@@ -7,12 +7,14 @@ phase: 准备与协作
 severity: 中
 applies_to: "Claude Code 全版本"
 evidence: 官方文档
-tags: [计划模式, 协作姿势, 返工, 项目经理, 工程师, 架构师, Gemini CLI]
+tags: [计划模式, 协作姿势, 返工, 项目经理, 工程师, 架构师, Gemini CLI, Cursor, GitHub Copilot]
 sources:
   - { title: "Best practices for Claude Code · Explore first, then plan, then code（Anthropic 官方）", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "Choose a permission mode · Analyze before you edit with plan mode（Claude Code 官方）", url: "https://code.claude.com/docs/en/permission-modes" }
   - { title: "Common workflows · Plan before editing（Claude Code 官方）", url: "https://code.claude.com/docs/en/common-workflows" }
   - { title: "Plan mode is now available in Gemini CLI（Google Developers Blog）", url: "https://developers.googleblog.com/plan-mode-now-available-in-gemini-cli/" }
+  - { title: "Cursor — Plan Mode (official docs)", url: "https://cursor.com/docs/agent/plan-mode" }
+  - { title: "Build with agents in VS Code (VS Code docs)", url: "https://code.visualstudio.com/docs/copilot/agents/overview" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -111,7 +113,11 @@ claude --permission-mode plan
 
 ## 工具差异
 
-Gemini CLI 也有一等的 **Plan Mode**（只读、写工具被禁，Shift+Tab 循环切换或 `--approval-mode=plan` 启动），机制和这里说的一样（Gemini CLI，截至 2026-06）。差别在姿态：它**对新用户默认开**，正好和本条描述的「默认 opt-in、要你主动进」相反。好消息是更安全的姿态更接近默认值；但闸门再近，人还是会手动把它关掉图省事——这条误区的根因（我的默认冲动是立刻产出）不因默认值变了而消失。
+**Gemini CLI（截至 2026-06）**：Gemini CLI 也有一等的 **Plan Mode**（只读、写工具被禁，Shift+Tab 循环切换或 `--approval-mode=plan` 启动），机制和这里说的一样。差别在姿态：它**对新用户默认开**，正好和本条描述的「默认 opt-in、要你主动进」相反。好消息是更安全的姿态更接近默认值；但闸门再近，人还是会手动把它关掉图省事——这条误区的根因（我的默认冲动是立刻产出）不因默认值变了而消失。
+
+**Cursor（截至 2026-06）**：Cursor 有一等的 **Plan Mode**（Shift+Tab 切换，和 Claude Code 同手势），机制一样：先研究代码、问清、出可评审计划、不改文件。两个 Cursor 特点：计划是一份**可直接编辑的 Markdown**（你能增删待办），还能存到 `.cursor/plans/` 续作；对复杂任务 Cursor 会**自动建议**进 Plan Mode。和 Claude Code 一样是 opt-in（不像 Gemini 默认开）。
+
+**GitHub Copilot（截至 2026-06）**：VS Code Copilot 有专门的 **Plan agent**——先出一份可评审的分步实现计划、再动文件，和 Claude Code 一样 opt-in。而 coding agent 的把关点结构不同：它直接开一个草稿 PR、在明处工作，于是「计划 / 评审」这道闸挪到了 PR review，而不是动手前的某个模式。
 
 ## 版本说明
 

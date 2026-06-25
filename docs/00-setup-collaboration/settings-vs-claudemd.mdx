@@ -7,12 +7,15 @@ phase: 准备与协作
 severity: 高
 applies_to: "Claude Code 全版本"
 evidence: 官方文档
-tags: [settings.json, CLAUDE.md, 权限, 配置, hook, 工程师, 架构师, Gemini CLI]
+tags: [settings.json, CLAUDE.md, 权限, 配置, hook, 工程师, 架构师, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
   - { title: "Claude Code settings（官方）", url: "https://code.claude.com/docs/en/settings" }
   - { title: "How Claude remembers your project（官方 memory 文档）", url: "https://code.claude.com/docs/en/memory" }
   - { title: "Configure permissions（官方）", url: "https://code.claude.com/docs/en/permissions" }
   - { title: "Gemini CLI — GEMINI.md context（官方文档）", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/gemini-md.md" }
+  - { title: "Codex — AGENTS.md custom instructions (OpenAI official)", url: "https://developers.openai.com/codex/guides/agents-md" }
+  - { title: "Cursor — permissions.json reference (official docs)", url: "https://cursor.com/docs/reference/permissions" }
+  - { title: "Adding repository custom instructions for GitHub Copilot (GitHub docs)", url: "https://docs.github.com/copilot/customizing-copilot/adding-custom-instructions-for-github-copilot" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -144,7 +147,13 @@ flowchart TD
 
 ## 工具差异
 
-在 Gemini CLI 里这条分界一模一样，只是换了文件名（Gemini CLI，截至 2026-06）。我的项目记忆文件叫 `GEMINI.md`（文件名可在 settings 里改），它和 `CLAUDE.md` 同性质——**建议性上下文**，我读、我尽量照办，但不是强制层。真要拦住一个动作，归 `.gemini/settings.json`：它由客户端**强制生效**，不经过我的判断。所以同样的口诀照搬：该强制的别写进 `GEMINI.md`，写进 `.gemini/settings.json`。
+**Gemini CLI（截至 2026-06）**：在 Gemini CLI 里这条分界一模一样，只是换了文件名。我的项目记忆文件叫 `GEMINI.md`（文件名可在 settings 里改），它和 `CLAUDE.md` 同性质——**建议性上下文**，我读、我尽量照办，但不是强制层。真要拦住一个动作，归 `.gemini/settings.json`：它由客户端**强制生效**，不经过我的判断。所以同样的口诀照搬：该强制的别写进 `GEMINI.md`，写进 `.gemini/settings.json`。
+
+**Codex CLI（截至 2026-06）**：同样的三层分法，只是文件名不同——`AGENTS.md` 是建议性上下文（我读、尽量照办，但后一句提示就能盖过它），`config.toml` 才是强制配置（`approval_policy`、`sandbox_mode`），企业还有一层 `requirements.toml` 是连用户都改不动的托管策略（可禁掉 `approval_policy="never"`）。`AGENTS.md` 是跨工具的开放约定，所以「建议≠门锁」这条心法可移植。
+
+**Cursor（截至 2026-06）**：Cursor 把这条分法拆成三件：**Rules**（`.cursor/rules/*.mdc` + 旧版 `.cursorrules`）是建议性「指引、非约束」；`permissions.json` 是最接近 `settings.json` 的强制层（命令 / 工具 allowlist）；`sandbox.json` 管 OS 隔离。但有个反转值得记：Cursor 官方明说连 `permissions.json` 的 allowlist / autoRun 也是「尽力而为的便利，不是安全保证」——它的「门锁」比 Claude Code 的 `permissions.deny`（硬性客户端拦截）更软，该锁死的别只靠它。
+
+**GitHub Copilot（截至 2026-06）**：我这边的建议性上下文是 `.github/copilot-instructions.md`（外加路径级 `.instructions.md` 与 `AGENTS.md`）——GitHub 明说「Copilot 不保证每次都照做」，它**不是**权限 / 强制层。所以同样的分界照搬：真要拦住一个动作，别写进指令文件。我的强制层在别处——组织 / 企业的 Copilot policies 与 content exclusions，而不是这些 `.md`。
 
 ## 版本说明
 
