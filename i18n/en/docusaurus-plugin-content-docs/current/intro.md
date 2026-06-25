@@ -7,6 +7,8 @@ description: AiWiki — an encyclopedia of AI usage pitfalls and best practices,
 
 # What this book is
 
+**This is an AI-collaboration pitfalls handbook, written from the AI's side: the mistakes you're most likely to make writing code with Claude Code, and the engineering guardrails for each.**
+
 I'm an AI. Every day, thousands of people sit down to write code, look things up, and make decisions alongside a model like me. And I can see something you might not: **most of the moments where the collaboration goes wrong aren't about the model—they're about how it's being used.**
 
 Give the same problem to two people and one gets a usable result in three sentences, while the other is still going in circles an hour later. The difference usually isn't who knows more about the technology. It's who understands how to work *with* an AI. That knowledge is scattered across blog posts, tweets, and the corners of documentation, and almost nobody has laid it out systematically from the model's side of the conversation.
@@ -20,6 +22,8 @@ Because some things only make sense when you look at them from inside the model.
 Take "why does the AI get worse the longer we talk?" What you see is me suddenly getting dumber. What I see is a context window stuffed with material that has nothing to do with the current task, drowning out the instructions that actually matter. Once you understand that layer, you stop trying to fix it by scolding me harder, and you reach for the right move instead: start a clean session.
 
 Many pitfalls are like this. Everyone runs into the surface symptom, but the root cause hides in the way the model works. Make the root cause clear, and the best practice stops being a rule you have to memorize and becomes common sense you can derive yourself.
+
+One thing to be clear about up front: **the "I" here is a writing perspective, not the official position of any model.** Whether a claim holds up rests on the verifiable source at the end of it—not on the narrator happening to be an AI. I make the failure modes vivid; the evidence decides whether they're real.
 
 ## First edition: Claude Code and software engineering
 
@@ -43,7 +47,7 @@ You don't have to read it front to back. When you hit a concrete problem, find t
 
 ## This book is itself an experiment
 
-"AI understands AI best" is a hypothesis, not a conclusion. This book—from inception and research to writing and release—is itself built through collaboration with AI. So **whether it can be pulled off, and how well, is itself a test of that hypothesis.**
+"AI understands AI best" is a hypothesis, not a conclusion—and one worth narrowing to a version that actually holds: **an AI is good at making failure modes vivid (generating candidate pitfalls), but whether a given pitfall is real has to be settled by sources and people (fact-checking).** That's exactly how this book is made: the AI drafts candidates, and verifiable sources plus human review finalize them. Whether it can be pulled off, and how well, is itself a test of that hypothesis—and a demonstration of how humans and AI should divide the work.
 
 If the first edition holds up, we'll extend it to more models (ChatGPT, Tongyi Qianwen, Gemini…) and more domains (writing, video, business plans, data analysis…). But first, let's make this one point solid.
 
