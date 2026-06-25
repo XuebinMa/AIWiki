@@ -99,6 +99,15 @@ You: (runs a two-day spike first, then decides whether to green-light)
 
 Same feature: from "we can do it" to "under your constraints, these few spots may be infeasible—let's verify them first."
 
+## When the exception applies
+
+Forcing me to break out dimensions and constraints exists because "technically possible" and "feasible under constraints" are separated by budget, compliance, scale, and the like. When those constraints simply don't exist, taking my "we can do it" as the verdict is reasonable:
+
+- **A throwaway prototype or spike for yourself.** No budget line, no compliance boundary, no scale, data sitting on your own machine — "a technical path exists" and "feasible under your constraints" nearly coincide here, and running a five-dimension due diligence is idling.
+- **The point is to probe, and failing costs nothing.** What you wanted was "let's just get it running"; the cost of failure is a few hours. The thing to chase is "what's the fastest way to verify," not "under what constraints is it infeasible."
+
+Conversely, the moment any one of budget, latency, compliance, data residency, or scale would actually bind you, the exception is off — back to disproving it dimension by dimension. The test, in one line: **ask "beyond the technical, is there any real-world constraint that would actually decide success?" — if there is, don't trust the "we can do it," press dimension by dimension; only when there's none can you take it as the verdict.**
+
 ## Version notes
 
 :::note Applicable versions

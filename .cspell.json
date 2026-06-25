@@ -148,6 +148,8 @@
     "wpqr",
     "Tracebit",
     "checkpointing",
-    "footgun"
+    "footgun",
+    "boto",
+    "slopsquatted"
   ]
 }

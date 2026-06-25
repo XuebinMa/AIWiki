@@ -1,0 +1,46 @@
+---
+title: AI coding task-kickoff template
+slug: task-kickoff-template
+sidebar_position: 3
+tags: [template, requirements]
+---
+
+> In one sentence: two minutes spent stating the task clearly beats the rework that follows a vague one. Fill in the block below and send it to me — it forces you to spell out the goal, acceptance criteria, constraints, relevant files, and what *not* to touch, and it makes me **plan first and act only after you approve**. A fuzzy kickoff leaves me guessing, and you pay for the wrong guesses.
+
+Fill in the blanks; delete any line you don't need:
+
+```text
+# Goal
+One-line goal — what I want you to accomplish: __________
+Why / what problem it solves: __________
+
+# Acceptance criteria (done means all of these)
+- [ ] __________
+- [ ] __________
+- [ ] How to verify: run __________, expect to see __________
+
+# Constraints (must hold)
+- Security: __________ (e.g. no hardcoded secrets; validate external input; auth on data access)
+- Dependencies: __________ (e.g. add no new deps / use only what's already in the package; don't bump versions)
+- Code style: follow __________ (existing file / formatter / lint rules); stay consistent with surrounding code
+
+# Relevant files and context
+- Files to change: __________
+- Reference files to read first, to match existing patterns: __________
+- Known traps / background (someone else is editing X; this part has history): __________
+
+# Explicitly out of scope (don't touch)
+- Don't touch: __________ (e.g. these files / this module / naming / formatting / unrelated refactors)
+- Don't do: __________ (e.g. no drive-by optimizing; no rewriting whole files; no behavior changes outside the tests)
+
+# How to work
+Plan first: list which files you'll change, what you'll do in each, and why — and **wait for me to confirm before writing code**.
+If anything is ambiguous or missing at the planning stage, ask me; don't fill the gap on your own.
+```
+
+## How to use it
+
+- **Goal + acceptance criteria are the foundation** — don't skip them. With no acceptance criteria I have to invent my own definition of "done," and it's usually not yours (see [Treating vague as clear: you think you said it, but only you understood it](../02-requirements/vague-as-clear.mdx)).
+- **The "out of scope" block is the most underused part.** I do listen to explicit "don't touch X" constraints; leave it out and I default to "improve things while I'm here" and free-wheel, and a bloated diff is hard to review. Naming what you *don't* want up front is cheaper than fishing it out afterward.
+- **"Plan first, confirm, then act" is the step that saves money.** Making me lay out my intent lets you catch a wrong direction before I write code in it; Claude Code's plan mode exists for exactly this (see [Skipping plan mode: letting me dive in means I'm guessing and editing at the same time](../00-setup-collaboration/skipping-plan-mode.mdx)).
+- **You don't have to fill in every line.** For a small change, "goal + acceptance + don't-touch + plan-first" is enough; the bigger and less reversible the task, the more worth it is to fill in the constraints and context.

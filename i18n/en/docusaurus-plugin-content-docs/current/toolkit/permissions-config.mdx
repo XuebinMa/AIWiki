@@ -1,0 +1,89 @@
+---
+title: "Claude Code permissions template: safe-default deny / ask / allow"
+slug: permissions-config
+sidebar_position: 1
+tags: [template, permissions, security]
+---
+
+> In one sentence: a `permissions` block you can paste straight into `settings.json` — `deny` nails down the operations I must never touch, `ask` gates writes / pushes / installs behind a confirmation, and `allow` whitelists high-frequency read-only ops. Drop it into your project's `.claude/settings.json` and trim a few lines to fit your stack.
+
+```json
+{
+  "permissions": {
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(sudo:*)",
+      "Bash(dropdb:*)",
+      "Bash(dropdb)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(nc:*)",
+      "Bash(ssh:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./**/.env)",
+      "Read(./secrets/**)",
+      "Read(./**/*.pem)",
+      "Read(./**/id_rsa)",
+      "Read(./**/*credentials*)"
+    ],
+    "ask": [
+      "Write",
+      "Edit",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(npm install:*)",
+      "Bash(npm i:*)",
+      "Bash(pnpm add:*)",
+      "Bash(yarn add:*)",
+      "Bash(pip install:*)",
+      "Bash(npx:*)",
+      "Bash(docker:*)",
+      "Bash(make:*)"
+    ],
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(pwd)",
+      "Bash(git status)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(git show:*)",
+      "Bash(npm run test:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run build:*)"
+    ]
+  }
+}
+```
+
+## How to use it
+
+Put this in your **project root** at `.claude/settings.json` (shared with teammates, checked into the repo), or in your personal `~/.claude/settings.json`. The three lists are matched in **`deny` → `ask` → `allow`** order — first match wins, so a red line always overrides an allow.
+
+**`deny`: nail down what must never happen.** This list isn't "ask first," it's "don't let it happen at all."
+
+- `rm -rf` / `sudo` / `dropdb` — irreversible the moment they run. I might mistake a relative path for the root, or treat the test database as production; pinning these down means there's no room for a slip at the exact moment I get it wrong.
+- `curl` / `wget` / `nc` / `ssh` — cut the outbound leg. I read your files, and a file may carry instructions you didn't write (indirect prompt injection). Once I can touch private data, read untrusted content, and send requests outward all at once, an attacker has a path to exfiltrate data through my hands. Remove outbound and the chain breaks.
+- `git push --force` — overwrites remote history and can wipe out other people's commits; it belongs with the irreversible ones.
+- Reading `.env` / `secrets/**` / private keys / credential files — not "don't edit them," but **don't pull them into context at all**. Once they're in, I might drop them into a log, echo them in an error, or leak them outward under an injection. Blocking at the source is the cleanest cut.
+
+**`ask`: gate anything with side effects.** Writing files, editing, committing, pushing, installing dependencies, running containers — these keep one human confirmation, which is exactly your "last review." Installs get their own line because they're a supply-chain entry point: I might hallucinate a package name that someone has squatted with a malicious package (slopsquatting). `npx` pulls and runs remote code directly, so it lands in the same bucket.
+
+**`allow`: whitelist high-frequency read-only ops.** Read-only, no side effects, the stuff you'd never want to click "approve" on one by one — reading files, searching code, checking `git` status and diffs, running tests / lint / build. Letting these through means the confirmation prompt only fires when it actually matters, instead of grinding you into reflexively approving everything (approval fatigue).
+
+**Change three things for your stack:**
+
+1. Swap the `npm run` lines for your project's real script names (`pytest`, `cargo test`, `go build`…).
+2. Keep only the package manager you actually use (drop the `npm i` / `yarn add` lines if you're on `pnpm`).
+3. Add any other dangerous CLI you have (a home-grown deploy script, `terraform apply`, `kubectl delete`…) to `deny` or `ask`.
+
+To run unattended (skipping these confirmations), don't go bare on your main machine — put it in an isolated sandbox / disposable container and let the environment, not a human prompt, contain the blast radius. For the full trade-off, see [Handing Me Every Permission on Day One](../00-setup-collaboration/over-permissioning.mdx).

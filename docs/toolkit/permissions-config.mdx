@@ -1,0 +1,89 @@
+---
+title: Claude Code 权限配置模板：安全默认的 deny / ask / allow
+slug: permissions-config
+sidebar_position: 1
+tags: [模板, 权限, 安全]
+---
+
+> 一句话摘要：一份可直接粘进 `settings.json` 的 `permissions` 块——`deny` 钉死绝不能碰的操作，`ask` 把写入 / 推送 / 装依赖卡在确认上，`allow` 放行高频只读操作。复制进项目的 `.claude/settings.json`，再按你的技术栈删改几行即可。
+
+```json
+{
+  "permissions": {
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(sudo:*)",
+      "Bash(dropdb:*)",
+      "Bash(dropdb)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(nc:*)",
+      "Bash(ssh:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./**/.env)",
+      "Read(./secrets/**)",
+      "Read(./**/*.pem)",
+      "Read(./**/id_rsa)",
+      "Read(./**/*credentials*)"
+    ],
+    "ask": [
+      "Write",
+      "Edit",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(npm install:*)",
+      "Bash(npm i:*)",
+      "Bash(pnpm add:*)",
+      "Bash(yarn add:*)",
+      "Bash(pip install:*)",
+      "Bash(npx:*)",
+      "Bash(docker:*)",
+      "Bash(make:*)"
+    ],
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(pwd)",
+      "Bash(git status)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(git show:*)",
+      "Bash(npm run test:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run build:*)"
+    ]
+  }
+}
+```
+
+## 怎么用
+
+放进**项目根**的 `.claude/settings.json`（跟队友共享、进版本库），或个人级的 `~/.claude/settings.json`。三类规则按 **`deny` → `ask` → `allow`** 顺序匹配——先撞上哪条算哪条，所以红线永远盖过放行。
+
+**`deny`：钉死绝不能碰的操作。** 这一档不是「问一下」，是「根本不让发生」。
+
+- `rm -rf` / `sudo` / `dropdb` —— 一旦执行就不可逆。我可能把相对路径误判成根目录、把测试库当成生产库，钉死它们是为了在我出错的那一刻没有「手滑」的空间。
+- `curl` / `wget` / `nc` / `ssh` —— 切断对外通信这条腿。我读你的文件，文件里可能藏着不是你写的指令（间接提示注入）；只要我同时能接触私有数据、读不可信内容、又能对外发请求，攻击者就有机会借我的手把数据送出去。拆掉对外通信，这条链就断了。
+- `git push --force` —— 覆盖远程历史、可能抹掉别人的提交，归到不可逆那一类。
+- 读 `.env` / `secrets/**` / 私钥 / 凭据文件 —— 不是不让改，是**根本不读进上下文**。读进来就可能被我顺手写进日志、贴进报错、或在注入场景下外传。源头堵住最干净。
+
+**`ask`：把有副作用的操作卡在确认上。** 写文件、改文件、提交、推送、装依赖、跑容器——这些保留一次人工确认，正是你那道「最后复核」。装依赖单列是因为它是供应链入口：我可能幻觉出一个不存在的包名，而那个名字恰好被人抢注了恶意包（slopsquatting）。`npx` 会直接拉远程代码执行，归进同一档。
+
+**`allow`：放行高频只读操作。** 只读、无副作用、你不会想逐次点确认的——读文件、搜代码、看 `git` 状态与 diff、跑测试 / lint / build。把它们放出来，确认弹窗才会只在真正要紧时出现，不至于让你陷入「无脑点同意」的确认疲劳。
+
+**按你的栈改三处：**
+
+1. 把 `npm run` 那几行换成你项目真实的脚本名（`pytest`、`cargo test`、`go build`…）。
+2. 包管理器只留你在用的那个（用 `pnpm` 就删掉 `npm i` / `yarn add` 那几行）。
+3. 有额外的危险 CLI（自家部署脚本、`terraform apply`、`kubectl delete`…）就补进 `deny` 或 `ask`。
+
+要无人值守跑（跳过这些确认），别在主力机器上裸跑——放进隔离沙箱 / 一次性容器，让环境替你兜住爆炸半径。完整的权衡见[《一上来就把所有权限都给我》](../00-setup-collaboration/over-permissioning.mdx)。

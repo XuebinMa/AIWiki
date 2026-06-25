@@ -105,6 +105,15 @@ Me: orders table: amount uses DECIMAL(12,2) plus a currency column; status uses 
 
 Same table — ask about the read/write patterns, scale, and evolution direction first, and I go from "tossing off a version that can store it" to "settling the data contract's bill three years out for you."
 
+## When the exception applies
+
+"Ask about reads/writes and evolution before defining the schema" is the default gate — but it assumes this schema will carry real data and evolve over time. In some settings, a careless table is exactly right:
+
+- **A throwaway spike you'll definitely discard**: you just want to check "does this query even work" or "is this idea viable," with data that's used once and never reaches production. A `float` for money or a `varchar` for status doesn't matter here — spending time on forward-looking design is the waste.
+- **One-off scripts and local analysis**: a data import you run once and delete, a throwaway report. The schema has no "later," so there's nothing to pay for in evolution that won't happen.
+
+The test: will this data **be depended on long-term, and will it evolve**? If yes, pin down read/write patterns and scale before defining the contract. If its lifespan is measured in hours and it's explicitly not going to production, careless is correct — but say "this is a one-off spike" out loud, so it doesn't quietly grow into a real table.
+
 ## Version notes
 
 :::note Applicability
