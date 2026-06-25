@@ -73,6 +73,16 @@ Claude Code · CLAUDE.md · Anthropic · Claude · Opus · Sonnet · Haiku · Do
 | 重复逻辑 | duplicate logic | 违反 DRY |
 | 幻觉 import | hallucinated import | 幻觉出不存在的依赖；参见 slopsquatting |
 | 供应链（攻击）| supply chain (attack) | |
+| 确定性 | determinism | 与「非确定性」成对；hook 是确定性执行 |
+| 渐进式披露 | progressive disclosure | skill 按需加载的设计 |
+| 强制配置 | enforced configuration | settings 强制生效，区别于「建议性上下文」 |
+| 建议性上下文 | advisory context | CLAUDE.md 是建议性、非强制 |
+| 多代理协作 | multi-agent collaboration | |
+| 职责边界 | responsibility boundaries | 多 subagent 各自负责范围 |
+| 共享契约 | shared contract | 跨 subagent 的接口/格式/命名约定 |
+| 致命三件套 | lethal trifecta | Simon Willison：私有数据 + 不可信内容 + 对外通信 |
+| 版本漂移 | version drift | API/依赖版本对不上 |
+| 文档源 | doc source | 版本化文档源，如 Context7 |
 
 ## 枚举值映射（frontmatter 与 `<PitfallMeta>`）
 
