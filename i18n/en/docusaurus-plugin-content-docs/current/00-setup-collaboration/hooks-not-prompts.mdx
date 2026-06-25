@@ -117,6 +117,16 @@ Me: (get the feedback, switch to config injection, leave .env alone)
 
 The difference isn't that I became more disciplined — it's that the few things that "must happen" were moved out of my goodwill and handed to an executor that doesn't forget and doesn't drift.
 
+## When the exception applies
+
+"Make it a hook" rests on "it must happen every time." When that premise doesn't hold, leaving it in a prompt is the right call:
+
+- **The requirement is genuinely soft, judgment-based.** "Prefer existing helper functions," "name things to match the module" — things I should weigh case by case and can occasionally bend. A hook would reject the reasonable exceptions along with the rest and just get in the way.
+- **The rule is still churning, or used only once.** A throwaway convention you tweak daily during exploration, a check inside a one-off script — the hook's upkeep cost (writing, debugging, keeping it in sync) outweighs the reliability it buys; a prompt is cheaper.
+- **There's no interception point to hang it on.** What I'm trying to govern matches no deterministic trigger (no tool call, no file path), so forcing it into a hook wouldn't stop anything anyway — a prompt is the only carrier left.
+
+The test, in one line: **ask "does missing it once cause harm?" — if it does and you can hang it on a deterministic trigger, make it a hook; if it doesn't, or there's nothing to hang it on, leave it in the prompt.**
+
 ## Version notes
 
 :::note Applicable versions

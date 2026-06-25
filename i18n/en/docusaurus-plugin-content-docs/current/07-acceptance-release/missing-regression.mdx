@@ -93,6 +93,15 @@ In reality, refunds, reconciliation, and reports all still call it the old way a
 
 Same change. The only difference is whether I **looked at the whole dependency graph first and brought every caller into verification**. The first version waits for a user to report "refunds are miscalculated" after release; the second turns B green before the merge.
 
+## When the exception applies
+
+"Always run regression after a change" guards against "touched shared code, broke a B somewhere else." If a change **has no B at all** — nothing depends on it and it won't stick around — that regression ritual is just spinning:
+
+- **A one-off script you delete after running**: a single data migration, a throwaway report export, a bulk edit of test fixtures — nothing calls it, and it's discarded once it runs. It has no "existing callers," so there's nothing to regress; forcing me to build a suite is buying lifetime insurance for code that lives for minutes.
+- **A brand-new module with zero downstream**: fresh code that no caller touches yet — right now its blast radius is the empty set. What matters is whether it's correct on its own, not "did I break someone else." The moment it starts being reused, this exception is void.
+
+The test: ask "**does anything depend on this right now, and will it ever be reused?**" Only when both are "no" does the exception apply and you can skip regression. If either is "yes" — even "maybe later" — fall back to the default: list the blast radius first, then let the regression suite catch B for both of us.
+
 ## Version notes
 
 :::note Applicable versions

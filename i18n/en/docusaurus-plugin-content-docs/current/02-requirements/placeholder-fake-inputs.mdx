@@ -88,6 +88,16 @@ Me: (runs it through with the real test key + real shape, and notes: production
      key still to be swapped in, slot left in .env.example)
 ```
 
+## When the exception applies
+
+"When real input is missing, stop and ask — don't invent placeholders" is the default gate — but it assumes the fake value is standing in for a real one, on a path that should have been verified with real data. In some settings the placeholder or synthetic data *is* the deliverable, and making it up is exactly right:
+
+- **The placeholder is the product**: what you asked for is a `.env.example`, a scaffold template, an example config in the docs. Here `your-api-key-here` and `example.com` are placeholder instructions for a human reader, not filler pretending to be real. The job is to make them *visibly* placeholders, not to stop and ask for a real key.
+- **Synthetic data is more correct than real data**: in test fixtures, demos, or load-test data, deliberately fabricating "John Doe / balance 1000" is exactly what keeps real PII out of the repo — using real user data here would be the mistake.
+- **The real value doesn't exist yet, and you already know it**: you've said outright "that credential hasn't been requested yet — leave a placeholder that throws." You've already seen the gap; marking a throwing TODO is following orders, not swallowing the signal.
+
+The test: is this fake value the **final product** — a template, an example, a fixture — or a **stand-in for a real value you need to verify a real path against**? Fabricate freely for the former, but make it obviously a placeholder; stop and ask for the real thing for the latter. When unsure, any critical path that will be read as "it works" defaults to needing real data.
+
 ## Version notes
 
 :::note Applicable versions

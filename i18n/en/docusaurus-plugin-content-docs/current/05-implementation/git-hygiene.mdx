@@ -130,6 +130,16 @@ $ git log
 
 The difference isn't that I got more careful — it's that before the giant commit lands, there's now a process to "split first, list the plan, and let you call a halt," and `.env` and `dist/` got blocked before they ever entered the repo.
 
+## When the exception applies
+
+"Small, atomic, message explains why" is the default, but the value of commit granularity comes from "someone will read this history later." When that premise doesn't hold, forcing atomic commits is just waste:
+
+- **A throwaway spike / probe branch destined to be squashed whole**: you're only checking whether an idea pans out, the branch is use-and-discard, and merging it `squash`es everything into one commit. Nobody reads the granularity of the intermediate steps, so piling them into a heap of scratch commits is actually less work.
+- **WIP checkpoints, purely for your own save points**: in a long task I `commit -m "wip"` every so often just to have an anchor I can `reset` back to, with no intention of it entering the real history — I'll `rebase` and clean it up before merging.
+- **Machine-generated, wholesale-replaced artifacts**: lock files, a `generated/` directory, anything regenerated as one whole slab — splitting it into commits carries no semantic value, and a single "regenerate X" commit is the clearest record.
+
+But every one of these assumes "this history is private and will be rewritten or squashed before it hits the main line." The test, in one line: **the moment these commits enter someone else's `git bisect`, `git blame`, or code review as-is, the exception is off** — go back to small, atomic, explain-why.
+
 ## Version notes
 
 :::note Applicable versions
