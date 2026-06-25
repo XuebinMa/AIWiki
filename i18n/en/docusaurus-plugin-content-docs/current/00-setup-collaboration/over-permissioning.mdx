@@ -7,13 +7,17 @@ phase: Setup & Collaboration
 severity: High
 applies_to: "All models"
 evidence: Official docs
-tags: [permissions, least privilege, security, prompt injection, DevOps Engineer, Engineer]
+tags: [permissions, least privilege, security, prompt injection, DevOps Engineer, Engineer, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
   - { title: "Configure permissions (Claude Code official)", url: "https://code.claude.com/docs/en/permissions" }
   - { title: "How we built Claude Code auto mode (Anthropic)", url: "https://www.anthropic.com/engineering/claude-code-auto-mode" }
   - { title: "Making Claude Code more secure and autonomous with sandboxing (Anthropic)", url: "https://www.anthropic.com/engineering/claude-code-sandboxing" }
   - { title: "Living dangerously with Claude (Simon Willison)", url: "https://simonwillison.net/2025/Oct/22/living-dangerously-with-claude/" }
   - { title: "YOLO Mode: Hidden Risks in Claude Code Permissions (UpGuard)", url: "https://www.upguard.com/blog/yolo-mode-hidden-risks-in-claude-code-permissions" }
+  - { title: "Gemini CLI — approval modes / configuration (official docs)", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/get-started/configuration.md" }
+  - { title: "Codex — approval presets (openai/codex source)", url: "https://github.com/openai/codex/blob/main/codex-rs/utils/approval-presets/src/lib.rs" }
+  - { title: "Cursor — Agent Security (official docs)", url: "https://cursor.com/docs/agent/security" }
+  - { title: "Cloud and local sandboxes for GitHub Copilot now in public preview (GitHub Changelog)", url: "https://github.blog/changelog/2026-06-02-cloud-and-local-sandboxes-for-github-copilot-now-in-public-preview/" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -107,6 +111,16 @@ It's not "never go full-auto" — it's "don't go full-auto where there's a real 
 - **A temporary, disposable scratch repo**: no sensitive data, no outbound-communication capability, nothing you'd mourn if it's wiped.
 
 Conversely, the moment the environment still carries two or three of "private data / reads untrusted content / can talk outward," the exception is off — back to least privilege by default. The test, in one line: **what makes full-auto safe isn't "I trust the model," it's "even if it does the worst thing, it can't get out of this box."**
+
+## Tool differences
+
+**Gemini CLI (as of 2026-06)**: In Gemini CLI the one-flip "open everything" is **YOLO mode** (`--yolo` / `--approval-mode=yolo` / Ctrl+Y mid-session), which likewise auto-approves every tool call. It also has a middle tier, `auto_edit`: file edits are auto-approved, but shell commands still need your confirmation — a compromise between per-action prompts and full auto. One stance worth copying: it pairs sandbox-on with YOLO by default as the "recommended automation" configuration, so don't run YOLO without the sandbox — that tears out both the human gate and the environment gate at once.
+
+**Codex CLI (as of 2026-06)**: Codex uses three approval presets (Read Only / Auto / Full Access), and the default one (Auto) is already sandboxed (workspace-write + network off + on-demand approval) — the exact opposite of Claude Code's "sandbox off by default," so here the dangerous move is the user actively opting out of a safe default rather than forgetting to turn one on. The one flip that opens everything is `--dangerously-bypass-approvals-and-sandbox`; enterprises can forbid it via `requirements.toml`.
+
+**Cursor (as of 2026-06)**: Cursor's "open everything" is **Auto-Run / YOLO**, gated by the allowlist / denylist in `permissions.json`. Two things: (1) Cursor **deprecated the denylist in 1.3** — researchers demonstrated bypasses via Base64, subshells, quote obfuscation, and more, concluding the denylist is the wrong tool and only an allowlist works; (2) the classifier behind the current default Run Mode (Auto-review) is, in Cursor's own words, "non-deterministic and not a security boundary."
+
+**GitHub Copilot (as of 2026-06)**: In VS Code agent mode, my "open everything" switch is `chat.tools.autoApprove` (auto-approve tools) / `chat.tools.terminal.autoApprove` — Copilot's YOLO. The middle tiers are a terminal `allowList` / `denyList` and an OS-level agent sandbox (2026-06 preview). Same trap: once you fully turn off approvals, the `denyList` is ignored too. And the coding agent's autonomy is a server-side backstop (see the CI entry), not this one local skip switch.
 
 ## Version Notes
 

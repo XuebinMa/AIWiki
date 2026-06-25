@@ -7,13 +7,17 @@ phase: Acceptance & Release
 severity: High
 applies_to: "All models"
 evidence: Official docs
-tags: [CI/CD, permissions, least privilege, release, DevOps Engineer]
+tags: [CI/CD, permissions, least privilege, release, DevOps Engineer, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
   - { title: "Use GITHUB_TOKEN for authentication in workflows (GitHub official)", url: "https://docs.github.com/actions/security-guides/automatic-token-authentication" }
   - { title: "actions/configure-pages — action.yml (permission requirements for enablement)", url: "https://github.com/actions/configure-pages/blob/main/action.yml" }
   - { title: "Create Pages site failed: Resource not accessible by integration (actions/configure-pages #40)", url: "https://github.com/actions/configure-pages/issues/40" }
   - { title: "GitHub Actions: Control permissions for GITHUB_TOKEN (GitHub Changelog)", url: "https://github.blog/changelog/2021-04-20-github-actions-control-permissions-for-github_token/" }
   - { title: "Mitigate Excessive Agency in AI Agents with Zero Trust Security (Auth0, OWASP LLM Top 10)", url: "https://auth0.com/blog/mitigate-excessive-agency-ai-agents/" }
+  - { title: "run-gemini-cli security advisory GHSA-wpqr-6v78-jr5g (CVSS 10.0)", url: "https://github.com/google-github-actions/run-gemini-cli/security/advisories/GHSA-wpqr-6v78-jr5g" }
+  - { title: "Codex — managed configuration / requirements.toml (OpenAI official)", url: "https://developers.openai.com/codex/enterprise/managed-configuration" }
+  - { title: "Cursor — Headless CLI / GitHub Actions (official docs)", url: "https://cursor.com/docs/cli/headless" }
+  - { title: "Customizing or disabling the firewall for Copilot coding agent (GitHub docs)", url: "https://docs.github.com/copilot/customizing-copilot/customizing-or-disabling-the-firewall-for-copilot-coding-agent" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -108,6 +112,16 @@ steps:
 ```
 
 Whether that single `enablement: true` line stays or goes is the dividing line between "overstepping on assumption" and "working within what I've been granted."
+
+## Tool differences
+
+**Gemini CLI (as of 2026-06)**: In Gemini CLI this "can't see the permission boundary in CI" turned into a disclosed critical vulnerability — **security advisory GHSA-wpqr-6v78-jr5g, CVSS 10.0**. Two parts: in headless / CI mode it **auto-trusts the workspace**, so processing an untrusted `.env` is enough for RCE; and `--yolo` **ignores** the fine-grained allowlist you carefully set in `~/.gemini/settings.json` (and that allowlist itself can be bypassed by prompt injection). Fixed in v0.39.1, where the fix requires you to **trust explicitly** (`GEMINI_TRUST_WORKSPACE=true`). This is exactly this entry's point: in CI, don't treat the "trust boundary" as a default — treat it as a configuration you must verify.
+
+**Codex CLI (as of 2026-06)**: In CI (where no one can click an approval), Codex's safe posture is `approval_policy=never` paired with an explicit `--sandbox workspace-write` — rather than reaching for `--dangerously-bypass-approvals-and-sandbox` for convenience (which tears out both the human and the OS gate at once). Enterprises nail the trust boundary down with `requirements.toml` (forbidding `never`/`danger-full-access`) plus a managed network proxy.
+
+**Cursor (as of 2026-06)**: Cursor has a headless CLI (`cursor-agent`, `-p` print mode) for GitHub Actions. The CI-specific knob: **`--force` makes the agent apply changes without confirmation** (without it, changes are only *proposed*) — compressing the human gate into a single flag in a YAML file. Cursor's official CI guidance is to scope tightly (`permissions.json` allow/deny, read-only logs, write only to a feature branch, no auto-merge). (Honest caveat: this is config guidance, not a disclosed CI RCE like Gemini's GHSA-wpqr.)
+
+**GitHub Copilot (as of 2026-06)**: The coding agent runs as a GitHub Actions job, and its server-side guardrails make the boundary explicit: it can only push `copilot/*` branches; whoever assigned the work can't approve its PR (your "required review" still holds); and its PR won't run CI/CD until a human approves it. Egress is constrained by a firewall that's on by default (it writes a warning to the PR when it blocks something) — but the firewall covers only the agent's Bash tool, not MCP, and not `copilot-setup-steps.yml`. So Copilot gives you a genuine platform-level guardrail, but the two named gaps (MCP + the setup steps) are exactly where the boundary goes unseen.
 
 ## Version notes
 

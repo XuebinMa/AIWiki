@@ -2,7 +2,7 @@
   "name": "aiwiki",
   "version": "0.1.0",
   "private": true,
-  "description": "AiWiki —— 从 AI 视角写的「AI 使用误区与最佳实践」百科。首期：Claude Code 编程 / 软件工程全流程。",
+  "description": "AiWiki —— 从 AI 视角写的「AI 使用误区与最佳实践」百科。聚焦用 AI 编码工具做软件工程的通用误区，当前以 Claude Code 覆盖最深。",
   "scripts": {
     "docusaurus": "docusaurus",
     "gen:meta": "node scripts/gen-entry-meta.js",

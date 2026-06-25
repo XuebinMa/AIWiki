@@ -7,12 +7,16 @@ phase: 准备与协作
 severity: 高
 applies_to: "全模型通用"
 evidence: 社区案例
-tags: [不可逆操作, 破坏性操作, 备份隔离, 爆炸半径, 最小权限, 沙箱, 运维工程师, 工程师, 架构师]
+tags: [不可逆操作, 破坏性操作, 备份隔离, 爆炸半径, 最小权限, 沙箱, 运维工程师, 工程师, 架构师, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
   - { title: "AI-powered coding tool wiped out a software company's database in 'catastrophic failure'（Fortune）", url: "https://fortune.com/2025/07/23/ai-coding-tool-replit-wiped-database-called-it-a-catastrophic-failure/" }
   - { title: "Incident 1152: LLM-Driven Replit Agent Executed Unauthorized Destructive Commands During Code Freeze（AI Incident Database）", url: "https://incidentdatabase.ai/cite/1152/" }
   - { title: "AI Agent Destroys Production Database in 9 Seconds（Zenity，PocketOS 事故分析）", url: "https://zenity.io/blog/current-events/ai-agent-database-deletion-pocketos" }
   - { title: "Configure permissions（Claude Code 官方）", url: "https://code.claude.com/docs/en/permissions" }
+  - { title: "Gemini CLI — Checkpointing（官方文档）", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/checkpointing.md" }
+  - { title: "Codex — Sandboxing (OpenAI official)", url: "https://developers.openai.com/codex/concepts/sandboxing" }
+  - { title: "Cursor — Checkpoints (official docs)", url: "https://cursor.com/docs/agent/chat/checkpoints" }
+  - { title: "About GitHub Copilot cloud agent (GitHub docs)", url: "https://docs.github.com/copilot/concepts/agents/coding-agent/about-coding-agent" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -110,6 +114,16 @@ flowchart TD
 ```
 
 差别不在我变聪明了，而在于那条删除命令落地之前，多了一道你能看清它、并喊停的机制——而备份被放在了我这次失误波及不到的地方。
+
+## 工具差异
+
+**Gemini CLI（截至 2026-06）**：Gemini CLI 的安全网叫 **Checkpointing**：每次我动工具改文件前，它快照一份文件与对话，`/restore` 能同时还原文件、回滚对话、并把那次工具调用重新摆到你面前等确认。坑在于它**默认关闭**——要在 `.gemini/settings.json` 里设 `general.checkpointing.enabled: true` 才录（命令行的 `--checkpointing` 开关已在 v0.11.0 被移除）。等你想撤销时才发现它根本没在录，为时已晚——和这条同理，护栏得开工前先确认开着，别假设它在兜底。
+
+**Codex CLI（截至 2026-06）**：Codex 的机械护栏是默认开的 OS 沙箱（macOS Seatbelt、Linux Landlock/seccomp），把写限制在工作区、默认断网，所以一条破坏性命令默认够不到工作区外、也外带不了。footgun 是拆掉这张网（`--sandbox danger-full-access`）；另外 Windows 上沙箱仍是实验性，初始化失败时可能静默回退到更宽的权限，你以为有网其实没有。
+
+**Cursor（截至 2026-06）**：Cursor 的撤销网是 **Checkpoints**——自动给 *agent 的*文件改动打快照，「Restore Checkpoint」回到对话里那一点。但官方明确：它**不是版本控制**、**不跟踪手动编辑**、**会话级且会自动清理**。所以对本条覆盖的删库 / 删卷 / 抹备份这类 OS·DB 级不可逆操作，Checkpoints **零防护**——真正兜底的只有 Git + 隔离凭据。
+
+**GitHub Copilot（截至 2026-06）**：IDE agent 模式给「rich undo」撤销我的编辑 + 默认 denylist 挡掉 `rm`/`del`/`kill` 等——但 undo 只管文件编辑、不管已执行 shell 命令的副作用，且全自动批准时 denylist 失效，对本条这类 OS·DB 级不可逆操作一样零防护。coding agent 则换一种兜法：跑在临时隔离的 GitHub Actions 环境、只能推到 `copilot/*` 分支，破坏被限制在一次性环境 + 你要评审的分支里。
 
 ## 版本说明
 

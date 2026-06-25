@@ -7,10 +7,14 @@ phase: 编码实现
 severity: 中
 applies_to: "Claude Code 全版本"
 evidence: 官方文档
-tags: [CLAUDE.md, 上下文管理, 配置, 工程师, 架构师]
+tags: [CLAUDE.md, 上下文管理, 配置, 工程师, 架构师, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
   - { title: "Claude Code Best Practices（官方）", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "MuhammadUsmanGM/claude-code-best-practices", url: "https://github.com/MuhammadUsmanGM/claude-code-best-practices" }
+  - { title: "Gemini CLI — hierarchical GEMINI.md & /memory（官方文档）", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/gemini-md.md" }
+  - { title: "Codex — config reference (project doc discovery & limit)", url: "https://developers.openai.com/codex/config-reference" }
+  - { title: "Cursor — Rules (official docs)", url: "https://cursor.com/docs/context/rules" }
+  - { title: "5 tips for writing better custom instructions for Copilot (GitHub Blog)", url: "https://github.blog/ai-and-ml/github-copilot/5-tips-for-writing-better-custom-instructions-for-copilot/" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -70,6 +74,16 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 - 数据库迁移必须可回滚（上次漏了导致线上事故）。
 - 时间一律用 UTC 存储（混用时区出过 bug）。
 ```
+
+## 工具差异
+
+**Gemini CLI（截至 2026-06）**：Gemini CLI 把这个坑放大了一档：它的上下文是**层级式全量拼接**进每个 prompt——全局 `~/.gemini/GEMINI.md` + 项目根 `./GEMINI.md` + 你所在子目录的 `src/GEMINI.md` 一起塞进去，比扁平加载更容易堆到过载。两个对策：用 `/memory show` 看我**真正**收到的拼接结果（而不是你以为的那份），再把局部规则下沉到对应子目录的 `GEMINI.md` 里，让它只在相关路径下生效，控制总 footprint。
+
+**Codex CLI（截至 2026-06）**：Codex 的对应文件是 `AGENTS.md`，从 cwd 一路向上合并到项目根（还含 `~/.codex/AGENTS.md`），同样会层级式膨胀。但它有个硬上限：`project_doc_max_bytes` 默认 32 KiB，超了直接截断——「把它写短」在这里是被工具强制的，不只是劝你。
+
+**Cursor（截至 2026-06）**：Cursor 的 `.mdc` 规则带**激活模式**，能把 footprint 变成条件式而非永远占用：Always（`alwaysApply: true`，每次都载——过载陷阱）、Auto Attached（`globs:` 命中文件才载）、Agent Requested（只给 description、模型按需取）、Manual（`@规则名`）。所以减负不是简单「写短」，而是把 always 规则降级成 glob 范围或 agent-requested。官方也提醒：always 规则每个 token 都在每次请求里被消耗。
+
+**GitHub Copilot（截至 2026-06）**：同样的稀释，外加两个硬上限。GitHub 明说「过长的指令文件会让部分指令被忽略」，而且 Copilot code review **只读自定义指令文件的前 4000 字**——超出部分静默失效，我连读都读不到。方向因此一致：写短、写具体，而不是堆。
 
 ## 版本说明
 

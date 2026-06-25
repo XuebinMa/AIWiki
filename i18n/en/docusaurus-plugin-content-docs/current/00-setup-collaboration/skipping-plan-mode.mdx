@@ -7,11 +7,14 @@ phase: Setup & Collaboration
 severity: Medium
 applies_to: "All Claude Code versions"
 evidence: Official docs
-tags: [plan mode, collaboration stance, rework, project manager, engineer, architect]
+tags: [plan mode, collaboration stance, rework, project manager, engineer, architect, Gemini CLI, Cursor, GitHub Copilot]
 sources:
   - { title: "Best practices for Claude Code · Explore first, then plan, then code (Anthropic official)", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "Choose a permission mode · Analyze before you edit with plan mode (Claude Code official)", url: "https://code.claude.com/docs/en/permission-modes" }
   - { title: "Common workflows · Plan before editing (Claude Code official)", url: "https://code.claude.com/docs/en/common-workflows" }
+  - { title: "Plan mode is now available in Gemini CLI (Google Developers Blog)", url: "https://developers.googleblog.com/plan-mode-now-available-in-gemini-cli/" }
+  - { title: "Cursor — Plan Mode (official docs)", url: "https://cursor.com/docs/agent/plan-mode" }
+  - { title: "Build with agents in VS Code (VS Code docs)", url: "https://code.visualstudio.com/docs/copilot/agents/overview" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -107,6 +110,14 @@ Plan mode exists for "I might guess your intent wrong." When there's no ambiguit
 - **A reversible, tightly-scoped small change.** The blast radius is one or two files, a mistake is obvious at a glance, rollback costs near zero — correcting after the fact is faster than aligning up front, so act first and look.
 
 Conversely, the moment a task is ambiguous, spans multiple files, or carries a directional decision ("switch the auth scheme," "add multi-tenancy"), the exception is off — back to planning first. The test, in one line: **if you can describe the final diff in one sentence, skip the plan; if you can't, plan first.**
+
+## Tool differences
+
+**Gemini CLI (as of 2026-06)**: Gemini CLI has a first-class **Plan Mode** too (read-only, write tools disabled; cycle with Shift+Tab or launch with `--approval-mode=plan`), with the same mechanism described here. The difference is the stance: it's **on by default for new users**, the opposite of the opt-in posture this entry describes, where you have to enter it deliberately. The good news is that the safer stance sits closer to the default; but however near the gate, people still turn it off by hand to save a step — and this pitfall's root cause (my default impulse to produce immediately) doesn't vanish just because the default flipped.
+
+**Cursor (as of 2026-06)**: Cursor has a first-class **Plan Mode** too (Shift+Tab to toggle, the same gesture as Claude Code), with the same mechanism: research the code first, ask clarifying questions, produce a reviewable plan, and don't change files. Two Cursor specifics: the plan is **directly editable Markdown** (you can add or remove to-dos), and it can be saved into `.cursor/plans/` to resume later; for complex tasks Cursor will **automatically suggest** entering Plan Mode. Like Claude Code, it's opt-in (unlike Gemini's on-by-default).
+
+**GitHub Copilot (as of 2026-06)**: VS Code Copilot has a dedicated **Plan agent** — it produces a reviewable, step-by-step implementation plan before touching files, opt-in like Claude Code. The coding agent's checkpoint is structured differently: it opens a draft PR and works in the open, so the "plan / review" gate moves to PR review rather than a mode you enter before acting.
 
 ## Version notes
 

@@ -15,7 +15,7 @@
 
 | 阶段 | 目标 | 已发布 |
 |------|------|--------|
-| 00 准备与协作 | 8–10 | 10 |
+| 00 准备与协作 | 8–10 | 11 |
 | 01 灵感与可行性 | 4–6 | 6 |
 | 02 需求分析 | 5–7 | 6 |
 | 03 概要设计 | 5–7 | 7 |
@@ -129,11 +129,13 @@
 - ⬜ **核对并同步「现状」计数**：`CLAUDE.md`「现状」（写 56）与本表「进度总览」、`docs/` 实际条数已对不上（main 又合并进若干条目）；按「以 `docs/` 实际为准」核一次、同步两处。
 - 🟡 **首屏角色 CTA 分流**（评审 P0）：首页首屏加「我是工程师 / 架构师 / 负责发布·安全」角色按钮，把新访客直接分流到 `/roles`，让角色入口承担转化。
 - ✅ **模板库 / 清单**（评审 P2，「拿来即用」）：已建 `docs/toolkit/`「🧰 模板与清单」区，5 件（权限配置模板、PR review 清单、任务启动模板、上线前安全清单、坏 → 好 prompt 对照），中英镜像 + 与相关误区双链。
+- ⬜ **跨工具「世界可写配置」误区候选**（工具扩展研究沉淀，用户定先入库）：**CVE-2026-35603**——`C:\ProgramData` 配置目录默认人人可写，**Codex / Cursor / Gemini CLI / Claude Code 四家都中**，可植入「每轮必跑」命令做本地提权。属**范式级跨工具**新误区（不属某一工具），宜单开一条挂 `00-setup`、打多工具 tag；本波（Cursor/Copilot/Codex 扩展）未做。出处：Cymulate、The Hacker News（写时复核各家修复状态）。
+- ⬜ **其余工具差异候选（证据弱 / 跨工具，暂存）**：Cursor 的 VS Code Workspace-Trust 默认关（继承机制、无独有 bug）→ 宜作 `over-permissioning` 小节而非单条；GitHub Copilot 免费档训练默认 + content exclusion 不覆盖 agent（易过时）→ 训练默认作观察项、exclusion 事实可并入 `mcp-over-access`。来自 Cursor / Copilot 研究 List B 的弱项，按证据关未写。
 
 ### 待触发（条件未到，不算欠债）
 
-- ⏸️ **工具矩阵页 + 各条「工具差异」实际内容**：站点现为 Claude-only，无第 2 个工具就没内容可填。结构定调已在 `CLAUDE.md`「目录与双语约定」；接入 ChatGPT / Codex / Gemini 等第 2 个工具时再建 `docs/tool-matrix` 与各条小节。
-- ⏸️ **「适用范围」字段**（通用 LLM / Coding Agent 通用 / 某工具特有 / 未验证）：标注每条误区跨哪些 AI 系统。站点现为 Claude-only，全部会落在「Coding Agent 通用」，价值要等第 2 个工具才显现；与工具矩阵同批做。
+- 🟡 **工具矩阵页 + 各条「工具差异」实际内容**（**已扩到 5 工具**）：结构定调见 `CLAUDE.md`「目录与双语约定」与 `terminology.md`「tool 工具 / agent」（轴按工具 / agent 非模型）。已落地（中英镜像）：8 条主条目各带 **Gemini CLI / Codex CLI / Cursor / GitHub Copilot** 工具差异小节（Codex 略 skipping-plan-mode）+ 独立条目 `gemini-folder-trust-inheritance`、`cursor-ignore-best-effort` + 案例库 `gemini-cli-tracebit-rce`、`codex-cli-config-rce`、`github-copilot-camoleak` + `docs/tool-matrix`（已重构为「覆盖网格 + 每工具小节」）。后续可选：补更多工具、回填 Codex 的 plan-mode 近似。
+- 🟡 **「适用范围」字段**（**已触发**，与工具矩阵同批）：取值已落到 `terminology.md`「applies_to」（Coding Agent 通用 / 通用 LLM / 某工具特有 等）+「tool」枚举轴；条目用工具名作 tag（沿用 roles 的 tag 聚合）。先在 Gemini CLI 试点条目上铺。
 
 ### 评估后不照做（存档，便于追溯）
 

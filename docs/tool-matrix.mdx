@@ -1,0 +1,61 @@
+---
+title: 工具矩阵
+slug: /tool-matrix
+description: 哪些 AI 编码工具误区是范式级通用的、哪些在工具间防法不同、哪些是某个工具独有——一张索引。
+sidebar_position: 9
+---
+
+# 工具矩阵
+
+本书绝大多数误区是**范式级**的——它们来自大模型 + 工具调用 + 长上下文 + 自动执行这套共同机制，**换哪个工具都会踩**，所以默认每条都适用于各家 AI 编码工具。这页只索引**两类例外**：同一根因在不同工具里**防法不同**（写在条目的「工具差异」小节里），以及某个坑是**某工具独有机制**带来的（单独成条 / 进案例库）。
+
+:::note 覆盖深度（请如实看待）
+**Claude Code 覆盖最深**，是全书的默认参照（几乎每条都适用，故矩阵里不单设它一列）。**Gemini CLI、Codex CLI、Cursor、GitHub Copilot** 是已铺的第二批，下表是它们各自的首批工具差异——**Codex / Gemini（开源、官方文档全）最实**；**Cursor / Copilot（闭源、多形态、版本快变）以安全披露 + 官方文档为主，深度更薄**。矩阵只写**机制名**、不写具体命令，且**很快过时**——真要动手，以你所用版本的官方文档为准。截至 2026-06。
+:::
+
+## 覆盖一览
+
+行 = 有「工具差异」小节的误区（点进去看各工具的具体机制）；列 = 第二批四个工具；`✓` = 该条目里有这个工具的差异小节，`–` = 暂无。
+
+| 误区（主条目） | Gemini | Codex | Cursor | Copilot |
+|---|:-:|:-:|:-:|:-:|
+| [建议性上下文 vs 强制配置](./00-setup-collaboration/settings-vs-claudemd.mdx) | ✓ | ✓ | ✓ | ✓ |
+| [上下文文件过载](./05-implementation/claude-md-overload.mdx) | ✓ | ✓ | ✓ | ✓ |
+| [过度授权](./00-setup-collaboration/over-permissioning.mdx) | ✓ | ✓ | ✓ | ✓ |
+| [跳过 plan mode](./00-setup-collaboration/skipping-plan-mode.mdx) | ✓ | – | ✓ | ✓ |
+| [破坏性 / 不可逆操作](./00-setup-collaboration/destructive-irreversible-actions.mdx) | ✓ | ✓ | ✓ | ✓ |
+| [MCP 过度访问](./00-setup-collaboration/mcp-over-access.mdx) | ✓ | ✓ | ✓ | ✓ |
+| [开发期提示注入](./05-implementation/dev-time-prompt-injection.mdx) | ✓ | ✓ | ✓ | ✓ |
+| [CI 权限盲区](./07-acceptance-release/cicd-permission-blindspot.mdx) | ✓ | ✓ | ✓ | ✓ |
+
+> 列名缩写：Gemini = Gemini CLI，Codex = Codex CLI，Copilot = GitHub Copilot。`跳过 plan mode` 一行 Codex 为 `–`：Codex 没有独立的「计划模式」，只能用只读预设近似，证据偏弱故未单列。
+
+## 各工具一节（机制 + 独有条目）
+
+### Gemini CLI
+默认值最反直觉的一档：**Plan Mode 默认开、Checkpointing 默认关**。安全面有两起在野高危：Tracebit RCE、CI 自动信任工作区（GHSA-wpqr，CVSS 10）。
+- 独有条目：[信任继承：信任父目录连带信任了子目录](./00-setup-collaboration/gemini-folder-trust-inheritance.mdx)
+- 案例：[一句「介绍下这个 repo」被劫持（Tracebit RCE）](./cases/gemini-cli-tracebit-rce.mdx)
+- 全部条目 → [/tags/gemini-cli](/tags/gemini-cli)
+
+### Codex CLI
+唯一**默认即沙箱**（macOS Seatbelt / Linux Landlock + 网络关）的一档，与 Claude Code「沙箱默认关」正好相反；配置分 `AGENTS.md`（建议）/ `config.toml` / `requirements.toml`（org 强制）三层。
+- 案例：[一个 `.codex` 配置把「打开仓库」变成静默 RCE（CVE-2025-61260）](./cases/codex-cli-config-rce.mdx)
+- 全部条目 → [/tags/codex-cli](/tags/codex-cli)
+
+### Cursor
+门锁最软：官方明说 `permissions.json` 与 `.cursorignore` 都是「尽力而为、不是安全保证」；命令闸多次在**解析层**被绕（denylist 已废、NomShub）。MCP 出过双 CVE（CurXecute / MCPoison）。
+- 独有条目：[`.cursorignore` 是尽力而为，当读屏障是错觉](./00-setup-collaboration/cursor-ignore-best-effort.mdx)
+- 全部条目 → [/tags/cursor](/tags/cursor)
+
+### GitHub Copilot
+三态（补全 / Chat / coding agent）各自防法不同：coding agent 有**服务端护栏**（只推 `copilot/*` 分支、默认开防火墙），但有**点名缺口**（防火墙不覆盖 MCP 与 setup 步骤）；指令文件 code review 仅读前 4000 字。安全面有 CVE-2025-53773、CamoLeak（CVSS 9.6）。
+- 案例：[私有库密钥经 Camo 图片代理逐字外带（CamoLeak）](./cases/github-copilot-camoleak.mdx)
+- 全部条目 → [/tags/git-hub-copilot](/tags/git-hub-copilot)
+
+### Claude Code
+全书**默认参照**，几乎每条都适用，故不单设 tag / 不占一列。它的强制层最硬：回溯快照默认开、`permissions.deny` 客户端硬拦截、hooks 确定性执行——上面四个工具的「工具差异」多半是在和这套默认作对比。
+
+:::note 这张表会过时
+工具差异和默认值随版本变化很快。这里只记机制名与方向、不记具体命令；真要动手，以你所用版本的官方文档为准。发现已过时，欢迎在 [GitHub](https://github.com/xuebinma/AIWiki/issues) 指正。
+:::

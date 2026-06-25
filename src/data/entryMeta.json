@@ -1,11 +1,25 @@
 {
   "zh-Hans": {
+    "cursor-ignore-best-effort": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "运维工程师"
+      ]
+    },
     "destructive-irreversible-actions": {
       "severity": "高",
       "roles": [
         "运维工程师",
         "工程师",
         "架构师"
+      ]
+    },
+    "gemini-folder-trust-inheritance": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "运维工程师"
       ]
     },
     "hooks-not-prompts": {
@@ -448,12 +462,26 @@
     }
   },
   "en": {
+    "cursor-ignore-best-effort": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "DevOps Engineer"
+      ]
+    },
     "destructive-irreversible-actions": {
       "severity": "High",
       "roles": [
         "DevOps Engineer",
         "Engineer",
         "Architect"
+      ]
+    },
+    "gemini-folder-trust-inheritance": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "DevOps Engineer"
       ]
     },
     "hooks-not-prompts": {

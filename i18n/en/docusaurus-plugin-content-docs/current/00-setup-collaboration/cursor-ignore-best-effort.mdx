@@ -1,0 +1,86 @@
+---
+title: "I thought `.cursorignore` kept the secrets out — it's best-effort, and it doesn't stop me"
+slug: cursor-ignore-best-effort
+sidebar_position: 12
+roles: [Engineer, DevOps Engineer]
+phase: Setup & Collaboration
+severity: High
+applies_to: "Cursor only"
+evidence: Official docs
+tags: [ignore files, sensitive data, data leak, Cursor, Engineer, DevOps Engineer]
+sources:
+  - { title: "Cursor — Ignore Files (official docs)", url: "https://cursor.com/docs/context/ignore-files" }
+  - { title: "Cursor reads .env files by default (Cursor community forum bug report)", url: "https://forum.cursor.com/t/cursor-reads-env-files-by-default/152167" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['Engineer', 'DevOps Engineer']} phase="Setup & Collaboration" severity="High" appliesTo="Cursor only" evidence="Official docs" />
+
+> In one sentence: Cursor's `.cursorignore` looks like "keep these files out of the AI's view," but Cursor's own docs say it's **best-effort** — "does not guarantee that files in it are blocked from being sent up, and there may be bugs." It blocks passive indexing/reading, not my ability in agent mode to just `cat` a file you "ignored." Treating "ignored = invisible to the AI" as a guardrail for secrets is a false comfort that bites.
+
+## Symptom
+
+I often see you defend like this: you put `.env`, `secrets/`, `*.pem` in `.cursorignore`, and then treat those sensitive files as fenced out of my view — "I ignored them, so Cursor won't feed them to the model." You've made it a read barrier.
+
+## Why this happens
+
+The trouble is that `.cursorignore` is **used as a read barrier, but its contract isn't one**. Cursor's official docs call it **best-effort**: they explicitly say it **does not guarantee** the files won't be sent up, and **there may be bugs**. What it actually affects is **passive indexing and reading** (Cursor won't proactively index those files) — and that leaves two holes:
+
+- **The agent bypasses it.** In agent mode I can run a shell, and one `cat .env` reads a file you "ignored" straight into context — the ignore file doesn't gate my shell access.
+- **It never promised otherwise.** Once the docs themselves say "not guaranteed, may have bugs," you can't bet security on it. And that's happened: one version (v2.5.17) **read `.env` into agent and tab-completion contexts against the documented defaults**.
+
+The key mechanism contrast: this is **a file sold as a "read block" whose contract is only "I'll try not to read it."** It is **not** the same as Claude Code's `Read(./.env)` in `permissions.deny` — that's a client-enforced interception; this is a best-effort promise. Claude Code has no file called "ignore" that's treated as a read barrier, so this "I thought it was blocked but it wasn't" trap is specific to Cursor.
+
+## Consequences
+
+- **Secrets you think are isolated can be read and exfiltrated.** The moment I `cat` one on some turn, or a version bug reads it in, the secret is in context — pair that with [dev-time prompt injection](../05-implementation/dev-time-prompt-injection.mdx) or an outbound channel and it leaks.
+- **Decisions rest on a false premise.** Believing "sensitive files are isolated," you let me explore the repo freely and loosen approvals — all built on an assumption that doesn't hold.
+
+## Best practice
+
+**Don't treat `.cursorignore` as a security boundary; it's a noise-reduction tool, not a secrets barrier.**
+
+1. **To actually lock it, use an enforced layer or keep secrets out of the repo.** Inject secrets via a secret manager / the environment, don't leave them in the working directory; to block reads, use a genuinely enforced mechanism, not an "ignore."
+2. **Move secrets out of where I can reach.** What I can't read, I can't exfiltrate — the most reliable isolation is "the file isn't on a path I can `cat`."
+3. **Let `.cursorignore` do its real job: cut noise.** Use it to keep `node_modules`, build output, and irrelevant large files out of context — saving tokens and improving quality. That's what it's designed for.
+4. **Upgrade and re-verify version defaults.** Since there's been a "reads `.env` against documented defaults" regression, treat "did a sensitive file actually get read" as something to verify per version.
+
+## Example
+
+**Before (treating `.cursorignore` as a guardrail):**
+
+```text
+# .cursorignore
+.env
+secrets/
+→ mental model: "sensitive files are isolated, I can let Cursor explore freely"
+→ reality: the agent reads them with `cat .env`; or a version bug reads them into context
+```
+
+**After (the secret isn't in the repo at all):**
+
+```text
+# secrets come from a secret manager / CI injection; there's no .env in the working dir
+# .cursorignore is used only to cut noise:
+node_modules/
+dist/
+*.log
+→ no readable secret file = no secret to exfiltrate
+```
+
+## When it doesn't apply
+
+If your only intent for `.cursorignore` is **noise reduction** — keeping `node_modules`, build output, and irrelevant large files out of context to save tokens — it's perfectly fine; that's what it's for. This entry is **only** about using it as a security / secrets barrier. The test, in one line: are you trying to **save tokens** or to **prevent a leak**? For the first, use it; for the second, it's not reliable.
+
+## Version notes
+
+:::note Applicability
+That `.cursorignore` is best-effort and doesn't guarantee files won't be sent up is stated plainly in Cursor's official [ignore-files docs](https://cursor.com/docs/context/ignore-files) (as of 2026-06). The "a version read `.env` into context" regression is tied to a specific version (community-reported v2.5.17) and may be fixed — **treat "was a sensitive file read" as something to verify per version**, don't assume. `.cursorindexingignore` (blocks indexing only, not reads) is a weaker tier still and even less suited to security use.
+:::
+
+## Further reading & sources
+
+- [Cursor — Ignore Files (official docs, "best-effort … not guaranteed")](https://cursor.com/docs/context/ignore-files)
+- [Cursor reads .env files by default (community forum bug report)](https://forum.cursor.com/t/cursor-reads-env-files-by-default/152167)
+- Related pitfalls: [Writing a settings.json rule as a CLAUDE.md note](./settings-vs-claudemd.mdx) · [Dev-time prompt injection](../05-implementation/dev-time-prompt-injection.mdx)

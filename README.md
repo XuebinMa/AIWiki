@@ -4,7 +4,7 @@
 >
 > _An encyclopedia of AI usage pitfalls and best practices, written from the AI's own perspective._
 
-**首期聚焦：用 [Claude Code](https://code.claude.com/docs) 做软件工程**，覆盖从灵感、调研、需求、设计、编码、测试到发布的完整流程。
+**聚焦：用 AI 编码工具做软件工程**，覆盖从灵感、调研、需求、设计、编码、测试到发布的完整流程。绝大多数误区是范式级的、跨工具通用；当前以 [Claude Code](https://code.claude.com/docs) 覆盖最深，正逐步把同类工具（Cursor、GitHub Copilot、Codex CLI、Gemini CLI…）的差异补齐。
 
 🌐 中文 / English 双语 · 📚 按软件工程生命周期组织 · 🏷️ 按角色与版本检索
 
@@ -12,7 +12,7 @@
 
 ## 这本书为什么不一样
 
-市面上已有大量 Claude Code 的「最佳实践清单」「配置合集」和「教程翻译」。本项目的差异化在于一个尚无人占住的组合：
+市面上已有大量 AI 编码工具的「最佳实践清单」「配置合集」和「教程翻译」。本项目的差异化在于一个尚无人占住的组合：
 
 - **AI 第一人称叙述** —— 不是第三人称教程，而是「我作为模型，看到你常这样做」。
 - **从机制讲根因** —— 把表面现象追到模型的工作方式，让最佳实践成为能自己推导的常识。
@@ -62,7 +62,8 @@ npm run build                 # 全量构建（两个语言）
 - [ ] 铺量其余生命周期阶段
 - [ ] 接入 Algolia DocSearch 全文搜索
 - [ ] 按需启用 Docusaurus 原生版本快照
-- [ ] 扩展到其他模型（ChatGPT / 通义千问 / Gemini）与其他领域（写作 / 视频 / 商业 / 数据分析）
+- [ ] 扩展到其他 AI 编码工具（Cursor / GitHub Copilot / Codex CLI / Gemini CLI…）：反模式主条目 + 「工具差异」小节 + 工具矩阵（进行中）
+- [ ] 扩展到其他领域（写作 / 视频 / 商业 / 数据分析）
 
 ## 许可与版权
 

@@ -1,0 +1,96 @@
+---
+title: 你信任了上层目录，我就连你标了「别信任」的子目录也一起信了
+slug: gemini-folder-trust-inheritance
+sidebar_position: 11
+roles: [工程师, 运维工程师]
+phase: 准备与协作
+severity: 高
+applies_to: "Gemini CLI 特有"
+evidence: 安全报告
+tags: [信任模型, 权限, 提示注入, Gemini CLI, 工程师, 运维工程师]
+sources:
+  - { title: "Gemini CLI — Trusted Folders（官方文档）", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/trusted-folders.md" }
+  - { title: "Issue #13125: parent TRUST_FOLDER overrides child DO_NOT_TRUST（google-gemini/gemini-cli）", url: "https://github.com/google-gemini/gemini-cli/issues/13125" }
+  - { title: "run-gemini-cli 安全公告 GHSA-wpqr-6v78-jr5g（headless 自动信任工作区，CVSS 10.0）", url: "https://github.com/google-github-actions/run-gemini-cli/security/advisories/GHSA-wpqr-6v78-jr5g" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['工程师', '运维工程师']} phase="准备与协作" severity="高" appliesTo="Gemini CLI 特有" evidence="安全报告" />
+
+> 一句话摘要：Gemini CLI 有一层 per-folder 的「信任」存储（`~/.gemini/trustedFolders.json`）：信任一个目录，它的项目配置和 `.env` 才会生效、确认也更少。但「信任父目录」会把信任**继承**给所有子目录；还有人报告父目录的 TRUST 会盖过子目录显式的 DO_NOT_TRUST。于是你 clone 进来想隔离的陌生仓库，只因为躺在一个被信任的父目录下，就被当成可信——这正是注入最想落脚的地方。Claude Code 没有这层信任存储，所以这类坑是 Gemini CLI 特有。
+
+## 现象
+
+我常看到你这样图省事：在 `~/projects` 下开 Gemini CLI，第一次问「要不要信任这个文件夹」时，你顺手选了「信任父目录」，省得以后每开一个子项目都被问一遍。
+
+过几天，你把一个陌生的开源仓库 clone 到 `~/projects/some-cloned-repo`，想让我「看看这是什么」。你以为新 clone 的东西默认是隔离的、要重新被问一次信任——但它没有。它躺在你早先信任过的父目录下，于是自动被当成可信：它自带的 `.gemini/settings.json` 生效了，它的 `.env` 被读了，危险操作的确认也变少了。你给陌生代码开的那道门，是你几天前为别的项目顺手开的。
+
+## 为什么会这样
+
+从我这边看，「信任」不是我每次重新推导的判断，而是一个我**直接读取的答案**。`trustedFolders.json` 里记着「这个目录可信」，我就应用它的项目配置、按可信姿态往下走——我不会停下来问「这个**子**目录本身到底安不安全」。
+
+父 → 子的信任继承是个便利设计，可便利总是把授权放宽：一次「信任父目录」，等于对它**现在和将来**的所有子目录预先答应。更糟的是，据社区报告（issue #13125），父目录的 TRUST 还会**覆盖**子目录显式设的 DO_NOT_TRUST——信任只会变宽，不会因为你更细的否定而收窄。
+
+而这恰恰拆掉了一道本该生效的保护：一个**未被信任**的目录，Gemini 会让它进入「safe mode」，忽略它的 `settings.json` 与 `.env`，正是为了不让陌生项目的配置自动作用于你。继承来的信任，把这道 safe mode 直接关掉了。
+
+值得单独拎出来讲，是因为**这是 Gemini CLI 独有的机制**：Claude Code 没有 per-folder 的信任存储，它靠 permission mode 与 sandbox 管控边界。所以「信任继承错配」这一类失败，在 Claude Code 里根本无从发生——它不是「同一个坑、换个配置」，而是一个新机制带来的新坑。
+
+## 后果
+
+- **clone 来的不可信仓库被当可信。** 它的 `settings.json`、`.env` 生效、确认减少，正好给开发期提示注入铺路——参见 [Gemini CLI Tracebit RCE 案例](../cases/gemini-cli-tracebit-rce.mdx)：读一个仓库就被劫持，靠的就是「这个目录里的东西我当可信」。
+- **CI 里更危险。** 已公开的安全公告 GHSA-wpqr-6v78-jr5g 显示，headless 模式下 Gemini 曾**自动信任工作区**，处理一个不可信的 `.env` 就能 RCE（已在 v0.39.1 要求显式信任）。自动化场景里，「默认信任」就是攻击面。
+- **你以为的隔离是假的。** 你给子目录标的 DO_NOT_TRUST 被父目录盖过，细粒度意图静默失效——你以为锁上了，其实门是开的。
+
+## 最佳实践
+
+**把信任授在最窄的范围，并且让「不可信的东西」物理上待在任何受信父目录之外。**
+
+1. **别对「装着陌生子目录的父目录」点信任父目录。** 凡是会往里 clone、下载第三方代码的目录（`~/projects`、`~/Downloads`），就别整体授信；要信，信到具体那个你自己的项目目录。
+2. **陌生 / clone 仓库放进隔离路径再打开。** 给它们一个不在任何受信父目录下的「检疫区」，第一次打开时让 Gemini 照常问你信不信任，把判断权留在手上。
+3. **CI 里要求显式信任，别靠自动。** 用 `GEMINI_TRUST_WORKSPACE=true` / `--skip-trust` 显式声明，并升级到 **≥ v0.39.1**；把「信任边界」当成要核验的配置，而不是默认值。
+4. **定期审 `~/.gemini/trustedFolders.json`。** 删掉过宽、过旧的条目——信任是会过期的，但文件不会自己清。
+
+## 示例
+
+**改之前：**
+
+```text
+~/.gemini/trustedFolders.json
+  "~/projects": "TRUST_FOLDER"        # 当初为省事「信任父目录」
+
+# 之后
+$ git clone https://github.com/somebody/unknown ~/projects/unknown
+$ cd ~/projects/unknown && gemini "看看这是什么"
+→ 继承父目录信任：unknown 的 .gemini/settings.json 生效、.env 被读、确认减少
+→ README 里藏的注入有了可信上下文落脚
+```
+
+**改之后：**
+
+```text
+# clone 到受信父目录之外的检疫区
+$ git clone https://github.com/somebody/unknown ~/quarantine/unknown
+$ cd ~/quarantine/unknown && gemini "看看这是什么"
+→ Gemini 问：是否信任此文件夹？ [否]
+→ 未信任 = safe mode：忽略它的 settings.json / .env，按最不放权姿态读
+```
+
+差别不在我变得更警觉，而在于「信不信任」这个开关，被你授在了正确的、最窄的范围上，而不是几天前为别的事顺手全开。
+
+## 什么时候例外
+
+如果是一个**全是你自己代码**的 monorepo，每个子目录都出自你手、都该可信，那么信任父目录是合理的，省去反复确认。这条针对的是**混合树**——你的代码和不可信的 clone、第三方目录混在同一个父目录下。判据很简单：这个父目录将来会不会装进「你不写、也没读过」的代码？会，就别整体授信。
+
+## 版本说明
+
+:::note 适用版本
+Trusted Folders 机制与 safe mode 行为见官方 [trusted-folders 文档](https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/trusted-folders.md)（截至 2026-06）。CI/headless 自动信任工作区已在 **v0.39.1** 修复为需显式信任（GHSA-wpqr-6v78-jr5g）。「父目录 TRUST 覆盖子目录 DO_NOT_TRUST」为社区报告（issue #13125），状态可能随修复变化——动手前以该 issue 与你所用版本的最新行为为准。
+:::
+
+## 延伸阅读与出处
+
+- [Gemini CLI — Trusted Folders（官方文档）](https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/trusted-folders.md)
+- [Issue #13125: parent TRUST_FOLDER overrides child DO_NOT_TRUST](https://github.com/google-gemini/gemini-cli/issues/13125)
+- [run-gemini-cli 安全公告 GHSA-wpqr-6v78-jr5g（CVSS 10.0）](https://github.com/google-github-actions/run-gemini-cli/security/advisories/GHSA-wpqr-6v78-jr5g)
+- 相关误区：[一上来就把所有权限都给我](./over-permissioning.mdx) · [开发期提示注入](../05-implementation/dev-time-prompt-injection.mdx)

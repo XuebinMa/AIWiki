@@ -5,7 +5,7 @@ const { themes: prismThemes } = require('prism-react-renderer');
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'AiWiki',
-  tagline: '用 Claude Code 写代码最容易踩的坑，以及对应的工程护栏',
+  tagline: '用 AI 编码工具写代码最容易踩的坑，以及对应的工程护栏',
   favicon: 'img/logo.svg',
 
   url: 'https://xuebinma.github.io',
