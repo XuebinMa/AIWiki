@@ -5,7 +5,7 @@
 
 ## 专有名词（不翻译，原样保留）
 
-Claude Code · CLAUDE.md · Anthropic · Claude · Opus · Sonnet · Haiku · Docusaurus · MDX · Mermaid · Git · GitHub · slug · frontmatter
+Claude Code · CLAUDE.md · Anthropic · Claude · Opus · Sonnet · Haiku · Docusaurus · MDX · Mermaid · Git · GitHub · slug · frontmatter · WebSearch · WebFetch
 
 ## 通用术语
 
@@ -44,6 +44,26 @@ Claude Code · CLAUDE.md · Anthropic · Claude · Opus · Sonnet · Haiku · Do
 | 技术选型 | technology selection | |
 | 权衡 | trade-off | |
 | 技术债 | technical debt | |
+| 边界条件 | boundary conditions | |
+| 健壮性 | robustness | |
+| 主路径 | happy path | 也写 happy path |
+| 幂等 | idempotency | |
+| 代码风格 | code style | |
+| 一致性 | consistency | |
+| 约定 | convention | 项目既有写法/规范 |
+| 风格漂移 | style drift | 跨文件/跨轮风格不一致 |
+| 格式化工具 | formatter | |
+| 性能 | performance | |
+| 复杂度 | complexity | |
+| 反模式 | anti-pattern | |
+| 非功能需求 | non-functional requirement | |
+| 幻觉 | hallucination | AI 编造看似可信的内容 |
+| 编造来源 | fabricated sources | |
+| 检索 | retrieval | |
+| 非确定性 | non-determinism | 同输入未必同输出 |
+| 不确定度 | uncertainty | |
+| 置信度 | confidence | |
+| 架构决策记录 | ADR (architecture decision record) | 缩写 ADR 保留不译 |
 
 ## 枚举值映射（frontmatter 与 `<PitfallMeta>`）
 

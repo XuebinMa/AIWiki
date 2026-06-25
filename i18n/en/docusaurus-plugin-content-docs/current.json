@@ -86,5 +86,17 @@
   "sidebar.wikiSidebar.category.🚀 验收与发布.link.generated-index.description": {
     "message": "The last gate before shipping: acceptance criteria, regression, release, and rollback. This part covers how to avoid \"it runs in the demo, ship it,\" and make me help guard the gate instead of waving things through.",
     "description": "The generated-index page description for category '🚀 验收与发布' in sidebar 'wikiSidebar'"
+  },
+  "sidebar.wikiSidebar.category.📐 详细设计": {
+    "message": "📐 Detailed Design",
+    "description": "The label for category '📐 详细设计' in sidebar 'wikiSidebar'"
+  },
+  "sidebar.wikiSidebar.category.📐 详细设计.link.generated-index.title": {
+    "message": "Detailed Design",
+    "description": "The generated-index page title for category '📐 详细设计' in sidebar 'wikiSidebar'"
+  },
+  "sidebar.wikiSidebar.category.📐 详细设计.link.generated-index.description": {
+    "message": "Interfaces, data structures, and boundary conditions, down on paper. This part covers how, in detailed design, to turn my plausible-looking plans into ones that hold up under edge-case scrutiny.",
+    "description": "The generated-index page description for category '📐 详细设计' in sidebar 'wikiSidebar'"
   }
 }
