@@ -5,7 +5,7 @@ sidebar_position: 4
 roles: [工程师, 架构师, 运维工程师]
 phase: 验收与发布
 severity: 高
-applies_to: "全模型通用（含 Claude Code 协助构建的 LLM 功能）"
+applies_to: "Coding Agent 通用"
 evidence: 安全报告
 tags: [提示注入, 过度代理, 致命三件套, 最小权限, 安全, 发布, 威胁建模, 工程师, 架构师, 运维工程师]
 sources:
@@ -17,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '架构师', '运维工程师']} phase="验收与发布" severity="高" appliesTo="全模型通用（含 Claude Code 协助构建的 LLM 功能）" evidence="安全报告" />
+<PitfallMeta roles={['工程师', '架构师', '运维工程师']} phase="验收与发布" severity="高" appliesTo="Coding Agent 通用" evidence="安全报告" />
 
 > 一句话摘要：当我帮你做的产品本身内置了 LLM——客服 bot、Agent、那种「读完用户内容/网页/邮件再行动」的功能——上线后，攻击者会把恶意指令藏进我会读到的内容里，诱导你后端那个 LLM 越权：泄露数据、调用它不该调的工具、绕过你定的规则。开发期我默认「输入都是善意的」，于是把一个本该当成攻击面的发布面，当成了普通功能交付。
 

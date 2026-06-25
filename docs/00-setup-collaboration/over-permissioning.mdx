@@ -5,7 +5,7 @@ sidebar_position: 1
 roles: [运维工程师, 工程师]
 phase: 准备与协作
 severity: 高
-applies_to: "全模型通用"
+applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [权限, 最小权限, 安全, 提示注入, 运维工程师, 工程师, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
@@ -22,7 +22,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['运维工程师', '工程师']} phase="准备与协作" severity="高" appliesTo="全模型通用" evidence="官方文档" />
+<PitfallMeta roles={['运维工程师', '工程师']} phase="准备与协作" severity="高" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
 > 一句话摘要：你在准备阶段就给我开了 `--dangerously-skip-permissions`、把所有工具调用都自动批准，图的是「不被频繁打断」。但你同时也交出了在出错那一刻喊停的唯一机会——而出错的不一定是我，也可能是藏在某个文件里的一段注入指令借我的手干的。
 

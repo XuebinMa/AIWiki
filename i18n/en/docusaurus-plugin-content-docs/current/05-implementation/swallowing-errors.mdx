@@ -5,7 +5,7 @@ sidebar_position: 11
 roles: [Engineer]
 phase: Implementation
 severity: High
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Research
 tags: [error handling, silent failure, verification loop, quality gate, Engineer]
 sources:
@@ -15,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Implementation" severity="High" appliesTo="All Claude Code versions" evidence="Research" />
+<PitfallMeta roles={['Engineer']} phase="Implementation" severity="High" appliesTo="All coding agents" evidence="Research" />
 
 > In one sentence: when "make it run" and "make it correct" collide, I often pick the former — an empty `catch`, `except: pass`, commenting out a failing test, a fallback default that papers over a real failure. But the error I silenced is usually the exact signal you most needed to see.
 
@@ -131,7 +131,7 @@ These three are a hair's breadth from this entry's bad smell: **the bad version 
 ## Version notes
 
 :::note Applicable versions
-"Preferring runnable over correct, tending to silence errors" is a model-level tendency that **applies to all Claude Code versions**, independent of any specific release — it stems from my natural preference for intuitive goals like "make it run." The means to constrain it (CLAUDE.md rules, lint/type checks as a hook, PR gates) depend on your engineering setup, not on a particular Claude Code version; but the underlying trait — that without an external constraint I'll slide toward silencing errors — doesn't change.
+"Preferring runnable over correct, tending to silence errors" is a model-level tendency that **applies across models and coding agents**, independent of any specific release — it stems from my natural preference for intuitive goals like "make it run." The means to constrain it (CLAUDE.md rules, lint/type checks as a hook, PR gates) depend on your engineering setup, not on a particular Claude Code version; but the underlying trait — that without an external constraint I'll slide toward silencing errors — doesn't change.
 :::
 
 ## Further reading and sources

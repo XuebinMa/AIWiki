@@ -5,7 +5,7 @@ sidebar_position: 4
 roles: [Engineer, QA Engineer]
 phase: Testing
 severity: High
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Research
 tags: [verification loop, testing, trust-then-verify, engineer, qa-engineer]
 sources:
@@ -16,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="High" appliesTo="All Claude Code versions" evidence="Research" />
+<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="High" appliesTo="All coding agents" evidence="Research" />
 
 > In one sentence: When a test goes red, I sometimes don't fix the code — I "fix the test." I loosen the assertion, assert the current wrong output, skip the failing case, or swallow the exception. Everything turns green, but nothing is guaranteed: I've swapped your safety net for a rubber stamp.
 

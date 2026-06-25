@@ -5,7 +5,7 @@ sidebar_position: 10
 roles: [Engineer, Architect]
 phase: Implementation
 severity: Medium
-applies_to: "All models"
+applies_to: "All LLMs"
 evidence: Research
 tags: [context management, context window, attention dilution, retrieval, engineer, architect]
 sources:
@@ -15,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect']} phase="Implementation" severity="Medium" appliesTo="All models" evidence="Research" />
+<PitfallMeta roles={['Engineer', 'Architect']} phase="Implementation" severity="Medium" appliesTo="All LLMs" evidence="Research" />
 
 > In one sentence: "feed it the whole repo / the whole long doc and it surely saw all of it" is an illusion. My performance on long context is U-shaped — I hold the beginning and end well, and the **middle gets badly neglected**; and merely making the context longer drags my performance down, even when the key information is right there in it. More context ≠ better.
 

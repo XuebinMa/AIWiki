@@ -5,7 +5,7 @@ sidebar_position: 7
 roles: [架构师, 工程师]
 phase: 概要设计
 severity: 高
-applies_to: "全模型通用"
+applies_to: "Coding Agent 通用"
 tags: [架构, 数据模型, schema, 迁移, 演进式设计, 架构师, 工程师]
 sources:
   - { title: "Evolutionary Database Design (Martin Fowler & Pramod Sadalage)", url: "https://martinfowler.com/articles/evodb.html" }
@@ -14,7 +14,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['架构师', '工程师']} phase="概要设计" severity="高" appliesTo="全模型通用" />
+<PitfallMeta roles={['架构师', '工程师']} phase="概要设计" severity="高" appliesTo="Coding Agent 通用" />
 
 > 一句话摘要：你让我设计表结构或接口契约，我会很快给你一版「能把数据存下来」的 schema——但字段类型挑得随意（该 decimal 用了 float、该枚举用了自由文本）、缺约束少索引、没想过将来要怎么查、怎么演进。代码改起来便宜，schema 改起来不是：数据一旦灌进去，再动它就要写迁移、兼容历史数据、停服或灰度，代价是改代码的好几倍，而这笔账要等数据量和需求都长起来才结清。
 

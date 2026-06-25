@@ -5,7 +5,7 @@ sidebar_position: 6
 roles: [Engineer, QA Engineer]
 phase: Testing
 severity: Medium
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 tags: [testing, mock, contract testing, verification loop, Engineer, QA Engineer]
 sources:
   - { title: "Mocks Aren't Stubs (Martin Fowler)", url: "https://martinfowler.com/articles/mocksArentStubs.html" }
@@ -16,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="Medium" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="Medium" appliesTo="All coding agents" />
 
 > In one sentence: when you ask me to write tests, I tend to mock the database, external APIs, the filesystem, and the clock into "returning the value I expect." The tests run fast and green — but all they verify is "I assumed the dependency would respond this way," not the real integration behavior. The real bugs are hiding in exactly what the mocks paper over.
 

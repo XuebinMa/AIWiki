@@ -5,7 +5,7 @@ sidebar_position: 1
 roles: [Engineer]
 phase: Detailed Design
 severity: High
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [boundary conditions, detailed design, verification loop, Engineer]
 sources:
@@ -15,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Detailed Design" severity="High" appliesTo="All Claude Code versions" evidence="Official docs" />
+<PitfallMeta roles={['Engineer']} phase="Detailed Design" severity="High" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: the code I hand you almost always runs on the main path. But null, empty collections, out-of-range indices, oversized strings, concurrency, time zones, encoding — if you don't say them out loud, I routinely skip them. The code looks complete; feed it one edge input and it breaks. This entry is about omissions at the **implementation-detail level**; if the whole design's robustness assumptions don't hold, see [The design looks right but doesn't survive edge cases](./plausible-but-brittle-design.mdx).
 
@@ -93,7 +93,7 @@ The test: the exception holds when you can state **why this edge can't reach thi
 ## Version notes
 
 :::note Applicable versions
-"Strong main path, weak edges" is an inherent tendency of large language models writing code — it applies to **all Claude Code versions and across models**. The stronger the model, the more polished the main path, which actually makes it easier to relax your guard on the edges — so "enumerate edges first, nail them down with tests" doesn't go stale as models get stronger.
+"Strong main path, weak edges" is an inherent tendency of large language models writing code — it applies to **all models and coding agents**. The stronger the model, the more polished the main path, which actually makes it easier to relax your guard on the edges — so "enumerate edges first, nail them down with tests" doesn't go stale as models get stronger.
 :::
 
 ## Further reading and sources

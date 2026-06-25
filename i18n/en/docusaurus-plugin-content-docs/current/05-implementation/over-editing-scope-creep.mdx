@@ -5,7 +5,7 @@ sidebar_position: 6
 roles: [Engineer]
 phase: Implementation
 severity: Medium
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [scope, diff review, code review, context window, Engineer]
 sources:
@@ -15,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Implementation" severity="Medium" appliesTo="All Claude Code versions" evidence="Official docs" />
+<PitfallMeta roles={['Engineer']} phase="Implementation" severity="Medium" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: you asked me to change one line of config, and along the way I renamed variables, refactored a nearby function, and touched two other files. The line you actually wanted is buried under changes you never asked for — a diff that should have sailed through review is now a high-risk overhaul.
 

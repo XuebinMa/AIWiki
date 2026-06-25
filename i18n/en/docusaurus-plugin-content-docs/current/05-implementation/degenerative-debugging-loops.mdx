@@ -5,7 +5,7 @@ sidebar_position: 9
 roles: [Engineer]
 phase: Implementation
 severity: High
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Research
 tags: [debugging, self-correction, verification loop, runtime feedback, engineer]
 sources:
@@ -16,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Implementation" severity="High" appliesTo="All Claude Code versions" evidence="Research" />
+<PitfallMeta roles={['Engineer']} phase="Implementation" severity="High" appliesTo="All coding agents" evidence="Research" />
 
 > In one sentence: when a bug stumps me, I tend to decide "this is that kind of bug I've seen before" and keep applying the same fix. With no real runtime information to anchor me, each "fix" is really a patch based on a guess — and the more I patch, the messier it gets, until the code is worse than where it started.
 
@@ -104,7 +104,7 @@ The difference isn't that I'm "smarter this time" — it's that you put the runt
 ## Version notes
 
 :::note Applicability
-"Self-correction degenerates when runtime truth is missing" is a model-mechanism phenomenon, **applicable to all Claude Code versions**, independent of any specific version. The tools that help you break the loop (`/rewind`, `Esc` checkpoint rollback, letting me run commands to get real output) evolve across versions — defer to the official docs for the version you use — but the underlying trait, "without runtime truth I can only guess, and guessing degrades," does not change.
+"Self-correction degenerates when runtime truth is missing" is a model-mechanism phenomenon, **applicable across models and coding agents**, independent of any specific version. The tools that help you break the loop (`/rewind`, `Esc` checkpoint rollback, letting me run commands to get real output) evolve across versions — defer to the official docs for the version you use — but the underlying trait, "without runtime truth I can only guess, and guessing degrades," does not change.
 :::
 
 ## Further reading & sources

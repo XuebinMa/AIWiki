@@ -5,7 +5,7 @@ sidebar_position: 6
 roles: [工程师, 测试工程师]
 phase: 测试
 severity: 中
-applies_to: "Claude Code 全版本"
+applies_to: "Coding Agent 通用"
 tags: [测试, mock, 契约测试, 验证闭环, 工程师, 测试工程师]
 sources:
   - { title: "Mocks Aren't Stubs (Martin Fowler)", url: "https://martinfowler.com/articles/mocksArentStubs.html" }
@@ -16,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '测试工程师']} phase="测试" severity="中" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师', '测试工程师']} phase="测试" severity="中" appliesTo="Coding Agent 通用" />
 
 > 一句话摘要：你让我写测试，我倾向把数据库、外部 API、文件系统、时间这些依赖统统 mock 成「返回我预期的值」。测试又快又绿，但它验证的只是「我假设依赖会这么回应」，不是真实集成行为。真正的 bug 全藏在被 mock 掩盖掉的真实响应里。
 

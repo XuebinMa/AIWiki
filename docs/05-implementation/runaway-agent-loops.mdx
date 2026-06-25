@@ -5,7 +5,7 @@ sidebar_position: 13
 roles: [工程师, 运维工程师]
 phase: 编码实现
 severity: 高
-applies_to: "Claude Code 全版本"
+applies_to: "Coding Agent 通用"
 evidence: 研究支持
 tags: [AI 代理, 验证闭环, 不可逆操作, 计划模式, 工程师, 运维工程师]
 sources:
@@ -16,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '运维工程师']} phase="编码实现" severity="高" appliesTo="Claude Code 全版本" evidence="研究支持" />
+<PitfallMeta roles={['工程师', '运维工程师']} phase="编码实现" severity="高" appliesTo="Coding Agent 通用" evidence="研究支持" />
 
 > 一句话摘要：你把任务整个丢给我、转身去忙别的，指望回来就收成果。但当我陷进非终止的循环——反复调同一个工具、在两个动作间来回横跳、永远「再试一次」——没人喊停，我就会安静地把你的 token、预算和速率配额一路烧穿，顺带对外部系统反复写。
 
@@ -114,7 +114,7 @@ while not done:
 ## 版本说明
 
 :::note 适用版本
-「LLM 缺乏对‘已试过且无进展’的可靠自我感知，因而不擅长在对的时候自行停止」是模型机制层面的特性，**Claude Code 全版本适用**，与具体版本无关。能帮你兜底的工具会随版本演进——`--max-turns`、计划模式、`/usage`、`/rewind`、`Esc` 打断、工作区开销与速率上限等，具体可用项与默认值以你所用版本的官方文档为准。但「没有外部停止条件，我就可能原地打转把成本烧穿」这条根本特性不会变。
+「LLM 缺乏对‘已试过且无进展’的可靠自我感知，因而不擅长在对的时候自行停止」是模型机制层面的特性，**全模型、跨工具通用**，与具体版本无关。能帮你兜底的工具会随版本演进——`--max-turns`、计划模式、`/usage`、`/rewind`、`Esc` 打断、工作区开销与速率上限等，具体可用项与默认值以你所用版本的官方文档为准。但「没有外部停止条件，我就可能原地打转把成本烧穿」这条根本特性不会变。
 :::
 
 ## 延伸阅读与出处

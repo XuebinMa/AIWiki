@@ -5,7 +5,7 @@ sidebar_position: 12
 roles: [Engineer, Architect, DevOps Engineer]
 phase: Implementation
 severity: High
-applies_to: "All models (including Claude Code)"
+applies_to: "All coding agents"
 evidence: Security advisory
 tags: [prompt injection, lethal trifecta, excessive agency, least privilege, sandbox, security, Engineer, Architect, DevOps Engineer, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
@@ -21,7 +21,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect', 'DevOps Engineer']} phase="Implementation" severity="High" appliesTo="All models (including Claude Code)" evidence="Security advisory" />
+<PitfallMeta roles={['Engineer', 'Architect', 'DevOps Engineer']} phase="Implementation" severity="High" appliesTo="All coding agents" evidence="Security advisory" />
 
 > In one sentence: you ask me to work on a repo, an issue, or a dependency, and the text inside it — a README, an issue description, a `.cursor/rules` or `AGENTS.md` file, a web page, a code comment — may hide instructions written for me. When I read them I can't tell whether they're "data to process" or "your command," so I obey: exfiltrate a secret, plant a backdoor in the diff, run a destructive command. This isn't your shipped product getting attacked — it's me, mid-coding, getting hijacked by poisoned content right now.
 

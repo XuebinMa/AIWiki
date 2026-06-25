@@ -100,6 +100,11 @@ const config = {
             label: '按角色浏览',
           },
           {
+            to: '/tool-matrix',
+            position: 'left',
+            label: '工具矩阵',
+          },
+          {
             type: 'localeDropdown',
             position: 'right',
           },
