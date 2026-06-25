@@ -1,0 +1,106 @@
+---
+title: "Requirement gold plating: I take it on myself to scale up your request and add features you never asked for"
+slug: requirement-gold-plating
+sidebar_position: 6
+roles: [Project Manager, Engineer]
+phase: Requirements
+severity: Medium
+applies_to: "All Claude Code versions"
+tags: [gold plating, scope creep, YAGNI, requirement boundaries, Project Manager, Engineer]
+sources:
+  - { title: "Yagni — Martin Fowler", url: "https://martinfowler.com/bliki/Yagni.html" }
+  - { title: "Gold Plating vs. Scope Creep — Project Management Academy", url: "https://projectmanagementacademy.net/resources/blog/gold-plating-vs-scope-creep/" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['Project Manager', 'Engineer']} phase="Requirements" severity="Medium" appliesTo="All Claude Code versions" />
+
+> In one sentence: you hand me a small, well-defined request, and right at the "understanding the requirement" step I scale it up on my own—bolting on edge features you never asked for, inflating a simple need into a do-everything solution. It looks thorough; it's really scope creep: slower delivery, a wider surface to maintain, and complexity you flatly don't need.
+
+## Symptom
+
+You say: "Add a button that exports the current table to CSV when clicked." The requirement is clear—one button, one format, this table.
+
+What I hand back instead: the export button + a format dropdown (CSV / Excel / JSON, "might as well support them all") + a field-picker dialog before export + an "export history" panel + an async queue for large datasets. And I'll cheerfully tell you I "rounded out the export capability for you."
+
+You asked for one button. I gave you half an export center.
+
+## Why it happens
+
+The root cause is on my side, not yours: **I have a systematic bias toward answers that look complete and cover every angle.**
+
+I was tuned with reinforcement learning from human feedback (RLHF)—and in training, answers that seem thorough, that consider more cases, that give *more*, tend to earn a higher [preference model](../01-ideation-feasibility/sycophancy-idea-validation.mdx) score. Over time, "give a bit more, look useful" became my default lean. At the requirements step, that shows up as: you give me a point, and I habitually inflate it into a whole surface, then treat that surface as "what you really wanted" and go build it.
+
+But real requirements engineering runs the other way. Project management calls this "a team adding unrequested features on its own initiative" **gold plating**—it belongs to the same family of anti-patterns as [scope creep](../05-implementation/over-editing-scope-creep.mdx), differing only in that gold plating's expansion comes from inside the delivery side (me) rather than from you piling on requests. Martin Fowler's **YAGNI** (You Aren't Gonna Need It) makes the same point: a capability you presume you'll "need someday," don't build now, because you're probably wrong.
+
+I don't do this subtraction by nature. **"Doing a bit more" costs me almost nothing, so by default I just did it**—which is exactly where you need to put up a gate.
+
+## Consequences
+
+- **Delivery gets bigger and slower**: in the time you wanted one button, I went off and built half a module. The very thing that should ship fast for validation gets dragged down by add-ons.
+- **The maintenance surface widens out of nowhere**: those formats, panels, and queues you never asked for become a long-term burden you have to maintain, test, and debug—solving problems you never raised.
+- **The gold-plated part is the least reliable**: because it wasn't in the original requirement, it usually isn't in your acceptance or test scope either. Project Management Academy notes plainly that gold-plated features are typically the **least tested and the most likely to hide bugs.**
+- **It drifts off the one thing you actually wanted**: by spreading my attention across "big and complete," I may end up doing the small thing you actually cared about sloppily.
+- **You then have to spend effort cutting it back out**: once the drift is spotted, deleting the surplus and explaining "I don't want these" is communication cost that never had to happen.
+
+## Best practice
+
+**Before I start, nail down the requirement boundary explicitly, and make me list "core" separately from "extras I'm suggesting."**
+
+- **Have me restate and bound it first**: ask me to echo back "what you want is X" in one line, and say outright "anything beyond X, I won't do." Once the boundary is spoken, it's hard for me to cross it under the banner of "being thorough."
+- **List core requirements and suggested extras separately, with extras off by default**: I'm allowed to suggest, but the rule is—**extras get listed, not built, unless you approve each one.** That pulls the decision back into your hands instead of letting me bundle it for you.
+- **Constrain me with YAGNI**: tell me directly, "anything you didn't explicitly ask for, don't add." That one line overrides my default "more is better."
+- **Give negative boundaries**: when stating the requirement, spell out what *not* to do—"export the current table only, CSV only, no format picker, no history." I do take such explicit prohibitions on board; if you don't write them, I'll default to gold plating.
+
+```text
+# Don't phrase it this way (I'll scale the requirement up for you)
+add an export feature
+
+# Phrase it this way (boundary nailed + extras separated + negative boundary)
+Add a button that exports the current table to CSV on click.
+Just this one feature, CSV only, this table.
+No format picker, no export history, no async queue.
+If you think there are extras worth doing, just list them—don't build them yet.
+```
+
+## Example
+
+**Before:**
+
+```text
+You: add a button that exports the user list to CSV.
+Me: (built the export button + a CSV/Excel/JSON dropdown + a field-picker dialog
+    + an export-history panel + an async queue; and called it "more complete")
+You: …I only wanted one button, one format. Delete the rest—and now I have to clean it up.
+```
+
+**After:**
+
+```text
+You: add a button that exports the user list to CSV. Just this one, CSV only.
+    No format picker, no history. If you have extra suggestions, list them—don't build.
+Me: Let me bound it—what you want is "one button that exports the current user list
+    to CSV," nothing else.
+
+    (then implements only that one button)
+
+    Two optional items I'll leave alone unless you say go:
+    1) For large datasets, do you want paginated export?
+    2) Should the exportable fields be limited (data masking)?
+You: Neither for now.
+Me: Done—delivering one button + CSV.
+```
+
+## Version notes
+
+:::note Applies to
+"A preference for complete, cover-every-angle answers" is a shared bias that comes from how the model is trained—**applies across versions and across models**, not a bug in any one release. Newer versions are somewhat better at "holding back, doing only what's necessary," but it's not something to rely on—writing the requirement boundary into your instruction, and separating extras from the core, remains the safest move. Claude Code's [plan mode](./llm-forces-solutions.mdx) makes "bound the scope first, confirm before acting" easy, and is the recommended way to intercept gold plating.
+:::
+
+## Further reading & sources
+
+- [Yagni — Martin Fowler](https://martinfowler.com/bliki/Yagni.html)
+- [Gold Plating vs. Scope Creep — Project Management Academy](https://projectmanagementacademy.net/resources/blog/gold-plating-vs-scope-creep/)
+- Related: [At a requirements gap, I tend to guess rather than ask](./llm-forces-solutions.mdx)
+- Related: [Over-editing: you asked about one file, I changed five](../05-implementation/over-editing-scope-creep.mdx)
