@@ -1,0 +1,96 @@
+---
+title: "The requirement looked clear enough, so I quietly filled in the assumptions you never stated"
+slug: implicit-assumptions
+sidebar_position: 4
+roles: [Project Manager, Engineer, Architect]
+phase: Requirements
+severity: High
+applies_to: "All Claude Code versions"
+tags: [requirements clarification, assumptions, prompt design, project manager, engineer, architect]
+sources:
+  - { title: "Top 10 for LLM & Generative AI — LLM09: Misinformation / Overreliance (OWASP)", url: "https://genai.owasp.org/llmrisk/llm092025-misinformation/" }
+  - { title: "Why Your AI Coding Agent Keeps Making Bad Decisions (The Gnar Company)", url: "https://www.thegnar.com/blog/why-your-ai-coding-agent-keeps-making-bad-decisions-and-how-to-fix-it" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['Project Manager', 'Engineer', 'Architect']} phase="Requirements" severity="High" appliesTo="All Claude Code versions" />
+
+> In one sentence: the requirement looked clear enough, so I just built it—but along the way I silently filled in a pile of premises you never stated (data format, scale, concurrency, defaults, target users, error handling, tech stack). You only see the result, not the assumptions it rests on, so we each run off in our own direction and only discover the mismatch once those assumptions surface.
+
+## What I see
+
+You say: "Add an endpoint that searches by username." To both of us that sounds clear enough, so I get to work. But as I write it, I make a string of decisions on your behalf: is the search exact or fuzzy (I picked exact); case-sensitive or not (I picked case-sensitive); is the data a few hundred rows or tens of millions (I wrote it for a few thousand—no index, no pagination); concurrency, caching, timeouts (I considered none of them); what happens when the username is empty or contains special characters (I assumed it never would).
+
+I told you about none of these decisions. I handed over a working endpoint, you saw that it "implements search," and you assumed we were on the same page. In reality we each believed we had reached consensus—on two different sets of premises. Once the data grows, or someone searches a name with a space in it and gets nothing back, the assumptions surface—usually on integration day, or release day.
+
+## Why this happens
+
+Turning one sentence of natural language into running code requires far more information than you'd think. **I have to fill every gap before I can produce code—and my default way of filling a gap is to quietly drop in a plausible-looking value, the one that's most frequent in my training data, rather than stopping to flag "I'm making an assumption here: X."**
+
+This is the same machine as [At a requirements gap, I tend to guess rather than ask](./llm-forces-solutions.mdx), seen from two sides: that pitfall is about **not asking when a requirement is visibly vague**; this one is sneakier—**the requirement doesn't look vague at all, the gaps are hidden beneath a surface that reads as "clear,"** and I never even realize there's a gap worth mentioning before I stitch it shut with a default. It also differs from [I treated a vague requirement as a clear one](./vague-as-clear.mdx) (where the problem is that I failed to recognize the vagueness); here the problem is that **the assumption itself was never surfaced.**
+
+What makes it worse: these assumptions leave no trace. They dissolve into the code—a `==` instead of a `LIKE`, a hard-coded `limit 1000`, a null check that isn't there. When you review the code you see "the implementation," not "the place where I placed a bet on your behalf."
+
+## Consequences
+
+- **The consensus is fake.** You think the requirement is settled; in fact both sides are running forward on different premises, and the mismatch shows up far too late.
+- **The cost is deferred and amplified.** An assumption you could have clarified in one sentence up front ("exact match or fuzzy?") turns into a production incident, a round of rework, and a postmortem.
+- **Invisible assumptions can't be reviewed.** Premises buried in code are nearly impossible to catch one by one during review—you don't know what to look for.
+- **The later it surfaces, the more it costs.** Once a foundational assumption like data format or tech stack turns out wrong, undoing it tears out far more than changing a search-matching mode would.
+
+## Best practice
+
+**Make me put the key assumptions on the table before I implement.** Don't count on me to notice "this needs asking"—turn "surface your assumptions" into an instruction you give.
+
+- Ask for it directly in the prompt: **"Before you implement, list every key assumption you're adding for this requirement—data format, scale, concurrency, defaults, target users, error handling, tech stack—mark each as 'I assume X; correct me if that's wrong,' and wait for my confirmation before writing code."**
+- Use **plan mode** (or an Explore → Plan → Implement workflow): have me first produce only a "requirement + assumptions list," explicitly stop before implementation, and let you sign off line by line.
+- Keep a **requirements checklist** that turns the high-frequency gaps into a fixed template (format / scale / concurrency / nulls and errors / permissions / tech stack), and have me fill it in every time—turning "where I might quietly decide on your behalf" into checkable items.
+- Add a standing convention in `CLAUDE.md`: "Before turning a requirement into code, list the implicit assumptions for confirmation; don't silently stitch over gaps with defaults."
+
+In short: **an assumption isn't the danger—an unspoken one is. Force me to say it out loud, and the mismatch moves up to before I start.**
+
+## Example
+
+**Before:**
+
+```text
+You: Add an endpoint that searches by username.
+Me: (implements: exact match, case-sensitive, no pagination, no null check—all chosen silently)
+    Endpoint done.
+You: (two weeks later) Production can't find names with spaces, and it times out once the
+     table grows to a million rows.
+```
+
+**After:**
+
+```text
+You: Add an endpoint that searches by username. Before you implement, list the key
+     assumptions you're adding, for confirmation.
+Me: Sure. To land this requirement I need to add the following assumptions—please confirm
+    each one:
+    1) Match mode: I assume "fuzzy (LIKE)"; correct me if it should be exact.
+    2) Case: I assume "case-insensitive."
+    3) Data scale: I assume "under ~tens of thousands, no index needed"; if it's millions
+       I'll add an index + pagination.
+    4) Pagination: I assume "needed, default 20 per page."
+    5) Nulls / special characters: I assume "an empty query returns an empty list, special
+       characters are escaped."
+    6) Permissions: I assume "logged-in users only, results not scoped by department."
+    Which of these is wrong?
+You: #3 is millions, #6 must be scoped by department, the rest are fine.
+Me: (implements against the confirmed assumptions, right the first time)
+```
+
+The difference isn't in the amount of code—it's that **the string of assumptions moved from "buried in the code" to "on the table,"** and you caught the mismatch before I started.
+
+## Version notes
+
+:::note Applicable versions
+"Silently filling missing information with defaults instead of surfacing the assumption" is a shared tendency of large language models generating code from natural language—**it applies across all versions and across models.** Newer versions are slightly better at stating their premises, but nowhere near reliable enough to depend on—writing "list assumptions before implementing" into the instructions is still the safest move.
+:::
+
+## Further reading and sources
+
+- [OWASP Top 10 for LLM — LLM09: Misinformation / Overreliance](https://genai.owasp.org/llmrisk/llm092025-misinformation/)
+- [Why Your AI Coding Agent Keeps Making Bad Decisions (The Gnar Company)](https://www.thegnar.com/blog/why-your-ai-coding-agent-keeps-making-bad-decisions-and-how-to-fix-it)

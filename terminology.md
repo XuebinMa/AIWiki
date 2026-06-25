@@ -5,7 +5,7 @@
 
 ## 专有名词（不翻译，原样保留）
 
-Claude Code · CLAUDE.md · Anthropic · Claude · Opus · Sonnet · Haiku · Docusaurus · MDX · Mermaid · Git · GitHub · slug · frontmatter · WebSearch · WebFetch
+Claude Code · CLAUDE.md · Anthropic · Claude · Opus · Sonnet · Haiku · Docusaurus · MDX · Mermaid · Git · GitHub · slug · frontmatter · WebSearch · WebFetch · ADR · slopsquatting
 
 ## 通用术语
 
@@ -64,6 +64,15 @@ Claude Code · CLAUDE.md · Anthropic · Claude · Opus · Sonnet · Haiku · Do
 | 不确定度 | uncertainty | |
 | 置信度 | confidence | |
 | 架构决策记录 | ADR (architecture decision record) | 缩写 ADR 保留不译 |
+| 歧义 | ambiguity | |
+| 计划模式 | plan mode | 对应 plan mode |
+| 规格 | spec | |
+| 验收标准 | acceptance criteria | |
+| 占位值 | placeholder | |
+| 假数据 | fake data | |
+| 重复逻辑 | duplicate logic | 违反 DRY |
+| 幻觉 import | hallucinated import | 幻觉出不存在的依赖；参见 slopsquatting |
+| 供应链（攻击）| supply chain (attack) | |
 
 ## 枚举值映射（frontmatter 与 `<PitfallMeta>`）
 

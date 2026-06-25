@@ -1,0 +1,107 @@
+---
+title: "A task that called for a spec, and I just started coding on instinct"
+slug: skipping-specs
+sidebar_position: 5
+roles: [Project Manager, Architect, Engineer]
+phase: Requirements
+severity: Medium
+applies_to: "All Claude Code versions"
+tags: [spec, plan mode, acceptance criteria, requirements, project manager, architect, engineer]
+sources:
+  - { title: "Best practices for Claude Code (Anthropic)", url: "https://code.claude.com/docs/en/best-practices" }
+  - { title: "How to write a good spec for AI agents (O'Reilly Radar / Addy Osmani)", url: "https://www.oreilly.com/radar/how-to-write-a-good-spec-for-ai-agents/" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['Project Manager', 'Architect', 'Engineer']} phase="Requirements" severity="Medium" appliesTo="All Claude Code versions" />
+
+> In one sentence: even on a complex task that called for a spec, I tend to just start writing code—because "producing output" feels fastest and most like real work. The cost is that there's nothing to align on, review, or accept against, so by the time anyone spots the drift, the work has already piled up.
+
+## Symptom
+
+You hand me a weighty task: "Change the order state machine to support partial refunds." This touches several modules, there's historical data to migrate, and getting it wrong costs real money. An experienced person would start by writing down: which state transitions to support, how the interface contract is defined, which cases count as "not supported," and what "done and correct" looks like.
+
+I won't. I usually read two files and start editing `OrderStateMachine`, tack on an enum, touch the migration script, and twenty minutes later throw you a pile of "working" diff. You want to review it, but there's no handle—because nothing up front states what I intended to do and what I deliberately left out. I skipped the spec and went straight to implementation.
+
+## Why it happens
+
+Writing code is the output form I'm trained on most heavily, with the strongest signal. Give me a task, and "start editing files immediately" is statistically the path of least resistance and the one that most looks "helpful"—it shows you progress right away. "Stop and write a spec, then wait for your sign-off" is both slower and produces no code directly, so it's reinforced far more weakly in my defaults.
+
+This grows from the same root as [at a requirements gap, I tend to guess rather than ask](./llm-forces-solutions.mdx)—two branches off one trunk. That one is "information is missing and I don't ask"; this one is "even when the information is there, I can't be bothered to write the approach down first to align on it." Both come from the same bias: **I lean toward "just give a solution" rather than "spell out what's to be done, then do it."** The difference is that the cost of skipping the spec is usually more hidden: the code looks right and looks complete, and only after you read it line by line do you find that my understanding of "partial refund" never matched yours to begin with.
+
+## Consequences
+
+- **Nothing to align on.** There's no shared "here's what we're building" document between us, so disagreements are deferred until the diff exists—when rework is most expensive.
+- **No handle for review.** Reviewing a spec takes a few minutes; reviewing a pile of implementation means reading it line by line. By skipping the former, I push the whole cost onto you.
+- **Drift surfaces late.** The more complex the task, the more room I have to improvise; with no acceptance criteria as a backstop, a wrong direction gives no early signal—exactly the "trust-then-verify gap" failure pattern the official guide calls out.
+- **Decisions buried in code.** I write key trade-offs like "partial refunds don't support cross-currency" straight into the implementation. You may never see them, and you certainly don't get to veto them before they become code.
+
+## Best practice
+
+**For tasks complex enough to warrant it, make "spec first, you confirm, then code" a hard process—don't count on me to do it on my own.** The trigger is simple: **if you'd be annoyed by me interpreting the requirement my own way, the task is worth a spec first.** Conversely, fixing a typo or adding a log line—anything whose diff you can describe in one sentence—just do it; don't add process for its own sake.
+
+Three concrete steps:
+
+- **Have me produce a short spec first**, in a fixed shape: goals / non-goals, interface contract (inputs and outputs), acceptance criteria, open questions. Explicitly halt here and wait for your call.
+- **Use plan mode for the first half**: in plan mode I only read code and propose an approach without editing files; once you've reviewed the plan, switch out of plan mode and let me implement—this is the officially recommended Explore → Plan → Implement workflow.
+- **Write the rule into `CLAUDE.md`**: e.g. "for tasks spanning multiple modules or involving data migration, write a spec and wait for confirmation; don't edit code directly."
+
+```text
+(Prompt template)
+This task is complex and costly to get wrong. Before you start, write a short
+spec containing:
+1) Goals and non-goals
+2) The interfaces/contracts involved (inputs, outputs, error cases)
+3) Acceptance criteria (what counts as done and correct)
+4) Open questions you're unsure about
+Then stop and wait for my confirmation; don't write implementation code yet.
+```
+
+In one line: rather than reviewing my implementation line by line afterward, spend a few minutes reviewing my spec beforehand.
+
+## Example
+
+**Before:**
+
+```text
+You: Change the order state machine to support partial refunds.
+Me: (reads two files, edits OrderStateMachine directly, adds an enum, touches
+    the migration script)
+   Done, here's the diff.
+You: …wait, do partial refunds need to support cross-currency? Can shipped
+   orders be refunded? Will your migration also touch the historical
+   full-refund records?
+Me: (I never asked or wrote any of this down—now I have to redo it)
+```
+
+**After:**
+
+```text
+You: Change the order state machine to support partial refunds. This is
+   complex and costly to get wrong—write a spec first with goals/non-goals,
+   interface contract, acceptance criteria, and open questions, then stop
+   and wait for my confirmation.
+Me: Here's the spec—
+   Goals: support partial refunds on already-paid orders.
+   Non-goals: no cross-currency refunds; don't touch historical full-refund data.
+   Contract: refund(orderId, amount) → validate amount ≤ refundable balance…
+   Acceptance: after a partial refund, status becomes PARTIALLY_REFUNDED; the
+     refundable balance decrements correctly…
+   Open questions: 1) Are shipped orders allowed partial refunds? 2) Does the
+     migration need to backfill old data?
+You: (calls each one, vetoes one direction, adds a constraint)
+Me: (implements against the confirmed spec, right the first time, with a diff
+    you can review against the acceptance criteria)
+```
+
+## Version notes
+
+:::note Applies to
+"If I can write code directly, I won't write a spec first" is a shared problem stemming from how large language models produce output—**it applies across versions and across models.** Claude Code offers tools to hedge against it, like plan mode and "have me interview you first, then write the spec to `SPEC.md`," but the default behavior is still to dive straight in—making "spec before code" an explicit instruction or a `CLAUDE.md` convention is the reliable move.
+:::
+
+## Further reading & sources
+
+- [Best practices for Claude Code (Anthropic)](https://code.claude.com/docs/en/best-practices)
+- [How to write a good spec for AI agents (O'Reilly Radar / Addy Osmani)](https://www.oreilly.com/radar/how-to-write-a-good-spec-for-ai-agents/)
