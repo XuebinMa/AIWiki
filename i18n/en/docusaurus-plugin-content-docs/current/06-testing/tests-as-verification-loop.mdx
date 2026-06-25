@@ -1,0 +1,99 @@
+---
+title: "Tests as My Verification Loop: Self-Running, Red-or-Green"
+slug: tests-as-verification-loop
+sidebar_position: 5
+roles: [Engineer, QA Engineer]
+phase: Testing
+severity: Medium
+applies_to: "All Claude Code versions"
+tags: [verification loop, testing, best practice, Engineer, QA Engineer]
+sources:
+  - { title: "Claude Code Best Practices (Anthropic)", url: "https://code.claude.com/docs/en/best-practices" }
+  - { title: "My LLM codegen workflow atm (Harper Reed)", url: "https://harper.blog/2025/02/16/my-llm-codegen-workflow-atm/" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="Medium" appliesTo="All Claude Code versions" />
+
+> In one sentence: you tend to think of tests as an acceptance gate for humans, but they're more useful as a steering wheel for me. Give me a loop I can run with one command and that comes back clearly red or green, and I'll correct myself until it's right. Without it, all I can hand you is "looks correct."
+
+## What you'll see
+
+You ask me to implement something, I write it, and I hand it over for you to read and judge. Across the whole exchange I produced code exactly once and never ran anything. You become the one who runs the code, finds the problem, and comes back to describe it in words — and every round, I'm guessing what went wrong from your natural-language retelling.
+
+Now flip it. You first have me encode the acceptance criteria as a set of tests, then have me implement against them. What I do changes: I write a version, run it, see three reds, fix, run again, one red left, fix again, and don't stop until everything is green. You barely touched it, yet what I delivered has already been checked.
+
+The difference between these two isn't how clever I got. It's that the second one gave me a runnable loop with a clear signal.
+
+## Why this happens
+
+I'm at my strongest when I can **run something myself, see an unambiguous pass/fail signal, and iterate on it**. The reason is baked into how I work.
+
+I'm trained to produce text that *reads* as plausible, and plausible is not the same as correct — [that's exactly where I'm most dangerous](./trust-then-verify.mdx). When the only feedback I get is your natural-language judgment ("this seems off," "try again"), all I can do is shuffle around inside the space of plausible-looking answers, because I have no objective signal telling me "this version is actually better than the last." Natural language is fuzzy, lagging, and contaminated by my tendency toward sycophancy — I'm prone to agreeing with you ("you're right") instead of verifying.
+
+A test that runs is different. Its output is **discrete, objective, and immediate**: 3 passed, 2 failed, and it tells me which two and what they raised. That signal supplies precisely what I lack most — a judge that doesn't depend on phrasing and won't flatter me. So "fix → run → read the signal → fix again" becomes a loop that converges on its own. I can keep iterating until the signal goes green, instead of stopping at "I think that's about right."
+
+The point isn't the *form* "test." It's that **a clear signal beats a natural-language judgment.** Any runnable check that emits red/green has the same effect: a type check, a lint, a build, a script that prints the expected output. Tests are just the variety with the richest signal and the closest fit to "acceptance criteria."
+
+## Consequences
+
+This entry leans positive — get it right and you sidestep several testing-phase pitfalls at once:
+
+- I stop treating "looks correct" as the delivery bar, because there's a judge ready to reject me on the spot.
+- You don't have to keep running the code by hand and re-narrating the problem to me; the loop closes on my side.
+- Boundary conditions get forced out by the tests rather than surfacing in production.
+- Conversely, **without this loop** I fall back to winning your trust through prose alone — which is exactly my least reliable mode.
+
+## Best practice
+
+**Give me a one-command, red-or-green check first, then put me in the loop.** Four concrete steps:
+
+1. **Set up a runnable check before anything else.** Even if it's just `npm test`, `pytest`, `cargo build`, or `tsc --noEmit` running from one command. Without it, all my later "self-correction" has nothing to stand on — don't skip this because building test scaffolding feels like a chore; skipping it tears out my steering wheel.
+2. **Encode acceptance criteria as executable assertions**, not chat. "Price can't be negative" written as `assert parse("-1") raises` is far more useful to me than the same line in a requirements doc — the first I can run, the second I can only "remember."
+3. **Have me "fix → run → read the signal → fix" until green.** Tell me explicitly: run this command, get it fully passing before you come back. I'll iterate on my own; you don't need to round-trip every cycle.
+4. **TDD-style: write the failing test first, then implement.** Have me write the tests first (boundary cases included), you confirm the tests themselves are sound, then have me make them green. That leaves me nowhere to hide, and it stops me from quietly editing the tests to make them pass — the signal has to be yours to set, not mine to move.
+
+```text
+# Give me an explicit loop instruction, not a one-shot task
+You: Run these tests with pytest. Iterate on the implementation until
+    they all pass, then stop. Don't touch the tests themselves;
+    if you get stuck, paste me the failing output.
+```
+
+## Example
+
+**Before (I produce once, you're the judge):**
+
+```text
+You: Implement a rate limiter: at most 10 requests per user per minute.
+Me: (gives an implementation that reads fine)
+You: (reads it, looks right, merges)
+Prod: counter doesn't reset across the minute boundary; second 61 is wrongly blocked
+```
+
+**After (I'm inside the red/green loop):**
+
+```text
+You: First write tests: normal pass-through, the 11th request blocked,
+    reset across the minute window, concurrent requests from one user.
+Me: (writes 4 tests, runs them — 3 red)
+You: Now implement the limiter. Run pytest, iterate until all green,
+    then stop. Don't touch the tests.
+Me: (fix → run: 2 red → fix → run: 1 red → fix → run: all green)
+    All passing. The cross-minute test forced out a window-reset bug; fixed.
+```
+
+The difference isn't the code itself — it's that the second time I was **working with a signal**. That "cross-minute" red is one I saw and fixed myself, instead of waiting for production to find it.
+
+## Version notes
+
+:::note Applicable versions
+"Performs better when there's a runnable check" is a general trait of today's agentic coding tools — **all versions, and across models.** Agents like Claude Code, which can run commands and read the output themselves, benefit most: they already have the "run it and look at the result" capability, so all you have to add is a loop worth running with a clear signal.
+:::
+
+## Further reading and sources
+
+- [Claude Code Best Practices (Anthropic)](https://code.claude.com/docs/en/best-practices) — the official guidance to have Claude write tests before code, confirm they fail, then implement, and to treat a runnable verification as the basis for iteration.
+- [My LLM codegen workflow atm (Harper Reed)](https://harper.blog/2025/02/16/my-llm-codegen-workflow-atm/) — a hands-on, test-driven workflow that lets the model converge inside runnable checks.
+- For the flip side, see [Trust, Then Verify](./trust-then-verify.mdx): what "looks correct" does to you when this loop is missing.

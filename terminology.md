@@ -88,6 +88,15 @@ Claude Code · CLAUDE.md · Anthropic · Claude · Opus · Sonnet · Haiku · Do
 | 整文件重写 | full-file rewrite | 不读现状、从头重写整个文件 |
 | 最小 diff | minimal diff | 只改必要之处 |
 | 重构 | refactoring | |
+| 回归测试 | regression testing | |
+| 副作用 | side effect | |
+| 鉴权 | authorization | |
+| 输入校验 | input validation | |
+| 纵深防御 | defense in depth | |
+| 威胁建模 | threat modeling | |
+| 可维护性 | maintainability | |
+| 质量闸门 | quality gate | |
+| 敏感数据 | sensitive data | |
 
 ## 枚举值映射（frontmatter 与 `<PitfallMeta>`）
 
