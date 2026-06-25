@@ -127,6 +127,15 @@ The difference isn't whether I can remember the procedure; it's that **when you 
 
 [CLAUDE.md Overload](../05-implementation/claude-md-overload.mdx) is about "too many rules, averaged into dilution" — a *quantity* problem whose fix is trimming and adding priority. This entry is about "this procedure shouldn't be resident at all" — a *placement* problem whose fix is changing layers (move it into an on-demand skill). The two often appear together: dumping a whole procedure into `CLAUDE.md` is frequently the very move that tips it into overload.
 
+## When the exception applies
+
+"Make the procedure a skill" exists so unrelated tasks don't pay for it. When "on demand" saves nothing, or the "drawer" itself has a cost, leaving the procedure in `CLAUDE.md` is the better fit:
+
+- **A short procedure almost every task runs.** A three-to-five-line convention this repo uses nearly every time ("follow this commit format after every change") — it should be resident anyway, and making it a skill wraps an always-unfolded thing in an on-demand shell, adding a load step for nothing.
+- **Too small for the skill's indirection to pay off.** In a personal repo or a temp project, creating a directory, a `SKILL.md`, and remembering to invoke it costs more than a few lines in `CLAUDE.md`. When the procedure is short and you're its only user, don't split it out.
+
+The test, in one line: **ask "does almost every session use this procedure?" — if yes and it's short, keep it in `CLAUDE.md`; only when it fires for one kind of task and runs long does it belong in a skill.**
+
 ## Version notes
 
 :::note Applicable versions

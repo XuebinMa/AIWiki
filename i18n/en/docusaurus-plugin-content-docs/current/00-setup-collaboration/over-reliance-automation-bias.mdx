@@ -91,6 +91,15 @@ You: (add the core auth change to the "must be explainable out loud to pass revi
 
 The difference isn't that I wrote it better this time — it's that you didn't treat "it's always been reliable" as a reason to wave it through. You kept judgment in your own hands.
 
+## When the exception applies
+
+"Human-in-the-loop" has to be real — but that doesn't mean "you read every line yourself." Spreading the same review intensity over all output burns effort where it isn't worth it. When the cost is boxed in by the environment, letting go — even rubber-stamping — is rational:
+
+- **Low-stakes, reversible, machine-verifiable changes.** A one-off script, boilerplate, a small change with full tests and CI behind it — if it breaks, a light turns red and rollback costs near zero. You don't need a deep mental model of it.
+- **Output you won't maintain long-term.** A run-and-discard analysis, a temp tool — it won't become the foundation you debug against later, so skill atrophy doesn't apply to it.
+
+Conversely, the moment a change touches core logic, security, or data, or will settle into code you'll maintain, the exception is off — back to substantive review, understand it before merging. The test, in one line: **what decides whether to review closely isn't "do I trust it," it's "what happens if it's wrong and hits the worst case" — high-impact or irreversible, vet it by hand; small and reversible, you can skip.**
+
 ## Version notes
 
 :::note Applicability

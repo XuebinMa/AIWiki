@@ -132,6 +132,15 @@ The difference isn't that I became more obedient; it's that this time the "can I
 
 [CLAUDE.md Overload](../05-implementation/claude-md-overload.mdx) is about "too many rules, averaged into dilution and ignored" — a *quantity* problem. This entry is about "the rule is in the wrong layer entirely" — a *placement* problem. Even if your `CLAUDE.md` had a single line, "never `rm -rf`," it still wouldn't stop me, because permissions were never its job.
 
+## When the exception applies
+
+"Action-blocking belongs in settings" rests on the action being **expressible** as a rule. When it isn't, leaving it in `CLAUDE.md` isn't cutting corners — it's the only control available, as long as you know it's just a soft constraint:
+
+- **The constraint is semantic, and no command/path pattern captures it.** "Don't touch production data" — but prod and staging run the same kind of command, the same SQL, so `deny` has no literal signature to anchor to. A rule like this can't be written as a lock, only as context (the real backstop is a different layer: read-only credentials, environment isolation — not that sentence).
+- **It's a tendency, not a red line.** "Prefer editing config over deleting outright" — directional, but I should be allowed to judge the exception in the moment. That belongs in advisory context; putting it in `settings.json` would weld shut the reasonable workarounds too.
+
+The test, in one line: **ask "can this action be pinned by a literal `deny`/`ask` pattern?" — if yes, don't write a sentence, write a rule or a hook; only when it can't be pinned, or it's meant to stay my judgment call, does it belong in `CLAUDE.md` — and know it won't truly stop the action.**
+
 ## Version notes
 
 :::note Applicable versions

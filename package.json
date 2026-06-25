@@ -5,7 +5,10 @@
   "description": "AiWiki —— 从 AI 视角写的「AI 使用误区与最佳实践」百科。首期：Claude Code 编程 / 软件工程全流程。",
   "scripts": {
     "docusaurus": "docusaurus",
+    "gen:meta": "node scripts/gen-entry-meta.js",
+    "prestart": "node scripts/gen-entry-meta.js",
     "start": "docusaurus start",
+    "prebuild": "node scripts/gen-entry-meta.js",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",

@@ -120,6 +120,16 @@ Me: (reads that file first, then generates)
 
 The difference isn't whether I can write it, but whether you first helped me settle "which are true constants, which are config, and where they go."
 
+## When the exception applies
+
+Extracting config is the default, but a few cases where dropping a literal in place is actually right:
+
+- **Throwaway one-off scripts**: a data migration, a quick investigation, a notebook you run once and delete — it never enters the repo, no one maintains it, and it doesn't switch environments, so naming a use-once value or building a config layer is pure overhead.
+- **Self-evident literals that should only ever have one value**: `* 2`, array indices `0 / 1`, `status === 200`, `24` hours in a day — naming them (`TWO`, `FIRST_INDEX`) makes the code harder to read, not clearer.
+- **A value that appears exactly once in the whole codebase, with adjacent context that already explains it**: `sleep(100)  // 100ms for the animation` — extracting a constant buys you nothing, because there's only the one spot to change.
+
+The test: the exception holds only when the value **won't change, won't differ by environment, and won't be copied to a second place**. The moment it might shift with deployment or recur elsewhere, fall back to the default — name it, centralize it, inject it by environment.
+
 ## Version notes
 
 :::note Applicability

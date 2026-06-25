@@ -91,6 +91,16 @@ Me: (confirms from the doc source that 3.x is new somelib.Pool(...),
 
 The difference isn't that I understand the library better—it's that I now hold a fact that matches your version, so I no longer have to bet on what "looks right."
 
+## When the exception applies
+
+Wiring in a doc source hedges against "my memory doesn't match your version." When that mismatch risk is low to begin with, skipping it is reasonable:
+
+- **A stable, long-standing API I know cold.** A language standard library, a mature library whose signatures haven't shifted in years — its usage is both dense and consistent in my training data, so my odds of mixing versions are low, and a dedicated doc source is over-preparation.
+- **Throwaway or exploratory code.** A spike, a temp script, a prototype about to be discarded — run-it-and-toss-it, where no one hits a production landmine because I wrote it the way some minor version does. Correct here means "it runs," not "version-perfect."
+- **You've already fed the version facts into context.** When the relevant doc snippets, `.d.ts` types, or official examples are already pasted in or readable in the repo, the source of truth is in place, and stacking an MCP doc source on top is redundant.
+
+The test, in one line: **ask "did this library change after my cutoff, and could I be mixing versions?" — if it could have, or you're unsure I remember it right, wire in version-matched docs; only when it's stable enough that I'd get it right blind, or the code is disposable anyway, can you skip it.**
+
 ## Version notes
 
 :::note Applicable versions

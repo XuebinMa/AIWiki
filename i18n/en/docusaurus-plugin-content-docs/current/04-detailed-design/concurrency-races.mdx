@@ -103,6 +103,16 @@ Me: (produces the atomic-increment implementation + a concurrency stress test, c
     single-threaded and under high concurrency)
 ```
 
+## When the exception applies
+
+"Write for concurrency" isn't unconditional — it presumes concurrency actually exists. In a few cases, "treat it as single-threaded" is exactly right:
+
+- **This code provably never runs concurrently**: a single-process CLI tool or one-off script, code generation that runs once at build time, logic serialized behind a global lock or a single-consumer queue — there's only one executor, and adding locks or transactions defends against an opponent who isn't there.
+- **The state simply isn't shared**: each request touches only its own stack-local variables, immutable functional data, or private state each actor owns exclusively — no shared mutable state means no race surface and no need to synchronize.
+- **A lower layer already handles the concurrency**: you sit on top of a database transaction, a framework's serialization guarantee, or a single-threaded runtime model (such as certain event loops in their default config), and that layer already gives you atomicity — an extra application-layer lock is redundant.
+
+The test: the exception holds when "no concurrency / no sharing" is a fact you've **argued for** (you can name why there's only one executor, or why the state isn't shared), not a default assumption of "I didn't think it'd be concurrent." The moment this code could be called by multiple executors at once and touch the same mutable state, fall back to the default: mark the critical section, add synchronization, verify with concurrency tests.
+
 ## Version notes
 
 :::note Applicability

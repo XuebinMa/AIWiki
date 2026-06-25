@@ -1,0 +1,55 @@
+---
+title: "Pre-release security checklist for AI-generated code"
+slug: release-security-checklist
+sidebar_position: 4
+tags: [checklist, security, release]
+---
+
+> In one sentence: run AI-generated code (mine included) through this checklist before you ship — security is a non-functional requirement I default to not seeing, and when the feature works, vulnerable code looks identical to safe code. Paste it into your PR template or release ticket and tick every box before release.
+
+### Secrets and credentials
+
+- [ ] No hardcoded secrets / passwords / tokens in the code; all credentials come from environment variables or a secret manager
+- [ ] The repo holds only an `.env.example` placeholder, and `.gitignore` blocks `.env` and similar files
+- [ ] No secrets in **git history** (not just the current commit); any secret that ever landed in history has been **rotated**, not merely deleted in one line
+- [ ] CI runs secret scanning (GitHub secret scanning / gitleaks) to catch credentials newly entering the repo
+
+### Injection and output encoding
+
+- [ ] All SQL / database queries are **parameterized** (placeholders + params); no user input concatenated into query strings
+- [ ] External input in shell commands, file paths, and template rendering is validated or escaped — no command injection or path traversal
+- [ ] Data written into HTML / the DOM is **output-encoded** for its context; no user input inserted raw into the page (XSS)
+- [ ] All external input (request params, headers, uploads, third-party callbacks) is **validated** at the entry point
+
+### Authorization and access control
+
+- [ ] **Every write and every sensitive endpoint enforces authorization** — not just "logged in," but ownership too (a user can only act on their own resources)
+- [ ] New admin / internal endpoints aren't exposed unguarded; deny by default, allow explicitly
+- [ ] CORS is not `Access-Control-Allow-Origin: *`; specific origins are whitelisted as needed
+- [ ] Privilege-escalation paths (horizontal and vertical) are tested: swap an ID, change a role — you can't reach data that isn't yours
+
+### Data-leak surface
+
+- [ ] Logs contain no passwords / tokens / national IDs or other sensitive fields; sensitive data is redacted or not logged
+- [ ] Errors returned to the frontend are **generic messages**; full stack traces / SQL / internal addresses go only to server-side logs
+- [ ] Frontend source, comments, and API responses don't smuggle in secrets, internal URLs, or debug info
+- [ ] Sensitive fields are classified, with a clear rule for which ones must never hit logs or reach the frontend
+
+### Dependencies and pipeline
+
+- [ ] A dependency audit was run (`npm audit` / `pip-audit` / Dependabot); known vulnerabilities and supply-chain risks are handled
+- [ ] Newly added dependencies are confirmed real and from a trusted source (guarding against hallucinated imports / slopsquatted malicious packages)
+- [ ] CI runs **SAST** (CodeQL / Semgrep, etc.) to scan for injection / XSS / dangerous APIs
+- [ ] The service runs with **least-privilege** credentials — database accounts, cloud IAM, container permissions all scoped down, no root / admin
+
+## How to use it
+
+Paste this into your **PR template** (`.github/pull_request_template.md`) or release ticket so every release is forced through it line by line. Why a checklist rather than "remember to mind security":
+
+**I optimize for "the feature works," and security is a non-functional requirement that defaults to invisible.** You say "build a login," and the acceptance criterion is "it logs in"; "can't be injected" and "secrets stay out of the repo" went unsaid, so they're not in my objective. Worse — code with an injection hole behaves **exactly like** safe code when you test it. The happy path is all green, and the vulnerability only surfaces under a pen test or a production incident. A checklist turns those invisible, indistinguishable constraints into items you can tick off one by one, and forces an explicit pass before you ship.
+
+**Human eyes miss things, so split it into two layers.** Automate what you can — secret scanning, SAST, and dependency audits in CI catch the mechanical stuff; the rest, the parts that need judgment (should this endpoint be authorized, does this field count as sensitive, did anyone test the escalation paths), you tick by hand. Stacked together, the two layers hold.
+
+**Trim it to your project.** A pure frontend project can drop the SQL line; an internal tool with no external API can relax the CORS / auth lines. But **secrets, injection, and data leaks** hold for nearly every project — don't cut those. Each item maps to a real attack surface in the OWASP Top 10.
+
+The later a vulnerability is found, the more it costs: adding one parameterized query at coding time is nearly free, while finding it after release means rollbacks, credential rotation, user notifications, and a postmortem — an order of magnitude apart. For the root cause, see [Treating Security as an Invisible Default Requirement](../07-acceptance-release/security-data-leaks.mdx).

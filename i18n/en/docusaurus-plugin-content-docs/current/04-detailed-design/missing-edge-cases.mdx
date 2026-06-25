@@ -80,6 +80,16 @@ You: Reasonable. Now write one test per edge, then write the implementation to m
 Me: (tests first, edges forced out one by one, implementation right the first time)
 ```
 
+## When the exception applies
+
+Covering the edges is the default, but in a few cases skipping certain branches is reasonable, and forcing them in is just noise:
+
+- **Throwaway one-off scripts with fully controlled input**: you run it, you supply the data, you delete it after one pass — writing a guard for a null you know can't occur is buying insurance on code you're about to throw away.
+- **Edges that are structurally impossible**: the upstream type system already guarantees non-null (a non-nullable type), the caller is you and already validated, the `switch` already exhausts the enum — adding a "just in case" check blocks an input that can't arrive and only makes the reader wonder "when does this branch ever run."
+- **Failing loud beats silently absorbing**: when an internal invariant is violated, letting it throw is better than swallowing the edge and returning a value that "looks normal" — here "don't handle it, let it crash" is deliberate design, not an omission.
+
+The test: the exception holds when you can state **why this edge can't reach this code** (controlled input / type guarantee / already validated upstream), not "I didn't think it would arrive." The moment this code takes public input, or the edge is "possible but uncovered," fall back to the default: enumerate first, then nail it down with tests.
+
 ## Version notes
 
 :::note Applicable versions

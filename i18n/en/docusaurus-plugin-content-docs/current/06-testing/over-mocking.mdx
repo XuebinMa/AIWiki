@@ -100,6 +100,16 @@ Result: this time the green light really means "ordering behaves correctly even 
 
 Same service: "mock everything" yields a green light talking to itself; "split out the ownership boundary + real/fake dependencies + a contract test" yields tests that actually touched the failing seam.
 
+## When the exception applies
+
+"Don't mock" targets your own logic and boundaries you can run for real; for a few kinds of dependency, a mock (or test double) is the right answer:
+
+- **External dependencies that genuinely can't run in CI**: a metered third-party API, one needing human credentials / an SMS code, or a vendor with no sandbox at all — when every test run costs money or external cooperation, use a double, and guard the fields and error codes with a separate contract test that hits the real endpoint on its own.
+- **Inherently nondeterministic sources**: the current time, randomness, network latency — if `clock.now()` isn't pinned down, assertions can't be stable. Replacing these with controlled values isn't about smoothing friction; it's about making the test reproducible.
+- **Disaster branches you have to construct deliberately**: disk full, connection dropped, a third party returning 500 — a real dependency can barely produce these, so injecting the failure through a double is how you verify your fallback and retry.
+
+The test: the exception holds when what you're replacing is a boundary you **don't own, can't run cheaply for real, or that's inherently nondeterministic**, and you can answer for every double "what real behavior it replaces and which real risks it lets through." The moment the mocked thing is your own core logic, or a seam you could have run against a fake or a real dependency, fall back to the default: don't mock — run it against close-to-real behavior.
+
 ## How this differs from neighboring pitfalls
 
 The testing phase has a few pitfalls that are easy to confuse, each with a different root cause:
