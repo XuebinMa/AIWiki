@@ -44,7 +44,7 @@
 
 - 优先 Mermaid 自绘，能用一张图说清的关系就别用三段话。
 - 图要服务于理解，不为配图而配图。
-- **Mermaid 多行节点标签，末尾补一个 `<br/>&nbsp;` 空行。** 当前 Mermaid 对 CJK 多行标签的高度估算偏小，末行会被方框裁掉；用一个空行占住缺口，真实文字就能完整显示（见 `kitchen-sink-session` 的节点 E）。同理，过长的单行也会自动换行触发同样的裁切，写不下就拆成多个节点。
+- **Mermaid 节点文字裁切已全局根治，不要再手动补 `<br/>&nbsp;` 占位。** 站点已在 `docusaurus.config.js` 设 `themeConfig.mermaid.options.htmlLabels: false`，节点改用原生 SVG `<text>` 渲染、按真实文字尺寸自动撑高，绕开了 Mermaid v11 默认 foreignObject 路径「方框不纵向撑高 → 末行被裁」的回归（[mermaid #7354](https://github.com/mermaid-js/mermaid/issues/7354)）。**注意**：SVG 文本模式不解码 HTML 实体，`&nbsp;` / `&amp;` 等会显示成字面量——节点标签里只用纯文本和 `<br/>` 换行，别放 HTML 实体。多行用 `<br/>` 显式换行即可；单行过长会自动换行，实在太长就拆成多个节点。
 
 ## 中英一致性
 

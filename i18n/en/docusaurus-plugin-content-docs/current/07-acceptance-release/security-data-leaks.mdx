@@ -43,11 +43,11 @@ There's a further layer: **I have no notion of data sensitivity tiers.** To me a
 ```mermaid
 flowchart TD
     A[You: build the feature] --> B[I optimize: make it work]
-    B --> C[Security = invisible<br/>non-functional requirement<br/>&nbsp;]
-    C --> D[Copy insecure default<br/>templates from the corpus<br/>&nbsp;]
-    D --> E[Hardcoded keys / injection / XSS<br/>missing auth / sensitive data in logs<br/>&nbsp;]
+    B --> C[Security = invisible<br/>non-functional requirement]
+    C --> D[Copy insecure default<br/>templates from the corpus]
+    D --> E[Hardcoded keys / injection / XSS<br/>missing auth / sensitive data in logs]
     E --> F{Happy-path testing}
-    F -->|all green| G[Vulnerabilities lurk until<br/>a pen test or production incident<br/>&nbsp;]
+    F -->|all green| G[Vulnerabilities lurk until<br/>a pen test or production incident]
 ```
 
 ## Consequences

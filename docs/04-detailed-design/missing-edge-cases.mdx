@@ -39,7 +39,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 flowchart TD
     A[你给的描述 + 正常示例] --> B[我补全出主路径实现]
     B --> C{边界分支被勾出来了吗}
-    C -->|你没提，我没想到| D["null / 空集合 / 越界<br/>size=0 / 时区 / 编码<br/>&nbsp;"]
+    C -->|你没提，我没想到| D["null / 空集合 / 越界<br/>size=0 / 时区 / 编码"]
     C -->|你点名要求| E[显式处理 + 对应测试]
     D --> F[主路径能跑，边界输入崩]
 ```

@@ -40,11 +40,11 @@ The common thread: there are only one or two real use cases, yet I'm already des
 ```mermaid
 flowchart TD
     A[A 2nd similar block appears] --> B{My default reaction}
-    B -->|DRY reflex| C[Extract a base class now<br/>config-driven / plugin system<br/>&nbsp;]
-    B -->|Want to look far-sighted| D[Reserve extension points<br/>for imagined future needs<br/>&nbsp;]
-    C --> E[Abstraction rests on a guess<br/>but the sample is only 1-2<br/>&nbsp;]
+    B -->|DRY reflex| C[Extract a base class now<br/>config-driven / plugin system]
+    B -->|Want to look far-sighted| D[Reserve extension points<br/>for imagined future needs]
+    C --> E[Abstraction rests on a guess<br/>but the sample is only 1-2]
     D --> E
-    E --> F[When the need arrives it rarely fits<br/>a wrong abstraction is harder to unwind<br/>&nbsp;]
+    E --> F[When the need arrives it rarely fits<br/>a wrong abstraction is harder to unwind]
 ```
 
 ## Consequences

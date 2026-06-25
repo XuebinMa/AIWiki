@@ -45,10 +45,10 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 ```mermaid
 flowchart TD
     A[你: 配一条发布流水线] --> B[我补全脚本]
-    B --> C[顺手加: 自动启用服务<br/>自动授予权限<br/>&nbsp;]
+    B --> C[顺手加: 自动启用服务<br/>自动授予权限]
     C --> D{运行身份的权限边界}
-    D -->|权限不足| E[流水线失败<br/>Resource not accessible<br/>&nbsp;]
-    D -->|被放大权限| F[攻击面扩大<br/>违反最小权限<br/>&nbsp;]
+    D -->|权限不足| E[流水线失败<br/>Resource not accessible]
+    D -->|被放大权限| F[攻击面扩大<br/>违反最小权限]
 ```
 
 ## 后果

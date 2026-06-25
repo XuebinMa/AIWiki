@@ -44,7 +44,7 @@ The root cause is one sentence: **my training has a cutoff date, and I have no a
 flowchart TD
     A[Ask me to call a library] --> B{Do I have the real, version-correct signature?}
     B -- No --> C[Fill in from training memory]
-    C --> D["Old API / mixed versions / hallucinated method<br/>all of it looks right<br/>&nbsp;"]
+    C --> D["Old API / mixed versions / hallucinated method<br/>all of it looks right"]
     D --> E[Compiler may not catch it → blows up at runtime]
     B -- Yes --> F[Write against the real signature]
     F --> G[Version-correct calls]

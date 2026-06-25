@@ -39,7 +39,7 @@ The root cause is that I **optimize for "reads as reasonable and self-consistent
 flowchart TD
     A[You ask for a design] --> B[I give a happy-path design]
     B --> C{Did anyone force it to face the worst case?}
-    C -->|No, it reads fine straight through| D["scale-up / timeout & retry<br/>concurrency & idempotency / partial failure<br/>&nbsp;"]
+    C -->|No, it reads fine straight through| D["scale-up / timeout & retry<br/>concurrency & idempotency / partial failure"]
     C -->|You explicitly probe the failure paths| E[Design adds degradation and recovery]
     D --> F[Collapses under real load]
 ```

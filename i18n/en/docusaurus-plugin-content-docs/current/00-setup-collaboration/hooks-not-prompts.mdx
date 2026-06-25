@@ -39,10 +39,10 @@ One line to keep them apart: **a prompt is a suggestion, a hook is a mechanism.*
 ```mermaid
 flowchart TB
     subgraph P[Written into a prompt / CLAUDE.md]
-        P1["Enters the context window"] --> P2["I follow it probabilistically<br/>forget / drift / lost after compaction<br/>&nbsp;"]
+        P1["Enters the context window"] --> P2["I follow it probabilistically<br/>forget / drift / lost after compaction"]
     end
     subgraph H[Made into a hook]
-        H1["Harness fires it at a fixed point"] --> H2["Deterministic execution<br/>does not pass through my judgment<br/>&nbsp;"]
+        H1["Harness fires it at a fixed point"] --> H2["Deterministic execution<br/>does not pass through my judgment"]
     end
     P2 -.->|mismatch when it must always happen| X[Rule gets skipped]
 ```

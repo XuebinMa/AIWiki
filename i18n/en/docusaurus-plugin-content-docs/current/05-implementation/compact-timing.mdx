@@ -40,7 +40,7 @@ That explains both failure modes, which turn out to be the same root cause:
 ```mermaid
 flowchart TD
     A[Verbatim conversation history] --> B{Trigger /compact}
-    B --> C["Structured summary<br/>keeps: intent / key concepts / files modified<br/>drops: full tool output / intermediate reasoning<br/>&nbsp;"]
+    B --> C["Structured summary<br/>keeps: intent / key concepts / files modified<br/>drops: full tool output / intermediate reasoning"]
     C --> D[Unsaved plan judged as intermediate reasoning]
     D --> E[Can't reconnect after compacting, different head]
 ```

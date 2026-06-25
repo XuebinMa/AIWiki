@@ -40,11 +40,11 @@ Third, **without a regression suite, I'm flying blind**. If the only check after
 
 ```mermaid
 flowchart TD
-    A[You: change feature A] --> B[I edit shared code<br/>calculateTotal<br/>&nbsp;]
+    A[You: change feature A] --> B[I edit shared code<br/>calculateTotal]
     B --> C{Who else depends on this code}
-    C -->|What I see: A| D[Verify A passes<br/>Report: done<br/>&nbsp;]
-    C -->|What I miss: B| E[Refunds/reconcile/reports<br/>quietly broken<br/>&nbsp;]
-    E --> F[After release, users hit<br/>a feature that used to work<br/>&nbsp;]
+    C -->|What I see: A| D[Verify A passes<br/>Report: done]
+    C -->|What I miss: B| E[Refunds/reconcile/reports<br/>quietly broken]
+    E --> F[After release, users hit<br/>a feature that used to work]
 ```
 
 ## Consequences

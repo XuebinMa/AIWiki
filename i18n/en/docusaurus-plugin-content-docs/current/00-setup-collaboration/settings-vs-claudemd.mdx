@@ -58,9 +58,9 @@ This entry is only about the top line: **anything that controls whether I *can d
 
 ```mermaid
 flowchart TD
-    A[A constraint] --> B{Is it trying to block an action<br/>&nbsp;or tell me a fact?}
-    B -->|Block an action| C[settings.json permissions<br/>enforced by the client<br/>&nbsp;]
-    B -->|Tell me a fact| D[CLAUDE.md<br/>advisory context<br/>&nbsp;]
+    A[A constraint] --> B{Is it trying to block an actionor tell me a fact?}
+    B -->|Block an action| C[settings.json permissions<br/>enforced by the client]
+    B -->|Tell me a fact| D[CLAUDE.md<br/>advisory context]
     C --> E[Never passes through my decision; always applies]
     D --> F[Passes through my decision; may be skipped or diluted]
 ```

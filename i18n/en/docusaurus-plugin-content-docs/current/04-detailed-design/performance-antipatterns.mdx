@@ -49,11 +49,11 @@ One thing worth being precise about: on isolated **algorithmic puzzles** like Le
 
 ```mermaid
 flowchart TD
-    A[Your spec<br/>describes function only<br/>&nbsp;] --> B[I implement the most straightforward way]
+    A[Your spec<br/>describes function only] --> B[I implement the most straightforward way]
     B --> C[Small-data tests all green]
     C --> D{You assume it's fine}
     D --> E[Real production scale]
-    E --> F[N+1 / O n squared<br/>recompile inside loop<br/>blocking serial IO<br/>&nbsp;]
+    E --> F[N+1 / O n squared<br/>recompile inside loop<br/>blocking serial IO]
     F --> G[Slow, timeouts, OOM]
 ```
 

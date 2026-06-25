@@ -44,9 +44,9 @@ When you haven't explicitly asked for road 2, I default to road 1. Because gener
 ```mermaid
 flowchart TD
     A[need a value: timeout/retries/URL/threshold] --> B{do I stop to judge<br/>whether it changes / varies by environment}
-    B -- No: fill in a literal --> C[welded in place<br/>no name, no central place, scattered<br/>&nbsp;]
-    B -- Yes: distinguish true constant from config value --> D[named constant + inject by environment<br/>single source<br/>&nbsp;]
-    C --> E[change one spot, search the whole repo<br/>switch environments and it breaks, read code by guessing<br/>&nbsp;]
+    B -- No: fill in a literal --> C[welded in place<br/>no name, no central place, scattered]
+    B -- Yes: distinguish true constant from config value --> D[named constant + inject by environment<br/>single source]
+    C --> E[change one spot, search the whole repo<br/>switch environments and it breaks, read code by guessing]
     D --> F[change one line<br/>switch environments by changing config, not code]
 ```
 

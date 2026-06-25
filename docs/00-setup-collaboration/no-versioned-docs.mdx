@@ -40,7 +40,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 flowchart LR
     A[让我写某库调用] --> B{有版本化文档源?}
     B -- 没有 --> C[凭训练记忆 + 网搜]
-    C --> D["旧版 API / 混版 / 幻觉方法<br/>看起来都对<br/>&nbsp;"]
+    C --> D["旧版 API / 混版 / 幻觉方法<br/>看起来都对"]
     D --> E[运行时才崩]
     B -- 有 --> F[以你给的文档为准]
     F --> G[版本正确的调用]

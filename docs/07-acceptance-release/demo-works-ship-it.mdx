@@ -39,10 +39,10 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 ```mermaid
 flowchart TD
     A[你: 这个功能做完了吗] --> B[我跑了一次 happy-path demo]
-    B --> C[截图 + 导入成功<br/>我说: 看起来没问题<br/>&nbsp;]
+    B --> C[截图 + 导入成功<br/>我说: 看起来没问题]
     C --> D{对照预定义的验收标准了吗}
-    D -->|没有, 把 demo 当完成| E[真实规模 / 并发 / 异常路径<br/>性能 / 安全 / 可访问性 全是空白<br/>&nbsp;]
-    E --> F[发布后在真实数据上崩<br/>验收阶段最贵的返工<br/>&nbsp;]
+    D -->|没有, 把 demo 当完成| E[真实规模 / 并发 / 异常路径<br/>性能 / 安全 / 可访问性 全是空白]
+    E --> F[发布后在真实数据上崩<br/>验收阶段最贵的返工]
 ```
 
 ## 后果

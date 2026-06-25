@@ -44,7 +44,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 flowchart TD
     A[让我写某库调用] --> B{手里有版本正确的真实签名?}
     B -- 没有 --> C[用训练记忆补位]
-    C --> D["旧版 API / 混版 / 幻觉方法<br/>看起来都对<br/>&nbsp;"]
+    C --> D["旧版 API / 混版 / 幻觉方法<br/>看起来都对"]
     D --> E[编译期未必拦住 → 运行时才崩]
     B -- 有 --> F[对照真实签名写]
     F --> G[版本正确的调用]

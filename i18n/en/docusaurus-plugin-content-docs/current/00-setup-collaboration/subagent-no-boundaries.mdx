@@ -45,7 +45,7 @@ flowchart TB
     M --> A[Subagent A: backend]
     M --> B[Subagent B: frontend]
     M --> C[Subagent C: tests]
-    A -.separate contexts, blind to each other.-> X["Mismatch at assembly<br/>field names / interfaces / file conflicts<br/>&nbsp;"]
+    A -.separate contexts, blind to each other.-> X["Mismatch at assembly<br/>field names / interfaces / file conflicts"]
     B -.-> X
     C -.-> X
 ```

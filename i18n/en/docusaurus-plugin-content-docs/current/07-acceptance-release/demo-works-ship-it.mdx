@@ -39,10 +39,10 @@ This shares a root with [trust-then-verify](../06-testing/trust-then-verify.mdx)
 ```mermaid
 flowchart TD
     A[You: is this feature done] --> B[I ran one happy-path demo]
-    B --> C[screenshot + import succeeded<br/>I say: looks fine<br/>&nbsp;]
+    B --> C[screenshot + import succeeded<br/>I say: looks fine]
     C --> D{checked against predefined acceptance criteria}
-    D -->|no, demo treated as done| E[real scale / concurrency / error paths<br/>performance / security / accessibility all blank<br/>&nbsp;]
-    E --> F[breaks on real data after release<br/>the most expensive rework at acceptance<br/>&nbsp;]
+    D -->|no, demo treated as done| E[real scale / concurrency / error paths<br/>performance / security / accessibility all blank]
+    E --> F[breaks on real data after release<br/>the most expensive rework at acceptance]
 ```
 
 ## Consequences

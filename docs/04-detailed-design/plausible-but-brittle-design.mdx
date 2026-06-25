@@ -39,7 +39,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 flowchart TD
     A[你要一套方案] --> B[我给出 happy path 设计]
     B --> C{有人逼它面对最坏情况吗}
-    C -->|没有，顺着读都合理| D["规模放大 / 超时重试<br/>并发与幂等 / 部分失败<br/>&nbsp;"]
+    C -->|没有，顺着读都合理| D["规模放大 / 超时重试<br/>并发与幂等 / 部分失败"]
     C -->|你显式追问失败路径| E[方案补上退化与恢复策略]
     D --> F[上了真实负载就垮]
 ```

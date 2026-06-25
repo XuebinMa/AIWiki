@@ -43,12 +43,12 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ```mermaid
 flowchart TD
-    A[你让我处理外部仓库 / issue / 依赖<br/>&nbsp;] --> B[我读 README / issue / 规则文件 / 网页]
-    B --> C{其中藏着<br/>写给我的指令?<br/>可能是零宽字符隐藏<br/>&nbsp;}
-    C -->|是: 我分不清数据与指令| D{我手里有<br/>高权限工具?<br/>shell / 文件 / 网络 / push<br/>&nbsp;}
+    A[你让我处理外部仓库 / issue / 依赖] --> B[我读 README / issue / 规则文件 / 网页]
+    B --> C{其中藏着<br/>写给我的指令?<br/>可能是零宽字符隐藏}
+    C -->|是: 我分不清数据与指令| D{我手里有<br/>高权限工具?<br/>shell / 文件 / 网络 / push}
     C -->|否| E[正常完成任务]
-    D -->|有: 致命三件套凑齐| F[外泄密钥 / 插后门<br/>跑破坏性命令<br/>&nbsp;]
-    D -->|被沙箱 / 需确认拦住| G[注入无处落地<br/>或动手前被你拦下<br/>&nbsp;]
+    D -->|有: 致命三件套凑齐| F[外泄密钥 / 插后门<br/>跑破坏性命令]
+    D -->|被沙箱 / 需确认拦住| G[注入无处落地<br/>或动手前被你拦下]
 ```
 
 ## 后果

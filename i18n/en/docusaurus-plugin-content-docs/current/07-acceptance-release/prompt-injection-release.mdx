@@ -41,10 +41,10 @@ Worse still, prompt injection is an attack class **unique to LLM applications an
 
 ```mermaid
 flowchart LR
-    A[Attacker hides instructions in<br/>user input / web page / email<br/>&nbsp;] -->|untrusted content enters context| B[Backend LLM reads it and is misled]
-    B --> C{Can it directly drive<br/>sensitive tools?<br/>&nbsp;}
-    C -->|Yes: input wired straight to tools| D[Oversteps: leaks data<br/>calls tools it shouldn't<br/>&nbsp;]
-    C -->|Isolated / needs confirmation| E[Injection has nowhere to land<br/>or is stopped before it acts<br/>&nbsp;]
+    A[Attacker hides instructions in<br/>user input / web page / email] -->|untrusted content enters context| B[Backend LLM reads it and is misled]
+    B --> C{Can it directly drive<br/>sensitive tools?}
+    C -->|Yes: input wired straight to tools| D[Oversteps: leaks data<br/>calls tools it shouldn't]
+    C -->|Isolated / needs confirmation| E[Injection has nowhere to land<br/>or is stopped before it acts]
 ```
 
 ## The consequences
