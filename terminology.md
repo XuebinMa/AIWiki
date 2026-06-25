@@ -96,6 +96,14 @@ Claude Code · CLAUDE.md · Anthropic · Claude · Opus · Sonnet · Haiku · Do
 | 试运行 | dry-run | 先打印将要改动什么、不真做 |
 | 上下文腐烂 | context rot | 上下文越长质量越降、中段被忽略 |
 | 静态扫描 | SAST | 静态应用安全测试 |
+| 错误处理 | error handling | |
+| 静默失败 | silent failure | 吞掉异常 / 用兜底默认值掩盖 |
+| 间接提示注入 | indirect prompt injection | 外部内容里藏的恶意指令 |
+| 文档漂移 | doc drift | 注释/文档与代码不一致 |
+| 依赖膨胀 | dependency bloat | 为小需求引入重依赖 |
+| 过早抽象 | premature abstraction | 为不存在的需求提前抽象 |
+| 原子提交 | atomic commit | 一个提交一件事 |
+| 失控循环 | runaway loop | agent 非终止 / 烧 token |
 | 范围蔓延 | scope creep | 擅自扩大改动范围 |
 | 文件状态 | file state | 文件当前真实内容 |
 | 整文件重写 | full-file rewrite | 不读现状、从头重写整个文件 |
