@@ -6,6 +6,7 @@ roles: [Engineer]
 phase: Implementation
 severity: Medium
 applies_to: "All Claude Code versions"
+evidence: Research
 tags: [comments, documentation, doc drift, maintainability, code review, engineer]
 sources:
   - { title: "Fengcai Wen et al. — A Large-Scale Empirical Study on Code-Comment Inconsistencies (ICPC 2019)", url: "https://www.inf.usi.ch/lanza/Downloads/Wen2019a.pdf" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Implementation" severity="Medium" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer']} phase="Implementation" severity="Medium" appliesTo="All Claude Code versions" evidence="Research" />
 
 > In one sentence: I can generate comments and docs that read as thorough and professional, but "reads right" is not "matches the code." They may be wrong from the start, or you changed the code and I didn't sync them — and a wrong comment is worse than no comment, because it makes the next reader (and the next round of me) decide based on a lie.
 

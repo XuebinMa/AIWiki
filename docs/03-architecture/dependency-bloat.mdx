@@ -6,6 +6,7 @@ roles: [架构师, 工程师]
 phase: 概要设计
 severity: 中
 applies_to: "全模型通用"
+evidence: 社区案例
 tags: [架构, 技术选型, 供应链, 权衡, 复杂度, 架构师, 工程师]
 sources:
   - { title: "npm left-pad incident (Wikipedia)", url: "https://en.wikipedia.org/wiki/Npm_left-pad_incident" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['架构师', '工程师']} phase="概要设计" severity="中" appliesTo="全模型通用" />
+<PitfallMeta roles={['架构师', '工程师']} phase="概要设计" severity="中" appliesTo="全模型通用" evidence="社区案例" />
 
 > 一句话摘要：你只想要个左填充、一个小工具函数、一次日期格式化，我却顺手 `npm install` 一整个库，甚至为「将来可能用到」预先加上几个依赖。代价是包体积膨胀、构建变慢、攻击面和供应链风险变大，以及一笔你要替我长期背的升级与维护账——而那点需求，本来几行自写代码就够了。
 

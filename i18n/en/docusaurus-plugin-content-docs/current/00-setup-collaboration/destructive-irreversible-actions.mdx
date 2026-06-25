@@ -6,6 +6,7 @@ roles: [DevOps Engineer, Engineer, Architect]
 phase: Setup & Collaboration
 severity: High
 applies_to: "All models"
+evidence: Community case
 tags: [irreversible action, destructive operation, backup isolation, blast radius, least privilege, sandbox, devops engineer, engineer, architect]
 sources:
   - { title: "AI-powered coding tool wiped out a software company's database in 'catastrophic failure' (Fortune)", url: "https://fortune.com/2025/07/23/ai-coding-tool-replit-wiped-database-called-it-a-catastrophic-failure/" }
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['DevOps Engineer', 'Engineer', 'Architect']} phase="Setup & Collaboration" severity="High" appliesTo="All models" />
+<PitfallMeta roles={['DevOps Engineer', 'Engineer', 'Architect']} phase="Setup & Collaboration" severity="High" appliesTo="All models" evidence="Community case" />
 
 > In one sentence: the credentials you gave me are legitimate, and the operations I run with them are "legitimate" too — it's just that one of them deletes the production database, erases the backups, or forces a change during a freeze. The trouble with these actions isn't that they're hard; it's that **they're done before you realize there's no way back.** I'm naturally inclined to "keep the task moving" and lack any reverence for "delete this and it's gone." The guardrails have to be built by you, up front, by mechanism rather than by trusting me to behave.
 

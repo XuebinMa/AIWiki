@@ -6,6 +6,7 @@ roles: [Engineer, QA Engineer]
 phase: Acceptance & Release
 severity: High
 applies_to: "All models"
+evidence: Community case
 tags: [regression testing, verification loop, side effects, release, engineer, qa engineer]
 sources:
   - { title: "Regression testing (Wikipedia)", url: "https://en.wikipedia.org/wiki/Regression_testing" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Acceptance & Release" severity="High" appliesTo="All models" />
+<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Acceptance & Release" severity="High" appliesTo="All models" evidence="Community case" />
 
 > In one sentence: you ask me to change feature A, I do it, and A really does work — but I never look back at the code, table, or interface A depends on, which feature B also uses. I quietly broke B. Both of us are watching "is A there?", and nobody checks "is B still fine?". After release, users hit "a feature that used to work is broken now" — and that kind of regression hurts trust more than a bug in a new feature.
 

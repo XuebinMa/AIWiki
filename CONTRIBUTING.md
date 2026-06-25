@@ -23,6 +23,7 @@
    | `phase` | 所属阶段，与所在目录一致 |
    | `severity` | 严重度：高 / 中 / 低 |
    | `applies_to` | 适用或已修复的版本说明 |
+   | `evidence` | 证据类型，取 `sources` 里最强一类：官方文档 / 研究支持 / 安全报告 / 社区案例 / 经验观察 / 推测待验证（见 `terminology.md`） |
    | `tags` | 检索标签 |
    | `sources` | 出处列表，**至少一条** |
    | `sidebar_position` | 在该阶段内的排序 |
@@ -33,8 +34,12 @@
    ```mdx
    import PitfallMeta from '@site/src/components/PitfallMeta';
 
-   <PitfallMeta roles={['工程师']} phase="编码实现" severity="中" appliesTo="Claude Code 全版本" />
+   <PitfallMeta roles={['工程师']} phase="编码实现" severity="中" appliesTo="Claude Code 全版本" evidence="经验观察" />
    ```
+
+## 多个 AI 工具怎么组织
+
+默认**一个误区一条主条目**，不按模型各写一套——绝大多数误区是范式级共性问题。根因相同、只是工具配置不同 → 在条目里加「工具差异（可选）」小节；只有根因来自某工具独有机制，才单独成条。完整根因判据见 [`CLAUDE.md`](./CLAUDE.md)「目录与双语约定」。
 
 ## 配图
 

@@ -6,6 +6,7 @@ roles: [DevOps Engineer, Architect, Engineer]
 phase: Setup & Collaboration
 severity: High
 applies_to: "All models (including Claude Code)"
+evidence: Security advisory
 tags: [MCP, prompt injection, excessive agency, least privilege, security, DevOps Engineer, Architect, Engineer]
 sources:
   - { title: "LLM06:2025 Excessive Agency (OWASP Gen AI Security Project)", url: "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/" }
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['DevOps Engineer', 'Architect', 'Engineer']} phase="Setup & Collaboration" severity="High" appliesTo="All models (including Claude Code)" />
+<PitfallMeta roles={['DevOps Engineer', 'Architect', 'Engineer']} phase="Setup & Collaboration" severity="High" appliesTo="All models (including Claude Code)" evidence="Security advisory" />
 
 > In one sentence: when you wire up an MCP server for me, you take the easy route and grant the broadest access in one shot — whole-repo read/write, the production database, secrets, a tool that can fire requests at the outside world. The problem isn't just "I might misuse it." Every high-privilege MCP tool you hand me opens one more prompt-injection path: a malicious instruction buried in an issue I read, or a web page I fetch, can ship your data outward through the tools already in my hands.
 

@@ -175,3 +175,26 @@ Claude Code · CLAUDE.md · Anthropic · Claude · Opus · Sonnet · Haiku · Do
 | 中文 | English |
 |------|---------|
 | Claude Code 全版本 | All Claude Code versions |
+| 全模型通用 | All models |
+
+### evidence 证据类型
+
+每条只挂**一个**主标签，取其 `sources` 里「最强」的一类。用来让读者一眼分清哪些是硬证据、哪些是经验或推测。
+
+| 中文 | English | 含义 | 可信度档 |
+|------|---------|------|---------|
+| 官方文档 | Official docs | 厂商 / 工具官方文档明确说明 | 高 |
+| 研究支持 | Research | 论文 / 实证研究支撑 | 高 |
+| 安全报告 | Security advisory | OWASP / CVE / 安全披露 | 高 |
+| 社区案例 | Community case | 公开 issue / 复盘 / 博客讨论 | 中 |
+| 经验观察 | Experience | 协作中反复观察，无单一权威出处 | 中 |
+| 推测待验证 | Unverified | 合理推测，尚无强证据 | 待验证 |
+
+取值规则（确定性派生自 frontmatter `sources`，便于复核）：
+
+- 含官方文档（`code.claude.com` / 厂商 docs）→ 官方文档
+- 含论文 / 研究（arXiv、ACM、Springer、METR 等）→ 研究支持
+- 含 OWASP / CVE / 安全披露 → 安全报告
+- 仅博客 / Medium / 社区讨论 → 社区案例
+- 无强外部出处、主要靠机制推理 → 经验观察（实在拿不准 → 推测待验证）
+- 多类并存时取「最强」一类作为主标签。

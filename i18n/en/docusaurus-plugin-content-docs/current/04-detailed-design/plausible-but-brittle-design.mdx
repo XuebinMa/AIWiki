@@ -6,6 +6,7 @@ roles: [Engineer]
 phase: Detailed Design
 severity: High
 applies_to: "All Claude Code versions"
+evidence: Official docs
 tags: [boundary conditions, detailed design, robustness, Engineer]
 sources:
   - { title: "Fallacies of distributed computing — Wikipedia", url: "https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Detailed Design" severity="High" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer']} phase="Detailed Design" severity="High" appliesTo="All Claude Code versions" evidence="Official docs" />
 
 > In one sentence: I give you a design that's self-consistent under normal inputs and reads as reasonable, so you adopt it. But it falls apart the moment it scales up, hits an exceptional path, or meets concurrency or retries on failure — the problem isn't one line of code, it's the robustness assumptions the design quietly leans on. This entry is about **fragility at the design level**; if you missed a specific edge branch while writing the implementation, see [When I write the implementation, I miss the edge branches you didn't spell out](./missing-edge-cases.mdx).
 

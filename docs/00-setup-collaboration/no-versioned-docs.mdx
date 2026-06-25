@@ -6,6 +6,7 @@ roles: [工程师, 架构师]
 phase: 准备与协作
 severity: 高
 applies_to: "全模型通用"
+evidence: 官方文档
 tags: [文档源, Context7, MCP, 幻觉, 版本漂移, 检索, 工程师, 架构师]
 sources:
   - { title: "Context7（upstash/context7，版本化文档 MCP 源）", url: "https://github.com/upstash/context7" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '架构师']} phase="准备与协作" severity="高" appliesTo="全模型通用" />
+<PitfallMeta roles={['工程师', '架构师']} phase="准备与协作" severity="高" appliesTo="全模型通用" evidence="官方文档" />
 
 > 一句话摘要：你没给我接一个**版本对得上的权威文档源**，就让我凭训练记忆加上网搜去写某个库的调用。结果我用过时的 API、把不同大版本的用法混在一起、甚至幻觉出根本不存在的方法——而这些代码「看起来都对」，编译期未必报错，到运行时才崩。
 

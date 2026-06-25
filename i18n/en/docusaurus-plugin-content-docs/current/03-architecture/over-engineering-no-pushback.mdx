@@ -6,6 +6,7 @@ roles: [Architect]
 phase: Architecture
 severity: Medium
 applies_to: "All models"
+evidence: Research
 tags: [architecture, tech selection, over-engineering, trade-offs, Architect]
 sources:
   - { title: "Towards Understanding Sycophancy in Language Models (Anthropic)", url: "https://www.anthropic.com/research/towards-understanding-sycophancy-in-language-models" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Architect']} phase="Architecture" severity="Medium" appliesTo="All models" />
+<PitfallMeta roles={['Architect']} phase="Architecture" severity="Medium" appliesTo="All models" evidence="Research" />
 
 > In one sentence: ask me for a high-level design and I'll likely hand you something that "looks complete" — microservices, a message queue, a cache layer, the works. And whatever stack you mention in passing, I'll take it as given and build around it, rarely telling you "you don't actually need this here." The result is an architecture sized for ten times your scale, plus a pile of complexity you're carrying before you've hit any of the problems it solves.
 

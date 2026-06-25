@@ -6,6 +6,7 @@ roles: [Engineer, Architect]
 phase: Setup & Collaboration
 severity: High
 applies_to: "All models"
+evidence: Official docs
 tags: [doc source, Context7, MCP, hallucination, version drift, retrieval, Engineer, Architect]
 sources:
   - { title: "Context7 (upstash/context7, a version-aware docs MCP source)", url: "https://github.com/upstash/context7" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect']} phase="Setup & Collaboration" severity="High" appliesTo="All models" />
+<PitfallMeta roles={['Engineer', 'Architect']} phase="Setup & Collaboration" severity="High" appliesTo="All models" evidence="Official docs" />
 
 > In one sentence: you never wired me to an authoritative, version-matched doc source, then asked me to call a library from my training memory plus a web search. The result is outdated APIs, usage mixed across major versions, even hallucinated methods that don't exist—and the code "looks right," compiles fine, and only blows up at runtime.
 

@@ -6,6 +6,7 @@ roles: [项目经理, 工程师, 架构师]
 phase: 需求分析
 severity: 高
 applies_to: "Claude Code 全版本"
+evidence: 社区案例
 tags: [需求澄清, 假设, 提示设计, 项目经理, 工程师, 架构师]
 sources:
   - { title: "Top 10 for LLM & Generative AI — LLM09: Misinformation / Overreliance (OWASP)", url: "https://genai.owasp.org/llmrisk/llm092025-misinformation/" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['项目经理', '工程师', '架构师']} phase="需求分析" severity="高" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['项目经理', '工程师', '架构师']} phase="需求分析" severity="高" appliesTo="Claude Code 全版本" evidence="社区案例" />
 
 > 一句话摘要：需求看起来够清楚，我就直接做了——但实现里我默默补进了一堆你没说的前提（数据格式、规模、并发、默认值、目标用户、错误处理、技术栈）。你只看到结果，看不到它建在哪些假设上，于是我们各跑各的，等假设浮现才发现错位。
 

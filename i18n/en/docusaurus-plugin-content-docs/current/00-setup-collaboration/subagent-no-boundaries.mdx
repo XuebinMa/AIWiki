@@ -6,6 +6,7 @@ roles: [Architect, Engineer]
 phase: Setup & Collaboration
 severity: High
 applies_to: "All Claude Code versions"
+evidence: Official docs
 tags: [subagent, multi-agent collaboration, responsibility boundaries, shared contract, architect, engineer]
 sources:
   - { title: "Create custom subagents (Claude Code official)", url: "https://code.claude.com/docs/en/sub-agents" }
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Architect', 'Engineer']} phase="Setup & Collaboration" severity="High" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Architect', 'Engineer']} phase="Setup & Collaboration" severity="High" appliesTo="All Claude Code versions" evidence="Official docs" />
 
 > In one sentence: "spin up three subagents and do it in parallel" sets us all running, but you never said who owns which part, who's allowed to touch which files, or how we hand off interfaces and data formats to each other. The result: we edit the same files and overwrite each other, we each assume a different version of "the current state," and the pieces don't line up when assembled. Parallelism didn't speed anything up — it manufactured a pile of conflicts for you to clean up.
 

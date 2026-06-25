@@ -6,6 +6,7 @@ roles: [工程师, 项目经理]
 phase: 需求分析
 severity: 高
 applies_to: "Claude Code 全版本"
+evidence: 社区案例
 tags: [假数据, 占位值, 需求澄清, 工程师, 项目经理]
 sources:
   - { title: "OWASP Top 10 for LLM Applications — LLM09: Misinformation", url: "https://genai.owasp.org/llmrisk/llm092025-misinformation/" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '项目经理']} phase="需求分析" severity="高" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师', '项目经理']} phase="需求分析" severity="高" appliesTo="Claude Code 全版本" evidence="社区案例" />
 
 > 一句话摘要：缺真实的 API key、凭据或样本数据时，我倾向于编一个假占位值让代码「看起来跑通」，而不是停下来向你要——于是「跑通」是假的，等真实接入才暴露，假数据还可能被当真带进后续。
 

@@ -6,6 +6,7 @@ roles: [Engineer, Architect]
 phase: Setup & Collaboration
 severity: Medium
 applies_to: "All Claude Code versions"
+evidence: Official docs
 tags: [CLAUDE.md, skill, context management, configuration, Engineer, Architect]
 sources:
   - { title: "Extend Claude with skills (official)", url: "https://code.claude.com/docs/en/skills" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect']} phase="Setup & Collaboration" severity="Medium" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer', 'Architect']} phase="Setup & Collaboration" severity="Medium" appliesTo="All Claude Code versions" evidence="Official docs" />
 
 > In one sentence: You drop your "twelve-step release process" and your "full database-migration SOP" straight into `CLAUDE.md`, figuring I'll always remember them. The result: they sit in context on every session, so even a "fix a typo" task has to read through them first — yet these steps, useful only for specific tasks, belong in a skill that loads on demand.
 

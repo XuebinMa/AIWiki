@@ -19,13 +19,17 @@ description: 为 AiWiki 撰写或修订一条「误区」条目（docs/ 下的 .
 
 1. **定位阶段**：判断该误区属于哪个生命周期阶段，进入对应的 `docs/0X-*/` 目录。
 2. **建文件**：复制 `docs/_templates/entry-template.md` 到该目录，命名为 `<slug>.mdx`，删掉模板里的 `#` 注释。
-3. **填 frontmatter**：title/slug/roles/phase/severity/applies_to/tags/sources/sidebar_position。`sources` 至少一条可核查链接——**没有可靠出处的论断不写**。
+3. **填 frontmatter**：title/slug/roles/phase/severity/applies_to/evidence/tags/sources/sidebar_position。`sources` 至少一条可核查链接——**没有可靠出处的论断不写**；`evidence` 取 `sources` 里最强的一类（见 `terminology.md`「evidence 证据类型」）。
 4. **写正文七段**（顺序不可变）：现象 → 为什么会这样 → 后果 → 最佳实践 → 示例 → 版本说明（`:::note`）→ 延伸阅读与出处。正文前加一句 `> 一句话摘要：…`。
-5. **插入徽章**：顶部 `<PitfallMeta roles={[...]} phase=… severity=… appliesTo=… />`，props 必须与 frontmatter 完全一致。
+5. **插入徽章**：顶部 `<PitfallMeta roles={[...]} phase=… severity=… appliesTo=… evidence=… />`，props 必须与 frontmatter 完全一致。
 6. **配图**：关系复杂处用 Mermaid 自绘（零版权风险），能一张图说清就别堆三段文字。
 7. **自查**：对照 `STYLE-GUIDE.md` 的「AI 腔」清单逐句过；确认零错别字、术语与 `terminology.md` 一致。
 8. **出英文版**：调用 `aiwiki-translator` skill，生成 `i18n/en/docusaurus-plugin-content-docs/current/<相同子路径>/<slug>.mdx`。
 9. **跑 linter**：`.github/workflows/lint.yml` 里用到的工具（autocorrect / Vale / cspell），本地可先跑一遍再提交。
+
+## 多工具：要不要为某个工具单写一条
+
+默认**合并**：一个误区一条主条目。根因相同、只是不同工具配置不同 → 在条目里加「工具差异（可选）」小节，别拆。只有当根因来自**某工具独有机制**（如 Claude Code hooks 覆盖面、Gemini 并行 subagent 编辑冲突）才单独成条。工具差异小节要短、且注明版本（很快过时）。
 
 ## 红线（写之前默念一遍）
 

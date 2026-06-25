@@ -6,6 +6,7 @@ roles: [工程师, 运维工程师]
 phase: 准备与协作
 severity: 高
 applies_to: "Claude Code 全版本"
+evidence: 官方文档
 tags: [hooks, CLAUDE.md, 确定性, 提示词, 工程师, 运维工程师]
 sources:
   - { title: "Automate actions with hooks（Claude Code 官方）", url: "https://code.claude.com/docs/en/hooks-guide" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '运维工程师']} phase="准备与协作" severity="高" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师', '运维工程师']} phase="准备与协作" severity="高" appliesTo="Claude Code 全版本" evidence="官方文档" />
 
 > 一句话摘要：你在 CLAUDE.md 里写了「改完代码必须跑 format」「提交前必须跑测试」「这些文件不许动」，然后指望我每次都照做。但提示词对我只是「建议」，不是「机制」——我会忘、会忽略、上下文一长就漂。要它必然发生，就别交给我的自觉，做成 hook。
 
