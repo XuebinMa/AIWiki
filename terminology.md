@@ -104,6 +104,24 @@ Claude Code · CLAUDE.md · Anthropic · Claude · Opus · Sonnet · Haiku · Do
 | 过早抽象 | premature abstraction | 为不存在的需求提前抽象 |
 | 原子提交 | atomic commit | 一个提交一件事 |
 | 失控循环 | runaway loop | agent 非终止 / 烧 token |
+| 数据模型 | data model | schema / 表结构 / 接口契约 |
+| 迁移 | migration | schema 变更脚本 |
+| 演进式设计 | evolutionary design | schema 跟代码一起迭代 |
+| 并发 | concurrency | |
+| 竞态条件 | race condition | check-then-act / read-modify-write |
+| 魔数 | magic number | 无名字的字面量 |
+| 硬编码 | hardcoding | 把配置值写死进代码 |
+| 许可合规 | license compliance | |
+| copyleft | copyleft | 传染性许可（GPL/AGPL） |
+| 知识产权 | intellectual property (IP) | |
+| 记忆与回吐 | memorization / regurgitation | 模型逐字复现训练样本 |
+| 校准 | calibration | 置信度与正确率是否匹配 |
+| 解释忠实性 | explanation faithfulness | 解释是否反映真实推理 |
+| 过度自信 | overconfidence | |
+| 规划谬误 | planning fallacy | 系统性低估工期 |
+| 参照类比预测 | reference-class forecasting | 用历史同类项目校准估算 |
+| 需求镀金 | gold plating | 擅自把需求做大 |
+| 过度 mock | over-mocking | 把真实依赖 mock 掉致测试失义 |
 | 范围蔓延 | scope creep | 擅自扩大改动范围 |
 | 文件状态 | file state | 文件当前真实内容 |
 | 整文件重写 | full-file rewrite | 不读现状、从头重写整个文件 |
