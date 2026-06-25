@@ -132,8 +132,8 @@
 
 ### 待触发（条件未到，不算欠债）
 
-- ⏸️ **工具矩阵页 + 各条「工具差异」实际内容**：站点现为 Claude-only，无第 2 个工具就没内容可填。结构定调已在 `CLAUDE.md`「目录与双语约定」；接入 ChatGPT / Codex / Gemini 等第 2 个工具时再建 `docs/tool-matrix` 与各条小节。
-- ⏸️ **「适用范围」字段**（通用 LLM / Coding Agent 通用 / 某工具特有 / 未验证）：标注每条误区跨哪些 AI 系统。站点现为 Claude-only，全部会落在「Coding Agent 通用」，价值要等第 2 个工具才显现；与工具矩阵同批做。
+- 🟡 **工具矩阵页 + 各条「工具差异」实际内容**（**已触发**）：触发条件「接入第 2 个工具」已启动——**Gemini CLI 试点**。结构定调见 `CLAUDE.md`「目录与双语约定」与 `terminology.md`「tool 工具 / agent」（轴按工具 / agent 非模型）。进行中：改写 10–15 条高相似度条目补「工具差异」小节、新增 1–2 条 Gemini 独有机制条目、建 `docs/tool-matrix` 矩阵页。过试点评审闸后再决定是否扩到 Cursor / Copilot / Codex CLI。
+- 🟡 **「适用范围」字段**（**已触发**，与工具矩阵同批）：取值已落到 `terminology.md`「applies_to」（Coding Agent 通用 / 通用 LLM / 某工具特有 等）+「tool」枚举轴；条目用工具名作 tag（沿用 roles 的 tag 聚合）。先在 Gemini CLI 试点条目上铺。
 
 ### 评估后不照做（存档，便于追溯）
 
