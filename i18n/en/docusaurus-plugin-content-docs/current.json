@@ -36,7 +36,7 @@
     "description": "The generated-index page title for category '📋 需求分析' in sidebar 'wikiSidebar'"
   },
   "sidebar.wikiSidebar.category.📋 需求分析.link.generated-index.description": {
-    "message": "Turning an idea into clear, unambiguous, verifiable requirements. This part covers where I tend to make decisions for you during the requirements phase—and how to make me ask first instead.",
+    "message": "Turning an idea into clear, unambiguous, verifiable requirements. The five entries here are all about \"I made the call for you,\" but the failure modes differ: a gap is a question mark you can see, and I guess instead of asking; ambiguity is a fork you might see, and I pick one reading without flagging it; an implicit assumption is a premise you don't even notice, and I quietly fill in a default; a placeholder is missing real input, and I fake one to paper over it; a spec is a complex task that deserved a written one, and I just start coding by feel.",
     "description": "The generated-index page description for category '📋 需求分析' in sidebar 'wikiSidebar'"
   },
   "sidebar.wikiSidebar.category.🏗 概要设计": {
