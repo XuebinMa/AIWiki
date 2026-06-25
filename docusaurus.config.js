@@ -87,6 +87,11 @@ const config = {
             label: '百科',
           },
           {
+            to: '/roles',
+            position: 'left',
+            label: '按角色浏览',
+          },
+          {
             type: 'localeDropdown',
             position: 'right',
           },
