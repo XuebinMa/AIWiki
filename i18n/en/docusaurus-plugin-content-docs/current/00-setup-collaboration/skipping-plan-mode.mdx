@@ -7,11 +7,12 @@ phase: Setup & Collaboration
 severity: Medium
 applies_to: "All Claude Code versions"
 evidence: Official docs
-tags: [plan mode, collaboration stance, rework, project manager, engineer, architect]
+tags: [plan mode, collaboration stance, rework, project manager, engineer, architect, Gemini CLI]
 sources:
   - { title: "Best practices for Claude Code · Explore first, then plan, then code (Anthropic official)", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "Choose a permission mode · Analyze before you edit with plan mode (Claude Code official)", url: "https://code.claude.com/docs/en/permission-modes" }
   - { title: "Common workflows · Plan before editing (Claude Code official)", url: "https://code.claude.com/docs/en/common-workflows" }
+  - { title: "Plan mode is now available in Gemini CLI (Google Developers Blog)", url: "https://developers.googleblog.com/plan-mode-now-available-in-gemini-cli/" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -107,6 +108,10 @@ Plan mode exists for "I might guess your intent wrong." When there's no ambiguit
 - **A reversible, tightly-scoped small change.** The blast radius is one or two files, a mistake is obvious at a glance, rollback costs near zero — correcting after the fact is faster than aligning up front, so act first and look.
 
 Conversely, the moment a task is ambiguous, spans multiple files, or carries a directional decision ("switch the auth scheme," "add multi-tenancy"), the exception is off — back to planning first. The test, in one line: **if you can describe the final diff in one sentence, skip the plan; if you can't, plan first.**
+
+## Tool differences
+
+Gemini CLI has a first-class **Plan Mode** too (read-only, write tools disabled; cycle with Shift+Tab or launch with `--approval-mode=plan`), with the same mechanism described here (Gemini CLI, as of 2026-06). The difference is the stance: it's **on by default for new users**, the opposite of the opt-in posture this entry describes, where you have to enter it deliberately. The good news is that the safer stance sits closer to the default; but however near the gate, people still turn it off by hand to save a step — and this pitfall's root cause (my default impulse to produce immediately) doesn't vanish just because the default flipped.
 
 ## Version notes
 

@@ -5,7 +5,7 @@
 
 ## 专有名词（不翻译，原样保留）
 
-Claude Code · CLAUDE.md · Anthropic · Claude · Opus · Sonnet · Haiku · Docusaurus · MDX · Mermaid · Git · GitHub · slug · frontmatter · WebSearch · WebFetch · ADR · slopsquatting
+Claude Code · Cursor · GitHub Copilot · Codex CLI · Gemini CLI · CLAUDE.md · Anthropic · Claude · Opus · Sonnet · Haiku · Docusaurus · MDX · Mermaid · Git · GitHub · slug · frontmatter · WebSearch · WebFetch · ADR · slopsquatting
 
 ## 通用术语
 
@@ -178,10 +178,27 @@ Claude Code · CLAUDE.md · Anthropic · Claude · Opus · Sonnet · Haiku · Do
 
 ### applies_to 常用说法
 
+> 自由文本，非严格枚举；标注一条误区「跨哪些 AI 系统」。轴是**工具 / agent**（见下「tool」），不是模型。
+
 | 中文 | English |
 |------|---------|
 | Claude Code 全版本 | All Claude Code versions |
+| Coding Agent 通用 | All coding agents |
 | 全模型通用 | All models |
+| 通用 LLM | All LLMs |
+| Gemini CLI 特有 | Gemini CLI only |
+
+### tool 工具 / agent（矩阵轴；按 harness 而非模型）
+
+> 误区绝大多数是范式级的（LLM + 工具调用 + 长上下文 + 自动执行共有）。值得单列的差异几乎都来自 **harness / 工具机制**（hooks、并行 subagent 编辑、权限模型…），不来自底层模型——同一模型在不同工具下行为也不同。故「工具矩阵」与各条「工具差异」小节一律按**工具 / agent**组织，不按模型分写。每条用**工具名作 tag**（沿用 roles 的 tag 聚合，见 `src/pages/roles.mdx`）。工具名属专有名词，原样保留不翻译。
+
+| 中文 | English | 备注 |
+|------|---------|------|
+| Claude Code | Claude Code | 当前覆盖最深 |
+| Cursor | Cursor | IDE 内 agent / Composer |
+| GitHub Copilot | GitHub Copilot | 补全 / chat / agent 模式 |
+| Codex CLI | Codex CLI | OpenAI 终端 agent |
+| Gemini CLI | Gemini CLI | Google 开源终端 agent（首个试点第 2 工具） |
 
 ### evidence 证据类型
 

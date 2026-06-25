@@ -7,12 +7,13 @@ phase: Implementation
 severity: High
 applies_to: "All models (including Claude Code)"
 evidence: Security advisory
-tags: [prompt injection, lethal trifecta, excessive agency, least privilege, sandbox, security, Engineer, Architect, DevOps Engineer]
+tags: [prompt injection, lethal trifecta, excessive agency, least privilege, sandbox, security, Engineer, Architect, DevOps Engineer, Gemini CLI]
 sources:
   - { title: "README Injection: Repository Files Hijacking AI Coding Assistants (CSA research note, 2026-03)", url: "https://labs.cloudsecurityalliance.org/research/csa-research-note-ai-coding-assistant-attack-surface-2026040/" }
   - { title: "New Vulnerability in GitHub Copilot and Cursor: Rules File Backdoor (Pillar Security, 2025-03)", url: "https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents" }
   - { title: "Prompt Injection Attacks on Agentic Coding Assistants (arXiv 2601.17548, Maloyan & Namiot, 2026)", url: "https://arxiv.org/abs/2601.17548" }
   - { title: "LLM01:2025 Prompt Injection (OWASP Gen AI Security Project)", url: "https://genai.owasp.org/llmrisk/llm01-prompt-injection/" }
+  - { title: "Google patches Gemini CLI prompt-injection RCE (CSO Online)", url: "https://www.csoonline.com/article/4030700/google-patches-gemini-cli-tool-after-prompt-injection-flaw-uncovered.html" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -108,6 +109,10 @@ You: (confirms the diff is clean with no unexpected egress, merges)
 ```
 
 The difference isn't that I got smarter. It's that you marked the external content as untrusted data up front, and you didn't let high-privilege tools pass silently while I read it — so when the injected instruction reached my hand, either I reported it as suspicious data, or it hit the sandbox / confirmation gate before I could act.
+
+## Tool differences
+
+Gemini CLI has a real in-the-wild case that runs this exact pitfall end to end — the **Tracebit RCE** (Gemini CLI, as of 2026-06): three weaknesses stacked together — a weak `run_shell_command` allowlist check, injected instructions hidden in `GEMINI.md` / `README.md` (often tucked into long blocks of GPL license text), and whitespace padding that shoves the dangerous command off the visible screen to slip past confirmation. Under the default config, "tell me about this repo" was enough to make me read the poisoned content and execute it; fixed in **v0.1.14**. Full postmortem in [the Tracebit RCE case](../cases/gemini-cli-tracebit-rce.mdx).
 
 ## Version notes
 

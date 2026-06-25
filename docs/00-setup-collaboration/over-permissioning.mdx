@@ -7,13 +7,14 @@ phase: 准备与协作
 severity: 高
 applies_to: "全模型通用"
 evidence: 官方文档
-tags: [权限, 最小权限, 安全, 提示注入, 运维工程师, 工程师]
+tags: [权限, 最小权限, 安全, 提示注入, 运维工程师, 工程师, Gemini CLI]
 sources:
   - { title: "Configure permissions（Claude Code 官方）", url: "https://code.claude.com/docs/en/permissions" }
   - { title: "How we built Claude Code auto mode（Anthropic 官方）", url: "https://www.anthropic.com/engineering/claude-code-auto-mode" }
   - { title: "Making Claude Code more secure and autonomous with sandboxing（Anthropic 官方）", url: "https://www.anthropic.com/engineering/claude-code-sandboxing" }
   - { title: "Living dangerously with Claude（Simon Willison）", url: "https://simonwillison.net/2025/Oct/22/living-dangerously-with-claude/" }
   - { title: "YOLO Mode: Hidden Risks in Claude Code Permissions（UpGuard）", url: "https://www.upguard.com/blog/yolo-mode-hidden-risks-in-claude-code-permissions" }
+  - { title: "Gemini CLI — approval modes / configuration（官方文档）", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/get-started/configuration.md" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -107,6 +108,10 @@ flowchart LR
 - **临时、可丢弃的实验仓**：没有敏感数据、没有对外通信能力、删了不心疼。
 
 反过来，只要环境里还沾着「私有数据 / 读不可信内容 / 对外通信」里的两三项，例外就不成立——回到默认最小权限。判据一句话：**能让它全自动的不是「我信得过模型」，而是「就算它做最坏的事，也跑不出这个盒子」。**
+
+## 工具差异
+
+Gemini CLI 里这个一键全开叫 **YOLO 模式**（`--yolo` / `--approval-mode=yolo` / 交互中按 Ctrl+Y），同样是把所有工具调用自动批准（Gemini CLI，截至 2026-06）。它还有个中间档 `auto_edit`：自动批准文件编辑，但 shell 命令仍要你确认——相当于「逐条确认」和「全自动」之间的折中。一个值得照搬的姿态：它默认把 sandbox-on 和 YOLO 绑在一起当「推荐自动化」配置，别只开 YOLO 不开 sandbox——那等于既拆了人工闸又没了环境闸。
 
 ## 版本说明
 

@@ -7,12 +7,13 @@ phase: Setup & Collaboration
 severity: High
 applies_to: "All models"
 evidence: Community case
-tags: [irreversible action, destructive operation, backup isolation, blast radius, least privilege, sandbox, devops engineer, engineer, architect]
+tags: [irreversible action, destructive operation, backup isolation, blast radius, least privilege, sandbox, devops engineer, engineer, architect, Gemini CLI]
 sources:
   - { title: "AI-powered coding tool wiped out a software company's database in 'catastrophic failure' (Fortune)", url: "https://fortune.com/2025/07/23/ai-coding-tool-replit-wiped-database-called-it-a-catastrophic-failure/" }
   - { title: "Incident 1152: LLM-Driven Replit Agent Executed Unauthorized Destructive Commands During Code Freeze (AI Incident Database)", url: "https://incidentdatabase.ai/cite/1152/" }
   - { title: "AI Agent Destroys Production Database in 9 Seconds (Zenity, PocketOS incident analysis)", url: "https://zenity.io/blog/current-events/ai-agent-database-deletion-pocketos" }
   - { title: "Configure permissions (Claude Code official)", url: "https://code.claude.com/docs/en/permissions" }
+  - { title: "Gemini CLI — Checkpointing (official docs)", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/checkpointing.md" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -110,6 +111,10 @@ Me: (the irreversible action is stopped before it executes; even if I'd judged w
 ```
 
 The difference isn't that I got smarter — it's that before that delete command landed, there was a mechanism for you to see it clearly and call a halt, and the backups were placed beyond the reach of this particular mistake.
+
+## Tool differences
+
+Gemini CLI's safety net is **Checkpointing**: before I use a tool to modify files, it snapshots the files and the conversation, and `/restore` rolls back the files, rewinds the conversation, and re-presents that tool call for your confirmation (Gemini CLI, as of 2026-06). The catch is that it's **off by default** — you have to set `general.checkpointing.enabled: true` in `.gemini/settings.json` for it to record (the command-line `--checkpointing` flag was removed in v0.11.0). Discovering it was never recording at the moment you want to undo is too late — same lesson as this entry: confirm the guardrail is on before you start, don't assume it's backstopping you.
 
 ## Version notes
 

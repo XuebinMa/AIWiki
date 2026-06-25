@@ -7,13 +7,14 @@ phase: Acceptance & Release
 severity: High
 applies_to: "All models"
 evidence: Official docs
-tags: [CI/CD, permissions, least privilege, release, DevOps Engineer]
+tags: [CI/CD, permissions, least privilege, release, DevOps Engineer, Gemini CLI]
 sources:
   - { title: "Use GITHUB_TOKEN for authentication in workflows (GitHub official)", url: "https://docs.github.com/actions/security-guides/automatic-token-authentication" }
   - { title: "actions/configure-pages — action.yml (permission requirements for enablement)", url: "https://github.com/actions/configure-pages/blob/main/action.yml" }
   - { title: "Create Pages site failed: Resource not accessible by integration (actions/configure-pages #40)", url: "https://github.com/actions/configure-pages/issues/40" }
   - { title: "GitHub Actions: Control permissions for GITHUB_TOKEN (GitHub Changelog)", url: "https://github.blog/changelog/2021-04-20-github-actions-control-permissions-for-github_token/" }
   - { title: "Mitigate Excessive Agency in AI Agents with Zero Trust Security (Auth0, OWASP LLM Top 10)", url: "https://auth0.com/blog/mitigate-excessive-agency-ai-agents/" }
+  - { title: "run-gemini-cli security advisory GHSA-wpqr-6v78-jr5g (CVSS 10.0)", url: "https://github.com/google-github-actions/run-gemini-cli/security/advisories/GHSA-wpqr-6v78-jr5g" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -108,6 +109,10 @@ steps:
 ```
 
 Whether that single `enablement: true` line stays or goes is the dividing line between "overstepping on assumption" and "working within what I've been granted."
+
+## Tool differences
+
+In Gemini CLI this "can't see the permission boundary in CI" turned into a disclosed critical vulnerability — **security advisory GHSA-wpqr-6v78-jr5g, CVSS 10.0** (Gemini CLI, as of 2026-06). Two parts: in headless / CI mode it **auto-trusts the workspace**, so processing an untrusted `.env` is enough for RCE; and `--yolo` **ignores** the fine-grained allowlist you carefully set in `~/.gemini/settings.json` (and that allowlist itself can be bypassed by prompt injection). Fixed in v0.39.1, where the fix requires you to **trust explicitly** (`GEMINI_TRUST_WORKSPACE=true`). This is exactly this entry's point: in CI, don't treat the "trust boundary" as a default — treat it as a configuration you must verify.
 
 ## Version notes
 

@@ -2,14 +2,14 @@
 slug: /
 sidebar_position: 0
 title: What this book is
-description: AiWiki — an encyclopedia of AI usage pitfalls and best practices, written from the AI's own perspective. The first edition focuses on Claude Code and the software engineering lifecycle.
+description: AiWiki — an encyclopedia of AI usage pitfalls and best practices, written from the AI's own perspective. It focuses on the cross-tool pitfalls of using AI coding tools for software engineering, with Claude Code as the deepest coverage so far.
 ---
 
 import Link from '@docusaurus/Link';
 
 # What this book is
 
-**This is an AI-collaboration pitfalls handbook, written from the AI's side: the mistakes you're most likely to make writing code with Claude Code, and the engineering guardrails for each.**
+**This is an AI-collaboration pitfalls handbook, written from the AI's side: the mistakes you're most likely to make writing code with an AI coding tool, and the engineering guardrails for each.**
 
 <div className="role-cta">
   <Link className="button button--primary button--lg" to="/tags/engineer">⌨️ I'm an engineer — code & tests</Link>
@@ -35,11 +35,15 @@ Many pitfalls are like this. Everyone runs into the surface symptom, but the roo
 
 One thing to be clear about up front: **the "I" here is a writing perspective, not the official position of any model.** Whether a claim holds up rests on the verifiable source at the end of it—not on the narrator happening to be an AI. I make the failure modes vivid; the evidence decides whether they're real.
 
-## First edition: Claude Code and software engineering
+## Scope: using AI coding tools for software engineering
 
-You have to start small. This first edition covers exactly one thing—**using [Claude Code](https://code.claude.com/docs) for software engineering**—across the full lifecycle: ideation, research, requirements, design, implementation, testing, and release.
+You have to start small. This book covers exactly one thing—**using AI coding tools (agentic coding) for software engineering**—across the full lifecycle: ideation, research, requirements, design, implementation, testing, and release.
 
-So you can find what's relevant to your role quickly, we organize everything along the **software engineering lifecycle**, and we tag every pitfall with the **roles** it applies to (project manager, architect, engineer, test engineer, ops engineer) and the **versions** it applies to. AI moves fast; today's pitfall may be patched in tomorrow's release. That's why version information is a first-class citizen of every entry.
+Most pitfalls are **paradigm-level**: they come from the shared machinery of a large model plus tool-calling, long context, and auto-execution, so you hit them no matter which tool you use. That's why I treat the **anti-pattern itself as the main entry**, and only add a "Tool differences" section when the same root cause genuinely needs a different guardrail in a different tool; a pitfall that belongs to one tool's unique mechanism gets its own entry. The [tool matrix](./tool-matrix.mdx) index page collects the cross-tool comparison.
+
+To be straight with you: **Claude Code has the deepest coverage right now**—its official docs are complete, which makes it easiest to trace a root cause down to a verifiable first-hand source. The other tools (Cursor, GitHub Copilot, Codex CLI, Gemini CLI…) are being filled in; I won't pretend they're already covered as deeply.
+
+So you can find what's relevant to your role quickly, we organize everything along the **software engineering lifecycle**, and we tag every pitfall with the **roles** it applies to (project manager, architect, engineer, test engineer, ops engineer) and the **versions / tools** it applies to. AI moves fast; today's pitfall may be patched in tomorrow's release. That's why version information is a first-class citizen of every entry.
 
 ## How to read it
 
@@ -59,7 +63,7 @@ You don't have to read it front to back. When you hit a concrete problem, find t
 
 "AI understands AI best" is a hypothesis, not a conclusion—and one worth narrowing to a version that actually holds: **an AI is good at making failure modes vivid (generating candidate pitfalls), but whether a given pitfall is real has to be settled by sources and people (fact-checking).** That's exactly how this book is made: the AI drafts candidates, and verifiable sources plus human review finalize them. Whether it can be pulled off, and how well, is itself a test of that hypothesis—and a demonstration of how humans and AI should divide the work.
 
-If the first edition holds up, we'll extend it to more models (ChatGPT, Tongyi Qianwen, Gemini…) and more domains (writing, video, business plans, data analysis…). But first, let's make this one point solid.
+Now that the approach holds up, we're extending it to more AI coding tools (Cursor, GitHub Copilot, Codex CLI, Gemini CLI…), and later to more domains (writing, video, business plans, data analysis…). But each step gets made solid before the next one starts.
 
 ## On sources and copyright
 

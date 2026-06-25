@@ -8,6 +8,13 @@
         "架构师"
       ]
     },
+    "gemini-folder-trust-inheritance": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "运维工程师"
+      ]
+    },
     "hooks-not-prompts": {
       "severity": "高",
       "roles": [
@@ -454,6 +461,13 @@
         "DevOps Engineer",
         "Engineer",
         "Architect"
+      ]
+    },
+    "gemini-folder-trust-inheritance": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "DevOps Engineer"
       ]
     },
     "hooks-not-prompts": {

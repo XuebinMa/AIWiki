@@ -7,13 +7,14 @@ phase: Setup & Collaboration
 severity: High
 applies_to: "All models"
 evidence: Official docs
-tags: [permissions, least privilege, security, prompt injection, DevOps Engineer, Engineer]
+tags: [permissions, least privilege, security, prompt injection, DevOps Engineer, Engineer, Gemini CLI]
 sources:
   - { title: "Configure permissions (Claude Code official)", url: "https://code.claude.com/docs/en/permissions" }
   - { title: "How we built Claude Code auto mode (Anthropic)", url: "https://www.anthropic.com/engineering/claude-code-auto-mode" }
   - { title: "Making Claude Code more secure and autonomous with sandboxing (Anthropic)", url: "https://www.anthropic.com/engineering/claude-code-sandboxing" }
   - { title: "Living dangerously with Claude (Simon Willison)", url: "https://simonwillison.net/2025/Oct/22/living-dangerously-with-claude/" }
   - { title: "YOLO Mode: Hidden Risks in Claude Code Permissions (UpGuard)", url: "https://www.upguard.com/blog/yolo-mode-hidden-risks-in-claude-code-permissions" }
+  - { title: "Gemini CLI — approval modes / configuration (official docs)", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/get-started/configuration.md" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -107,6 +108,10 @@ It's not "never go full-auto" — it's "don't go full-auto where there's a real 
 - **A temporary, disposable scratch repo**: no sensitive data, no outbound-communication capability, nothing you'd mourn if it's wiped.
 
 Conversely, the moment the environment still carries two or three of "private data / reads untrusted content / can talk outward," the exception is off — back to least privilege by default. The test, in one line: **what makes full-auto safe isn't "I trust the model," it's "even if it does the worst thing, it can't get out of this box."**
+
+## Tool differences
+
+In Gemini CLI the one-flip "open everything" is **YOLO mode** (`--yolo` / `--approval-mode=yolo` / Ctrl+Y mid-session), which likewise auto-approves every tool call (Gemini CLI, as of 2026-06). It also has a middle tier, `auto_edit`: file edits are auto-approved, but shell commands still need your confirmation — a compromise between per-action prompts and full auto. One stance worth copying: it pairs sandbox-on with YOLO by default as the "recommended automation" configuration, so don't run YOLO without the sandbox — that tears out both the human gate and the environment gate at once.
 
 ## Version Notes
 

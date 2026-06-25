@@ -1,0 +1,41 @@
+---
+title: 工具矩阵
+slug: /tool-matrix
+description: 哪些 AI 编码工具误区是范式级通用的、哪些在工具间防法不同、哪些是某个工具独有——一张索引。
+sidebar_position: 9
+---
+
+# 工具矩阵
+
+本书绝大多数误区是**范式级**的——它们来自大模型 + 工具调用 + 长上下文 + 自动执行这套共同机制，**换哪个工具都会踩**，所以默认每条都适用于各家 AI 编码工具。这张表只索引**两类例外**：同一根因在不同工具里**防法不同**（写在条目的「工具差异」小节里），以及某个坑是**某工具独有机制**带来的（单独成条）。
+
+:::note 覆盖深度（请如实看待）
+**当前以 Claude Code 覆盖最深**——它官方文档完整，是全书的默认参照。**Gemini CLI 是第一个试点的第二工具**，下表是它的首批工具差异；其余工具（Cursor、GitHub Copilot、Codex CLI…）尚未铺开。矩阵只写**机制名**、不写具体命令，且**很快过时**——真要动手，以你所用版本的官方文档为准。截至 2026-06。
+:::
+
+## 同一误区，工具间防法不同
+
+| 误区（主条目） | Claude Code | Gemini CLI |
+|---|---|---|
+| [建议性上下文 vs 强制配置](./00-setup-collaboration/settings-vs-claudemd.mdx) | CLAUDE.md（建议）/ settings.json（强制） | GEMINI.md（建议）/ .gemini/settings.json（强制） |
+| [上下文文件过载](./05-implementation/claude-md-overload.mdx) | 扁平加载 CLAUDE.md | 层级式 GEMINI.md 全量拼接；`/memory show` 看真实加载量 |
+| [过度授权](./00-setup-collaboration/over-permissioning.mdx) | 跳过权限确认（全开） | YOLO 模式；中间档 auto_edit；默认与 sandbox 耦合 |
+| [跳过 plan mode](./00-setup-collaboration/skipping-plan-mode.mdx) | plan mode（opt-in） | Plan Mode（对新用户默认开） |
+| [破坏性 / 不可逆操作](./00-setup-collaboration/destructive-irreversible-actions.mdx) | 回溯快照默认**开** | Checkpointing 默认**关** |
+| [MCP 过度访问](./00-setup-collaboration/mcp-over-access.mdx) | 默认脱敏厂商凭据 | 默认脱敏 env + 每-server trust；server 名带下划线令策略静默失效 |
+| [开发期提示注入](./05-implementation/dev-time-prompt-injection.mdx) | 范式级通用 | Tracebit RCE：弱 allowlist + README 注入 + 视觉欺骗（已修 v0.1.14） |
+| [CI 权限盲区](./07-acceptance-release/cicd-permission-blindspot.mdx) | 范式级通用 | GHSA-wpqr：headless 自动信任工作区、YOLO 绕 allowlist（已修 v0.39.1） |
+
+## 某工具独有机制带来的坑（单独成条）
+
+- **Gemini CLI** —— [信任继承：信任父目录，连带信任了你标「别信任」的子目录](./00-setup-collaboration/gemini-folder-trust-inheritance.mdx)：per-folder 的 trustedFolders 信任存储 + 父 → 子继承，是 Claude Code 没有的机制。
+- **Gemini CLI** —— 案例库：[一句「介绍下这个 repo」被劫持（Tracebit RCE）](./cases/gemini-cli-tracebit-rce.mdx)。
+
+## 按工具浏览
+
+- Gemini CLI 涉及的全部条目 → [/tags/gemini-cli](/tags/gemini-cli)
+- Claude Code 是全书默认参照，几乎每条都适用，故不单设标签。
+
+:::note 这张表会过时
+工具差异和默认值随版本变化很快。这里只记机制名与方向、不记具体命令；真要动手，以你所用版本的官方文档为准。发现已过时，欢迎在 [GitHub](https://github.com/xuebinma/AIWiki/issues) 指正。
+:::

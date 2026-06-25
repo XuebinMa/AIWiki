@@ -1,0 +1,41 @@
+---
+title: Tool matrix
+slug: /tool-matrix
+description: Which AI-coding-tool pitfalls are paradigm-level and universal, which differ in defense between tools, and which are unique to one tool — one index.
+sidebar_position: 9
+---
+
+# Tool matrix
+
+Most pitfalls in this book are **paradigm-level** — they come from the shared machinery of a large model plus tool-calling, long context, and auto-execution, so **you hit them in any tool**. By default, then, every entry applies across AI coding tools. This page indexes only the **two kinds of exception**: where the same root cause needs a **different guardrail in a different tool** (written up in an entry's "Tool differences" section), and where a pitfall comes from a **mechanism unique to one tool** (its own entry).
+
+:::note Coverage depth (read it honestly)
+**Claude Code has the deepest coverage right now** — its official docs are complete, and it's the book's default reference. **Gemini CLI is the first pilot second tool**, and the table below is its first batch of tool differences; the others (Cursor, GitHub Copilot, Codex CLI…) aren't filled in yet. The matrix lists **mechanism names only**, not exact commands, and it **goes stale fast** — when you act, defer to your version's official docs. As of 2026-06.
+:::
+
+## Same pitfall, different defense per tool
+
+| Pitfall (main entry) | Claude Code | Gemini CLI |
+|---|---|---|
+| [Advisory context vs enforced config](./00-setup-collaboration/settings-vs-claudemd.mdx) | CLAUDE.md (advisory) / settings.json (enforced) | GEMINI.md (advisory) / .gemini/settings.json (enforced) |
+| [Context-file overload](./05-implementation/claude-md-overload.mdx) | flat CLAUDE.md load | hierarchical GEMINI.md concatenation; `/memory show` for the real load |
+| [Over-permissioning](./00-setup-collaboration/over-permissioning.mdx) | skip permission prompts (all-on) | YOLO mode; an auto_edit middle tier; coupled with sandbox by default |
+| [Skipping plan mode](./00-setup-collaboration/skipping-plan-mode.mdx) | plan mode (opt-in) | Plan Mode (on by default for new users) |
+| [Destructive / irreversible actions](./00-setup-collaboration/destructive-irreversible-actions.mdx) | rewind snapshots **on** by default | Checkpointing **off** by default |
+| [MCP over-access](./00-setup-collaboration/mcp-over-access.mdx) | scrubs vendor credentials by default | scrubs env by default + per-server trust; an underscore in a server name silently breaks policy |
+| [Dev-time prompt injection](./05-implementation/dev-time-prompt-injection.mdx) | paradigm-level | Tracebit RCE: weak allowlist + README injection + visual deception (fixed v0.1.14) |
+| [CI permission blindspot](./07-acceptance-release/cicd-permission-blindspot.mdx) | paradigm-level | GHSA-wpqr: headless auto-trusts the workspace, YOLO bypasses the allowlist (fixed v0.39.1) |
+
+## Pitfalls from a tool's unique mechanism (their own entry)
+
+- **Gemini CLI** — [Trust inheritance: trusting a parent folder silently trusts the child you marked "don't trust"](./00-setup-collaboration/gemini-folder-trust-inheritance.mdx): a per-folder trustedFolders store plus parent → child inheritance, a mechanism Claude Code doesn't have.
+- **Gemini CLI** — Case library: [hijacked by "tell me about this repo" (Tracebit RCE)](./cases/gemini-cli-tracebit-rce.mdx).
+
+## Browse by tool
+
+- All entries touching Gemini CLI → [/tags/gemini-cli](/tags/gemini-cli)
+- Claude Code is the book's default reference and applies to nearly every entry, so it has no separate tag.
+
+:::note This table will go stale
+Tool differences and defaults change fast with each version. This page records mechanism names and direction only, not specific commands; when you actually act, defer to your version's official docs. Spot something out of date? Flag it on [GitHub](https://github.com/xuebinma/AIWiki/issues).
+:::
