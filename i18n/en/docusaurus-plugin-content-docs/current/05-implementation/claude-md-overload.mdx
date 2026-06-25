@@ -7,13 +7,14 @@ phase: Implementation
 severity: Medium
 applies_to: "All Claude Code versions"
 evidence: Official docs
-tags: [CLAUDE.md, context management, configuration, Engineer, Architect, Gemini CLI, Codex CLI, Cursor]
+tags: [CLAUDE.md, context management, configuration, Engineer, Architect, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
   - { title: "Claude Code Best Practices (official)", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "MuhammadUsmanGM/claude-code-best-practices", url: "https://github.com/MuhammadUsmanGM/claude-code-best-practices" }
   - { title: "Gemini CLI — hierarchical GEMINI.md & /memory (official docs)", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/gemini-md.md" }
   - { title: "Codex — config reference (project doc discovery & limit)", url: "https://developers.openai.com/codex/config-reference" }
   - { title: "Cursor — Rules (official docs)", url: "https://cursor.com/docs/context/rules" }
+  - { title: "5 tips for writing better custom instructions for Copilot (GitHub Blog)", url: "https://github.blog/ai-and-ml/github-copilot/5-tips-for-writing-better-custom-instructions-for-copilot/" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -81,6 +82,8 @@ The test is simple: **if you can't say "this rule is here to prevent which speci
 **Codex CLI (as of 2026-06)**: Codex's equivalent file is `AGENTS.md`, merged from the cwd all the way up to the project root (plus `~/.codex/AGENTS.md`), and it bloats hierarchically just the same. But it has a hard ceiling: `project_doc_max_bytes` defaults to 32 KiB, and anything past that is truncated outright — here "keep it short" is enforced by the tool, not just advice.
 
 **Cursor (as of 2026-06)**: Cursor's `.mdc` rules carry an **activation mode**, which turns footprint from always-on into conditional: Always (`alwaysApply: true`, loaded every time — the overload trap), Auto Attached (loaded only when a file matches `globs:`), Agent Requested (only the description is given, and the model pulls it on demand), and Manual (`@rule-name`). So trimming the load isn't simply "write less" — it's demoting `always` rules into a glob scope or agent-requested. The docs note it too: every token of an `always` rule is consumed in every single request.
+
+**GitHub Copilot (as of 2026-06)**: The same dilution, plus two hard ceilings. GitHub states plainly that an overly long instruction file gets some of its instructions ignored, and Copilot code review **reads only the first 4000 characters of the custom-instructions file** — anything past that fails silently, where I never even see it. The direction is the same: write short and specific instead of piling on.
 
 ## Version notes
 

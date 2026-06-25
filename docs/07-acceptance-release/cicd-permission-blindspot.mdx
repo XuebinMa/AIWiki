@@ -7,7 +7,7 @@ phase: 验收与发布
 severity: 高
 applies_to: "全模型通用"
 evidence: 官方文档
-tags: [CI/CD, 权限, 最小权限, 发布, 运维工程师, Gemini CLI, Codex CLI, Cursor]
+tags: [CI/CD, 权限, 最小权限, 发布, 运维工程师, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
   - { title: "Use GITHUB_TOKEN for authentication in workflows（GitHub 官方）", url: "https://docs.github.com/actions/security-guides/automatic-token-authentication" }
   - { title: "actions/configure-pages — action.yml（enablement 的权限要求）", url: "https://github.com/actions/configure-pages/blob/main/action.yml" }
@@ -17,6 +17,7 @@ sources:
   - { title: "run-gemini-cli 安全公告 GHSA-wpqr-6v78-jr5g（CVSS 10.0）", url: "https://github.com/google-github-actions/run-gemini-cli/security/advisories/GHSA-wpqr-6v78-jr5g" }
   - { title: "Codex — managed configuration / requirements.toml (OpenAI official)", url: "https://developers.openai.com/codex/enterprise/managed-configuration" }
   - { title: "Cursor — Headless CLI / GitHub Actions (official docs)", url: "https://cursor.com/docs/cli/headless" }
+  - { title: "Customizing or disabling the firewall for Copilot coding agent (GitHub docs)", url: "https://docs.github.com/copilot/customizing-copilot/customizing-or-disabling-the-firewall-for-copilot-coding-agent" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -119,6 +120,8 @@ steps:
 **Codex CLI（截至 2026-06）**：在 CI（无人可点审批）里，Codex 的安全姿态是 `approval_policy=never` 配一个显式的 `--sandbox workspace-write`——而不是图省事上 `--dangerously-bypass-approvals-and-sandbox`（那等于人和 OS 两道闸一起拆）。企业用 `requirements.toml`（禁 `never`/`danger-full-access`）+ 托管网络代理把信任边界钉死。
 
 **Cursor（截至 2026-06）**：Cursor 有个无头 CLI（`cursor-agent`，`-p` print 模式）给 GitHub Actions 用。CI 专属旋钮：**`--force` 让 agent 不经确认直接应用改动**（没它则只是「提议」）——把人这道闸压成 YAML 里一个 flag。官方 CI 指引是收窄（`permissions.json` allow/deny、只读日志、只写功能分支、不自动合并）。（诚实一句：这是配置指引，不是像 Gemini GHSA-wpqr 那样已披露的 CI RCE。）
+
+**GitHub Copilot（截至 2026-06）**：coding agent 跑成 GitHub Actions job，自带服务端护栏让边界显式：只能推 `copilot/*` 分支；派活的人不能批准它的 PR（你的「必需评审」仍生效）；它的 PR 未经人工批准不跑 CI/CD。出口由默认开的防火墙约束（挡掉时往 PR 写警告）——但防火墙只覆盖 agent 的 Bash 工具，不覆盖 MCP、也不覆盖 `copilot-setup-steps.yml`。所以 Copilot 给了真·平台级护栏，但点名的那两个缺口（MCP + setup 步骤）正是边界看不见处。
 
 ## 版本说明
 

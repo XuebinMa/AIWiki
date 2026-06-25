@@ -7,7 +7,7 @@ phase: Setup & Collaboration
 severity: High
 applies_to: "All Claude Code versions"
 evidence: Official docs
-tags: [settings.json, CLAUDE.md, permissions, configuration, hook, Engineer, Architect, Gemini CLI, Codex CLI, Cursor]
+tags: [settings.json, CLAUDE.md, permissions, configuration, hook, Engineer, Architect, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
   - { title: "Claude Code settings (official)", url: "https://code.claude.com/docs/en/settings" }
   - { title: "How Claude remembers your project (official memory docs)", url: "https://code.claude.com/docs/en/memory" }
@@ -15,6 +15,7 @@ sources:
   - { title: "Gemini CLI — GEMINI.md context (official docs)", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/gemini-md.md" }
   - { title: "Codex — AGENTS.md custom instructions (OpenAI official)", url: "https://developers.openai.com/codex/guides/agents-md" }
   - { title: "Cursor — permissions.json reference (official docs)", url: "https://cursor.com/docs/reference/permissions" }
+  - { title: "Adding repository custom instructions for GitHub Copilot (GitHub docs)", url: "https://docs.github.com/copilot/customizing-copilot/adding-custom-instructions-for-github-copilot" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -151,6 +152,8 @@ The test, in one line: **ask "can this action be pinned by a literal `deny`/`ask
 **Codex CLI (as of 2026-06)**: Same three layers, just different filenames — `AGENTS.md` is advisory context (I read it and try to follow it, but the next prompt can override it), while `config.toml` is the enforced configuration (`approval_policy`, `sandbox_mode`), and enterprises get one more layer in `requirements.toml`, a managed policy even the user can't edit (it can forbid `approval_policy="never"`). `AGENTS.md` is an open, cross-tool convention, so the "advice ≠ lock" mental model carries straight over.
 
 **Cursor (as of 2026-06)**: Cursor splits this same distinction across three pieces: **Rules** (`.cursor/rules/*.mdc` plus the legacy `.cursorrules`) are advisory "guidance, not constraints"; `permissions.json` is the enforcement layer closest to `settings.json` (command / tool allowlists); and `sandbox.json` governs OS isolation. But there's a reversal worth remembering: Cursor's own docs say even the `permissions.json` allowlist / autoRun is a "best-effort convenience, not a security guarantee" — its "lock" is softer than Claude Code's `permissions.deny` (a hard client-side interception), so don't rely on it alone for what must truly be locked down.
+
+**GitHub Copilot (as of 2026-06)**: My advisory context here is `.github/copilot-instructions.md` (plus path-scoped `.instructions.md` and `AGENTS.md`) — GitHub states plainly that "Copilot may not follow them every time," so it's **not** a permissions or enforcement layer. The same line carries over: to actually stop an action, don't write it into an instruction file. My enforcement layer lives elsewhere — org / enterprise Copilot policies and content exclusions, not these `.md` files.
 
 ## Version notes
 

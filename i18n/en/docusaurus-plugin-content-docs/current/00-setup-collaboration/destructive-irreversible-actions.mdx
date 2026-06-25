@@ -7,7 +7,7 @@ phase: Setup & Collaboration
 severity: High
 applies_to: "All models"
 evidence: Community case
-tags: [irreversible action, destructive operation, backup isolation, blast radius, least privilege, sandbox, devops engineer, engineer, architect, Gemini CLI, Codex CLI, Cursor]
+tags: [irreversible action, destructive operation, backup isolation, blast radius, least privilege, sandbox, devops engineer, engineer, architect, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
   - { title: "AI-powered coding tool wiped out a software company's database in 'catastrophic failure' (Fortune)", url: "https://fortune.com/2025/07/23/ai-coding-tool-replit-wiped-database-called-it-a-catastrophic-failure/" }
   - { title: "Incident 1152: LLM-Driven Replit Agent Executed Unauthorized Destructive Commands During Code Freeze (AI Incident Database)", url: "https://incidentdatabase.ai/cite/1152/" }
@@ -16,6 +16,7 @@ sources:
   - { title: "Gemini CLI — Checkpointing (official docs)", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/checkpointing.md" }
   - { title: "Codex — Sandboxing (OpenAI official)", url: "https://developers.openai.com/codex/concepts/sandboxing" }
   - { title: "Cursor — Checkpoints (official docs)", url: "https://cursor.com/docs/agent/chat/checkpoints" }
+  - { title: "About GitHub Copilot cloud agent (GitHub docs)", url: "https://docs.github.com/copilot/concepts/agents/coding-agent/about-coding-agent" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -121,6 +122,8 @@ The difference isn't that I got smarter — it's that before that delete command
 **Codex CLI (as of 2026-06)**: Codex's mechanical guardrail is an OS sandbox that's on by default (macOS Seatbelt, Linux Landlock/seccomp), confining writes to the workspace and cutting network access, so by default a destructive command can't reach outside the workspace or exfiltrate anything. The footgun is tearing that net down (`--sandbox danger-full-access`); also, on Windows the sandbox is still experimental and may silently fall back to broader permissions when it fails to initialize — you think the net is up when it isn't.
 
 **Cursor (as of 2026-06)**: Cursor's undo net is **Checkpoints** — it automatically snapshots *the agent's* file changes, and "Restore Checkpoint" returns you to that point in the conversation. But the docs are explicit: it's **not version control**, it **doesn't track manual edits**, and it's **session-scoped and auto-cleaned**. So for the OS- and DB-level irreversible operations this entry covers — wiping a DB, deleting a volume, erasing backups — Checkpoints offer **zero protection**; the only real backstop is Git plus isolated credentials.
+
+**GitHub Copilot (as of 2026-06)**: IDE agent mode gives you "rich undo" to revert my edits plus a default denylist that blocks `rm`/`del`/`kill` and the like — but undo only covers file edits, not the side effects of a shell command already run, and the denylist lapses under full auto-approve, so for the OS- and DB-level irreversible operations this entry covers it offers zero protection just the same. The coding agent backstops it differently: it runs in an ephemeral, isolated GitHub Actions environment and can only push to `copilot/*` branches, so the damage is confined to a throwaway environment plus a branch you have to review.
 
 ## Version notes
 
