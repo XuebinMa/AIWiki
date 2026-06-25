@@ -99,6 +99,16 @@ Me:  Done. Added a standalone exportExcel function alongside exportCsv.
 
 Same request, a different constraint, and I go from "predicting your future and building an empty hangar" back to "getting this one thing right now, leaving abstraction until the pattern grows on its own."
 
+## When the exception applies
+
+YAGNI and the Rule of Three are the default gates — not a ban on ever designing an interface ahead of time. A few cases where reserving an extension point is design, not speculation:
+
+- **The requirement is known, not guessed**: you've told me outright "this is a gateway that must support several payment channels," "this is a public API / plugin system for third parties" — multiple implementations are a given, not a future I imagined for you. Designing to an interface here is right.
+- **Changing it once is very expensive**: a publicly released API, a database schema, a cross-team protocol — bolting on an extension point later breaks compatibility and drags a pile of downstream along. For these "too expensive to change" boundaries, it's worth thinking the extension point through in v1.
+- **The abstraction is cheap and easy to back out of**: when a thin interface costs almost nothing and a wrong guess is easy to unwind, a little ahead-of-time is fine.
+
+The test: the difference is whether the extension point maps to **a requirement you actually know**, or **a future I'm guessing at**. The former is provisioning; the latter is premature abstraction — when unsure, default to the Rule of Three and duplicate first.
+
 ## Version notes
 
 :::note Applicable versions
