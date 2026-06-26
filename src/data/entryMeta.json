@@ -1,9 +1,25 @@
 {
   "zh-Hans": {
+    "autonomy-approval-boundaries": {
+      "severity": "高",
+      "roles": [
+        "项目经理",
+        "架构师",
+        "运维工程师"
+      ]
+    },
     "cursor-ignore-best-effort": {
       "severity": "高",
       "roles": [
         "工程师",
+        "运维工程师"
+      ]
+    },
+    "data-boundary-policy": {
+      "severity": "高",
+      "roles": [
+        "项目经理",
+        "架构师",
         "运维工程师"
       ]
     },
@@ -37,6 +53,13 @@
         "工程师"
       ]
     },
+    "network-egress-control": {
+      "severity": "高",
+      "roles": [
+        "运维工程师",
+        "架构师"
+      ]
+    },
     "no-versioned-docs": {
       "severity": "高",
       "roles": [
@@ -64,6 +87,14 @@
       "roles": [
         "工程师",
         "架构师"
+      ]
+    },
+    "sandbox-filesystem-isolation": {
+      "severity": "高",
+      "roles": [
+        "运维工程师",
+        "架构师",
+        "工程师"
       ]
     },
     "settings-vs-claudemd": {
@@ -427,6 +458,14 @@
         "测试工程师"
       ]
     },
+    "ai-code-ip-ownership": {
+      "severity": "中",
+      "roles": [
+        "项目经理",
+        "架构师",
+        "工程师"
+      ]
+    },
     "cicd-permission-blindspot": {
       "severity": "高",
       "roles": [
@@ -455,6 +494,13 @@
         "架构师",
         "工程师",
         "项目经理"
+      ]
+    },
+    "log-injection-audit-integrity": {
+      "severity": "中",
+      "roles": [
+        "运维工程师",
+        "工程师"
       ]
     },
     "missing-regression": {
@@ -490,10 +536,26 @@
     }
   },
   "en": {
+    "autonomy-approval-boundaries": {
+      "severity": "High",
+      "roles": [
+        "Project Manager",
+        "Architect",
+        "DevOps Engineer"
+      ]
+    },
     "cursor-ignore-best-effort": {
       "severity": "High",
       "roles": [
         "Engineer",
+        "DevOps Engineer"
+      ]
+    },
+    "data-boundary-policy": {
+      "severity": "High",
+      "roles": [
+        "Project Manager",
+        "Architect",
         "DevOps Engineer"
       ]
     },
@@ -527,6 +589,13 @@
         "Engineer"
       ]
     },
+    "network-egress-control": {
+      "severity": "High",
+      "roles": [
+        "DevOps Engineer",
+        "Architect"
+      ]
+    },
     "no-versioned-docs": {
       "severity": "High",
       "roles": [
@@ -554,6 +623,14 @@
       "roles": [
         "Engineer",
         "Architect"
+      ]
+    },
+    "sandbox-filesystem-isolation": {
+      "severity": "High",
+      "roles": [
+        "DevOps Engineer",
+        "Architect",
+        "Engineer"
       ]
     },
     "settings-vs-claudemd": {
@@ -917,6 +994,14 @@
         "Test Engineer"
       ]
     },
+    "ai-code-ip-ownership": {
+      "severity": "Medium",
+      "roles": [
+        "Project Manager",
+        "Architect",
+        "Engineer"
+      ]
+    },
     "cicd-permission-blindspot": {
       "severity": "High",
       "roles": [
@@ -945,6 +1030,13 @@
         "Architect",
         "Engineer",
         "Project Manager"
+      ]
+    },
+    "log-injection-audit-integrity": {
+      "severity": "Medium",
+      "roles": [
+        "DevOps Engineer",
+        "Engineer"
       ]
     },
     "missing-regression": {

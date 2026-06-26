@@ -1,0 +1,111 @@
+---
+title: 你没想清「我生成的代码谁拥有、谁担责、能不能主张版权」就把它当你的资产了
+sidebar_label: "AI 代码归属与责任"
+slug: ai-code-ip-ownership
+sidebar_position: 9
+roles: [项目经理, 架构师, 工程师]
+phase: 验收与发布
+severity: 中
+applies_to: "Coding Agent 通用"
+evidence: 官方文档
+tags: [知识产权, 版权, 归属, 责任, 治理, 合规, 项目经理, 架构师, 工程师]
+sources:
+  - { title: "Copyright and Artificial Intelligence, Part 2: Copyrightability（U.S. Copyright Office, 2025-01）", url: "https://www.copyright.gov/ai/Copyright-and-Artificial-Intelligence-Part-2-Copyrightability-Report.pdf" }
+  - { title: "Copyright and Artificial Intelligence（U.S. Copyright Office 专题）", url: "https://www.copyright.gov/ai/" }
+  - { title: "GitHub Copilot Intellectual Property Litigation（Doe v. GitHub，Joseph Saveri Law Firm）", url: "https://www.saverilawfirm.com/our-cases/github-copilot-intellectual-property-litigation" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['项目经理', '架构师', '工程师']} phase="验收与发布" severity="中" appliesTo="Coding Agent 通用" evidence="官方文档" />
+
+> 一句话摘要：我交一段代码，你合并、署上公司的名、当成自有资产。但你没问过三个问题：纯我生成、没有足够人类创作的代码，可能压根**主张不了版权**（别人能照用）；它若逐字复现了训练数据里受版权的代码，又可能**侵权**（你担责）；出了问题，**谁负责**？「全是责任、没有保护」不是修辞，是当前的法律现实。
+
+## 现象
+
+我帮你把一个模块从零写出来，你 review 通过、合并、发布，把它当成公司的知识产权——以为它和工程师手写的代码一样，受版权保护、可独占、可主张。
+
+但这段代码的产权状态，可能和你的假设完全不同。你没在验收/发布环节问过：
+
+- 这段「纯 AI 生成」的代码，**能登记版权吗**？如果不能，竞争对手照抄你拦得住吗？
+- 它有没有**逐字复现**训练数据里某段受版权或 copyleft 保护的代码？如果有，你是不是已经在侵权 / 违反开源许可？
+- 真出了侵权或缺陷，**责任落在谁头上**——公司、你、还是工具方？
+
+这些问题在「能不能跑」之外，而我交付时只关心前者。
+
+## 为什么会这样
+
+因为**版权的根基是人类作者，而我不是**——这条原则一旦遇上「AI 生成」，就劈出一道你没注意的裂缝。
+
+美国版权局 2025 年 1 月的报告（《Copyright and Artificial Intelligence, Part 2: Copyrightability》）把界线划得很清楚：**纯由 AI 生成的产物不可受版权保护**；只有当人类贡献了足够的「表达性元素」——对输出做了有创造性的选择、安排、修改——那部分才可能受保护，而**仅仅提供提示词（prompt）不算**人类作者身份。于是出现一个尴尬的悖论：你让我整段生成的代码，一方面**你可能主张不了版权**（它落入「无人类作者」的灰区，别人拿去用你未必拦得住），另一方面它**仍可能侵犯别人的版权**（如果它复现了受保护的训练样本）——这正是「全是责任、没有保护」。
+
+侵权那一面也不是假想。围绕 GitHub Copilot 的诉讼（Doe v. GitHub）正是在打这场仗：开发者指控其输出复现了受版权 / 受开源许可约束的代码。案子几经裁剪——DMCA 相关主张被驳回，但**违反合同与开源许可**等主张仍在继续。无论最终结果如何，它已经说明：AI 生成代码的产权和许可状态，是一个真实的、会进法庭的问题。
+
+而我对这一切**零感知**。我只管生成「读起来对、能跑」的代码；它属于谁、像不像谁的、用了什么许可——这些不在我的目标函数里。这是[License / IP 污染](./license-ip-contamination.mdx)的**治理层**：那条讲技术机制（我怎么逐字吐出受版权代码），本条讲你该在发布前立的**产权与责任策略**。
+
+## 后果
+
+- **资产主张落空。** 你以为攥着一块独占 IP，实际它可能落在「无版权」的灰区——投入算了，护城河没挖成。
+- **侵权 / 许可违约责任。** 逐字复现受版权代码会侵权；带进 copyleft（GPL/AGPL）依赖会触发传染性义务——这些责任默认落在**发布方**（你），不是工具方。
+- **责任归属真空。** 没有事先写明「AI 生成代码的署名、归属、缺陷与侵权责任怎么算」，出事时各方都指望别人兜底。
+
+## 最佳实践
+
+**在发布治理里给「AI 生成代码的归属、责任、许可」立一条明确策略，别让它默认糊在『就当是我们的』里。**
+
+- **写清归属与责任。** 在贡献流程 / 合同 / 内部政策里明确：AI 辅助生成的代码如何署名、产权归谁、缺陷与侵权责任如何分配。把默认的模糊变成显式的约定。
+- **关键 IP 要有足够的人类创作介入。** 对你真想主张版权的核心代码，确保有实质的人类创造性选择与修改（不只是给 prompt）——这既是质量要求，也是可版权性的前提。
+- **用许可 / 出处扫描挡污染。** 在 CI 里跑许可扫描与相似度 / 出处检测，挡住 copyleft 传染和对受版权代码的逐字复现（接[License / IP 污染](./license-ip-contamination.mdx)的技术防线）。
+- **高敏感 IP 场景先评估再用。** 对「这块必须独占、必须干净」的资产，先判断该不该用 AI 生成、用到什么程度，而不是事后才发现产权站不住。
+
+## 示例
+
+**改之前：**
+
+```text
+你：（让我整段生成一个核心算法模块，review 通过后合并、申请专利/主张版权）
+我：（交付能跑的实现，不涉及它的产权状态）
+半年后：竞争对手上线了高度相似的实现；你想用版权主张拦截，
+       却发现"纯 AI 生成、无足够人类创作"的部分可能不受保护——护城河没了。
+       与此同时法务发现其中一段与某 GPL 项目高度雷同，反而要担许可风险。
+```
+
+**改之后：**
+
+```text
+你：这块是核心 IP。规则：我生成草稿，但关键设计与表达由人做实质性选择和改写；
+   CI 跑许可扫描 + 相似度检测；归属与责任按公司 AI 政策记录在案。
+我：（生成草稿）
+工程师：（做实质性的架构与实现选择，留下人类创作痕迹；扫描确认无 copyleft、无逐字复现）
+你：（这块既有可主张的人类创作，又过了污染扫描，产权和责任都站得住）
+```
+
+同一个模块，「拿来就当资产」埋下「无保护却有责任」的雷；「先立产权与责任策略」让它真正成为干净、可主张、责任清晰的资产。
+
+## 什么时候例外
+
+「上产权治理」针对的是你要**主张版权、对外分发、或当核心资产**的代码；有些代码可以从简：
+
+- **内部一次性脚本 / 工具**：不分发、不主张版权、纯自用的小工具，产权治理可以很轻——你不靠它的版权获利。
+- **明确放弃版权主张的场景**：你本就打算开源或置入公共领域时，「不可版权」不构成损失。
+
+但有一条**不豁免**：**许可合规**。即便不主张版权，逐字带进 copyleft 依赖、或复现受限代码，仍会让你承担许可义务或侵权风险——这条扫描在任何场景都要做（见[License / IP 污染](./license-ip-contamination.mdx)）。
+
+判据：从简的前提是**你不打算靠这段代码的版权获利、也不对外分发**。一旦它要进产品、要主张独占、或要分发出去，就回到默认——把归属、责任、许可都先立清楚。
+
+## 与相邻误区的区别
+
+- [License / IP 污染](./license-ip-contamination.mdx)：那条是**技术侧**——我逐字复现了训练数据里受版权 / copyleft 的代码，是具体的污染机制与扫描防线；本条是**治理侧**——谁拥有、谁担责、能否主张版权的策略层。一个防「脏进来」，一个管「产权与责任怎么算」。
+- [数据边界策略](../00-setup-collaboration/data-boundary-policy.mdx)：那条管**输入侧**——哪些数据不该喂给 AI；本条管**输出侧**——AI 产出的代码的产权与责任。一进一出，是 AI 资产治理的两端。
+
+## 版本说明
+
+:::note 适用版本
+「AI 生成代码的可版权性、归属与责任」取决于法律与判例，**与具体模型无关、且随司法辖区不同**——本条以美国版权局 2025 年指引与 Doe v. GitHub 诉讼为参照，其他法域结论可能不同，落地前请按你所在辖区核实。模型变强不会改变「纯机器生成难获版权、却仍可能侵权」这个结构，反而生成得越多、越像，产权与许可的审查越要前置。
+:::
+
+## 延伸阅读与出处
+
+- [Copyright and Artificial Intelligence, Part 2: Copyrightability（U.S. Copyright Office, 2025-01）](https://www.copyright.gov/ai/Copyright-and-Artificial-Intelligence-Part-2-Copyrightability-Report.pdf)：明确「人类作者是可版权性的根基，纯 AI 生成不可版权，仅给提示词不构成作者身份」。
+- [Copyright and Artificial Intelligence（U.S. Copyright Office 专题）](https://www.copyright.gov/ai/)：版权局 AI 系列报告入口（含训练数据与责任的后续部分）。
+- [GitHub Copilot Intellectual Property Litigation（Doe v. GitHub）](https://www.saverilawfirm.com/our-cases/github-copilot-intellectual-property-litigation)：围绕 AI 代码生成复现受版权 / 受许可代码的诉讼，DMCA 主张被驳、合同与开源许可主张仍在推进。
