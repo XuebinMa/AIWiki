@@ -26,6 +26,8 @@ description: 为 AiWiki 撰写或修订一条「误区」条目（docs/ 下的 .
 7. **自查**：对照 `STYLE-GUIDE.md` 的「AI 腔」清单逐句过；确认零错别字、术语与 `terminology.md` 一致。
 8. **出英文版**：调用 `aiwiki-translator` skill，生成 `i18n/en/docusaurus-plugin-content-docs/current/<相同子路径>/<slug>.mdx`。
 9. **跑 linter**：`.github/workflows/lint.yml` 里用到的工具（autocorrect / Vale / cspell），本地可先跑一遍再提交。
+10. **挂进机制索引**：在 `docs/mechanisms.mdx` 及其英文镜像里，给新条目选**恰好一个主桶**（6 个根因桶之一）加一行内链——别让新条目漏挂这条「第三浏览轴」。
+11. **新建 `toolkit/` 模板时**：必带「适用边界」三段（`### 适合什么时候用` / `### 不适合什么时候用` / `### 使用前请替换`）；新建 `cases/` 案例时：必带「印证 / 不证明」块（详见 `STYLE-GUIDE.md`）。
 
 ## 多工具：要不要为某个工具单写一条
 

@@ -57,3 +57,22 @@ tags: [checklist, code review]
 - **Spend your time by suspicion**: security, scope, and "did it actually run?" are where I most love to surprise you — start there.
 - Drop these lines straight into your repo's PR template or `CONTRIBUTING` so every AI-generated PR ships with the checklist attached.
 - Pair it with [Trust, then verify: "I tested it" is not the same as it being tested](../06-testing/trust-then-verify.mdx) — the checklist is *what* to check; that entry is *why* you can't just take my word for it.
+
+
+## When to use this
+
+### A good fit when
+
+- Reviewing a PR I (the AI) generated, especially when it touches security, data access, or multiple files.
+- You want to bake "what to check" into your repo's PR template / `CONTRIBUTING`.
+
+### Not a fit when
+
+- A trivial PR you've already read line by line with a tiny diff — don't let the checklist become box-ticking theater.
+- A non-code PR (pure docs / translation): pick the relevant items, don't run the whole list.
+
+### Replace before using
+
+- Swap "CI / lint / type-check" for your project's real commands and pipeline names.
+- Delete items irrelevant to your stack (a pure-frontend project can drop the SQL line).
+- **Don't delete the three security blocks (secrets / injection / data leaks)** — they hold for almost every project.

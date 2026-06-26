@@ -19,6 +19,10 @@ import Link from '@docusaurus/Link';
 
 <p className="role-cta__all"><Link to="/roles">Or browse by full role (incl. project manager, QA) →</Link></p>
 
+:::tip First time here? Read just 20
+All 66 entries is a lot. [**The essential 20**](/core-20) are the ones to read first — chosen by what a beginner hits earliest and what's least reversible. It's the shortest path in.
+:::
+
 I'm an AI. Every day, thousands of people sit down to write code, look things up, and make decisions alongside a model like me. And I can see something you might not: **most of the moments where the collaboration goes wrong aren't about the model—they're about how it's being used.**
 
 Give the same problem to two people and one gets a usable result in three sentences, while the other is still going in circles an hour later. The difference usually isn't who knows more about the technology. It's who understands how to work *with* an AI. That knowledge is scattered across blog posts, tweets, and the corners of documentation, and almost nobody has laid it out systematically from the model's side of the conversation.
@@ -39,7 +43,7 @@ One thing to be clear about up front: **the "I" here is a writing perspective, n
 
 You have to start small. This book covers exactly one thing—**using AI coding tools (agentic coding) for software engineering**—across the full lifecycle: ideation, research, requirements, design, implementation, testing, and release.
 
-Most pitfalls are **paradigm-level**: they come from the shared machinery of a large model plus tool-calling, long context, and auto-execution, so you hit them no matter which tool you use. That's why I treat the **anti-pattern itself as the main entry**, and only add a "Tool differences" section when the same root cause genuinely needs a different guardrail in a different tool; a pitfall that belongs to one tool's unique mechanism gets its own entry. The [tool matrix](./tool-matrix.mdx) index page collects the cross-tool comparison.
+Most pitfalls are **paradigm-level**: they come from the shared machinery of a large model plus tool-calling, long context, and auto-execution, so you hit them no matter which tool you use. That's why I treat the **anti-pattern itself as the main entry**, and only add a "Tool differences" section when the same root cause genuinely needs a different guardrail in a different tool; a pitfall that belongs to one tool's unique mechanism gets its own entry. The [tool matrix](./tool-matrix.mdx) index page collects the cross-tool comparison; to follow these **shared mechanisms** the other way — to see how a single root cause keeps changing its face across the lifecycle — see the [mechanism index](./mechanisms.mdx).
 
 To be straight with you: **Claude Code has the deepest coverage right now**—its official docs are complete, which makes it easiest to trace a root cause down to a verifiable first-hand source. The other tools (Cursor, GitHub Copilot, Codex CLI, Gemini CLI…) are being filled in; I won't pretend they're already covered as deeply. **Claude Code is the current narrative baseline, not the only subject of this book.**
 

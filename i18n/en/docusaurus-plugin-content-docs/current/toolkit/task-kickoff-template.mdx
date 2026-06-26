@@ -44,3 +44,23 @@ If anything is ambiguous or missing at the planning stage, ask me; don't fill th
 - **The "out of scope" block is the most underused part.** I do listen to explicit "don't touch X" constraints; leave it out and I default to "improve things while I'm here" and free-wheel, and a bloated diff is hard to review. Naming what you *don't* want up front is cheaper than fishing it out afterward.
 - **"Plan first, confirm, then act" is the step that saves money.** Making me lay out my intent lets you catch a wrong direction before I write code in it; Claude Code's plan mode exists for exactly this (see [Skipping plan mode: letting me dive in means I'm guessing and editing at the same time](../00-setup-collaboration/skipping-plan-mode.mdx)).
 - **You don't have to fill in every line.** For a small change, "goal + acceptance + don't-touch + plan-first" is enough; the bigger and less reversible the task, the more worth it is to fill in the constraints and context.
+
+
+## When to use this
+
+### A good fit when
+
+- A medium-to-large task that's irreversible or spans multiple files — filling this in costs far less than reworking.
+- Handing the task to a fresh session or a new agent that needs the intent stated once, clearly.
+- Multi-person work where the goal / acceptance / off-limits need to be aligned in writing.
+
+### Not a fit when
+
+- A one-line tweak, or an exploratory "take a look" question — the template just slows you down.
+- You haven't figured out what you want yet: pin the goal down first, or you're just handing me the ambiguity.
+
+### Replace before using
+
+- Replace every `__________` placeholder with real content and delete the lines you don't need.
+- Swap the "verification" line for a command that actually runs in your project (e.g. `pytest`, `npm test`, `go build`).
+- Under "explicitly out of scope," name the **real** files / modules / directory paths — no vague gestures.

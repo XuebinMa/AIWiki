@@ -52,6 +52,16 @@ GitHub 在 **2025-08-14** 修复：**禁用 Copilot Chat 里的图片渲染**，
 
 完整机制推理见 [开发期提示注入](../05-implementation/dev-time-prompt-injection.mdx) 与 [泄露敏感数据](../07-acceptance-release/security-data-leaks.mdx) 两条。
 
+## 这个案例印证什么、不证明什么
+
+**印证的误区**（点进去看完整机制推理）：
+
+- [开发期提示注入](../05-implementation/dev-time-prompt-injection.mdx)
+- [上线后提示注入](../07-acceptance-release/prompt-injection-release.mdx)
+- [泄露敏感数据](../07-acceptance-release/security-data-leaks.mdx)
+
+**它不证明**：CamoLeak 是一个**已修复的具体漏洞**（经图片代理外泄私有数据）——不代表所有 Copilot 用法都会泄露，也不是「Copilot 不可用」的结论。它佐证的是「上线后的 LLM 功能本身就是攻击面」这一类机制风险。
+
 ## 出处
 
 - [CamoLeak: Critical GitHub Copilot Vulnerability Leaks Private Source Code (Legit Security)](https://www.legitsecurity.com/blog/camoleak-critical-github-copilot-vulnerability-leaks-private-source-code)

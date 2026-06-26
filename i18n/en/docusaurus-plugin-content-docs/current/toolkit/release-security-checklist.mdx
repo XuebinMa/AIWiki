@@ -53,3 +53,22 @@ Paste this into your **PR template** (`.github/pull_request_template.md`) or rel
 **Trim it to your project.** A pure frontend project can drop the SQL line; an internal tool with no external API can relax the CORS / auth lines. But **secrets, injection, and data leaks** hold for nearly every project — don't cut those. Each item maps to a real attack surface in the OWASP Top 10.
 
 The later a vulnerability is found, the more it costs: adding one parameterized query at coding time is nearly free, while finding it after release means rollbacks, credential rotation, user notifications, and a postmortem — an order of magnitude apart. For the root cause, see [Treating Security as an Invisible Default Requirement](../07-acceptance-release/security-data-leaks.mdx).
+
+
+## When to use this
+
+### A good fit when
+
+- A pre-release security gate, dropped into a PR template or a release ticket.
+- A project that exposes interfaces externally, or handles user / sensitive data.
+
+### Not a fit when
+
+- A purely local script or one-off prototype — no deployment, no external attack surface, no need to run the whole list.
+- But the moment it **does ship**, don't skip this gate.
+
+### Replace before using
+
+- Swap the dependency-audit / SAST commands for yours (`npm audit`, `pip-audit`, CodeQL, Semgrep…).
+- Tailor to the project: a pure-frontend app can drop the SQL-injection line; an internal tool can soften the CORS / authz lines.
+- **Keep the three blocks — secrets, injection, data leaks — for almost every project.** Don't delete them.
