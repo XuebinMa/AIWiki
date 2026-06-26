@@ -1,0 +1,110 @@
+---
+title: "My logs can be poisoned into an injection surface, or written dirty and incomplete—so you can't reconstruct what I did"
+sidebar_label: "Log integrity & audit"
+slug: log-injection-audit-integrity
+sidebar_position: 10
+roles: [DevOps Engineer, Engineer]
+phase: Acceptance & Release
+severity: Medium
+applies_to: "All coding agents"
+evidence: Security advisory
+tags: [log injection, audit trail, observability, accountability, security, DevOps Engineer, Engineer]
+sources:
+  - { title: "Log Injection (OWASP Foundation, CWE-117)", url: "https://owasp.org/www-community/attacks/Log_Injection" }
+  - { title: "Logging Cheat Sheet (OWASP Cheat Sheet Series)", url: "https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html" }
+  - { title: "A09:2025 Security Logging and Alerting Failures (OWASP Top 10)", url: "https://owasp.org/Top10/2025/A09_2025-Security_Logging_and_Alerting_Failures/" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['DevOps Engineer', 'Engineer']} phase="Acceptance & Release" severity="Medium" appliesTo="All coding agents" evidence="Security advisory" />
+
+> In one sentence: logs are the only foundation you have for later determining "what the AI actually did," but they are themselves an attack surface. I'll write unescaped external input straight into the log (letting an attacker forge log lines and fool the SIEM), and I may also fail to record key actions; conversely, when I read a poisoned log, it can mislead me. Once the logs are dirty, the audit trail breaks—and when something goes wrong, you can't reconstruct the truth.
+
+## Symptom
+
+You set up logging for me, figuring "if it's recorded, I can hold someone accountable." But this record is unreliable in two directions:
+
+- **The write direction**: when I process external input (usernames, URLs, third-party responses), I often splice it **verbatim** into the log line. All an attacker has to do is slip a newline (CR/LF) into the input, and they can **forge an entire seemingly legitimate log entry** in your logs—say, pretending some operation succeeded, or framing someone else. Worse, the polluted log can break the downstream SIEM's parsing and make alerting fail.
+- **The read direction**: when I read the logs to decide what to do next ("let me see why it failed last time"), a poisoned log entry becomes an injection channel that steers me in the direction the attacker wants.
+
+At the same time, I **don't proactively guarantee the audit trail is complete**: high-risk operations may not be recorded in structured form, may be recorded but mixed in with other output, or may even be overwritten by later actions. So when something actually goes wrong and you open the logs, what you see is a polluted, incomplete, possibly tampered record—one that can't answer "what did the AI actually do, and who approved it."
+
+## Why this happens
+
+Because **the log is both the agent's foundation for accountability and a classic attack surface that I leave undefended by default.**
+
+OWASP classifies this as **Log Injection (CWE-117, Improper Output Neutralization for Logs)**: when unescaped input is written into a log, an attacker can use CR/LF and delimiters to **forge log lines, break log parsing, or inject content**. OWASP's Logging Cheat Sheet gives very concrete countermeasures—apply sanitization to all event data (strip out CR, LF, delimiters), and give the audit trail **integrity controls** (such as append-only tables) to prevent it from being tampered with or deleted after the fact; OWASP Top 10 also lists **A09:2025 Security Logging and Alerting Failures** specifically. And I, as a generator trained to "get the task done," will by default casually splice external data into the log, won't proactively escape it, and won't proactively guarantee that "this audit record can't be wiped out by my later actions."
+
+This matters especially for agents, because the log is often the **only** thing you have to reconstruct "what I did." Once you grant me [a higher degree of autonomy](../00-setup-collaboration/autonomy-approval-boundaries.mdx), "which actions I took on my own, which were approved / denied" can only be reconstructed from the audit trail—and if that trail is itself dirty, missing, or modifiable, the whole accountability story is hollowed out.
+
+## Consequences
+
+- **Distorted audit, accountability lost.** Something goes wrong, you want to trace "what the AI changed and who signed off," only to find the logs polluted with forged lines, key actions unrecorded, or already overwritten—the truth can't be reconstructed.
+- **Monitoring subverted.** Injected newlines / control characters can make the SIEM mis-parse and miss alerts—the equivalent of throwing a blindfold over your eyes.
+- **The log becomes an injection loop.** When I read a poisoned log to make decisions, the attacker gains one more covert injection channel that doesn't go through a README / issue.
+
+## What to do instead
+
+**Write the log as untrusted data and protect it as an integrity asset: escape before writing, make the audit trail append-only against tampering, and mandate structured records for key actions.**
+
+- **Sanitize before writing the log.** For external input that's going into the log, escape / strip CR, LF, control characters, and delimiters to stamp out forged log lines (the core recommendation of the OWASP Logging Cheat Sheet). Prefer structured logging (JSON, etc.), so field boundaries are guaranteed by the format rather than by string splicing.
+- **Apply integrity controls to the audit trail.** Records of high-risk operations should go to an **append-only** store, carry integrity checks / be centrally forwarded to somewhere I can't modify, to prevent later overwriting or deletion—this is exactly the precondition for the "who approved / who denied" trail in [approval boundaries](../00-setup-collaboration/autonomy-approval-boundaries.mdx) to hold up.
+- **Mandate structured records for key actions.** Don't let "what I did" scatter across free text: record high-risk actions (deletions, production changes, outbound data, approval outcomes) as structured events with time, subject, and context, so they can be machine-audited.
+- **Treat the log as untrusted input when reading it.** When I read logs to drive a decision, treat them like any other external content—don't unconditionally believe the "conclusions" written in the log.
+- **Don't write secrets into the log.** This one overlaps with [shipping vulnerabilities / leaking sensitive data by default](./security-data-leaks.mdx): logs are seen by many people and retained for a long time, so a key / PII written into them is a leak.
+
+## Example
+
+**Before:**
+
+```text
+Me: (write the user-submitted name straight into the log)
+   logger.info("user login: " + name)
+Attacker submits name = "alice\n2026-06-26 12:00:00 INFO admin deleted audit log"
+The log shows:
+   user login: alice
+   2026-06-26 12:00:00 INFO admin deleted audit log   ← a forged line, framing admin
+Result: the audit log gets injected with a forged entry, accountability later points at the wrong person, and the SIEM is led astray by this fake log too.
+```
+
+**After:**
+
+```text
+Me: (structured logging + escaping, name as a field value rather than spliced into the message)
+   logger.info({event: "user_login", name: sanitize(name)})
+   → {"event":"user_login","name":"alice\\n2026-06-26 ..."}  ← the newline is escaped, kept inside the field
+   High-risk operations go to a separate append-only audit table, with time/subject/approver, centrally forwarded, cannot be overwritten.
+Result: the injected newline can't break into a new log line, the forgery fails; key actions have a tamper-proof trail, and accountability holds up.
+```
+
+The same user input: splicing it directly turns the log into the attacker's canvas, whereas structured logging + escaping + append-only audit makes the log a trustworthy accountability record again.
+
+## When the exception applies
+
+"Bring in log integrity governance" targets systems with **accountability / compliance / multi-party traceability** needs; some scenarios can be simpler:
+
+- **Purely local, one-off debug logs**: temporary output you read and discard yourself, that doesn't enter any audit / compliance chain, needs no append-only and integrity checks wrapped around it.
+- **Logs with no external input entering them**: if everything written into the log is content you trust and control, the log injection surface is small—but this case is rarer than you think.
+
+But two things are **not exempt**: **don't write secrets into the log** (the leak surface, see [security-data-leaks](./security-data-leaks.mdx)), and **treat external / historical logs as untrusted input when reading them to drive decisions** (the injection surface). These two hold in any scenario.
+
+The test: the precondition for simplifying is that **this log neither bears accountability / compliance, nor contains sensitive data, and isn't read back by me to make decisions**. The moment it's used for accountability, has to meet compliance, or gets fed back to me, it returns to the default—escape, structure, append-only, guard the integrity.
+
+## How this differs from neighboring pitfalls
+
+- [Shipping vulnerabilities / leaking sensitive data by default](./security-data-leaks.mdx): that one covers the **leak** surface of "don't write secrets into the log"; this one covers the **integrity and injection** surface of logs—forged entries, broken audit, injection back into me. One fears "the log leaking secrets," the other fears "the log being forged / distorted."
+- [Getting hijacked by poisoned content read at dev time](../05-implementation/dev-time-prompt-injection.mdx): that one covers **how** injection happens (a malicious README / issue); this one covers **the log** as a specific injection vector, and the consequences of it being damaged as an audit trail.
+- [Autonomy and approval boundaries](../00-setup-collaboration/autonomy-approval-boundaries.mdx): that one requires a "who approved / who denied" trail for high-risk actions; this one covers how **that trail itself** stays unpolluted and tamper-free—the former requires the record to exist, the latter guarantees the record is trustworthy.
+
+## Version notes
+
+:::note Applicable versions
+Log injection (CWE-117) and audit integrity are classic security-engineering problems independent of any specific model, **applicable across models and across tools**; they become especially critical in agent scenarios, because the log is often the only basis for reconstructing "what the AI did." The more autonomous the model and the more actions it takes, the higher the value of a trustworthy audit trail—escaping, append-only, structured recording: these practices don't go obsolete as models get stronger.
+:::
+
+## Further reading and sources
+
+- [Log Injection (OWASP Foundation, CWE-117)](https://owasp.org/www-community/attacks/Log_Injection): the attack and root cause whereby unescaped input written into a log leads to forged log lines, broken parsing, and injected content.
+- [Logging Cheat Sheet (OWASP Cheat Sheet Series)](https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html): apply sanitization to event data (handle CR/LF/delimiters), and use integrity controls such as append-only for the audit trail to prevent tampering.
+- [A09:2025 Security Logging and Alerting Failures (OWASP Top 10)](https://owasp.org/Top10/2025/A09_2025-Security_Logging_and_Alerting_Failures/): security logging and alerting failures as a Top 10 risk category.

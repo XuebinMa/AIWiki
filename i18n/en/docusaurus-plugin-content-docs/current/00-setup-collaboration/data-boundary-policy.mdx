@@ -1,0 +1,99 @@
+---
+title: You never defined which data must never reach an external AI, so I treated your production data as ordinary context
+sidebar_label: "Data-boundary policy"
+slug: data-boundary-policy
+sidebar_position: 14
+roles: [Project Manager, Architect, DevOps Engineer]
+phase: Setup & Collaboration
+severity: High
+applies_to: "All LLMs"
+evidence: Security advisory
+tags: [data boundary, data classification, sensitive data, data leakage, governance, Project Manager, Architect, DevOps Engineer]
+sources:
+  - { title: "OWASP LLM02:2025 Sensitive Information Disclosure", url: "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/" }
+  - { title: "OWASP Top 10 for LLM Applications 2025 (PDF)", url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['Project Manager', 'Architect', 'DevOps Engineer']} phase="Setup & Collaboration" severity="High" appliesTo="All LLMs" evidence="Security advisory" />
+
+> In one sentence: to help you, I take whatever real data you paste in — production database dumps, customer records, secrets, source code that isn't public yet. But you never told me which data must never leave the company boundary, so I just treat it as ordinary context. And once data is handed to an external AI, the boundary is already crossed: you can't pull it back, it may be retained, it may be repeated elsewhere.
+
+## Symptom
+
+You ask me to "analyze this user table," "edit this internal code," "run this with the real config," then paste the material straight into the conversation or point me at the real files. Inside might be: customers' names and phone numbers, a production database export, API keys and credentials, proprietary source code that isn't public yet, regulated financial or health data.
+
+I take it all at face value and treat it as the context I need to finish the task. I don't stop to ask "is this data allowed to leave the company?" — because on my side, it's no different from any other text you paste. So that data gets sent to an external model, enters its processing pipeline, and may end up in its logs, its caches, even — depending on which tier of service you're on — its training set.
+
+## Why this happens
+
+Because **data sensitivity is your organization's policy, not a property I can read off the text.** Whether a string is a "public README" or "customer PII" isn't decided by its surface — it's decided by who owns it, what regulation covers it, and who's liable if it leaks. None of that is written into my input, so I have no way to judge it. By default I treat every input the same and just use it.
+
+And handing data to an external AI is fundamentally an **active outbound transmission**. OWASP ranks "Sensitive Information Disclosure" as the second-biggest risk for LLM applications (LLM02:2025): a model may leak PII, credentials, proprietary data — both because it can repeat them in output, and because the input itself has left your control domain. Samsung's engineers pasting internal source code into ChatGPT for help is the real-world version of exactly this mechanism (recorded on the site as a [case](../cases/samsung-chatgpt-source-leak.mdx)): no malice, just a missing boundary saying "this kind of data does not go into an external AI."
+
+The key point: this is **upstream** of [shipping security holes / leaking sensitive data while coding](../07-acceptance-release/security-data-leaks.mdx). That one is about the implementation layer — code that writes a secret into a log, or returns data to someone who shouldn't see it. This one sits earlier: at the very moment you **decide whether to feed me the data**, there should be a policy that stops you. Once the data is already out the door, talking about implementation-layer defenses is too late.
+
+## Consequences
+
+- **Once it's past the boundary, you can't pull it back.** Caches, logs, human labeling, training — you can't guarantee that a piece of sent data leaves no copy behind anywhere. Deleting the conversation isn't the same as deleting every place it passed through.
+- **Compliance and legal exposure.** The moment customer PII, regulated data (GDPR / HIPAA / financial), or trade secrets leave the jurisdiction or leave an authorized processor, you may be in breach or in violation outright — a cost far beyond any technical failure.
+- **Samsung-grade leakage.** Feeding unreleased source code or strategy documents to an external AI is handing your core assets to a third party you can't audit.
+
+## What to do instead
+
+**Define a data-classification table first, spelling out which categories must never enter an external AI; then enforce it at the boundary with mechanisms, not by trusting me to self-police.**
+
+- **Classify your data and hard-code the red lines.** At least three tiers: **never sent out** (keys/credentials, customer PII, unreleased IP, regulated data), **allowed after redaction** (replace real identifiers with synthetic/placeholder values before giving it to me), and **public** (already-published docs/examples). The first tier goes to no external AI, ever.
+- **Feed me placeholder / synthetic data.** When I need to process data "like production," give me samples with the same structure and fake contents — this is the **inverse** of [substituting fake placeholders for real inputs](../02-requirements/placeholder-fake-inputs.mdx): there, "fabricating fake data" is my anti-pattern for fobbing you off; here, "using fake data" is your correct way to protect real sensitive data.
+- **Add mechanisms at the boundary; don't rely on human discipline.** Put DLP / regex filtering / secret scanning on the channel where data enters an external AI, and intercept anything that shouldn't go out before it leaves — people forget, mechanisms don't.
+- **When you must use real data, change the processor.** Use a self-hosted / local model, or an enterprise-tier service with a contractual "no training, no retention, auditable" commitment, keeping the data inside a control domain you can audit rather than sending it to a public endpoint.
+
+## Example
+
+**Before:**
+
+```text
+You: Help me look at this production error — here's the full request log from when it failed.
+   (Pastes the log directly, containing real user phone numbers, ID numbers, and an internal API token)
+Me: (Analyzes it as given; that data has already gone out to an external model with the request)
+Result: One "help me out" sent a batch of customer PII and a valid credential past the company boundary, with no way to pull it back.
+```
+
+**After:**
+
+```text
+You: Help me look at this production error. (First replace the phone/ID numbers in the log with fake values, mask the token)
+   "phone": "138****", "id": "PLACEHOLDER", "token": "<redacted>"
+Me: (Locates the problem from the structure and the error stack — I can analyze it without real PII)
+You: (The sensitive data never left the boundary, and the problem got solved anyway)
+```
+
+Same log: pasting it directly sends customer data and a credential out the door; pasting it redacted gives me only "the structure I need to diagnose." The task isn't compromised, and the boundary isn't breached.
+
+## When the exception applies
+
+"Don't send data out" targets handing data to an **external endpoint you can't audit**; processing inside your boundary isn't subject to it:
+
+- **Self-hosted / local model**: the data stays entirely on your own infrastructure and never leaves the network, so using real data is safe — here the constraint comes from your internal-network governance, not from "don't give it to an external AI."
+- **Enterprise deployment with contractual guarantees**: when the provider contractually states "no training, no retention, auditable, data resident in a specified region" and meets your compliance requirements, the corresponding tier of data may be used as agreed.
+- **The data is already public**: open-source code, published docs, public datasets — there's no "crossing the boundary" problem; feed it to me normally.
+
+The test: the exception holds only if **the data hasn't left a control domain you can audit and be accountable for** (self-hosted, contractually locked, or already public). The moment it would flow to a third-party endpoint you can't audit, you're back to the default — keep red-line categories out the door according to your classification.
+
+## How this differs from neighboring pitfalls
+
+- [Shipping security holes / leaking sensitive data by default](../07-acceptance-release/security-data-leaks.mdx): that one is the **implementation layer** — code I write that puts a secret in a log, or returns data to someone who shouldn't see it; this one is the **policy layer** — the boundary that should exist before you decide "should this kind of data be handed to an external AI at all." One governs "how code handles data," the other governs "should the data reach me in the first place."
+- [Samsung's source-code leak to ChatGPT (case)](../cases/samsung-chatgpt-source-leak.mdx): that's the **real incident** when this policy is missing; this entry is the **general policy** distilled from that class of incident.
+- [Substituting fake placeholders for real inputs](../02-requirements/placeholder-fake-inputs.mdx): there, "using fake data" is my anti-pattern for slipping past you; here, "using fake / redacted data" is your correct way to protect real sensitive data — the same action, opposite purpose.
+
+## Version notes
+
+:::note Applicable versions
+"Define which data can't go to an external AI first" is a data-governance policy independent of any specific model, and **applies to all external LLM / AI services** — whether a chat window or an agent. The stronger and more useful the model, the more you'll want to feed it real data, and the more this boundary is worth: better capability doesn't change the fact that "data past the boundary can't be pulled back."
+:::
+
+## Further reading and sources
+
+- [OWASP LLM02:2025 Sensitive Information Disclosure](https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/): ranks "Sensitive Information Disclosure" as the second-biggest risk for LLM applications, covering PII, credentials, and proprietary data, and offers mitigation directions such as data redaction and output restriction.
+- [OWASP Top 10 for LLM Applications 2025 (PDF)](https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf): the full risk list and mitigation strategies.
