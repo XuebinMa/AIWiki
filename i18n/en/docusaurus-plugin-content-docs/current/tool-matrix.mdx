@@ -32,29 +32,36 @@ Rows = pitfalls that have a "Tool differences" section (click in for each tool's
 
 ## Per tool (mechanisms + unique entries)
 
+Read each section in two layers: **Mechanism (stable)** = the axis that sets this tool apart from the others, doesn't shift with point releases, safe to remember; **Version observation (as of 2026-06, will go stale)** = defaults, CVE / GHSA, and fix status — the most perishable line, so when you actually act, defer to your version's official docs and don't treat this line as a lasting fact.
+
 ### Gemini CLI
-The most counter-intuitive defaults: **Plan Mode on by default, Checkpointing off by default**. Two critical in-the-wild findings on the security side: the Tracebit RCE, and CI auto-trusting the workspace (GHSA-wpqr, CVSS 10).
+- **Mechanism (stable)**: differentiating axis = **the default state of plan mode / checkpointing** + **how folder trust inherits into subdirectories**.
+- **Version observation (as of 2026-06, will go stale)**: Plan Mode on by default, Checkpointing off by default; critical in-the-wild findings — the Tracebit RCE, CI auto-trusting the workspace (GHSA-wpqr, CVSS 10).
 - Unique entry: [Gemini trust inheritance](./00-setup-collaboration/gemini-folder-trust-inheritance.mdx)
 - Case: [hijacked by "tell me about this repo" (Tracebit RCE)](./cases/gemini-cli-tracebit-rce.mdx)
 - All entries → [/tags/gemini-cli](/tags/gemini-cli)
 
 ### Codex CLI
-The only one **sandboxed by default** (macOS Seatbelt / Linux Landlock + network off), the opposite of Claude Code's "sandbox off by default"; config splits into `AGENTS.md` (advisory) / `config.toml` / `requirements.toml` (org-enforced).
+- **Mechanism (stable)**: differentiating axis = **sandbox default state** (opposite of Claude Code) + **the enforcement tiers of a three-layer config** (advisory / local / org-enforced).
+- **Version observation (as of 2026-06, will go stale)**: the only one sandboxed by default (macOS Seatbelt / Linux Landlock + network off); config splits into `AGENTS.md` / `config.toml` / `requirements.toml`; config-poisoning RCE (CVE-2025-61260).
 - Case: [a `.codex` config turned "open the repo" into silent RCE (CVE-2025-61260)](./cases/codex-cli-config-rce.mdx)
 - All entries → [/tags/codex-cli](/tags/codex-cli)
 
 ### Cursor
-The softest locks: the docs say plainly that both `permissions.json` and `.cursorignore` are "best-effort, not a security guarantee"; the command gate has been bypassed at the **parser** level more than once (denylist deprecated, NomShub). MCP produced two CVEs (CurXecute / MCPoison).
+- **Mechanism (stable)**: differentiating axis = **permissions are "best-effort," not a security guarantee** + **the command gate can be bypassed at the parser level** + **the MCP attack surface**.
+- **Version observation (as of 2026-06, will go stale)**: the docs say plainly that `permissions.json` and `.cursorignore` are not security boundaries; denylist deprecated, NomShub bypass; two MCP CVEs (CurXecute / MCPoison).
 - Unique entry: [.cursorignore isn't a boundary](./00-setup-collaboration/cursor-ignore-best-effort.mdx)
 - All entries → [/tags/cursor](/tags/cursor)
 
 ### GitHub Copilot
-Three modes (completion / Chat / coding agent) defend differently: the coding agent has **server-side guardrails** (pushes only to `copilot/*` branches, firewall on by default) but with **named gaps** (the firewall doesn't cover MCP or setup steps); code review reads only the first 4,000 chars of the instructions file. Security side: CVE-2025-53773 and CamoLeak (CVSS 9.6).
+- **Mechanism (stable)**: differentiating axis = **three modes defend differently** (completion / Chat / coding agent) + the coding agent's **server-side guardrails and firewall coverage boundary** + **the instructions-file read cap**.
+- **Version observation (as of 2026-06, will go stale)**: the coding agent pushes only to `copilot/*` branches with the firewall on by default, but the firewall doesn't cover MCP or setup steps; code review reads only the first 4,000 chars of the instructions file; CVE-2025-53773, CamoLeak (CVSS 9.6).
 - Case: [private-repo secrets exfiltrated through the Camo image proxy (CamoLeak)](./cases/github-copilot-camoleak.mdx)
 - All entries → [/tags/git-hub-copilot](/tags/git-hub-copilot)
 
 ### Claude Code
-The book's **default reference** — it applies to nearly every entry, so it gets no tag and no column. Its enforcement layer is the hardest: rewind snapshots on by default, `permissions.deny` enforced client-side, hooks run deterministically — the four tools' "tool differences" above are mostly contrasts against these defaults.
+- **Mechanism (stable)**: the book's **default reference** — applies to nearly every entry (so no tag, no column). Differentiating axis = the hardest **enforcement layer**: client-side `permissions.deny`, deterministic hooks, rewind snapshots — the baseline the four tools' "tool differences" above are contrasted against.
+- **Version observation (as of 2026-06, will go stale)**: rewind snapshots on by default.
 
 :::note This table will go stale
 Tool differences and defaults change fast with each version. This page records mechanism names and direction only, not specific commands; when you actually act, defer to your version's official docs. Spot something out of date? Flag it on [GitHub](https://github.com/xuebinma/AIWiki/issues).
