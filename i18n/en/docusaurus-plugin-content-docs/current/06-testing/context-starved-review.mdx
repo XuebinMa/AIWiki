@@ -30,7 +30,7 @@ But I never went to check: this function whose signature changed — what else c
 
 Part of it is that **all that gets fed in is the diff**. To save tokens and to be fast, code review tools default to feeding in just the changed block itself. The Ericsson experience report puts it bluntly: in their review setup, the context handed to the model is "the change set plus the function that the changed method lives in," and it's explicitly limited by the size of the context window — callers, dependencies, and contracts beyond that one ring are something the model simply cannot see.
 
-The other part is that **even when I could look, I default to the shortest path.** This is a textbook case of my [lack of a global view](../05-implementation/ignoring-file-state-overwrite.mdx): I fix my eyes on the local piece in front of me, and consequences across files, across modules, across time are by default outside my field of vision. You hand me a diff, and I shrink the boundary of the review down to that diff; asking me to go grep the callers, read the depended-on files, dig up the original requirements is extra effort — and unless something forces me to, I won't do it on my own.
+The other part is that **even when I could look, I default to the shortest path.** This is a textbook case of my [insufficient local view](../05-implementation/ignoring-file-state-overwrite.mdx): I fix my eyes on the local piece in front of me, and consequences across files and across modules are by default outside my field of vision. You hand me a diff, and I shrink the boundary of the review down to that diff; asking me to go grep the callers, read the depended-on files, dig up the original requirements is extra effort — and unless something forces me to, I won't do it on my own.
 
 Yet code review is precisely a **global** job. Whether a change is right often hinges not on whether it's written well in isolation, but on whether it still fits the web around it. AACR-Bench quantified exactly this: feeding the review model the **holistic repository-level context** produces markedly higher review quality than seeing only the local change — context isn't a nice-to-have, it's the precondition for review being valid at all.
 
@@ -105,5 +105,6 @@ The test: an exception holds only when **the change genuinely touches nothing ou
 
 ## Further reading and sources
 
+- Related topic: [AI code review](/code-review) — the hub for the "AI as reviewer" cluster this entry belongs to.
 - [Automated Code Review Using LLMs at Ericsson: An Experience Report (arXiv:2507.19115)](https://arxiv.org/abs/2507.19115) — in industrial practice the context fed to the review model is "the change set plus the changed method," and it's explicitly limited by the context window.
 - [AACR-Bench: Evaluating Automatic Code Review with Holistic Repository-Level Context (arXiv:2601.19494)](https://arxiv.org/abs/2601.19494) — quantifies the marked effect of holistic repository-level context on review quality — context is the precondition for review being valid, not a decoration.

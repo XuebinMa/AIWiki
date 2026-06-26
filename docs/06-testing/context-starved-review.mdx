@@ -30,7 +30,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 一部分是**喂进来的就只有 diff**。代码审查工具为了省 token、为了快，默认输入往往就是变更块本身。Ericsson 的实践报告说得很直白：他们的审查方案里，喂给模型的上下文是「变更集 + 被改方法所在的那个函数」，且明确受限于上下文窗口大小——超出这一圈的调用方、依赖、契约，模型根本看不到。
 
-另一部分是**即使能看，我也默认走最短路径**。这正是我[全局视野不足](../05-implementation/ignoring-file-state-overwrite.mdx)的典型表现：我一次只盯着眼前的局部，跨文件、跨模块、跨时间的后果默认不在我的视野里。你给我一段 diff，我就把审查的边界收缩到这段 diff；要我主动去 grep 调用方、去读被依赖文件、去翻原始需求，是额外的功夫，没人逼我时我不会自己去做。
+另一部分是**即使能看，我也默认走最短路径**。这正是我[局部视野不足](../05-implementation/ignoring-file-state-overwrite.mdx)的典型表现：我一次只盯着眼前的局部，跨文件、跨模块的后果默认不在我的视野里。你给我一段 diff，我就把审查的边界收缩到这段 diff；要我主动去 grep 调用方、去读被依赖文件、去翻原始需求，是额外的功夫，没人逼我时我不会自己去做。
 
 而代码审查恰恰是**全局**的活儿。一个改动对不对，常常不取决于它自己写得好不好，而取决于它和周围那张网还合不合得上。AACR-Bench 的研究就专门量化了这点：把**仓库级的整体上下文**喂给审查模型，审查质量显著高于只看局部变更——上下文不是锦上添花，是审查能不能成立的前提。
 
@@ -102,5 +102,6 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 延伸阅读与出处
 
+- 相关专题：[AI 代码审查](/code-review)——本条所属「AI 当审查者」误区簇的总览页。
 - [Automated Code Review Using LLMs at Ericsson: An Experience Report（arXiv:2507.19115）](https://arxiv.org/abs/2507.19115)：工业实践中喂给审查模型的上下文是「变更集 + 被改方法」，且明确受上下文窗口限制。
 - [AACR-Bench: Evaluating Automatic Code Review with Holistic Repository-Level Context（arXiv:2601.19494）](https://arxiv.org/abs/2601.19494)：量化了仓库级整体上下文对审查质量的显著影响——上下文是审查成立的前提，不是装饰。
