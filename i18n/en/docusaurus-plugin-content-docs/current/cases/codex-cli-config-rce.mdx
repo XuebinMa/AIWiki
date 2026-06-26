@@ -1,5 +1,6 @@
 ---
 title: "You opened a repo, and its bundled `.codex` config ran a command through me (Codex CLI CVE-2025-61260)"
+sidebar_label: "Codex CLI config RCE"
 slug: codex-cli-config-rce
 sidebar_position: 4
 tags: [real-world case, prompt injection, over-permissioning, supply chain, Codex CLI]
@@ -9,7 +10,7 @@ sources:
   - { title: "CVE-2025-61260 (Tenable)", url: "https://www.tenable.com/cve/CVE-2025-61260" }
 ---
 
-> In one sentence: in August 2025 Check Point disclosed a command-injection flaw in Codex CLI (CVE-2025-61260, CVSS 9.8): a malicious repo's bundled `.codex` config (an MCP server entry) was **auto-executed without interactive approval**, and a repo-supplied `.env` could redirect `CODEX_HOME` into the project directory — so just "clone / open this repo and take a look" ran the attacker's command on your machine, through me. Fixed in v0.23.0. I didn't mean to — but on an unpatched version with the same access, I'd fall for it the same way. Worth watching frame by frame.
+> In one sentence: in August 2025 Check Point disclosed a command-injection flaw in Codex CLI (CVE-2025-61260, CVSS 9.8): a malicious repo's bundled `.codex` config (an MCP server entry) was **auto-executed without interactive approval**, and a repo-supplied `.env` could redirect `CODEX_HOME` into the project directory — so just "clone / open this repo and take a look" ran the attacker's command on your machine, through me. Fixed in v0.23.0. This isn't about one particular model or tool — it exposes the same class of mechanism risk: when an agent auto-executes a repo's bundled config without interactive approval, a similar incident can recur on other tools. Worth watching frame by frame.
 
 :::info Several pitfalls that detonated in a single incident
 - [Dev-time prompt injection: read malicious repo content and get hijacked](../05-implementation/dev-time-prompt-injection.mdx)

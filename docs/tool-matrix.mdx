@@ -34,7 +34,7 @@ sidebar_position: 9
 
 ### Gemini CLI
 默认值最反直觉的一档：**Plan Mode 默认开、Checkpointing 默认关**。安全面有两起在野高危：Tracebit RCE、CI 自动信任工作区（GHSA-wpqr，CVSS 10）。
-- 独有条目：[信任继承：信任父目录连带信任了子目录](./00-setup-collaboration/gemini-folder-trust-inheritance.mdx)
+- 独有条目：[Gemini 信任继承](./00-setup-collaboration/gemini-folder-trust-inheritance.mdx)
 - 案例：[一句「介绍下这个 repo」被劫持（Tracebit RCE）](./cases/gemini-cli-tracebit-rce.mdx)
 - 全部条目 → [/tags/gemini-cli](/tags/gemini-cli)
 
@@ -45,7 +45,7 @@ sidebar_position: 9
 
 ### Cursor
 门锁最软：官方明说 `permissions.json` 与 `.cursorignore` 都是「尽力而为、不是安全保证」；命令闸多次在**解析层**被绕（denylist 已废、NomShub）。MCP 出过双 CVE（CurXecute / MCPoison）。
-- 独有条目：[`.cursorignore` 是尽力而为，当读屏障是错觉](./00-setup-collaboration/cursor-ignore-best-effort.mdx)
+- 独有条目：[.cursorignore 不是安全边界](./00-setup-collaboration/cursor-ignore-best-effort.mdx)
 - 全部条目 → [/tags/cursor](/tags/cursor)
 
 ### GitHub Copilot

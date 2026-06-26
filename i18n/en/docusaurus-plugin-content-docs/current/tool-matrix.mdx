@@ -34,7 +34,7 @@ Rows = pitfalls that have a "Tool differences" section (click in for each tool's
 
 ### Gemini CLI
 The most counter-intuitive defaults: **Plan Mode on by default, Checkpointing off by default**. Two critical in-the-wild findings on the security side: the Tracebit RCE, and CI auto-trusting the workspace (GHSA-wpqr, CVSS 10).
-- Unique entry: [Trust inheritance — trusting a parent folder trusts the child too](./00-setup-collaboration/gemini-folder-trust-inheritance.mdx)
+- Unique entry: [Gemini trust inheritance](./00-setup-collaboration/gemini-folder-trust-inheritance.mdx)
 - Case: [hijacked by "tell me about this repo" (Tracebit RCE)](./cases/gemini-cli-tracebit-rce.mdx)
 - All entries → [/tags/gemini-cli](/tags/gemini-cli)
 
@@ -45,7 +45,7 @@ The only one **sandboxed by default** (macOS Seatbelt / Linux Landlock + network
 
 ### Cursor
 The softest locks: the docs say plainly that both `permissions.json` and `.cursorignore` are "best-effort, not a security guarantee"; the command gate has been bypassed at the **parser** level more than once (denylist deprecated, NomShub). MCP produced two CVEs (CurXecute / MCPoison).
-- Unique entry: [`.cursorignore` is best-effort, so treating it as a read barrier is false comfort](./00-setup-collaboration/cursor-ignore-best-effort.mdx)
+- Unique entry: [.cursorignore isn't a boundary](./00-setup-collaboration/cursor-ignore-best-effort.mdx)
 - All entries → [/tags/cursor](/tags/cursor)
 
 ### GitHub Copilot

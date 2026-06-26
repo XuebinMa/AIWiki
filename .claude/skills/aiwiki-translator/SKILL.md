@@ -18,7 +18,7 @@ description: 把一条 AiWiki 中文误区条目（docs/ 下的 .mdx）翻译成
 
 1. **术语统一**：所有术语、以及 frontmatter 与 `<PitfallMeta>` 里的枚举值（roles / phase / severity），一律以 `terminology.md` 为准。表里没有的新术语，先补进 `terminology.md` 再用。
 2. **保结构原样**：
-   - frontmatter：key 不动；`title`/`tags`/`applies_to` 译；`roles`/`phase`/`severity`/`evidence` 用 `terminology.md` 的英文枚举；`slug`、`sidebar_position` 不变；`sources` 的 url 不变，title 可译。
+   - frontmatter：key 不动；`title`/`tags`/`applies_to` 译；**中文有 `sidebar_label` 时，英文也要译一个对应的短 `sidebar_label`**（导航/卡片用短名）；`roles`/`phase`/`severity`/`evidence` 用 `terminology.md` 的英文枚举；`slug`、`sidebar_position` 不变；`sources` 的 url 不变，title 可译。
    - 保留 `import … PitfallMeta`、`<PitfallMeta .../>`（props 改成英文枚举值）、所有 ```mermaid``` 代码块（节点内文字可译，结构与箭头不动）、`:::note` admonition。
    - **七段小标题用下面这套固定的地道英文，每节只用规范说法、不得另造变体**（允许与中文字面不字字对应——尤其「最佳实践 → What to do instead」）：
 

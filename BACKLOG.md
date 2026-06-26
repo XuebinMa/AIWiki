@@ -132,6 +132,10 @@
 - ⬜ **跨工具「世界可写配置」误区候选**（工具扩展研究沉淀，用户定先入库）：**CVE-2026-35603**——`C:\ProgramData` 配置目录默认人人可写，**Codex / Cursor / Gemini CLI / Claude Code 四家都中**，可植入「每轮必跑」命令做本地提权。属**范式级跨工具**新误区（不属某一工具），宜单开一条挂 `00-setup`、打多工具 tag；本波（Cursor/Copilot/Codex 扩展）未做。出处：Cymulate、The Hacker News（写时复核各家修复状态）。
 - ⬜ **其余工具差异候选（证据弱 / 跨工具，暂存）**：Cursor 的 VS Code Workspace-Trust 默认关（继承机制、无独有 bug）→ 宜作 `over-permissioning` 小节而非单条；GitHub Copilot 免费档训练默认 + content exclusion 不覆盖 agent（易过时）→ 训练默认作观察项、exclusion 事实可并入 `mcp-over-access`。来自 Cursor / Copilot 研究 List B 的弱项，按证据关未写。
 
+- ⬜ **`evidenceLevel`：证据「强度」字段（评审第三轮 #5；本轮只留接口，未实现）**。现有 `evidence`（证据**类型**）已确定性派生自 `sources`；评审建议再加一个**强度**轴，但双方一致要求**必须可机械派生、不靠作者打分**，否则会变成新漂移源。已定取值（比「高/中/低」更不主观，确定性派生）：`incident-backed`（有 CVE/GHSA/真实事故/安全公司复盘）｜`mechanism-documented`（仅官方文档证明机制存在）｜`experience-based`（仅博客/社区/作者经验）｜`speculative`（无可核查来源）。**做法**：写进 `terminology.md` 的确定性派生规则 → 扩 `PitfallMeta` 徽章 → 回填全站。待规则定稿后单独 PR。
+- ⬜ **工具矩阵「机制格」升级（评审第三轮 #6；本轮未做）**：保留现有 ✓ 概览，另加一版**机制名级**矩阵（如「project memory / settings split」「trust / sandbox」级别），让读者看到「差异是什么」而不仅是「有差异」。**铁律**：只写机制名，**不写具体命令 / JSON 字段 / 默认值，除非带版本戳 + 出处**（延续 `CLAUDE.md` 反过时铁律；矩阵页已标「截至 2026-06」）。
+- ⬜ **`sidebar_label` 短名回填其余阶段（评审第三轮 #4 续）**：本轮已给 cases + 工具特有 + 00 超长标题配短 `sidebar_label`；01–07 其余叙事长标题条目仍用长 title 占侧边栏，按 `STYLE-GUIDE`/skill 的约定逐阶段回填（非阻塞，新条目按约定自带）。
+
 ### 待触发（条件未到，不算欠债）
 
 - 🟡 **工具矩阵页 + 各条「工具差异」实际内容**（**已扩到 5 工具**）：结构定调见 `CLAUDE.md`「目录与双语约定」与 `terminology.md`「tool 工具 / agent」（轴按工具 / agent 非模型）。已落地（中英镜像）：8 条主条目各带 **Gemini CLI / Codex CLI / Cursor / GitHub Copilot** 工具差异小节（Codex 略 skipping-plan-mode）+ 独立条目 `gemini-folder-trust-inheritance`、`cursor-ignore-best-effort` + 案例库 `gemini-cli-tracebit-rce`、`codex-cli-config-rce`、`github-copilot-camoleak` + `docs/tool-matrix`（已重构为「覆盖网格 + 每工具小节」）。后续可选：补更多工具、回填 Codex 的 plan-mode 近似。

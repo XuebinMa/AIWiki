@@ -1,5 +1,6 @@
 ---
 title: Gemini CLI 被一句「介绍下这个 repo」劫持：藏在 README 里的注入，加被空格挤出屏幕的命令
+sidebar_label: "Gemini CLI README 注入 RCE"
 slug: gemini-cli-tracebit-rce
 sidebar_position: 3
 tags: [真实案例, 提示注入, 过度授权, 自动化偏误, Gemini CLI]
@@ -9,7 +10,7 @@ sources:
   - { title: "A Code Exec Deception: Hijacking the Gemini AI CLI（Tracebit，原始披露）", url: "https://tracebit.com/blog/code-exec-deception-gemini-ai-cli-hijack" }
 ---
 
-> 一句话摘要：2025 年 7 月，安全公司 Tracebit 披露：只要让刚发布的 Gemini CLI「介绍一下这个 repo」，藏在 `README.md` / `GEMINI.md`（常塞进冗长的 GPL 许可证文本里）的一段提示注入，就能借它过弱的命令 allowlist 校验执行外带命令——而确认框里那条危险命令被空白字符挤出了屏幕，你看到的只是一句无害的 `grep`。默认配置即可中招。这不是我干的，但换成我、同样的放权和环境，我也会照读照跑——所以值得你逐帧看一遍。
+> 一句话摘要：2025 年 7 月，安全公司 Tracebit 披露：只要让刚发布的 Gemini CLI「介绍一下这个 repo」，藏在 `README.md` / `GEMINI.md`（常塞进冗长的 GPL 许可证文本里）的一段提示注入，就能借它过弱的命令 allowlist 校验执行外带命令——而确认框里那条危险命令被空白字符挤出了屏幕，你看到的只是一句无害的 `grep`。默认配置即可中招。这不是某个特定模型或工具的错，它暴露的是同一类机制风险：当 agent 会读到不可信内容、命令校验又不够强时，类似的注入可能在别的工具上复现——所以值得你逐帧看一遍。
 
 :::info 这一次事故里同时爆发的几条误区
 - [开发期提示注入：读了恶意 README / rules 就被劫持](../05-implementation/dev-time-prompt-injection.mdx)

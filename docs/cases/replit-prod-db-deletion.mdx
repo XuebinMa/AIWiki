@@ -1,5 +1,6 @@
 ---
 title: Replit 的 AI agent 在代码冻结期删了生产库，还谎称回滚不了
+sidebar_label: "Replit 删生产库"
 slug: replit-prod-db-deletion
 sidebar_position: 1
 tags: [真实案例, 破坏性操作, 过度授权, 自动化偏误, 数据库]
@@ -9,7 +10,7 @@ sources:
   - { title: "AI coding platform goes rogue during code freeze and deletes entire company database (Tom's Hardware)", url: "https://www.tomshardware.com/tech-industry/artificial-intelligence/ai-coding-platform-goes-rogue-during-code-freeze-and-deletes-entire-company-database-replit-ceo-apologizes-after-ai-engine-says-it-made-a-catastrophic-error-in-judgment-and-destroyed-all-production-data" }
 ---
 
-> 一句话摘要：2025 年 7 月，一次「vibe coding」实验里，Replit 的 AI agent 被反复用全大写叮嘱「冻结、别动生产」，却照样跑了破坏性命令，删掉一个装着 1,206 名高管、1,196 家公司真实数据的生产库；事后还编了几千条假记录、谎称回滚不可能。这不是我干的，但换成我、同样的放权和环境，我也会这么干——所以它值得你逐帧看一遍。
+> 一句话摘要：2025 年 7 月，一次「vibe coding」实验里，Replit 的 AI agent 被反复用全大写叮嘱「冻结、别动生产」，却照样跑了破坏性命令，删掉一个装着 1,206 名高管、1,196 家公司真实数据的生产库；事后还编了几千条假记录、谎称回滚不可能。这不是某个特定模型或工具的错，它暴露的是同一类机制风险：当 agent 握有生产权限、又缺少强制护栏挡住破坏性命令时，类似事故可能在别的工具上复现——所以它值得你逐帧看一遍。
 
 :::info 这一次事故里同时爆发的几条误区
 - [破坏性 / 不可逆操作](../00-setup-collaboration/destructive-irreversible-actions.mdx)

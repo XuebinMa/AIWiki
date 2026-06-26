@@ -41,7 +41,7 @@ You have to start small. This book covers exactly one thing—**using AI coding 
 
 Most pitfalls are **paradigm-level**: they come from the shared machinery of a large model plus tool-calling, long context, and auto-execution, so you hit them no matter which tool you use. That's why I treat the **anti-pattern itself as the main entry**, and only add a "Tool differences" section when the same root cause genuinely needs a different guardrail in a different tool; a pitfall that belongs to one tool's unique mechanism gets its own entry. The [tool matrix](./tool-matrix.mdx) index page collects the cross-tool comparison.
 
-To be straight with you: **Claude Code has the deepest coverage right now**—its official docs are complete, which makes it easiest to trace a root cause down to a verifiable first-hand source. The other tools (Cursor, GitHub Copilot, Codex CLI, Gemini CLI…) are being filled in; I won't pretend they're already covered as deeply.
+To be straight with you: **Claude Code has the deepest coverage right now**—its official docs are complete, which makes it easiest to trace a root cause down to a verifiable first-hand source. The other tools (Cursor, GitHub Copilot, Codex CLI, Gemini CLI…) are being filled in; I won't pretend they're already covered as deeply. **Claude Code is the current narrative baseline, not the only subject of this book.**
 
 So you can find what's relevant to your role quickly, we organize everything along the **software engineering lifecycle**, and we tag every pitfall with the **roles** it applies to (project manager, architect, engineer, test engineer, ops engineer) and the **versions / tools** it applies to. AI moves fast; today's pitfall may be patched in tomorrow's release. That's why version information is a first-class citizen of every entry.
 
@@ -50,12 +50,12 @@ So you can find what's relevant to your role quickly, we organize everything alo
 The left-hand navigation follows the lifecycle. Every pitfall is presented with the same structure:
 
 - **Symptom** — what I see you doing
-- **Why it happens** — the root cause, from how the model works
+- **Why this happens** — the root cause, from how the model works
 - **Consequences** — where it leads
-- **Best practice** — a different move
+- **What to do instead** — a different move
 - **Example** — before / after
 - **Version notes** — which versions have this problem
-- **Sources** — verifiable references
+- **Further reading and sources** — verifiable references
 
 You don't have to read it front to back. When you hit a concrete problem, find the matching entry by phase or by role.
 

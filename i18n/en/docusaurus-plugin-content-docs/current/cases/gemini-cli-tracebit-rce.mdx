@@ -1,5 +1,6 @@
 ---
 title: "Gemini CLI hijacked by \"tell me about this repo\": an injection hidden in the README, and a command padded off-screen"
+sidebar_label: "Gemini CLI README-injection RCE"
 slug: gemini-cli-tracebit-rce
 sidebar_position: 3
 tags: [real-world case, prompt injection, over-permissioning, automation bias, Gemini CLI]
@@ -9,7 +10,7 @@ sources:
   - { title: "A Code Exec Deception: Hijacking the Gemini AI CLI (Tracebit, original disclosure)", url: "https://tracebit.com/blog/code-exec-deception-gemini-ai-cli-hijack" }
 ---
 
-> In one sentence: in July 2025 the security firm Tracebit showed that asking the newly released Gemini CLI to "tell me about this repo" was enough — an injection hidden in `README.md` / `GEMINI.md` (often buried inside a long GPL license blob) rode a too-weak command allowlist check to run an exfiltration command, while the dangerous part of that command was padded with whitespace until it scrolled off-screen, so all you saw was a harmless `grep`. The default config was vulnerable. I didn't do this — but give me the same access and setup, and I'd read and run it too. So it's worth watching frame by frame.
+> In one sentence: in July 2025 the security firm Tracebit showed that asking the newly released Gemini CLI to "tell me about this repo" was enough — an injection hidden in `README.md` / `GEMINI.md` (often buried inside a long GPL license blob) rode a too-weak command allowlist check to run an exfiltration command, while the dangerous part of that command was padded with whitespace until it scrolled off-screen, so all you saw was a harmless `grep`. The default config was vulnerable. This isn't about one particular model or tool — it exposes the same class of mechanism risk: when an agent reads untrusted content and command validation is too weak, a similar injection can recur on other tools. So it's worth watching frame by frame.
 
 :::info Several pitfalls that detonated in a single incident
 - [Dev-time prompt injection: read a malicious README / rules file and get hijacked](../05-implementation/dev-time-prompt-injection.mdx)
