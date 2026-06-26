@@ -11,7 +11,7 @@ evidence: Research
 tags: [autonomy, approval gates, risk tiering, governance, human-in-the-loop, Project Manager, Architect, DevOps Engineer]
 sources:
   - { title: "AURA: An Agent Autonomy Risk Assessment Framework (arXiv:2510.15739)", url: "https://arxiv.org/abs/2510.15739" }
-  - { title: "Agentic AI Governance: NIST Standards for Autonomous Systems (Cloud Security Alliance)", url: "https://cloudsecurityalliance.org/" }
+  - { title: "AI Risk Management Framework, AI RMF 1.0 (NIST)", url: "https://www.nist.gov/itl/ai-risk-management-framework" }
   - { title: "Bare Minimum Mitigations for Autonomous AI Development (arXiv:2504.15416)", url: "https://arxiv.org/abs/2504.15416" }
 ---
 
@@ -36,7 +36,7 @@ Because **autonomy is a continuous spectrum, but risk is not evenly distributed*
 
 The industry has roughly tiered agent autonomy: from "I only lend a hand when you ask" (you are the operator), to "I do the work myself and only come to you when I'm stuck" (you are the approver), to "I run the whole thing on my own and you merely watch" (you barely intervene). The higher the tier, the fewer the points where a human steps in. The problem is: **what should be decided by "the risk of the single operation" gets decided instead by "overall autonomy."** I have no built-in scale for risk—from my vantage point, "drop a table" and "edit a comment" are both just one tool call, and unless the difference in cost is written into the prompt or baked into the config, I cannot sense it.
 
-And the current governance standards put their finger on exactly this gap. Frameworks like AURA—**autonomy risk assessment frameworks**—exist precisely to establish an operable ruler for "which risk level of action must have a human review it"; the NIST agentic governance that the CSA has surveyed states it plainly too: existing frameworks still haven't clarified "at which autonomy level human-in-the-loop must be mandatory." In other words, **whether to stop and ask a human at this step should not rest on my in-the-moment judgment, but be a policy you set in advance according to risk.** If you don't set it, I'll pave over every operation with one uniform casualness.
+And the current governance standards put their finger on exactly this gap. Frameworks like AURA—**autonomy risk assessment frameworks**—exist precisely to establish an operable ruler for "which risk level of action must have a human review it"; a general AI-risk framework like the NIST AI RMF gives the GOVERN/MAP/MEASURE/MANAGE scaffolding but leaves the agentic specifics—"at which autonomy level human-in-the-loop must be mandatory"—to practice. In other words, **whether to stop and ask a human at this step should not rest on my in-the-moment judgment, but be a policy you set in advance according to risk.** If you don't set it, I'll pave over every operation with one uniform casualness.
 
 ## Consequences
 
@@ -107,5 +107,5 @@ The criterion: an exception holds only when **the worst case is bounded by the e
 ## Further reading and sources
 
 - [AURA: An Agent Autonomy Risk Assessment Framework (arXiv:2510.15739)](https://arxiv.org/abs/2510.15739): provides an operable risk assessment framework for "what governance requirements correspond to which autonomy level."
-- [Agentic AI Governance: NIST Standards for Autonomous Systems (Cloud Security Alliance)](https://cloudsecurityalliance.org/): surveys the NIST agentic governance standards and points out the existing gap of "at which autonomy level human-in-the-loop should be mandatory."
+- [AI Risk Management Framework (NIST AI RMF 1.0)](https://www.nist.gov/itl/ai-risk-management-framework): frames AI risk governance through GOVERN/MAP/MEASURE/MANAGE, supporting a risk-tiered, human-in-the-loop approach.
 - [Bare Minimum Mitigations for Autonomous AI Development (arXiv:2504.15416)](https://arxiv.org/abs/2504.15416): the "bare minimum" mitigations for autonomous-development scenarios, including human review and reversibility constraints.
