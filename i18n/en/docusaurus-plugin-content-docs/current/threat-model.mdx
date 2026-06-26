@@ -1,0 +1,88 @@
+---
+title: "AI coding security: a threat-model index"
+slug: /threat-model
+sidebar_position: 11
+sidebar_label: Threat Model
+description: Browse every security- and governance-related pitfall and case by threat dimension — the fourth browsing axis after role, tool, and mechanism. It strings the security entries scattered across the lifecycle into one comparable threat model.
+---
+
+# AI coding security: a threat-model index
+
+This is the **fourth browsing axis**, after [browse by role](/roles), the [tool matrix](/tool-matrix), and the [mechanism index](/mechanisms): every **security- and governance-**related pitfall in the book, regrouped by **threat dimension** into a single threat model.
+
+Security pitfalls are naturally scattered across the lifecycle phases (setup, implementation, acceptance…), and read one at a time each looks like an isolated trap; placed in a threat model, you'll see they're really different slices of the same attack surface. A useful starting point is Simon Willison's **the lethal trifecta** — **private data access + exposure to untrusted content + the ability to communicate externally** — an agent with all three is exploitable; most of the dimensions below are about locking down one of those three legs. At the mechanism level, most of these land in the [mechanism index](/mechanisms)'s **"Tool & permission overreach"** bucket.
+
+> This page is a **curated index** only (one line per entry, linking into the existing pitfall / case), not new per-entry metadata. Scan down by dimension, then click through for "why this happens" and "how to defend against it."
+
+## Permission & autonomy boundaries
+
+**Core threat**: I'm granted permissions that are too broad, or high-risk actions go unapproved, and so destructive, irreversible operations happen before you can react.
+
+**Positive defense**: least privilege + risk-tiered approval gates + plan/review gates, keeping irreversible actions on the far side of execution.
+
+- [Every permission on day one](./00-setup-collaboration/over-permissioning.mdx)
+- [Missing autonomy/approval tiers](./00-setup-collaboration/autonomy-approval-boundaries.mdx)
+- [Over-broad MCP access](./00-setup-collaboration/mcp-over-access.mdx)
+- [Skipping plan mode](./00-setup-collaboration/skipping-plan-mode.mdx)
+- [Destructive, irreversible actions](./00-setup-collaboration/destructive-irreversible-actions.mdx)
+- [CI/CD permission blind spot](./07-acceptance-release/cicd-permission-blindspot.mdx)
+
+## Isolation & sandboxing
+
+**Core threat**: only "soft permissions" hold me back, with no OS-level wall — once breached, I can escape to the whole machine's filesystem, credentials, and network.
+
+**Positive defense**: fence the filesystem with kernel-level isolation (containers / bubblewrap / seccomp) and fence the network egress with an allowlist — the two come as a pair.
+
+- [Soft permissions, no OS sandbox](./00-setup-collaboration/sandbox-filesystem-isolation.mdx)
+- [Uncontrolled network egress](./00-setup-collaboration/network-egress-control.mdx)
+- [Gemini folder-trust inheritance](./00-setup-collaboration/gemini-folder-trust-inheritance.mdx)
+- [`.cursorignore` isn't a boundary](./00-setup-collaboration/cursor-ignore-best-effort.mdx)
+
+## Untrusted content & injection
+
+**Core threat**: I read external content (READMEs, issues, web pages, tool returns, logs), and malicious instructions hidden inside can hijack my behavior.
+
+**Positive defense**: keep untrusted input on the far side of execution, and pair it with isolation and egress control to limit the blast radius once an injection lands.
+
+- [Dev-time prompt injection](./05-implementation/dev-time-prompt-injection.mdx)
+- [Prompt injection after launch](./07-acceptance-release/prompt-injection-release.mdx)
+
+## Data boundaries & exfiltration
+
+**Core threat**: I use data that should never leave the company as ordinary context, or write code that leaks sensitive data — once it's past the boundary, you can't pull it back.
+
+**Positive defense**: set data classification first (what must never reach an external AI), gate it with a mechanism at the boundary, and on the code side keep sensitive data out of logs / responses.
+
+- [No data-boundary policy](./00-setup-collaboration/data-boundary-policy.mdx)
+- [Planted vulnerabilities & data leaks](./07-acceptance-release/security-data-leaks.mdx)
+
+## Audit, accountability & logging
+
+**Core threat**: logs can be poisoned into an injection surface, and they can also be written dirty / written incomplete / tampered with by me, leaving you unable to reconstruct "what the AI actually did" after the fact.
+
+**Positive defense**: escape before writing, keep the audit trail append-only and tamper-resistant, and force structured records for critical actions.
+
+- [Log injection & audit-trail tampering](./07-acceptance-release/log-injection-audit-integrity.mdx)
+
+## Iteration & governance accountability
+
+**Core threat**: keep asking me to change things and vulnerabilities pile up; and with the ownership, liability, and copyright status of AI-generated code left unsettled, it's "all liability, no protection."
+
+**Positive defense**: treat security as a continuous gate rather than a one-time check, and establish a written ownership / liability / licensing policy for AI code.
+
+- [Security erosion across iterations](./07-acceptance-release/iterative-security-erosion.mdx)
+- [AI-code IP, ownership & liability](./07-acceptance-release/ai-code-ip-ownership.mdx)
+
+## Real incidents (case library)
+
+**Core threat**: the mechanisms above aren't hypothetical — below are public, verifiable real incidents, each one tripping over one of the threat dimensions.
+
+**Positive defense**: study them like "crime-scene photos," frame by frame: understand the mechanism in the entry first, then come here to see how it crashed in the real world and what it cost.
+
+- [Gemini CLI RCE in the wild (Tracebit)](./cases/gemini-cli-tracebit-rce.mdx)
+- [Codex CLI config RCE (CVE-2025-61260)](./cases/codex-cli-config-rce.mdx)
+- [GitHub Copilot CamoLeak exfiltration (CVE-2025-59145)](./cases/github-copilot-camoleak.mdx)
+
+---
+
+Companion artifacts: [Autonomy risk-tier checklist](./toolkit/autonomy-risk-tiers.mdx), [Data classification policy template](./toolkit/data-classification-policy.mdx), [Pre-release security checklist](./toolkit/release-security-checklist.mdx), [Permissions config template](./toolkit/permissions-config.mdx) — these compress the defenses above into checklists you can use directly.

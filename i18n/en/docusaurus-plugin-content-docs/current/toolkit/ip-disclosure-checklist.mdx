@@ -1,0 +1,50 @@
+---
+title: "IP disclosure and ownership checklist for AI-generated code"
+slug: ip-disclosure-checklist
+sidebar_position: 12
+tags: [checklist, template, governance, compliance]
+---
+
+> In one sentence: turn the [AI code ownership / liability / IP](../07-acceptance-release/ai-code-ip-ownership.mdx) principle into a checklist you can tick item by item before shipping. Don't reflexively treat AI-generated code as a "clean, exclusively ownable, protected" asset — it may be [without copyright protection yet still infringing](../07-acceptance-release/ai-code-ip-ownership.mdx). Walk this before you merge or distribute.
+
+## Checklist: walk this before treating AI code as an asset
+
+**License and contamination (no scenario is exempt)**
+
+- [ ] CI runs a **license scan**: no copyleft (GPL / AGPL) dependency drags its viral obligations into your closed-source code.
+- [ ] A **similarity / provenance check** has run: this code doesn't reproduce, verbatim, a copyrighted snippet from the training data (see [License / IP contamination](../07-acceptance-release/license-ip-contamination.mdx)).
+
+**Copyrightability (when you mean to claim exclusivity / treat it as a core asset)**
+
+- [ ] This code involved **substantial human authorship** (a person made creative design decisions, choices, and modifications) — not just "handed the AI a prompt and let it generate the whole thing," which can fall into the "no copyright" gray zone.
+- [ ] You know which parts can be claimed under copyright and which can't, and you aren't mistaking the "unprotected" parts for a moat.
+
+**Ownership and liability (in writing)**
+
+- [ ] The **attribution / ownership** of AI-assisted code is settled (who owns it).
+- [ ] How **defect / infringement liability** is allocated is settled (it defaults to the party that ships, not the tool vendor).
+- [ ] For high-sensitivity IP: you assessed "whether and how far to use AI generation here" up front, rather than discovering after the fact that your ownership won't hold up.
+
+## How to use it
+
+- **The two license items are hard gates**: even if you don't plan to claim copyright and won't distribute externally, pulling restricted code or a copyleft dependency in verbatim still leaves you liable — run both scans in every scenario.
+- **Tighten copyrightability and ownership by scenario**: an internal one-off script can keep it light; anything headed into a product, claimed as exclusive, or distributed should walk the whole list.
+- Wire this checklist into your release flow / legal review as a gate for "before AI-generated code ships."
+
+## When to use this
+
+### A good fit when
+
+- You're merging AI-generated code into a product, distributing it externally, or treating it as a company's exclusive asset.
+- Your team / legal needs a written checklist of "what to check before AI code ships."
+
+### Not a fit when
+
+- An internal, one-off, non-distributed script with no copyright claim — just walk the two "license and contamination" items; the rest can be skipped.
+- You explicitly plan to open-source it / place it in the public domain — the lack of copyright protection is no loss, so skip the copyrightability items; but license contamination still needs checking.
+
+### Replace before using
+
+- This checklist is **not legal advice**: it draws on the U.S. Copyright Office's 2025 guidance and Doe v. GitHub, and **conclusions may differ in other jurisdictions** — verify with your local jurisdiction and company counsel before acting.
+- Swap "license scan / similarity check" for the tools you actually use (e.g., SCA / SBOM tools, a code-similarity service).
+- Wire the attribution / ownership / liability items into your company's AI-use policy and contract templates.

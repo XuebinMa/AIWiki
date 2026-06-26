@@ -23,6 +23,10 @@
     "message": "Mechanisms",
     "description": "Navbar item with label 机制索引"
   },
+  "item.label.安全索引": {
+    "message": "Threat Model",
+    "description": "Navbar item with label 安全索引"
+  },
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"

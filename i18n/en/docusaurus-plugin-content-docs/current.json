@@ -120,7 +120,7 @@
     "description": "The generated-index page title for category '🧰 模板与清单' in sidebar 'wikiSidebar'"
   },
   "sidebar.wikiSidebar.category.🧰 模板与清单.link.generated-index.description": {
-    "message": "The entries tell you what not to do; this section hands you things to use directly — permission configs, a PR-review checklist, a task-kickoff template, a pre-release security checklist, and bad→good prompt pairs. Each compresses the book's best practices into a copy-paste artifact you can adapt.",
+    "message": "The entries tell you what not to do; this section hands you things to use directly — permission and security configs, review/security/governance checklists, and task and workflow templates. Each compresses the book's best practices into a copy-paste artifact you can adapt.",
     "description": "The generated-index page description for category '🧰 模板与清单' in sidebar 'wikiSidebar'"
   }
 }

@@ -1,0 +1,50 @@
+---
+title: "Data-classification policy template for what you feed AI"
+slug: data-classification-policy
+sidebar_position: 11
+tags: [checklist, template, governance, security]
+---
+
+> In one sentence: turn your [data-boundary policy](../00-setup-collaboration/data-boundary-policy.mdx) into a tier table you can use as-is. AI can't tell on its own whether a given piece of data is allowed to leave the company boundary — data sensitivity is your policy, and if you don't spell it out, AI treats everything the same and uses it. Classify the data first, then decide what must never enter an external AI, what's fine once it's de-identified, and what's fine because it's public.
+
+## Tier table (whether it may leave, by sensitivity)
+
+| Tier | Data category (examples) | OK to give an external AI? |
+|------|--------------------------|----------------------------|
+| **🔴 Never share** | Keys / credentials / tokens; customer PII (names, IDs, phone numbers); unreleased source / strategy docs; regulated data (GDPR / HIPAA / financial) | Never, to any external AI |
+| **🟡 OK once de-identified** | Logs, samples, and configs that contain sensitive fields but whose structure is useful | Replace real identifiers with synthetic / placeholder values first, then give it |
+| **🟢 Public OK** | Already open-sourced code, already published docs, public datasets | Use normally |
+
+> Rule of thumb: when in doubt, file it under 🔴. Whether a piece of data is 🟢 or 🔴 isn't about how it reads — it's about **whom it belongs to, what regulates it, and who's on the hook if it leaks**.
+
+## How to use it
+
+- **🔴 is a hard red line.** Don't rely on people "remembering not to paste it" — put DLP / secret scanning / regex filters on the path into the external AI, and stop what shouldn't leave before it goes out the door.
+- **For 🟡, use placeholders / synthetic data.** Give the AI a sample with the same structure and fake contents — this is the exact **inverse** of the [feeding you fake data](../02-requirements/placeholder-fake-inputs.mdx) anti-pattern: there, faking it is the problem; here, faking it is the protection.
+- **When you must use real sensitive data, switch the processor**: use a self-hosted / local model, or an enterprise tier with a "no training, no retention, auditable" contract, so the data stays inside a control domain you can audit.
+- This is the policy layer; at the code-implementation layer, don't write sensitive data into logs or return it to people who shouldn't see it — see [shipping vulnerabilities / leaking sensitive data by default](../07-acceptance-release/security-data-leaks.mdx); for a real incident, see [Samsung leaking source code to ChatGPT](../cases/samsung-chatgpt-source-leak.mdx).
+
+```text
+A one-line red line you can drop into team norms:
+- 🔴 (keys / customer PII / unreleased IP / regulated data) → never paste into any external AI; add scanning to intercept on the path.
+- 🟡 → de-identify / swap in placeholders first.
+- If you really need real 🔴 → only in a self-hosted environment or one with a "no training, no retention" contract.
+```
+
+## When to use this
+
+### A good fit when
+
+- Team members will paste real data / code into an external AI (chat or agent) to ask for help.
+- You need a written "what data must never go to an external AI" policy for training and compliance.
+
+### Not a fit when
+
+- A fully self-hosted environment where data never leaves the network — the constraints come from internal-network governance, and this table's "leaving" dimension doesn't apply.
+- The data you handle is already entirely public — there's no need for tiers.
+
+### Replace before using
+
+- Swap "data category" for your organization's real data assets and compliance requirements (which regulations bind you, which items are trade secrets).
+- Swap de-identification / scanning for your real tools and processes.
+- Spell out your allowlist of "auditable processors" (which AI services, at which tier, satisfy your compliance).
