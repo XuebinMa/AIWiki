@@ -87,3 +87,23 @@ Put this in your **project root** at `.claude/settings.json` (shared with teamma
 3. Add any other dangerous CLI you have (a home-grown deploy script, `terraform apply`, `kubectl delete`…) to `deny` or `ask`.
 
 To run unattended (skipping these confirmations), don't go bare on your main machine — put it in an isolated sandbox / disposable container and let the environment, not a human prompt, contain the blast radius. For the full trade-off, see [Handing Me Every Permission on Day One](../00-setup-collaboration/over-permissioning.mdx).
+
+
+## When to use this
+
+### A good fit when
+
+- A team-shared project that wants a safe-default `permissions` starting point.
+- Semi-autonomous work where you're willing to keep one manual confirmation for writes / pushes / installs.
+
+### Not a fit when
+
+- Unattended batch runs — contain the blast radius with an isolated sandbox / throwaway container, not with this `ask` list.
+- Your stack differs a lot from the example (replace as below first; don't paste it in verbatim).
+
+### Replace before using
+
+- Swap the `npm run` lines for your project's real script names (`pytest`, `cargo test`, …).
+- Keep only the package manager you actually use; delete the rest.
+- Add your own dangerous CLIs (`terraform apply`, `kubectl delete`, in-house deploy scripts) to `deny` or `ask`.
+- Check that the `.env` / `secrets` / private-key paths match your repo's actual layout.

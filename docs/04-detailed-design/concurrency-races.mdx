@@ -1,11 +1,12 @@
 ---
 title: 我写的代码单线程跑得对，一并发就出错
+sidebar_label: "并发竞态"
 slug: concurrency-races
 sidebar_position: 5
 roles: [工程师, 架构师]
 phase: 详细设计
 severity: 高
-applies_to: "Claude Code 全版本"
+applies_to: "Coding Agent 通用"
 tags: [并发, 竞态条件, 详细设计, 健壮性, 工程师, 架构师]
 sources:
   - { title: "Race condition — Wikipedia", url: "https://en.wikipedia.org/wiki/Race_condition" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '架构师']} phase="详细设计" severity="高" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师', '架构师']} phase="详细设计" severity="高" appliesTo="Coding Agent 通用" />
 
 > 一句话摘要：我默认按「单线程、顺序执行、没人同时动」来写代码，于是漏掉竞态条件、共享状态不加锁、check-then-act 不原子、数据库不加事务或乐观锁。功能测试（单线程）全绿，一上并发就偶发丢更新、数据错乱、死锁。这讲的是**并发正确性**这一类特定且隐蔽的缺陷，和[实现层漏分支](./missing-edge-cases.mdx)、[方案整体健壮性](./plausible-but-brittle-design.mdx)不是一回事。
 
@@ -41,7 +42,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 flowchart TD
     A[你要一段操作共享状态的代码] --> B[我补全出顺序版实现]
     B --> C{有人逼我推理并发交错吗}
-    C -->|你没提，我默认独占执行| D["竞态 / 丢更新<br/>check-then-act 不原子<br/>无锁无事务 / 死锁<br/>&nbsp;"]
+    C -->|你没提，我默认独占执行| D["竞态 / 丢更新<br/>check-then-act 不原子<br/>无锁无事务 / 死锁"]
     C -->|你点名并发场景| E[标出临界区 + 显式同步<br/>锁 / 事务 / CAS / 幂等]
     D --> F[单线程测试全绿，一上并发偶发错乱]
 ```
@@ -113,7 +114,7 @@ flowchart TD
 ## 版本说明
 
 :::note 适用版本
-「默认按单线程顺序逻辑生成代码」是大语言模型写代码的固有倾向，**Claude Code 全版本、且跨模型适用**。已有研究表明，即便最强的模型在并发推理上仍显著吃力（见[arXiv 2501.14326](https://arxiv.org/html/2501.14326v1)）。模型越强，顺序代码写得越漂亮，越容易让你忘了它默认没考虑并发——所以「显式给并发画像、标临界区、用并发测试验证」这套动作不会因为模型变强而过时。
+「默认按单线程顺序逻辑生成代码」是大语言模型写代码的固有倾向，**全模型、跨工具通用**。已有研究表明，即便最强的模型在并发推理上仍显著吃力（见[arXiv 2501.14326](https://arxiv.org/html/2501.14326v1)）。模型越强，顺序代码写得越漂亮，越容易让你忘了它默认没考虑并发——所以「显式给并发画像、标临界区、用并发测试验证」这套动作不会因为模型变强而过时。
 :::
 
 ## 延伸阅读与出处

@@ -1,5 +1,6 @@
 ---
 title: "Mistiming /compact: either too late, or wiping out progress at the worst moment"
+sidebar_label: "Mistiming /compact"
 slug: compact-timing
 sidebar_position: 4
 roles: [Engineer]
@@ -28,7 +29,7 @@ One is **compacting too late**: you keep working, the context window is nearly f
 
 The other is **bad timing**: I've just worked out an approach, or I'm halfway through a change spanning several files that isn't committed yet—and at that exact moment you (or auto-compaction) fire `/compact`. Afterward, the plan that had just taken shape in my head and never made it to disk gets condensed into a couple of sentences. The detail is gone. I come back "with a different head" and can't reconnect with the me you were just talking to.
 
-## Why it happens
+## Why this happens
 
 `/compact` isn't a lossless snapshot—it's a **lossy summary**: it replaces the verbatim conversation history with a structured summary. Per the official description of compaction behavior, the summary keeps your requests and intent, key technical concepts, files examined or modified with important code snippets, errors and how they were fixed, pending tasks, and current work. But **the full tool outputs and intermediate reasoning are gone**—I can still reference what I did, but I no longer have the exact code I read at the time.
 
@@ -40,7 +41,7 @@ That explains both failure modes, which turn out to be the same root cause:
 ```mermaid
 flowchart TD
     A[Verbatim conversation history] --> B{Trigger /compact}
-    B --> C["Structured summary<br/>keeps: intent / key concepts / files modified<br/>drops: full tool output / intermediate reasoning<br/>&nbsp;"]
+    B --> C["Structured summary<br/>keeps: intent / key concepts / files modified<br/>drops: full tool output / intermediate reasoning"]
     C --> D[Unsaved plan judged as intermediate reasoning]
     D --> E[Can't reconnect after compacting, different head]
 ```
@@ -51,7 +52,7 @@ flowchart TD
 - Compact at a bad moment: the plan I just worked out, or the half-finished multi-file change, gets condensed away. You have to re-explain the background, or worse, I redo it with an approach inconsistent with the earlier one—undoing the progress.
 - Both make you **misdiagnose this as me "getting dumber"** rather than "the context got mismanaged"—so you go fix my output instead of managing the timing, which is the wrong fight.
 
-## Best practice
+## What to do instead
 
 **Compact at a natural break, before it overflows; write down the key state before you compact.** Three things to anchor on:
 
@@ -97,7 +98,7 @@ You: continue.   ← progress lives in the commit and the summary, so I pick up 
 "Compaction is lossy, and timing makes or breaks it" is an inherent property of how compaction works, so **all Claude Code versions apply**. Exactly which fields compaction preserves, and how close to the limit auto-compaction triggers, will evolve across versions; but the fundamental trait—it keeps what *it* judges important, not what *this* step needs—doesn't change. Defer to the official docs for the version you're running.
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Explore the context window — What survives compaction (Anthropic, official)](https://code.claude.com/docs/en/context-window)
 - [Manage costs effectively — Manage context proactively (Anthropic, official)](https://code.claude.com/docs/en/costs)

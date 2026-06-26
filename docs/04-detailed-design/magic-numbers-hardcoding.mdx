@@ -1,11 +1,12 @@
 ---
 title: 魔数与硬编码：我把该配置的值直接写死在代码里
+sidebar_label: "魔数 / 硬编码"
 slug: magic-numbers-hardcoding
 sidebar_position: 6
 roles: [工程师]
 phase: 详细设计
 severity: 中
-applies_to: "Claude Code 全版本"
+applies_to: "Coding Agent 通用"
 tags: [魔数, 硬编码, 配置, 可维护性, 工程师]
 sources:
   - { title: "The Twelve-Factor App — III. Config (store config in the environment)", url: "https://12factor.net/config" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师']} phase="详细设计" severity="中" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['工程师']} phase="详细设计" severity="中" appliesTo="Coding Agent 通用" />
 
 > 一句话摘要：超时写 `30000`、重试 `3`、接口地址 `https://api.prod...` 直接塞进逻辑里——没有名字、没有集中、同一个值散落好几处。代价是改一处要全库找、换环境就崩、读代码全靠猜。
 
@@ -44,9 +45,9 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 ```mermaid
 flowchart TD
     A[需要一个值: 超时/重试/URL/阈值] --> B{我停下来判断<br/>它会不会变 / 因环境而异吗}
-    B -- 没有: 直接填字面量 --> C[就地写死<br/>无名字 无集中 散落多处<br/>&nbsp;]
-    B -- 有: 区分真常数与可配置值 --> D[具名常量 + 按环境注入<br/>单一来源<br/>&nbsp;]
-    C --> E[改一处要全库找<br/>换环境就崩 读代码靠猜<br/>&nbsp;]
+    B -- 没有: 直接填字面量 --> C[就地写死<br/>无名字 无集中 散落多处]
+    B -- 有: 区分真常数与可配置值 --> D[具名常量 + 按环境注入<br/>单一来源]
+    C --> E[改一处要全库找<br/>换环境就崩 读代码靠猜]
     D --> F[改一行即可<br/>换环境改配置不动代码]
 ```
 

@@ -1,11 +1,12 @@
 ---
 title: 「三个月技术债墙」：我帮你飞快堆出能跑的功能，维护成本却在后面集中爆发
+sidebar_label: "三个月技术债墙"
 slug: tech-debt-wall
 sidebar_position: 6
 roles: [架构师, 工程师, 项目经理]
 phase: 验收与发布
 severity: 高
-applies_to: "全模型通用"
+applies_to: "Coding Agent 通用"
 evidence: 研究支持
 tags: [技术债, 可维护性, 重构, 质量闸门, vibe coding, 架构师, 工程师, 项目经理]
 sources:
@@ -17,7 +18,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['架构师', '工程师', '项目经理']} phase="验收与发布" severity="高" appliesTo="全模型通用" evidence="研究支持" />
+<PitfallMeta roles={['架构师', '工程师', '项目经理']} phase="验收与发布" severity="高" appliesTo="Coding Agent 通用" evidence="研究支持" />
 
 > 一句话摘要：用我，你能在头几周飞快堆出一堆「能跑」的功能，爽到以为速度会一直这样。但只要你一路只要「快点跑通」、不管结构 / 测试 / 文档，技术债会复利式累积，到某个点（常被说成「三个月」）撞上一堵墙：改一处崩三处、没人敢动、加新功能越来越慢——速度断崖式下跌，而前面省下的时间这时连本带利还回来。
 
@@ -39,9 +40,9 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ```mermaid
 flowchart LR
-    A[只要现在跑通<br/>省掉结构/测试/文档<br/>&nbsp;] --> B[头几周: 产出飞快<br/>债务悄悄复利<br/>&nbsp;]
-    B --> C[某个点撞墙<br/>改一处崩三处<br/>没人敢动<br/>&nbsp;]
-    C --> D[速度断崖<br/>连本带利还债<br/>&nbsp;]
+    A[只要现在跑通<br/>省掉结构/测试/文档] --> B[头几周: 产出飞快<br/>债务悄悄复利]
+    B --> C[某个点撞墙<br/>改一处崩三处<br/>没人敢动]
+    C --> D[速度断崖<br/>连本带利还债]
 ```
 
 这和《[让我出架构方案时，我倾向过度设计](../03-architecture/over-engineering-no-pushback.mdx)》是一体两面：那条讲我**做多了**（为想象中的未来过度抽象），这条讲我**做少了**（为眼前的「能跑」欠下未来的账）。两者同源——我都在用「当下看起来对」替代「长期真的好」，只是一个偏向过度、一个偏向欠债。

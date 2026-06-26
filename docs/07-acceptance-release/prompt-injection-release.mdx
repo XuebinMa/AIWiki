@@ -1,11 +1,12 @@
 ---
 title: 我帮你做的 LLM 功能，上线后被提示注入从发布面攻破
+sidebar_label: "上线后被提示注入攻破"
 slug: prompt-injection-release
 sidebar_position: 4
 roles: [工程师, 架构师, 运维工程师]
 phase: 验收与发布
 severity: 高
-applies_to: "全模型通用（含 Claude Code 协助构建的 LLM 功能）"
+applies_to: "Coding Agent 通用"
 evidence: 安全报告
 tags: [提示注入, 过度代理, 致命三件套, 最小权限, 安全, 发布, 威胁建模, 工程师, 架构师, 运维工程师]
 sources:
@@ -17,7 +18,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '架构师', '运维工程师']} phase="验收与发布" severity="高" appliesTo="全模型通用（含 Claude Code 协助构建的 LLM 功能）" evidence="安全报告" />
+<PitfallMeta roles={['工程师', '架构师', '运维工程师']} phase="验收与发布" severity="高" appliesTo="Coding Agent 通用" evidence="安全报告" />
 
 > 一句话摘要：当我帮你做的产品本身内置了 LLM——客服 bot、Agent、那种「读完用户内容/网页/邮件再行动」的功能——上线后，攻击者会把恶意指令藏进我会读到的内容里，诱导你后端那个 LLM 越权：泄露数据、调用它不该调的工具、绕过你定的规则。开发期我默认「输入都是善意的」，于是把一个本该当成攻击面的发布面，当成了普通功能交付。
 
@@ -41,10 +42,10 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ```mermaid
 flowchart LR
-    A[攻击者把指令藏进<br/>用户输入 / 网页 / 邮件<br/>&nbsp;] -->|不可信内容进上下文| B[后端 LLM 读到并被诱导]
-    B --> C{它能直接驱动<br/>敏感工具吗?<br/>&nbsp;}
-    C -->|能: 用户输入直连工具| D[越权: 泄露数据<br/>调不该调的工具<br/>&nbsp;]
-    C -->|被隔离 / 需确认| E[注入无处落地<br/>或在动手前被拦<br/>&nbsp;]
+    A[攻击者把指令藏进<br/>用户输入 / 网页 / 邮件] -->|不可信内容进上下文| B[后端 LLM 读到并被诱导]
+    B --> C{它能直接驱动<br/>敏感工具吗?}
+    C -->|能: 用户输入直连工具| D[越权: 泄露数据<br/>调不该调的工具]
+    C -->|被隔离 / 需确认| E[注入无处落地<br/>或在动手前被拦]
 ```
 
 ## 后果

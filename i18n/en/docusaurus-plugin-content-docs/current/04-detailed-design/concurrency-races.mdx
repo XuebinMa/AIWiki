@@ -1,11 +1,12 @@
 ---
 title: "My code runs correctly single-threaded, then breaks the moment it's concurrent"
+sidebar_label: "Concurrency races"
 slug: concurrency-races
 sidebar_position: 5
 roles: [Engineer, Architect]
 phase: Detailed design
 severity: High
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 tags: [concurrency, race condition, detailed design, robustness, Engineer, Architect]
 sources:
   - { title: "Race condition — Wikipedia", url: "https://en.wikipedia.org/wiki/Race_condition" }
@@ -14,7 +15,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect']} phase="Detailed design" severity="High" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer', 'Architect']} phase="Detailed design" severity="High" appliesTo="All coding agents" />
 
 > In one sentence: I default to writing code as if it's "single-threaded, sequential, with no one touching it at the same time," so I miss race conditions, don't lock shared state, leave check-then-act non-atomic, and skip transactions or optimistic locking on the database. Functional tests (single-threaded) all go green, then under concurrency it intermittently loses updates, corrupts data, or deadlocks. This is about **concurrency correctness** — a specific, hidden class of defect — not the same as [missing branches at the implementation level](./missing-edge-cases.mdx) or [the overall robustness of a design](./plausible-but-brittle-design.mdx).
 
@@ -41,7 +42,7 @@ Several forces push me toward "write it as if single-threaded":
 flowchart TD
     A[You want code that touches shared state] --> B[I complete a sequential implementation]
     B --> C{Does anyone force me to reason about interleaving}
-    C -->|You didn't mention it, I assume exclusive execution| D["race / lost update<br/>check-then-act non-atomic<br/>no lock no transaction / deadlock<br/>&nbsp;"]
+    C -->|You didn't mention it, I assume exclusive execution| D["race / lost update<br/>check-then-act non-atomic<br/>no lock no transaction / deadlock"]
     C -->|You name the concurrent scenario| E[mark critical sections + explicit sync<br/>lock / transaction / CAS / idempotency]
     D --> F[single-threaded tests all green, intermittent corruption under concurrency]
 ```
@@ -53,7 +54,7 @@ flowchart TD
 - **Deadlocks bring the service to a halt.** Two executors each hold one lock and wait on the other's, requests pile up, threads exhaust — harder to locate live than a single-point crash.
 - **Fixing it often means touching the data model.** Adding a lock, a transaction, a unique constraint, or an optimistic-lock version number — these are design-level decisions, and patching them in after concurrency surfaces costs far more rework than designing them in from the start.
 
-## Best practice
+## What to do instead
 
 **Don't let me treat the world as single-threaded — tell me the concurrent scenario explicitly, force me to mark shared mutable state and critical sections, and say what synchronization nails them down.**
 
@@ -116,10 +117,10 @@ The test: the exception holds when "no concurrency / no sharing" is a fact you'v
 ## Version notes
 
 :::note Applicability
-"Defaulting to generating code as single-threaded sequential logic" is an inherent tendency of LLMs writing code, applying to **all Claude Code versions and across models**. Research shows even the strongest models still struggle significantly with concurrency reasoning (see [arXiv 2501.14326](https://arxiv.org/html/2501.14326v1)). The stronger the model, the prettier the sequential code, and the easier it is to forget it didn't consider concurrency by default — so "explicitly give a concurrency profile, mark critical sections, and verify with concurrency tests" won't go obsolete as models get stronger.
+"Defaulting to generating code as single-threaded sequential logic" is an inherent tendency of LLMs writing code, applying to **all models and coding agents**. Research shows even the strongest models still struggle significantly with concurrency reasoning (see [arXiv 2501.14326](https://arxiv.org/html/2501.14326v1)). The stronger the model, the prettier the sequential code, and the easier it is to forget it didn't consider concurrency by default — so "explicitly give a concurrency profile, mark critical sections, and verify with concurrency tests" won't go obsolete as models get stronger.
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Race condition — Wikipedia](https://en.wikipedia.org/wiki/Race_condition)
 - [Assessing Large Language Models in Comprehending and Verifying Concurrent Programs across Memory Models (arXiv 2501.14326)](https://arxiv.org/html/2501.14326v1)

@@ -1,11 +1,12 @@
 ---
 title: 让我做市场或竞品调研时，我会编造数据和来源
+sidebar_label: "编造调研数据与来源"
 slug: fabricated-research-data
 sidebar_position: 2
 roles: [项目经理, 工程师]
 phase: 灵感与可行性
 severity: 高
-applies_to: "全模型通用（无检索能力时尤甚）"
+applies_to: "通用 LLM"
 evidence: 研究支持
 tags: [幻觉, 编造来源, 想法验证, 可行性, 项目经理, 工程师]
 sources:
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['项目经理', '工程师']} phase="灵感与可行性" severity="高" appliesTo="全模型通用（无检索能力时尤甚）" evidence="研究支持" />
+<PitfallMeta roles={['项目经理', '工程师']} phase="灵感与可行性" severity="高" appliesTo="通用 LLM" evidence="研究支持" />
 
 > 一句话摘要：你让我做市场规模、增长率、竞品对比，我没有真实检索时不会说「我查不到」，而是顺手编出一份不存在的报告、一个打不开的链接、一串精确到小数点的数字——而且语气笃定、排版规整。你拿去写商业计划，地基是假的。
 
@@ -41,7 +42,7 @@ flowchart TD
     B -->|有检索结果或你贴的资料| C[基于真实来源作答]
     B -->|没有| D[训练目标：给出像样的完整答案]
     D --> E[用统计上最像的数字和机构名补位]
-    E --> F[输出：自信、规整、带假引用<br/>&nbsp;]
+    E --> F[输出：自信、规整、带假引用]
     F --> G[你当成已核实的事实采用]
 ```
 

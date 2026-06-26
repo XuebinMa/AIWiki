@@ -19,6 +19,57 @@
   margin-bottom: 0;
 }
 
+/* 条目卡片标题行：图标 + 可截断/可展开的标题文字。 */
+.cardTitle {
+  display: flex;
+  align-items: flex-start;
+  margin: 0 0 0.5rem;
+  line-height: 1.35;
+}
+
+.cardIcon {
+  flex-shrink: 0;
+  margin-right: 0.4rem;
+  font-size: 1.2rem;
+  line-height: 1.4;
+}
+
+.cardTitleText {
+  /* min-width:0 让 flex 子项能收缩到内容以下，text--truncate 才会生效 */
+  min-width: 0;
+  font-size: 1.2rem;
+}
+
+.cardDescription {
+  font-size: 0.8rem;
+}
+
+/* 展开态：取消单行截断，正常换行显示完整内容。 */
+.expanded {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+/* 「展开 / 收起」切换按钮——克制的次要样式，不抢卡片主信息。 */
+.toggle {
+  align-self: flex-start;
+  margin-top: 0.5rem;
+  padding: 0.12rem 0.45rem;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--ifm-color-primary);
+  background: transparent;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background var(--ifm-transition-fast) ease;
+}
+
+.toggle:hover {
+  background: var(--ifm-color-emphasis-100);
+}
+
 /* 分类页卡片底部的「严重度 / 角色」元信息行。 */
 .metaRow {
   display: flex;

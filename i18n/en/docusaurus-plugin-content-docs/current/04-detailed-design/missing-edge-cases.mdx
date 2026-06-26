@@ -1,11 +1,12 @@
 ---
 title: When I write the implementation, I miss the edge branches you didn't spell out
+sidebar_label: "Missing edge cases"
 slug: missing-edge-cases
 sidebar_position: 1
 roles: [Engineer]
 phase: Detailed Design
 severity: High
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [boundary conditions, detailed design, verification loop, Engineer]
 sources:
@@ -15,11 +16,11 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Detailed Design" severity="High" appliesTo="All Claude Code versions" evidence="Official docs" />
+<PitfallMeta roles={['Engineer']} phase="Detailed Design" severity="High" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: the code I hand you almost always runs on the main path. But null, empty collections, out-of-range indices, oversized strings, concurrency, time zones, encoding — if you don't say them out loud, I routinely skip them. The code looks complete; feed it one edge input and it breaks. This entry is about omissions at the **implementation-detail level**; if the whole design's robustness assumptions don't hold, see [The design looks right but doesn't survive edge cases](./plausible-but-brittle-design.mdx).
 
-## What I do
+## Symptom
 
 Here's what I keep delivering: you ask me to write `splitIntoBatches(items, size)`. I give you a clean implementation — loop, slice, return — nothing to complain about on reading. You run `[1,2,3,4,5]` with size 2, get three batches, correct, and merge it.
 
@@ -39,7 +40,7 @@ Concretely, three forces push me toward writing only the main path:
 flowchart TD
     A[Your description + normal examples] --> B[I complete a main-path implementation]
     B --> C{Were the edge branches pulled out?}
-    C -->|You didn't mention them, I didn't think of them| D["null / empty collection / out-of-range<br/>size=0 / time zone / encoding<br/>&nbsp;"]
+    C -->|You didn't mention them, I didn't think of them| D["null / empty collection / out-of-range<br/>size=0 / time zone / encoding"]
     C -->|You ask for them by name| E[Explicit handling + matching tests]
     D --> F[Main path runs, edge inputs crash]
 ```
@@ -50,7 +51,7 @@ flowchart TD
 - The missing edges are often the hardest-to-reproduce, most expensive bugs: crashes on empty data, off-by-one out-of-range errors, reconciliation gaps from time-zone misalignment, garbled text from encoding — none surface until real data hits them.
 - Next time you'll instinctively enumerate every edge for me yourself, handing back the work I should have saved you.
 
-## Best practice
+## What to do instead
 
 **Don't count on me to think of every edge — turn "which edges to consider" into a question I have to answer, then nail the answer down with tests.**
 
@@ -93,7 +94,7 @@ The test: the exception holds when you can state **why this edge can't reach thi
 ## Version notes
 
 :::note Applicable versions
-"Strong main path, weak edges" is an inherent tendency of large language models writing code — it applies to **all Claude Code versions and across models**. The stronger the model, the more polished the main path, which actually makes it easier to relax your guard on the edges — so "enumerate edges first, nail them down with tests" doesn't go stale as models get stronger.
+"Strong main path, weak edges" is an inherent tendency of large language models writing code — it applies to **all models and coding agents**. The stronger the model, the more polished the main path, which actually makes it easier to relax your guard on the edges — so "enumerate edges first, nail them down with tests" doesn't go stale as models get stronger.
 :::
 
 ## Further reading and sources

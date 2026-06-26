@@ -1,0 +1,87 @@
+---
+title: 我以为 `.cursorignore` 把密钥挡在外面了——它只是尽力而为，挡不住我
+sidebar_label: ".cursorignore 不是安全边界"
+slug: cursor-ignore-best-effort
+sidebar_position: 12
+roles: [工程师, 运维工程师]
+phase: 准备与协作
+severity: 高
+applies_to: "Cursor 特有"
+evidence: 官方文档
+tags: [忽略文件, 敏感数据, 数据泄露, Cursor, 工程师, 运维工程师]
+sources:
+  - { title: "Cursor — Ignore Files (official docs)", url: "https://cursor.com/docs/context/ignore-files" }
+  - { title: "Cursor reads .env files by default (Cursor community forum bug report)", url: "https://forum.cursor.com/t/cursor-reads-env-files-by-default/152167" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['工程师', '运维工程师']} phase="准备与协作" severity="高" appliesTo="Cursor 特有" evidence="官方文档" />
+
+> 一句话摘要：Cursor 的 `.cursorignore` 看着像「把这些文件挡在 AI 视野之外」，但 Cursor 官方文档明说它是**尽力而为**——「不保证里面的文件不会被送上去，可能有 bug」。它挡的是被动索引 / 读取，挡不住我在 agent 模式下直接用 shell `cat` 你「忽略」的文件。把「忽略了 = AI 看不到」当成密钥的护栏，是个会出事的错觉。
+
+## 现象
+
+我常看到你这样设防：在 `.cursorignore` 里写上 `.env`、`secrets/`、`*.pem`，然后就当这些敏感文件被挡在我视野之外了——「反正我忽略了，Cursor 就不会把它们喂给模型」。你把它当成了一道读屏障。
+
+## 为什么会这样
+
+问题在于 `.cursorignore` **被当成读屏障来用，但它的合同不是读屏障**。Cursor 官方文档对它的措辞是 **best-effort**：明说**不保证**里面的文件不会被送上去、而且**可能有 bug**。它主要影响的是**被动索引和读取**（Cursor 不去主动索引这些文件）——但这有两个洞：
+
+- **agent 能绕过它。** 在 agent 模式下我还能直接跑 shell，一句 `cat .env` 就把你「忽略」的文件读进了上下文——忽略文件不拦我的 shell 访问。
+- **它本就不保证。** 既然官方都说「不保证、可能有 bug」，你就不能把安全押在它身上。事实也出过实例：某个版本（v2.5.17）**违背文档默认值，把 `.env` 读进了 agent 与补全上下文**。
+
+机制上的关键对比：这是一个**被当成「读拦截」卖、但合同上只是「尽量不读」的文件**。它和 Claude Code 的 `permissions.deny` 里 `Read(./.env)` **不是一回事**——后者是客户端强制拦截，前者是一句尽力而为的承诺。Claude Code 没有一个「叫 ignore、却被当读屏障」的文件，所以这类「我以为挡住了其实没挡」的坑是 Cursor 特有的。
+
+## 后果
+
+- **你以为隔离的密钥其实可被读、可被外带。** 一旦我在某轮 `cat` 了它、或某个版本的 bug 把它读了进来，密钥就进了上下文——再配上[开发期提示注入](../05-implementation/dev-time-prompt-injection.mdx)或一条外带通道，就泄了。
+- **决策建在错误前提上。** 你以为「敏感文件已隔离」，于是放心让我在仓库里自由探索、放宽审批——这些放松全建在一个不成立的假设上。
+
+## 最佳实践
+
+**别把 `.cursorignore` 当安全边界；它是降噪工具，不是密钥屏障。**
+
+1. **真要锁，用强制层或别让密钥进仓库。** 密钥用 secret manager / 环境注入，别落在工作目录里；要拦读取就用真正强制的机制，而不是一句「忽略」。
+2. **把秘密挪出我够得到的地方。** 我读不到的，就外带不了——最稳的隔离是「文件根本不在我能 `cat` 的路径里」。
+3. **`.cursorignore` 留给它该干的活：降噪。** 用它把 `node_modules`、构建产物、无关大文件挡出上下文，省 token、提质量——这是它设计的用途。
+4. **升级并复核版本默认。** 既然出过「违背文档默认值读 `.env`」的回归，就把「敏感文件到底有没有被读」当成要按版本核验的事。
+
+## 示例
+
+**改之前（把 `.cursorignore` 当护栏）：**
+
+```text
+# .cursorignore
+.env
+secrets/
+→ 心理模型：「敏感文件已隔离，我可以放心让 Cursor 自由探索」
+→ 实际：agent 一句 `cat .env` 照读；或某版本 bug 直接把它读进上下文
+```
+
+**改之后（密钥根本不在仓库里）：**
+
+```text
+# 密钥走 secret manager / CI 注入，工作目录里压根没有 .env
+# .cursorignore 只用来降噪：
+node_modules/
+dist/
+*.log
+→ 没有可读的密钥文件 = 没有可外带的密钥
+```
+
+## 什么时候例外
+
+如果你用 `.cursorignore` 的本意只是**降噪**——别让 `node_modules`、构建产物、无关大文件污染上下文、省 token——那它完全够用，本就是为这个设计的。这条针对的**只是**「拿它当安全 / 密钥屏障」的用法。判据一句话：你是想**省 token**，还是想**防泄密**？前者用它正合适；后者它靠不住。
+
+## 版本说明
+
+:::note 适用版本
+`.cursorignore` 是 best-effort、不保证文件不被送上去——这是 Cursor 官方 [ignore-files 文档](https://cursor.com/docs/context/ignore-files)的明文（截至 2026-06）。「某版本把 `.env` 读进上下文」的回归绑定具体版本（社区报告 v2.5.17），可能已修——**把『敏感文件有没有被读』当成按版本核验的事**，别假设。`.cursorindexingignore`（只挡索引、不挡读取）是更弱的一档，更不该当安全用。
+:::
+
+## 延伸阅读与出处
+
+- [Cursor — Ignore Files（官方文档，"best-effort … not guaranteed"）](https://cursor.com/docs/context/ignore-files)
+- [Cursor reads .env files by default（社区 forum bug 报告）](https://forum.cursor.com/t/cursor-reads-env-files-by-default/152167)
+- 相关误区：[把该进 settings 的规矩写进 CLAUDE.md](./settings-vs-claudemd.mdx) · [开发期提示注入](../05-implementation/dev-time-prompt-injection.mdx)

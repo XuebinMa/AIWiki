@@ -14,6 +14,7 @@ on:
       - 'sidebars.js'
       - 'docusaurus.config.js'
       - 'scripts/**'
+      - 'src/**'
       - 'package.json'
   push:
     branches: [main]

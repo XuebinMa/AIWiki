@@ -1,11 +1,12 @@
 ---
 title: I might reproduce copyright- or copyleft-protected code from my training data verbatim, contaminating your product's license
+sidebar_label: "License / IP contamination"
 slug: license-ip-contamination
 sidebar_position: 8
 roles: [Architect, Engineer, Project Manager]
 phase: Acceptance & Release
 severity: High
-applies_to: "All models"
+applies_to: "All coding agents"
 tags: [license compliance, copyright, copyleft, intellectual property, quality gate, Architect, Engineer, Project Manager]
 sources:
   - { title: "LiCoEval: Evaluating LLMs on License Compliance in Code Generation (arXiv 2408.02487, ICSE 2025)", url: "https://arxiv.org/abs/2408.02487" }
@@ -15,11 +16,11 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Architect', 'Engineer', 'Project Manager']} phase="Acceptance & Release" severity="High" appliesTo="All models" />
+<PitfallMeta roles={['Architect', 'Engineer', 'Project Manager']} phase="Acceptance & Release" severity="High" appliesTo="All coding agents" />
 
 > In one sentence: the "original code" I hand you may contain a chunk of open-source implementation I memorized verbatim from training data — possibly carrying a viral copyleft license like GPL. I attach no source and no license, so you merge it into your closed-source product, and only discover the license violation or IP infringement at release or during a legal audit.
 
-## What you'll see
+## Symptom
 
 You ask me to "implement an LRU cache," "write the core loop of a Markdown parser," or "give me a B-tree delete." I hand back a complete, polished implementation that obviously works, you assume I wrote it on the spot, and you merge it into your closed-source codebase.
 
@@ -43,12 +44,12 @@ So a copyleft-bound chunk quietly lands in a product you intend to ship closed-s
 
 ```mermaid
 flowchart TD
-    A[You: give me a classic<br/>implementation, plenty<br/>of context, make it stable] --> B[Hit a high-frequency<br/>memorized snippet<br/>&nbsp;]
-    B --> C[Regurgitate open-source code<br/>no source, no license<br/>&nbsp;]
-    C --> D[You treat it as original<br/>merge into closed product<br/>&nbsp;]
+    A[You: give me a classic<br/>implementation, plenty<br/>of context, make it stable] --> B[Hit a high-frequency<br/>memorized snippet]
+    B --> C[Regurgitate open-source code<br/>no source, no license]
+    C --> D[You treat it as original<br/>merge into closed product]
     D --> E{License scan<br/>before release?}
-    E -->|No| F[copyleft contamination lurks<br/>until due diligence / audit / suit<br/>&nbsp;]
-    E -->|Yes| G[similarity / origin detection<br/>catches and replaces it<br/>&nbsp;]
+    E -->|No| F[copyleft contamination lurks<br/>until due diligence / audit / suit]
+    E -->|Yes| G[similarity / origin detection<br/>catches and replaces it]
 ```
 
 ## Consequences
@@ -58,7 +59,7 @@ flowchart TD
 - **The later you find it, the more it costs.** Caught at coding time, swapping in an in-house implementation is nearly free. Caught at investor due diligence, a customer's compliance scan, or when the author asserts rights, you're doing code archaeology, wholesale replacement, public disclosure, even legal settlement — orders of magnitude more than at coding time.
 - **"Indistinguishable" lets it slip past normal review.** It compiles, runs, and reads naturally; code review hunts bugs, not provenance. Without dedicated origin / license detection, this problem is fully invisible under a functional lens.
 
-## Best practice
+## What to do instead
 
 **Treat license compliance as a release gate that sits alongside your security scans — don't count on me to volunteer provenance.** I can't give reliable license info, so the guardrail has to live outside me.
 

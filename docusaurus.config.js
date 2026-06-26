@@ -5,7 +5,7 @@ const { themes: prismThemes } = require('prism-react-renderer');
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'AiWiki',
-  tagline: '用 Claude Code 写代码最容易踩的坑，以及对应的工程护栏',
+  tagline: '用 AI 编码工具写代码最容易踩的坑，以及对应的工程护栏',
   favicon: 'img/logo.svg',
 
   url: 'https://xuebinma.github.io',
@@ -73,6 +73,14 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       image: 'img/logo.svg',
+      // Mermaid：用原生 SVG <text> 渲染节点标签（htmlLabels:false），节点按真实文字尺寸排版，
+      // 绕开 v11 默认 foreignObject 路径「方框不再纵向撑高 → 末行被裁」的回归（mermaid #7354）。
+      // 这是全局根治：从此无需在多行/长节点末尾手动补 <br/>&nbsp; 占位。
+      mermaid: {
+        options: {
+          htmlLabels: false,
+        },
+      },
       navbar: {
         title: 'AiWiki',
         logo: {
@@ -90,6 +98,16 @@ const config = {
             to: '/roles',
             position: 'left',
             label: '按角色浏览',
+          },
+          {
+            to: '/tool-matrix',
+            position: 'left',
+            label: '工具矩阵',
+          },
+          {
+            to: '/mechanisms',
+            position: 'left',
+            label: '机制索引',
           },
           {
             type: 'localeDropdown',

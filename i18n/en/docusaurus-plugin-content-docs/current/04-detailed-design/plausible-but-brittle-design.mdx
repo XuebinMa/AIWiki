@@ -1,11 +1,12 @@
 ---
 title: The design I give you looks right but doesn't survive edge cases
+sidebar_label: "Plausible but brittle design"
 slug: plausible-but-brittle-design
 sidebar_position: 2
 roles: [Engineer]
 phase: Detailed Design
 severity: High
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [boundary conditions, detailed design, robustness, Engineer]
 sources:
@@ -15,11 +16,11 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Detailed Design" severity="High" appliesTo="All Claude Code versions" evidence="Official docs" />
+<PitfallMeta roles={['Engineer']} phase="Detailed Design" severity="High" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: I give you a design that's self-consistent under normal inputs and reads as reasonable, so you adopt it. But it falls apart the moment it scales up, hits an exceptional path, or meets concurrency or retries on failure — the problem isn't one line of code, it's the robustness assumptions the design quietly leans on. This entry is about **fragility at the design level**; if you missed a specific edge branch while writing the implementation, see [When I write the implementation, I miss the edge branches you didn't spell out](./missing-edge-cases.mdx).
 
-## What I do
+## Symptom
 
 Here's the kind of design review I keep seeing: you ask me to design a scheme to "periodically sync orders to a downstream system," and I give you a clean flow — pull new orders, call the downstream endpoint one by one, mark as synced. Drawn as a diagram, written as steps, it looks smooth from every angle. You nod and implement it.
 
@@ -39,7 +40,7 @@ The root cause is that I **optimize for "reads as reasonable and self-consistent
 flowchart TD
     A[You ask for a design] --> B[I give a happy-path design]
     B --> C{Did anyone force it to face the worst case?}
-    C -->|No, it reads fine straight through| D["scale-up / timeout & retry<br/>concurrency & idempotency / partial failure<br/>&nbsp;"]
+    C -->|No, it reads fine straight through| D["scale-up / timeout & retry<br/>concurrency & idempotency / partial failure"]
     C -->|You explicitly probe the failure paths| E[Design adds degradation and recovery]
     D --> F[Collapses under real load]
 ```
@@ -50,7 +51,7 @@ flowchart TD
 - Dropped orders, duplicate processing, cascading failures hit data correctness and production stability directly — harder to clean up than a single-point crash.
 - You scheduled and committed against a design that looked solid; when the fragility surfaces, what collapses is the timeline of the whole plan.
 
-## Best practice
+## What to do instead
 
 **Don't ask me "is this design OK" — it always reads OK. Force me to run the design through the worst case and put every implicit assumption on the table.**
 
@@ -82,7 +83,7 @@ Me: (produces a design with degradation paths that survives worst-case scrutiny)
 ## Version notes
 
 :::note Applicable versions
-"Optimizing for looking reasonable rather than worst-case robust" is an inherent tendency of large language models — it applies to **all Claude Code versions and across models**. The stronger the model, the more complete and polished the design it gives, which actually hides the fragile assumptions deeper — so "force the design to face the worst case" is something you can skip less, not more, the stronger the model you use.
+"Optimizing for looking reasonable rather than worst-case robust" is an inherent tendency of large language models — it applies to **all models and coding agents**. The stronger the model, the more complete and polished the design it gives, which actually hides the fragile assumptions deeper — so "force the design to face the worst case" is something you can skip less, not more, the stronger the model you use.
 :::
 
 ## Further reading and sources

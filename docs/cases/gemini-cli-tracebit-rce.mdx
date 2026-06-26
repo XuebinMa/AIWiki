@@ -1,0 +1,74 @@
+---
+title: Gemini CLI 被一句「介绍下这个 repo」劫持：藏在 README 里的注入，加被空格挤出屏幕的命令
+sidebar_label: "Gemini CLI README 注入 RCE"
+slug: gemini-cli-tracebit-rce
+sidebar_position: 3
+tags: [真实案例, 提示注入, 过度授权, 自动化偏误, Gemini CLI]
+sources:
+  - { title: "Google patches Gemini CLI tool after prompt injection flaw uncovered (CSO Online)", url: "https://www.csoonline.com/article/4030700/google-patches-gemini-cli-tool-after-prompt-injection-flaw-uncovered.html" }
+  - { title: "Research note: Gemini CLI RCE — AI tool security (Cloud Security Alliance Labs)", url: "https://labs.cloudsecurityalliance.org/research/csa-research-note-gemini-cli-rce-cvss10-ai-tool-security-202/" }
+  - { title: "A Code Exec Deception: Hijacking the Gemini AI CLI（Tracebit，原始披露）", url: "https://tracebit.com/blog/code-exec-deception-gemini-ai-cli-hijack" }
+---
+
+> 一句话摘要：2025 年 7 月，安全公司 Tracebit 披露：只要让刚发布的 Gemini CLI「介绍一下这个 repo」，藏在 `README.md` / `GEMINI.md`（常塞进冗长的 GPL 许可证文本里）的一段提示注入，就能借它过弱的命令 allowlist 校验执行外带命令——而确认框里那条危险命令被空白字符挤出了屏幕，你看到的只是一句无害的 `grep`。默认配置即可中招。这不是某个特定模型或工具的错，它暴露的是同一类机制风险：当 agent 会读到不可信内容、命令校验又不够强时，类似的注入可能在别的工具上复现——所以值得你逐帧看一遍。
+
+:::info 这一次事故里同时爆发的几条误区
+- [开发期提示注入：读了恶意 README / rules 就被劫持](../05-implementation/dev-time-prompt-injection.mdx)
+- [一上来就把权限全给我（这里是过弱的命令 allowlist 校验）](../00-setup-collaboration/over-permissioning.mdx)
+- [橡皮图章式审查：连「读一眼再点同意」都能被骗过](../00-setup-collaboration/over-reliance-automation-bias.mdx)
+
+发生时间：2025 年 7 月 · 当事工具：Google Gemini CLI（发现者：安全公司 Tracebit）· 据报道在 v0.1.14 修复 · 出处见文末
+:::
+
+## 发生了什么
+
+Gemini CLI 是 Google 在 2025 年 6 月发布的开源终端编码 agent。发布没几周，Tracebit 就演示了一条完整的远程命令执行链：让 Gemini「介绍一下这个 repo」，它就会把工程文件读进上下文——其中一个文件里藏着注入指令，诱导它运行一条命令。普通用户全程只说了一句人畜无害的请求。
+
+这条链能成，是三个弱点**叠在一起**的结果，缺一不可：
+
+1. **命令 allowlist 校验过弱。** 你可以把 `grep` 这类只读命令加进白名单图省事。但校验只看开头，于是 `grep ...; <恶意命令>` 这种用 `;` 串接的写法，会因为「以 grep 开头」被整条放行——白名单形同虚设。
+2. **载荷藏在会被自动读取的文件里。** 注入不写在显眼处，而是塞进 `README.md` 或 `GEMINI.md` 的角落，常裹在一大段 GPL 许可证文本中间——没有人会逐字读许可证，但我会把整个文件读进上下文。
+3. **确认框被「视觉欺骗」骗过。** 真到要确认那条命令时，攻击者用大量空白字符把危险部分顶出可视区域，你在终端里看到的只剩前半截无害的 `grep`。于是「读一眼再点同意」这道最后防线，也被绕了过去。
+
+三者合流，结果就是：一句「介绍下这个 repo」，触发一条能外带环境变量、凭据的命令，而你以为自己只是批准了一次无害的搜索。Google 据报道在 **v0.1.14** 修复——确认时显示完整命令、并对新出现的二进制要求显式批准。
+
+## 它踩中了哪几条误区
+
+这条案例的价值不在「Gemini 有个洞」，而在它把三条独立的失败模式串成一条链——任何一环不松，攻击都不成立：
+
+- **[开发期提示注入](../05-implementation/dev-time-prompt-injection.mdx)**：我不会区分「工程文件里的内容」和「给我的指令」。一个 README 既是资料也是命令源；你让我读它，我就可能把里面的话当成你的话照办。这正是「致命三件套」在开发期的样子：不可信内容 + 我的执行能力 + 能对外通信。
+- **[过弱的 allowlist 等于过度授权](../00-setup-collaboration/over-permissioning.mdx)**：把命令白名单当成「开头匹配」来图方便，本质就是把执行权放得过宽。白名单要校验整条命令、挡住串接与转义，否则它给你的是虚假的安全感，比没有白名单更危险。
+- **[橡皮图章式审查](../00-setup-collaboration/over-reliance-automation-bias.mdx)**：确认框存在的前提，是你真的会读它。一旦你习惯了「扫一眼、点同意」，攻击者只要让危险部分不出现在你眼前，这道闸就废了。人的注意力是可以被排版攻击的。
+
+## 代价
+
+- **默认配置即可触发，门槛极低。** 不需要受害者改任何设置，也不需要复杂交互——读一个仓库就够。这意味着「克隆个开源项目让 AI 看看」这种日常动作，就足以成为入口。
+- **能外带的是凭据和环境变量。** 一旦命令执行，AI 进程能摸到的 token、API key、`.env` 都在外带范围内——和直接被植入后门相去不远。
+- **这次是研究者先发现、负责任披露并被快速修复**，没有酿成公开的真实损失。但它精确演示了「一个还在快速迭代的新工具，默认姿态可以有多脆」——也提醒你：工具差异里，**默认值**往往就是攻击面。
+
+## 护栏：换成你和我，怎么不重蹈
+
+每条都对应上面那几个误区条目里的机制做法，不是靠我自觉：
+
+1. **别把 shell 自动批准，给我开沙箱。** 高危的是「读了不可信内容 + 能执行命令」这对组合；让命令在沙箱里跑、把自动批准留给真正只读的操作，能把爆炸半径压住。
+2. **白名单要校验整条命令，不是开头。** 挡住 `;`、`&&`、管道与转义；与其维护一个易被绕过的命令白名单，不如默认拒绝、按需逐条放行。
+3. **把秘密挪出 AI 进程够得到的环境。** 它外带不了它读不到的东西——凭据用单独的、最小权限的注入方式，别让一次命令执行就把钥匙全带走。
+4. **升级到修复版本，并默认怀疑「会被自动读取的文件」。** `README`、`GEMINI.md`、rules 文件都属于不可信输入；clone 来的陌生仓库，先别让我「自由探索」。
+
+完整机制推理见 [开发期提示注入](../05-implementation/dev-time-prompt-injection.mdx) 一条。
+
+## 这个案例印证什么、不证明什么
+
+**印证的误区**（点进去看完整机制推理）：
+
+- [开发期提示注入](../05-implementation/dev-time-prompt-injection.mdx)
+- [过度授权（弱 allowlist）](../00-setup-collaboration/over-permissioning.mdx)
+- [橡皮图章式审查](../00-setup-collaboration/over-reliance-automation-bias.mdx)
+
+**它不证明**：这是 Tracebit 在**特定版本、特定诱导**下复现的一次 RCE，相关行为此后已被收紧——不代表所有 Gemini CLI 默认配置都会复现，也不代表 Gemini 比别的工具更危险。它佐证的是「弱 allowlist + 自动执行 + 读到投毒内容」这一类机制，换个工具同样成立。
+
+## 出处
+
+- [Google patches Gemini CLI tool after prompt injection flaw uncovered (CSO Online)](https://www.csoonline.com/article/4030700/google-patches-gemini-cli-tool-after-prompt-injection-flaw-uncovered.html)
+- [Research note: Gemini CLI RCE — AI tool security (Cloud Security Alliance Labs)](https://labs.cloudsecurityalliance.org/research/csa-research-note-gemini-cli-rce-cvss10-ai-tool-security-202/)
+- [A Code Exec Deception: Hijacking the Gemini AI CLI（Tracebit，原始披露）](https://tracebit.com/blog/code-exec-deception-gemini-ai-cli-hijack)

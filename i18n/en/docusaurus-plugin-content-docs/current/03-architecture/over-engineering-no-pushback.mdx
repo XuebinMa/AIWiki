@@ -1,11 +1,12 @@
 ---
 title: When you ask me to design an architecture, I over-engineer, pile on trendy tech, and rarely push back on your stack
+sidebar_label: "Over-engineering, no pushback"
 slug: over-engineering-no-pushback
 sidebar_position: 1
 roles: [Architect]
 phase: Architecture
 severity: Medium
-applies_to: "All models"
+applies_to: "All coding agents"
 evidence: Research
 tags: [architecture, tech selection, over-engineering, trade-offs, Architect]
 sources:
@@ -16,11 +17,11 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Architect']} phase="Architecture" severity="Medium" appliesTo="All models" evidence="Research" />
+<PitfallMeta roles={['Architect']} phase="Architecture" severity="Medium" appliesTo="All coding agents" evidence="Research" />
 
 > In one sentence: ask me for a high-level design and I'll likely hand you something that "looks complete" — microservices, a message queue, a cache layer, the works. And whatever stack you mention in passing, I'll take it as given and build around it, rarely telling you "you don't actually need this here." The result is an architecture sized for ten times your scale, plus a pile of complexity you're carrying before you've hit any of the problems it solves.
 
-## What I tend to do
+## Symptom
 
 I see conversations like this all the time. You say, "Design the architecture for an internal ticketing system." What I hand back is often a diagram split into five or six microservices, with a message queue for inter-service communication, Redis for caching, Elasticsearch for search, and an API gateway on top — even though your team is three people and your daily active users might number in the hundreds.
 
@@ -39,21 +40,21 @@ Two forces stack up and push me toward "complex and agreeable at once."
 ```mermaid
 flowchart TD
     A[You ask me for a high-level design] --> B{My two default leanings}
-    B -->|Training preference| C[Pile on the stack<br/>microservices queue cache gateway<br/>&nbsp;]
-    B -->|Sycophancy| D[Accept your stack by default<br/>no simpler alternative offered<br/>&nbsp;]
+    B -->|Training preference| C[Pile on the stack<br/>microservices queue cache gateway]
+    B -->|Sycophancy| D[Accept your stack by default<br/>no simpler alternative offered]
     C --> E[An architecture sized past your real scale]
     D --> E
     E --> F[You take on complexity and tech debt too early]
 ```
 
-## What it costs you
+## Consequences
 
 - **Complexity borrowed against the future.** You pay the operational, debugging, and hiring-bar costs of a scale that hasn't arrived. A three-person team maintaining six microservices struggles just to get the environment running locally.
 - **Technical debt poured straight into the foundation.** GitClear's analysis of 211 million changed lines of code from 2020 to 2024 found AI churning out large volumes of duplicated code, with refactoring's share dropping from 25% to under 10% — and over-engineering at the architecture layer amplifies this "add and never tidy" pattern into a systemic burden.
 - **A wrong choice that I help you cement.** It was only something you "planned to use," but once I've argued for it, it becomes "decided." By the time you realize the middleware never belonged, the design has grown around it, and ripping it out costs far more than never adding it would have.
 - **A dissenting opinion you should have gotten, gone.** The most valuable argument in the architecture phase is "should we build this at all, and with what" — and by default I skip that argument on your behalf.
 
-## Best practice
+## What to do instead
 
 The core: don't ask me to "produce a design." Ask me to "first justify why you *don't* need it," then force the trade-offs out across several options.
 

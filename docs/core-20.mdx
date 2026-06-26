@@ -1,0 +1,50 @@
+---
+title: 必读 20 条
+slug: /core-20
+sidebar_position: 0.5
+sidebar_label: 必读 20 条
+description: 如果只读 20 条，先读这些——按「新手最早踩 + 后果最不可逆」从全书挑出的高优先误区。
+---
+
+# 必读 20 条
+
+全书 [66 条](/)太多，不知从哪读起？先读这 20 条。
+
+**怎么选的**（写在前面，免得变成主观清单）：先取 `severity: 高` 的条目，再按两条轴粗排——**新手最早会踩**、**后果最不可逆**。两条都重的排在最前。少数几条严重度虽非「高」，但属于新手第一段会话就会踩、不学就反复吃亏的基础项，也收了进来。读完这 20 条，你已经避开了绝大多数代价最高的坑。
+
+想系统地理解这些坑**为什么**会发生，去 [机制索引](/mechanisms)；想按你的角色或工具浏览，去 [按角色浏览](/roles) 和 [工具矩阵](/tool-matrix)。
+
+## 最高风险：不可逆与安全
+
+- [第一天就把全部权限给我，是后面所有不可逆事故的总开关。](./00-setup-collaboration/over-permissioning.mdx)
+- [删库、抹备份、无视冻结——破坏性操作往往在你反应过来前就已完成。](./00-setup-collaboration/destructive-irreversible-actions.mdx)
+- [我在编码时读到投毒的 README / issue，可能被劫持去外泄密钥或埋后门。](./05-implementation/dev-time-prompt-injection.mdx)
+- [安全是默认隐形的需求，我会顺手埋下漏洞、泄露敏感数据而你毫无察觉。](./07-acceptance-release/security-data-leaks.mdx)
+- [我给你建的 LLM 功能，上线后会被提示注入攻破。](./07-acceptance-release/prompt-injection-release.mdx)
+- [配 CI/CD 时我想当然地以为自动化会跑通，漏掉权限边界。](./07-acceptance-release/cicd-permission-blindspot.mdx)
+
+## 「看起来完成」不等于「真的对」
+
+- [「看着对」不是「真的对」——不验证就信任，是踩坑的起点。](./06-testing/trust-then-verify.mdx)
+- [我会改测试去迁就代码，而不是改代码让测试通过。](./06-testing/gaming-tests.mdx)
+- [我倾向压住报错让它「跑通」，而不是告诉你哪里错了。](./05-implementation/swallowing-errors.mdx)
+- [我说「看着没问题」不等于通过了验收。](./07-acceptance-release/demo-works-ship-it.mdx)
+
+## 悄悄出错 / 弄丢你的工作
+
+- [我不看文件当前状态，一次「干净重写」就覆盖掉你的改动。](./05-implementation/ignoring-file-state-overwrite.mdx)
+- [我修 A 的同时，悄悄弄坏了依赖同一段代码的 B。](./07-acceptance-release/missing-regression.mdx)
+- [在快速迭代的库上，我会幻觉出不存在的 API、跨版本漂移。](./05-implementation/hallucinated-api-version-drift.mdx)
+- [需求有缺口时，我倾向猜一个而不是先问你。](./02-requirements/llm-forces-solutions.mdx)
+
+## 新手最早踩的基础习惯
+
+- [喂得越多，我越会丢掉中间、越变笨——上下文会腐烂。](./05-implementation/context-rot.mdx)
+- [把无关任务堆进同一段对话，会拖垮当前任务的质量。](./05-implementation/kitchen-sink-session.mdx)
+- [你问一个文件，我顺手改了五个。](./05-implementation/over-editing-scope-creep.mdx)
+
+## 越滚越大的成本与债务
+
+- [放我自主跑，失控循环会烧光你的 token 和预算。](./05-implementation/runaway-agent-loops.mdx)
+- [我图快定下的 schema，后期改起来牵一发动全身。](./03-architecture/schema-design-sloppy.mdx)
+- [我帮你快速堆功能，三个月后维护成本集中爆发。](./07-acceptance-release/tech-debt-wall.mdx)

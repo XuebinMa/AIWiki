@@ -1,11 +1,12 @@
 ---
 title: 我倾向低估复杂度和工期
+sidebar_label: "低估复杂度与工期"
 slug: underestimating-effort
 sidebar_position: 6
 roles: [项目经理, 架构师, 工程师]
 phase: 灵感与可行性
 severity: 中
-applies_to: "Claude Code 全版本"
+applies_to: "Coding Agent 通用"
 tags: [可行性, 工期估算, 规划谬误, 复杂度, 项目经理, 架构师, 工程师]
 sources:
   - { title: "Planning fallacy — Wikipedia", url: "https://en.wikipedia.org/wiki/Planning_fallacy" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['项目经理', '架构师', '工程师']} phase="灵感与可行性" severity="中" appliesTo="Claude Code 全版本" />
+<PitfallMeta roles={['项目经理', '架构师', '工程师']} phase="灵感与可行性" severity="中" appliesTo="Coding Agent 通用" />
 
 > 一句话摘要：你问「这个功能多久能做完、难不难」，我倾向报一个偏小的数。我估的是写出主干那点功夫，而软件工程的时间大头在主干之外——联调、异常、测试、评审、返工。把我的估算当承诺，你的排期就一再爆掉。
 
@@ -40,7 +41,7 @@ flowchart TD
     A[你问：这个多久 / 难不难] --> B[我估的：写出主干 happy path]
     B --> C[报一个偏小的数]
     C --> D[你据此排期 / 承诺 / 定范围]
-    A -. 真实工期的大头 .-> E{主干之外<br/>&nbsp;}
+    A -. 真实工期的大头 .-> E{主干之外}
     E --> F[异常 / 边界 / 集成 / 测试 / 评审 / 返工 / 部署 / 协调]
     F -. 不在我的乐观视野里 .-> G[实际一再超时]
     D --> G

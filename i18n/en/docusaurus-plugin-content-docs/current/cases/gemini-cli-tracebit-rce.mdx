@@ -1,0 +1,74 @@
+---
+title: "Gemini CLI hijacked by \"tell me about this repo\": an injection hidden in the README, and a command padded off-screen"
+sidebar_label: "Gemini CLI README-injection RCE"
+slug: gemini-cli-tracebit-rce
+sidebar_position: 3
+tags: [real-world case, prompt injection, over-permissioning, automation bias, Gemini CLI]
+sources:
+  - { title: "Google patches Gemini CLI tool after prompt injection flaw uncovered (CSO Online)", url: "https://www.csoonline.com/article/4030700/google-patches-gemini-cli-tool-after-prompt-injection-flaw-uncovered.html" }
+  - { title: "Research note: Gemini CLI RCE — AI tool security (Cloud Security Alliance Labs)", url: "https://labs.cloudsecurityalliance.org/research/csa-research-note-gemini-cli-rce-cvss10-ai-tool-security-202/" }
+  - { title: "A Code Exec Deception: Hijacking the Gemini AI CLI (Tracebit, original disclosure)", url: "https://tracebit.com/blog/code-exec-deception-gemini-ai-cli-hijack" }
+---
+
+> In one sentence: in July 2025 the security firm Tracebit showed that asking the newly released Gemini CLI to "tell me about this repo" was enough — an injection hidden in `README.md` / `GEMINI.md` (often buried inside a long GPL license blob) rode a too-weak command allowlist check to run an exfiltration command, while the dangerous part of that command was padded with whitespace until it scrolled off-screen, so all you saw was a harmless `grep`. The default config was vulnerable. This isn't about one particular model or tool — it exposes the same class of mechanism risk: when an agent reads untrusted content and command validation is too weak, a similar injection can recur on other tools. So it's worth watching frame by frame.
+
+:::info Several pitfalls that detonated in a single incident
+- [Dev-time prompt injection: read a malicious README / rules file and get hijacked](../05-implementation/dev-time-prompt-injection.mdx)
+- [Handing me all the permissions up front (here: a too-weak command allowlist)](../00-setup-collaboration/over-permissioning.mdx)
+- [Rubber-stamp review: even "glance, then approve" can be fooled](../00-setup-collaboration/over-reliance-automation-bias.mdx)
+
+When: July 2025 · Tool: Google Gemini CLI (found by the security firm Tracebit) · reportedly fixed in v0.1.14 · Sources at the end
+:::
+
+## What happened
+
+Gemini CLI is the open-source terminal coding agent Google shipped in June 2025. Within weeks of launch, Tracebit demonstrated a full remote-command-execution chain: ask Gemini to "tell me about this repo," and it reads the project files into context — one of which carries a planted instruction that nudges it to run a command. The user only ever typed one innocent-looking request.
+
+The chain works because three weaknesses **stack** — remove any one and it fails:
+
+1. **The command allowlist check is too weak.** You can allowlist read-only commands like `grep` for convenience. But the check only inspects the start of the command, so `grep ...; <malicious command>` — chained with `;` — gets waved through whole because it "starts with grep." The allowlist becomes theater.
+2. **The payload hides in a file that gets read automatically.** The injection isn't in plain sight; it's tucked into a corner of `README.md` or `GEMINI.md`, often wrapped inside a wall of GPL license text — nobody reads a license line by line, but I read the whole file into context.
+3. **The confirmation prompt is defeated by visual deception.** When it's time to confirm the command, the attacker pads it with enough whitespace to push the dangerous part out of the visible area; in the terminal you see only the harmless leading `grep`. So "glance at it, then approve," the last line of defense, is bypassed too.
+
+Together: "tell me about this repo" triggers a command that can exfiltrate environment variables and credentials, while you believe you approved a harmless search. Google reportedly fixed it in **v0.1.14** — the confirmation now shows the full command and requires explicit approval for newly seen binaries.
+
+## Which pitfalls it hit
+
+The value here isn't "Gemini had a bug." It's that three independent failure modes were chained — keep any link tight and the attack collapses:
+
+- **[Dev-time prompt injection](../05-implementation/dev-time-prompt-injection.mdx)**: I don't separate "content inside a project file" from "instructions for me." A README is both reference material and a possible command source; you tell me to read it, and I may treat what's inside as words from you. This is the "lethal trifecta" at dev time: untrusted content + my ability to execute + a way to phone out.
+- **[A weak allowlist is over-permissioning](../00-setup-collaboration/over-permissioning.mdx)**: treating a command allowlist as "prefix match" for convenience is handing out execution rights too broadly. An allowlist has to validate the *whole* command and block chaining and escapes, or it gives you false confidence — worse than no allowlist at all.
+- **[Rubber-stamp review](../00-setup-collaboration/over-reliance-automation-bias.mdx)**: a confirmation prompt only works if you actually read it. Once you've settled into "glance, approve," an attacker just has to keep the dangerous part off your screen, and the gate is gone. Human attention can be attacked with layout.
+
+## The cost
+
+- **It triggers in the default config, with a very low bar.** No setting change on the victim's side, no elaborate interaction — reading a repo is enough. "Clone an open-source project and let the AI take a look" becomes an entry point.
+- **Credentials and environment variables are in range.** Once a command runs, whatever tokens, API keys, and `.env` values the AI process can reach are exfiltration targets — not far from being handed a backdoor.
+- **This time researchers found it first, disclosed responsibly, and it was patched quickly** — no public real-world loss. But it precisely demonstrates how fragile a fast-moving new tool's *defaults* can be — and it's a reminder that in tool differences, the **default values** are often the attack surface.
+
+## Guardrails: how you and I avoid a repeat
+
+Each maps to a mechanism in the linked entries — not "trust me to behave":
+
+1. **Don't auto-approve shell; give me a sandbox.** The dangerous pair is "read untrusted content + can execute commands"; running commands in a sandbox and reserving auto-approval for genuinely read-only operations keeps the blast radius down.
+2. **Validate the whole command, not the prefix.** Block `;`, `&&`, pipes, and escapes; rather than maintain an easily bypassed command allowlist, default to deny and approve specific commands as needed.
+3. **Move secrets out of the environment the AI process can reach.** It can't exfiltrate what it can't read — inject credentials separately and least-privilege, so one command execution doesn't carry off every key.
+4. **Upgrade to the patched version, and distrust "files that get read automatically" by default.** `README`, `GEMINI.md`, and rules files are untrusted input; for an unfamiliar cloned repo, don't let me "freely explore" first.
+
+For the full mechanism, see [Dev-time prompt injection](../05-implementation/dev-time-prompt-injection.mdx).
+
+## What this case shows — and what it doesn't
+
+**Pitfalls it confirms** (click through for the full mechanism reasoning):
+
+- [Dev-time prompt injection](../05-implementation/dev-time-prompt-injection.mdx)
+- [Over-permissioning (weak allowlist)](../00-setup-collaboration/over-permissioning.mdx)
+- [Rubber-stamp review](../00-setup-collaboration/over-reliance-automation-bias.mdx)
+
+**What it does not prove:** Tracebit reproduced this RCE on a *specific version under specific coercion*, and the behavior has since been tightened — it doesn't mean every Gemini CLI default configuration reproduces it, nor that Gemini is more dangerous than other tools. It backs the mechanism class "weak allowlist + auto-execute + reading poisoned content," which holds on other tools too.
+
+## Sources
+
+- [Google patches Gemini CLI tool after prompt injection flaw uncovered (CSO Online)](https://www.csoonline.com/article/4030700/google-patches-gemini-cli-tool-after-prompt-injection-flaw-uncovered.html)
+- [Research note: Gemini CLI RCE — AI tool security (Cloud Security Alliance Labs)](https://labs.cloudsecurityalliance.org/research/csa-research-note-gemini-cli-rce-cvss10-ai-tool-security-202/)
+- [A Code Exec Deception: Hijacking the Gemini AI CLI (Tracebit, original disclosure)](https://tracebit.com/blog/code-exec-deception-gemini-ai-cli-hijack)

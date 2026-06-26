@@ -1,11 +1,12 @@
 ---
 title: "I introduce performance anti-patterns without realizing it: the code is correct, but it doesn't scale"
+sidebar_label: "Performance anti-patterns"
 slug: performance-antipatterns
 sidebar_position: 4
 roles: [Engineer]
 phase: Detailed Design
 severity: Medium
-applies_to: "All models"
+applies_to: "All coding agents"
 evidence: Research
 tags: [performance, complexity, detailed design, engineer]
 sources:
@@ -16,11 +17,11 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Detailed Design" severity="Medium" appliesTo="All models" evidence="Research" />
+<PitfallMeta roles={['Engineer']} phase="Detailed Design" severity="Medium" appliesTo="All coding agents" evidence="Research" />
 
 > In one sentence: the code I hand you is functionally correct and the tests pass, but hidden inside is a query fired once per loop iteration, an O(n²) scan, a regex recompiled on every pass. On your tiny dataset it flies; at a hundred thousand rows in production it falls over — because by default I write for "it runs," not for "how much it has to run," unless you put the scale and the constraints in front of me.
 
-## What I do
+## Symptom
 
 Here is the kind of code I tend to hand you:
 
@@ -49,11 +50,11 @@ One thing worth being precise about: on isolated **algorithmic puzzles** like Le
 
 ```mermaid
 flowchart TD
-    A[Your spec<br/>describes function only<br/>&nbsp;] --> B[I implement the most straightforward way]
+    A[Your spec<br/>describes function only] --> B[I implement the most straightforward way]
     B --> C[Small-data tests all green]
     C --> D{You assume it's fine}
     D --> E[Real production scale]
-    E --> F[N+1 / O n squared<br/>recompile inside loop<br/>blocking serial IO<br/>&nbsp;]
+    E --> F[N+1 / O n squared<br/>recompile inside loop<br/>blocking serial IO]
     F --> G[Slow, timeouts, OOM]
 ```
 
@@ -64,7 +65,7 @@ flowchart TD
 - **The cost of optimizing is deferred and amplified.** Once the plain form is woven into the business logic and spread across its callers, retrofitting a batch query or a cache later touches far more surface than getting it right once would have.
 - **The resource bill creeps up quietly.** Redundant queries, needless deep copies, serial remote calls translate into higher database load, more memory, longer response times — all real money, and hard to trace back to any single line of code.
 
-## Best practice
+## What to do instead
 
 The core: **make scale and performance expectations explicit inputs, and hold me accountable for complexity with measurements.** I have no intuition for data volume, so don't make me guess.
 
@@ -75,7 +76,7 @@ The core: **make scale and performance expectations explicit inputs, and hold me
 - **Make the verification loop actually test performance.** Give a near-real-scale dataset or a benchmark assertion (e.g. "100k rows must finish within 1 second") so the green light means "fast enough," not just "functionally correct."
 - **Default to pagination / streaming for large data.** "This result set could be very large — use pagination or streaming, don't load it all into memory at once."
 
-## Examples
+## Example
 
 **Before:**
 

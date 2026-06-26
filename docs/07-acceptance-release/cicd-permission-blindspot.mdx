@@ -1,24 +1,29 @@
 ---
 title: 配 CI/CD 时我会想当然加自动化步骤，却看不见权限边界
+sidebar_label: "CI/CD 权限边界盲区"
 slug: cicd-permission-blindspot
 sidebar_position: 1
 roles: [运维工程师]
 phase: 验收与发布
 severity: 高
-applies_to: "全模型通用"
+applies_to: "Coding Agent 通用"
 evidence: 官方文档
-tags: [CI/CD, 权限, 最小权限, 发布, 运维工程师]
+tags: [CI/CD, 权限, 最小权限, 发布, 运维工程师, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
   - { title: "Use GITHUB_TOKEN for authentication in workflows（GitHub 官方）", url: "https://docs.github.com/actions/security-guides/automatic-token-authentication" }
   - { title: "actions/configure-pages — action.yml（enablement 的权限要求）", url: "https://github.com/actions/configure-pages/blob/main/action.yml" }
   - { title: "Create Pages site failed: Resource not accessible by integration（actions/configure-pages #40）", url: "https://github.com/actions/configure-pages/issues/40" }
   - { title: "GitHub Actions: Control permissions for GITHUB_TOKEN（GitHub Changelog）", url: "https://github.blog/changelog/2021-04-20-github-actions-control-permissions-for-github_token/" }
   - { title: "Mitigate Excessive Agency in AI Agents with Zero Trust Security（Auth0，OWASP LLM Top 10）", url: "https://auth0.com/blog/mitigate-excessive-agency-ai-agents/" }
+  - { title: "run-gemini-cli 安全公告 GHSA-wpqr-6v78-jr5g（CVSS 10.0）", url: "https://github.com/google-github-actions/run-gemini-cli/security/advisories/GHSA-wpqr-6v78-jr5g" }
+  - { title: "Codex — managed configuration / requirements.toml (OpenAI official)", url: "https://developers.openai.com/codex/enterprise/managed-configuration" }
+  - { title: "Cursor — Headless CLI / GitHub Actions (official docs)", url: "https://cursor.com/docs/cli/headless" }
+  - { title: "Customizing or disabling the firewall for Copilot coding agent (GitHub docs)", url: "https://docs.github.com/copilot/customizing-copilot/customizing-or-disabling-the-firewall-for-copilot-coding-agent" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['运维工程师']} phase="验收与发布" severity="高" appliesTo="全模型通用" evidence="官方文档" />
+<PitfallMeta roles={['运维工程师']} phase="验收与发布" severity="高" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
 > 一句话摘要：你让我配 CI/CD，我会顺手把「自动启用某个服务、自动授予某个权限」也写进流水线，仿佛运行环境里我无所不能。但流水线的令牌只有有限权限，结果不是发布失败（`Resource not accessible by integration`），就是被我悄悄放大了攻击面。
 
@@ -41,10 +46,10 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 ```mermaid
 flowchart TD
     A[你: 配一条发布流水线] --> B[我补全脚本]
-    B --> C[顺手加: 自动启用服务<br/>自动授予权限<br/>&nbsp;]
+    B --> C[顺手加: 自动启用服务<br/>自动授予权限]
     C --> D{运行身份的权限边界}
-    D -->|权限不足| E[流水线失败<br/>Resource not accessible<br/>&nbsp;]
-    D -->|被放大权限| F[攻击面扩大<br/>违反最小权限<br/>&nbsp;]
+    D -->|权限不足| E[流水线失败<br/>Resource not accessible]
+    D -->|被放大权限| F[攻击面扩大<br/>违反最小权限]
 ```
 
 ## 后果
@@ -108,6 +113,16 @@ steps:
 ```
 
 一行 `enablement: true` 的去留，就是「想当然地越权」和「在被授予的边界内做事」的分界。
+
+## 工具差异
+
+**Gemini CLI（截至 2026-06）**：Gemini CLI 把「CI 里看不见权限边界」直接变成了一条已公开的高危漏洞——**安全公告 GHSA-wpqr-6v78-jr5g，CVSS 10.0**。两点：在 headless / CI 模式下它会**自动信任工作区**，于是处理一个不可信的 `.env` 就足以 RCE；而且 `--yolo` 会**无视** `~/.gemini/settings.json` 里你精心设的细粒度 allowlist（这道 allowlist 本身也能被提示注入绕过）。已在 v0.39.1 修，修法是要你**显式信任**（`GEMINI_TRUST_WORKSPACE=true`）。这正印证本条：在 CI 里别把「信任边界」当默认值，把它当成一项要核验的配置。
+
+**Codex CLI（截至 2026-06）**：在 CI（无人可点审批）里，Codex 的安全姿态是 `approval_policy=never` 配一个显式的 `--sandbox workspace-write`——而不是图省事上 `--dangerously-bypass-approvals-and-sandbox`（那等于人和 OS 两道闸一起拆）。企业用 `requirements.toml`（禁 `never`/`danger-full-access`）+ 托管网络代理把信任边界钉死。
+
+**Cursor（截至 2026-06）**：Cursor 有个无头 CLI（`cursor-agent`，`-p` print 模式）给 GitHub Actions 用。CI 专属旋钮：**`--force` 让 agent 不经确认直接应用改动**（没它则只是「提议」）——把人这道闸压成 YAML 里一个 flag。官方 CI 指引是收窄（`permissions.json` allow/deny、只读日志、只写功能分支、不自动合并）。（诚实一句：这是配置指引，不是像 Gemini GHSA-wpqr 那样已披露的 CI RCE。）
+
+**GitHub Copilot（截至 2026-06）**：coding agent 跑成 GitHub Actions job，自带服务端护栏让边界显式：只能推 `copilot/*` 分支；派活的人不能批准它的 PR（你的「必需评审」仍生效）；它的 PR 未经人工批准不跑 CI/CD。出口由默认开的防火墙约束（挡掉时往 PR 写警告）——但防火墙只覆盖 agent 的 Bash 工具，不覆盖 MCP、也不覆盖 `copilot-setup-steps.yml`。所以 Copilot 给了真·平台级护栏，但点名的那两个缺口（MCP + setup 步骤）正是边界看不见处。
 
 ## 版本说明
 

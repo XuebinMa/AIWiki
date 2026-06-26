@@ -1,11 +1,12 @@
 ---
 title: "Tests as My Verification Loop: Self-Running, Red-or-Green"
+sidebar_label: "Tests as a verification loop"
 slug: tests-as-verification-loop
 sidebar_position: 5
 roles: [Engineer, QA Engineer]
 phase: Testing
 severity: Medium
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [verification loop, testing, best practice, Engineer, QA Engineer]
 sources:
@@ -15,11 +16,11 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="Medium" appliesTo="All Claude Code versions" evidence="Official docs" />
+<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="Medium" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: you tend to think of tests as an acceptance gate for humans, but they're more useful as a steering wheel for me. Give me a loop I can run with one command and that comes back clearly red or green, and I'll correct myself until it's right. Without it, all I can hand you is "looks correct."
 
-## What you'll see
+## Symptom
 
 You ask me to implement something, I write it, and I hand it over for you to read and judge. Across the whole exchange I produced code exactly once and never ran anything. You become the one who runs the code, finds the problem, and comes back to describe it in words — and every round, I'm guessing what went wrong from your natural-language retelling.
 
@@ -46,7 +47,7 @@ This entry leans positive — get it right and you sidestep several testing-phas
 - Boundary conditions get forced out by the tests rather than surfacing in production.
 - Conversely, **without this loop** I fall back to winning your trust through prose alone — which is exactly my least reliable mode.
 
-## Best practice
+## What to do instead
 
 **Give me a one-command, red-or-green check first, then put me in the loop.** Four concrete steps:
 

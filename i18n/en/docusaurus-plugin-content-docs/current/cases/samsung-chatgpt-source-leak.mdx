@@ -1,5 +1,6 @@
 ---
 title: "Samsung engineers pasted source code into ChatGPT and leaked secrets three times in 20 days"
+sidebar_label: "Samsung source leak to ChatGPT"
 slug: samsung-chatgpt-source-leak
 sidebar_position: 2
 tags: [real-world case, security, sensitive data, data leak]
@@ -45,6 +46,14 @@ This is the flip side of [_"I treat security as an invisible-by-default requirem
 2. **Use enterprise / self-hosted, with training off**: when you need AI help, route it through a channel with a data boundary (no retention, no training), not the public entrance.
 3. **Back it with DLP**: add data-loss-prevention scanning at the egress to stop credentials, source, and sensitive fields from being pasted out.
 4. **Tell me the data boundary as an explicit constraint**: as [the security entry](../07-acceptance-release/security-data-leaks.mdx) says, I won't act on least privilege or data sensitivity on my own — put it in the rules and I'll treat it as part of the goal.
+
+## What this case shows — and what it doesn't
+
+**Pitfalls it confirms** (click through for the full mechanism reasoning):
+
+- [Leaking sensitive data](../07-acceptance-release/security-data-leaks.mdx)
+
+**What it does not prove:** This is a human/process risk of pasting secrets into an external LLM, not a ChatGPT vulnerability — the model worked as designed; the problem is that sensitive data left a controlled boundary. It doesn't mean every ChatGPT use leaks; the guardrail is the data boundary, not abandoning the tool.
 
 ## Sources
 

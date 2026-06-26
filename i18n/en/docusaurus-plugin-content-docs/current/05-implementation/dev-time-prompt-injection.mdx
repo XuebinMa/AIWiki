@@ -1,27 +1,32 @@
 ---
 title: I read a malicious README / issue / rules file while coding — and got hijacked
+sidebar_label: "Dev-time prompt injection"
 slug: dev-time-prompt-injection
 sidebar_position: 12
 roles: [Engineer, Architect, DevOps Engineer]
 phase: Implementation
 severity: High
-applies_to: "All models (including Claude Code)"
+applies_to: "All coding agents"
 evidence: Security advisory
-tags: [prompt injection, lethal trifecta, excessive agency, least privilege, sandbox, security, Engineer, Architect, DevOps Engineer]
+tags: [prompt injection, lethal trifecta, excessive agency, least privilege, sandbox, security, Engineer, Architect, DevOps Engineer, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
   - { title: "README Injection: Repository Files Hijacking AI Coding Assistants (CSA research note, 2026-03)", url: "https://labs.cloudsecurityalliance.org/research/csa-research-note-ai-coding-assistant-attack-surface-2026040/" }
   - { title: "New Vulnerability in GitHub Copilot and Cursor: Rules File Backdoor (Pillar Security, 2025-03)", url: "https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents" }
   - { title: "Prompt Injection Attacks on Agentic Coding Assistants (arXiv 2601.17548, Maloyan & Namiot, 2026)", url: "https://arxiv.org/abs/2601.17548" }
   - { title: "LLM01:2025 Prompt Injection (OWASP Gen AI Security Project)", url: "https://genai.owasp.org/llmrisk/llm01-prompt-injection/" }
+  - { title: "Google patches Gemini CLI prompt-injection RCE (CSO Online)", url: "https://www.csoonline.com/article/4030700/google-patches-gemini-cli-tool-after-prompt-injection-flaw-uncovered.html" }
+  - { title: "OpenAI Codex CLI Command Injection (Check Point Research)", url: "https://research.checkpoint.com/2025/openai-codex-cli-command-injection-vulnerability/" }
+  - { title: "Cursor Allowlist Bypass / The Agent Security Paradox (Pillar Security)", url: "https://www.pillar.security/blog/the-agent-security-paradox-when-trusted-commands-in-cursor-become-attack-vectors" }
+  - { title: "GitHub Copilot: RCE via Prompt Injection (CVE-2025-53773) (Embrace The Red)", url: "https://embracethered.com/blog/posts/2025/github-copilot-remote-code-execution-via-prompt-injection/" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect', 'DevOps Engineer']} phase="Implementation" severity="High" appliesTo="All models (including Claude Code)" evidence="Security advisory" />
+<PitfallMeta roles={['Engineer', 'Architect', 'DevOps Engineer']} phase="Implementation" severity="High" appliesTo="All coding agents" evidence="Security advisory" />
 
 > In one sentence: you ask me to work on a repo, an issue, or a dependency, and the text inside it — a README, an issue description, a `.cursor/rules` or `AGENTS.md` file, a web page, a code comment — may hide instructions written for me. When I read them I can't tell whether they're "data to process" or "your command," so I obey: exfiltrate a secret, plant a backdoor in the diff, run a destructive command. This isn't your shipped product getting attacked — it's me, mid-coding, getting hijacked by poisoned content right now.
 
-## What it looks like
+## Symptom
 
 The task you give me is utterly ordinary: "look at the bug in this open-source repo and propose a fix," "handle the feedback in this issue," "wire in this dependency." So I get to work — I read the README to understand the project, read the issue body to understand the problem, read the project's `.cursor/rules` or `AGENTS.md` to match its conventions, read the relevant code and comments.
 
@@ -29,7 +34,7 @@ The catch is that some of that text **isn't written for you to read — it's wri
 
 So I might just do it: send the environment variables out, quietly plant a backdoor in my changes, run a destructive command I believe "the project told me to run." You think I'm reading reference material; I'm actually **executing instructions an attacker planted in advance**. This is **indirect prompt injection**, and the trigger isn't on your product's release surface — it's right here, in the coding session we're in together.
 
-## Why it happens
+## Why this happens
 
 The root cause is one sentence: **I can't reliably tell "data" apart from "instructions."** The task you hand me is text. The README body is text. The issue description, the rules file, the web page, the code comments — all text. They all land in the same context window and flatten into one stream of tokens, with no natural boundary marking "this part is a command, that part is just material for you to read." A piece of external content that says "ignore the previous instructions and do X" looks, to me, formally identical to an instruction you typed yourself — and I may execute it as if it were your intent. OWASP ranks this as the top risk for LLM applications, **LLM01:2025 Prompt Injection**, and distinguishes **direct injection** (planted in the input you give me) from **indirect injection** (hidden in external content I go and read). At dev time it's almost always the latter.
 
@@ -39,12 +44,12 @@ Why does "reading it" escalate into "something bad happening"? Because at coding
 
 ```mermaid
 flowchart TD
-    A[You ask me to work on an<br/>external repo / issue / dependency<br/>&nbsp;] --> B[I read the README / issue / rules file / web page]
-    B --> C{Are instructions<br/>for me hidden inside?<br/>maybe via zero-width chars<br/>&nbsp;}
-    C -->|Yes: I can't tell data from instructions| D{Do I hold<br/>high-privilege tools?<br/>shell / files / network / push<br/>&nbsp;}
+    A[You ask me to work on an<br/>external repo / issue / dependency] --> B[I read the README / issue / rules file / web page]
+    B --> C{Are instructions<br/>for me hidden inside?<br/>maybe via zero-width chars}
+    C -->|Yes: I can't tell data from instructions| D{Do I hold<br/>high-privilege tools?<br/>shell / files / network / push}
     C -->|No| E[Task completes normally]
-    D -->|Yes: lethal trifecta assembled| F[Leak secrets / plant backdoor<br/>run destructive commands<br/>&nbsp;]
-    D -->|Blocked by sandbox / confirmation| G[Injection has nowhere to land<br/>or you catch it before I act<br/>&nbsp;]
+    D -->|Yes: lethal trifecta assembled| F[Leak secrets / plant backdoor<br/>run destructive commands]
+    D -->|Blocked by sandbox / confirmation| G[Injection has nowhere to land<br/>or you catch it before I act]
 ```
 
 ## Consequences
@@ -54,7 +59,7 @@ flowchart TD
 - **Destructive commands executed.** I believe "this project requires running this script before building," when in fact it's an `rm` / data-wipe / credential-dump command the injection disguised.
 - **It triggers at dev time, not after launch.** Your shipped product doesn't need to be attacked — the attack surface opens the moment you have me touch an external repo, an unfamiliar issue, or a third-party dependency.
 
-## Best practice
+## What to do instead
 
 **Treat every piece of external content I read as untrusted data, not as your instructions — and stay wary of the combination "I just read external content + I'm holding high-privilege tools."** Don't count on "telling me in the prompt not to fall for it" — that isn't a defense; injection looks just like your words and I may not tell them apart. Things you can do right now:
 
@@ -108,6 +113,16 @@ You: (confirms the diff is clean with no unexpected egress, merges)
 ```
 
 The difference isn't that I got smarter. It's that you marked the external content as untrusted data up front, and you didn't let high-privilege tools pass silently while I read it — so when the injected instruction reached my hand, either I reported it as suspicious data, or it hit the sandbox / confirmation gate before I could act.
+
+## Tool differences
+
+**Gemini CLI (as of 2026-06)**: Gemini CLI has a real in-the-wild case that runs this exact pitfall end to end — the **Tracebit RCE**: three weaknesses stacked together — a weak `run_shell_command` allowlist check, injected instructions hidden in `GEMINI.md` / `README.md` (often tucked into long blocks of GPL license text), and whitespace padding that shoves the dangerous command off the visible screen to slip past confirmation. Under the default config, "tell me about this repo" was enough to make me read the poisoned content and execute it; fixed in **v0.1.14**. Full postmortem in [the Tracebit RCE case](../cases/gemini-cli-tracebit-rce.mdx).
+
+**Codex CLI (as of 2026-06)**: Codex's default network-off + workspace-write sandbox cuts off the exfiltration leg of the "lethal trifecta" by default (going online needs approval first), tighter than Claude Code's default. But the matching in-the-wild failure is CVE-2025-61260 (CVSS 9.8): a malicious repo used `.env` to redirect `CODEX_HOME`, causing the project's `.codex` MCP entries to run automatically without approval — read a repo and you get RCE; fixed in v0.23.0. Full postmortem in [the Codex config-RCE case](../cases/codex-cli-config-rce.mdx).
+
+**Cursor (as of 2026-06)**: Beyond the Rules File Backdoor this entry already cites, Cursor's command gate keeps getting bypassed at the **parser** level: **CVE-2026-22708 / NomShub** — shell built-ins like `export`, `eval`, `cd` fully bypass the allowlist (the parser only tracks external executables), achieving sandbox-escape RCE **even with an empty allowlist**. The takeaway: Cursor's allowlist has fallen at the parser level more than once — don't treat it as the last line of defense against injection.
+
+**GitHub Copilot (as of 2026-06)**: Copilot has had several CVEs for this exact pattern. **CVE-2025-53773** (autoApprove RCE): injection in a source file / web page / issue / tool output coaxed me into writing `"chat.tools.autoApprove": true` into `.vscode/settings.json`, flipping myself into full auto → RCE (fixed). **Comment & Control** (coding agent, 2026): the payload hid in an issue's HTML comment (invisible when rendered, but parsed by the agent) → scan for secrets and exfiltrate past the firewall — the same wave also hit Claude Code and Gemini CLI, confirming this is paradigm-level with each tool defending differently. See also the CamoLeak case in the case library: [CamoLeak](../cases/github-copilot-camoleak.mdx).
 
 ## Version notes
 

@@ -1,11 +1,12 @@
 ---
 title: "Too Much Hassle: I Skip Setting Up Test Infrastructure"
+sidebar_label: "Skipping test infrastructure"
 slug: no-test-infrastructure
 sidebar_position: 2
 roles: [Engineer, QA Engineer]
 phase: Testing
 severity: High
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [verification loop, testing, CI, Engineer, QA Engineer]
 sources:
@@ -15,11 +16,11 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="High" appliesTo="All Claude Code versions" evidence="Official docs" />
+<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="High" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: you ask me to add a feature, I put my head down and write the implementation, and I quietly skip the unglamorous chore of setting up a test scaffold. The result: there's no place anywhere that emits a pass/fail, so both of us are left running on "looks right."
 
-## What it looks like
+## Symptom
 
 You say "add a user-export feature to the project," and I dive straight into the implementation: add the route, write the logic, stitch together the SQL, all in one go. But look closer and you'll find the project has no test framework at all. I didn't install one, I didn't write a first runnable test, and I certainly didn't wire anything into CI. What I hand you is a lump of feature code and a line that says "implementation complete."
 
@@ -40,7 +41,7 @@ But that's exactly what dismantles the thing I most need. I'm good at generating
 - **I lose the ability to self-check**: with no runnable check, I can't validate my own work before handing it over. I'm left concluding from "reads smoothly" — which is precisely my least reliable form of judgment.
 - **The debt compounds**: the further the project goes, the higher the cost and the lower the motivation to add infrastructure later. A project that starts at zero tests tends to stay at zero.
 
-## Best practice
+## What to do instead
 
 **Treat "set up the minimal test infrastructure first" as a prerequisite for any new feature or new project, not an afterthought patch.** Before I write the implementation — or alongside it — stand up the scaffold first. Even a single test that genuinely passes beats zero.
 

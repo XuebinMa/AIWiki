@@ -1,11 +1,12 @@
 ---
 title: Ask me the same judgment call twice and I may flip my answer—without you noticing
+sidebar_label: "Nondeterministic flip-flop"
 slug: nondeterministic-flip-flop
 sidebar_position: 4
 roles: [Project Manager, Architect, Engineer]
 phase: Ideation & Feasibility
 severity: Medium
-applies_to: "All sampling-based chat models (a general trait)"
+applies_to: "All LLMs"
 evidence: Research
 tags: [non-determinism, feasibility, technology selection, uncertainty, Project Manager, Architect, Engineer]
 sources:
@@ -15,11 +16,11 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Project Manager', 'Architect', 'Engineer']} phase="Ideation & Feasibility" severity="Medium" appliesTo="All sampling-based chat models (a general trait)" evidence="Research" />
+<PitfallMeta roles={['Project Manager', 'Architect', 'Engineer']} phase="Ideation & Feasibility" severity="Medium" appliesTo="All LLMs" evidence="Research" />
 
 > In one sentence: ask me the same "should we use it / is this path viable" judgment call again a couple of days later, or with slightly different wording, and I may hand you the **opposite** conclusion—stated just as confidently both times. What looks like "a stable answer" is really one roll of the dice.
 
-## What you'll see me do
+## Symptom
 
 On Monday you ask: "Can SQLite handle this project's write load?" I say, "Plenty—don't reach for a database cluster this early." On Thursday you rephrase: "Won't SQLite buckle under this write pressure?" I say, "There's real risk; I'd go straight to Postgres."
 
@@ -44,12 +45,12 @@ flowchart TD
     C --> D{Which end of the range does it land on}
     D -->|This sample| E[Fine, use it]
     D -->|That sample| F[Risky, avoid it]
-    E --> G[You see only one answer<br/>&nbsp;]
+    E --> G[You see only one answer]
     F --> G
     G --> H[Mistaken for a stable judgment]
 ```
 
-## What it costs you
+## Consequences
 
 - **You treat one sample as a verdict.** In the feasibility phase, "use this tech or not" and "is this path viable" are often foundation-level calls; building your architecture on an answer that could just as easily have flipped is pouring the foundation on a die roll.
 - **The flip happens where you can't see it.** You rarely ask the exact same question twice verbatim, so two opposing conclusions almost never appear side by side—you don't perceive that they existed, so nothing tips you off.

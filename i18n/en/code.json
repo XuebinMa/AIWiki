@@ -1,4 +1,8 @@
 {
+  "tagline": {
+    "message": "Coding with AI tools — the pitfalls you'll hit and the guardrails for each, written from the model's side.",
+    "description": "The site tagline"
+  },
   "pitfallMeta.phase": {
     "message": "Phase",
     "description": "PitfallMeta badge label: lifecycle phase"

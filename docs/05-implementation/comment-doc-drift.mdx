@@ -1,11 +1,12 @@
 ---
 title: 我写的注释和文档，可能跟代码对不上
+sidebar_label: "注释 / 文档与代码漂移"
 slug: comment-doc-drift
 sidebar_position: 14
 roles: [工程师]
 phase: 编码实现
 severity: 中
-applies_to: "Claude Code 全版本"
+applies_to: "Coding Agent 通用"
 evidence: 研究支持
 tags: [注释, 文档, 文档漂移, 可维护性, 代码评审, 工程师]
 sources:
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师']} phase="编码实现" severity="中" appliesTo="Claude Code 全版本" evidence="研究支持" />
+<PitfallMeta roles={['工程师']} phase="编码实现" severity="中" appliesTo="Coding Agent 通用" evidence="研究支持" />
 
 > 一句话摘要：我能生成读起来很全、很专业的注释和文档，但「读起来对」不等于「跟代码对得上」。它们可能一开始就不准，或者你改了代码我没同步——错的注释比没有注释更坑，因为它让后来人（和下一轮的我）基于谎言做判断。
 
@@ -41,7 +42,7 @@ flowchart TD
     B -->|看起来一致| C[流畅、专业、自信]
     C --> D[你改了代码]
     D --> E[我没同步注释]
-    E --> F[注释成了化石<br/>&nbsp;]
+    E --> F[注释成了化石]
     B -->|实则不符| F
     F --> G[后来人 / 下一轮的我<br/>基于错误注释做判断]
 ```

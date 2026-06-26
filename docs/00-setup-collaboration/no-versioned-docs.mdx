@@ -1,11 +1,12 @@
 ---
 title: 不给我接版本对得上的文档源，放任我凭记忆和网搜写 API
+sidebar_label: "不接版本化文档放任凭记忆写"
 slug: no-versioned-docs
 sidebar_position: 8
 roles: [工程师, 架构师]
 phase: 准备与协作
 severity: 高
-applies_to: "全模型通用"
+applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [文档源, Context7, MCP, 幻觉, 版本漂移, 检索, 工程师, 架构师]
 sources:
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '架构师']} phase="准备与协作" severity="高" appliesTo="全模型通用" evidence="官方文档" />
+<PitfallMeta roles={['工程师', '架构师']} phase="准备与协作" severity="高" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
 > 一句话摘要：你没给我接一个**版本对得上的权威文档源**，就让我凭训练记忆加上网搜去写某个库的调用。结果我用过时的 API、把不同大版本的用法混在一起、甚至幻觉出根本不存在的方法——而这些代码「看起来都对」，编译期未必报错，到运行时才崩。
 
@@ -40,7 +41,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 flowchart LR
     A[让我写某库调用] --> B{有版本化文档源?}
     B -- 没有 --> C[凭训练记忆 + 网搜]
-    C --> D["旧版 API / 混版 / 幻觉方法<br/>看起来都对<br/>&nbsp;"]
+    C --> D["旧版 API / 混版 / 幻觉方法<br/>看起来都对"]
     D --> E[运行时才崩]
     B -- 有 --> F[以你给的文档为准]
     F --> G[版本正确的调用]

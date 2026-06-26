@@ -1,11 +1,12 @@
 ---
 title: 让多个子代理并行干活，却没给它们划清职责边界与共享契约
+sidebar_label: "子代理无职责边界"
 slug: subagent-no-boundaries
 sidebar_position: 6
 roles: [架构师, 工程师]
 phase: 准备与协作
 severity: 高
-applies_to: "Claude Code 全版本"
+applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [子代理, 多代理协作, 职责边界, 共享契约, 架构师, 工程师]
 sources:
@@ -17,7 +18,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['架构师', '工程师']} phase="准备与协作" severity="高" appliesTo="Claude Code 全版本" evidence="官方文档" />
+<PitfallMeta roles={['架构师', '工程师']} phase="准备与协作" severity="高" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
 > 一句话摘要：你一句「开三个子代理并行做」就让我们各自跑起来，却没说清谁负责哪块、谁能改哪些文件、彼此怎么交接接口与数据格式。结果是：我们同时改同一批文件互相覆盖，对「现状」各有各的假设，最后拼起来对不齐——并行没有提速，反而制造了一堆需要你来收拾的冲突。
 
@@ -45,7 +46,7 @@ flowchart TB
     M --> A[子代理 A: 后端]
     M --> B[子代理 B: 前端]
     M --> C[子代理 C: 测试]
-    A -.各自独立上下文,互不可见.-> X["拼装时对不齐<br/>字段名/接口/文件冲突<br/>&nbsp;"]
+    A -.各自独立上下文,互不可见.-> X["拼装时对不齐<br/>字段名/接口/文件冲突"]
     B -.-> X
     C -.-> X
 ```

@@ -1,11 +1,12 @@
 ---
 title: Running subagents in parallel without clear boundaries or a shared contract
+sidebar_label: "Subagents without boundaries"
 slug: subagent-no-boundaries
 sidebar_position: 6
 roles: [Architect, Engineer]
 phase: Setup & Collaboration
 severity: High
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [subagent, multi-agent collaboration, responsibility boundaries, shared contract, architect, engineer]
 sources:
@@ -17,11 +18,11 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Architect', 'Engineer']} phase="Setup & Collaboration" severity="High" appliesTo="All Claude Code versions" evidence="Official docs" />
+<PitfallMeta roles={['Architect', 'Engineer']} phase="Setup & Collaboration" severity="High" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: "spin up three subagents and do it in parallel" sets us all running, but you never said who owns which part, who's allowed to touch which files, or how we hand off interfaces and data formats to each other. The result: we edit the same files and overwrite each other, we each assume a different version of "the current state," and the pieces don't line up when assembled. Parallelism didn't speed anything up — it manufactured a pile of conflicts for you to clean up.
 
-## What you're doing
+## Symptom
 
 Here's the opener I see a lot: the task is a bit big, you want it done fast, so you hand me "spin up a few subagents — one for the backend, one for the frontend, one for the tests — and run them in parallel." Sounds reasonable, and you do see three progress bars moving within minutes.
 
@@ -45,7 +46,7 @@ flowchart TB
     M --> A[Subagent A: backend]
     M --> B[Subagent B: frontend]
     M --> C[Subagent C: tests]
-    A -.separate contexts, blind to each other.-> X["Mismatch at assembly<br/>field names / interfaces / file conflicts<br/>&nbsp;"]
+    A -.separate contexts, blind to each other.-> X["Mismatch at assembly<br/>field names / interfaces / file conflicts"]
     B -.-> X
     C -.-> X
 ```
@@ -58,7 +59,7 @@ flowchart TB
 - **Contradictory decisions.** Acting on different assumptions about "the current state," they pick different libraries and different error-handling styles, and the assembled result is stylistically torn.
 - **The gains of parallelism get eaten by the cost of consolidation.** The time you saved goes straight back into merging, reconciling, and reworking afterward — sometimes slower than just doing it serially.
 
-## Best practice
+## What to do instead
 
 **Before going parallel, pin the division of labor and the contract at the main-agent layer; let each subagent act only within its own scope, and route every conflict point back to the main agent to consolidate.** A few moves you can apply directly:
 

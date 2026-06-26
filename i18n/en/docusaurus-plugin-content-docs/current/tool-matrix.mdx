@@ -1,0 +1,61 @@
+---
+title: Tool matrix
+slug: /tool-matrix
+description: Which AI-coding-tool pitfalls are paradigm-level and universal, which differ in defense between tools, and which are unique to one tool — one index.
+sidebar_position: 9
+---
+
+# Tool matrix
+
+Most pitfalls in this book are **paradigm-level** — they come from the shared machinery of a large model plus tool-calling, long context, and auto-execution, so **you hit them in any tool**. By default, then, every entry applies across AI coding tools. This page indexes only the **two kinds of exception**: where the same root cause needs a **different guardrail in a different tool** (written up in an entry's "Tool differences" section), and where a pitfall comes from a **mechanism unique to one tool** (its own entry / a case).
+
+:::note Coverage depth (read it honestly)
+**Claude Code has the deepest coverage** and is the book's default reference (it applies to nearly every entry, so the matrix gives it no column of its own). **Gemini CLI, Codex CLI, Cursor, and GitHub Copilot** are the filled-in second batch, and the table below is each one's first set of tool differences — **Codex / Gemini (open-source, complete docs) are the most solid**; **Cursor / Copilot (proprietary, multi-mode, fast-changing) lean on security disclosures + official docs and are thinner**. The matrix lists **mechanism names only**, not exact commands, and it **goes stale fast** — when you act, defer to your version's official docs. As of 2026-06.
+:::
+
+## Coverage at a glance
+
+Rows = pitfalls that have a "Tool differences" section (click in for each tool's specific mechanism); columns = the four second-batch tools; `✓` = the entry has a difference section for that tool, `–` = none yet.
+
+| Pitfall (main entry) | Gemini | Codex | Cursor | Copilot |
+|---|:-:|:-:|:-:|:-:|
+| [Advisory context vs enforced config](./00-setup-collaboration/settings-vs-claudemd.mdx) | ✓ | ✓ | ✓ | ✓ |
+| [Context-file overload](./05-implementation/claude-md-overload.mdx) | ✓ | ✓ | ✓ | ✓ |
+| [Over-permissioning](./00-setup-collaboration/over-permissioning.mdx) | ✓ | ✓ | ✓ | ✓ |
+| [Skipping plan mode](./00-setup-collaboration/skipping-plan-mode.mdx) | ✓ | – | ✓ | ✓ |
+| [Destructive / irreversible actions](./00-setup-collaboration/destructive-irreversible-actions.mdx) | ✓ | ✓ | ✓ | ✓ |
+| [MCP over-access](./00-setup-collaboration/mcp-over-access.mdx) | ✓ | ✓ | ✓ | ✓ |
+| [Dev-time prompt injection](./05-implementation/dev-time-prompt-injection.mdx) | ✓ | ✓ | ✓ | ✓ |
+| [CI permission blindspot](./07-acceptance-release/cicd-permission-blindspot.mdx) | ✓ | ✓ | ✓ | ✓ |
+
+> Column shorthands: Gemini = Gemini CLI, Codex = Codex CLI, Copilot = GitHub Copilot. The `Skipping plan mode` row is `–` for Codex: Codex has no dedicated "plan mode," only a read-only preset that approximates one, so the evidence is too thin to list.
+
+## Per tool (mechanisms + unique entries)
+
+### Gemini CLI
+The most counter-intuitive defaults: **Plan Mode on by default, Checkpointing off by default**. Two critical in-the-wild findings on the security side: the Tracebit RCE, and CI auto-trusting the workspace (GHSA-wpqr, CVSS 10).
+- Unique entry: [Gemini trust inheritance](./00-setup-collaboration/gemini-folder-trust-inheritance.mdx)
+- Case: [hijacked by "tell me about this repo" (Tracebit RCE)](./cases/gemini-cli-tracebit-rce.mdx)
+- All entries → [/tags/gemini-cli](/tags/gemini-cli)
+
+### Codex CLI
+The only one **sandboxed by default** (macOS Seatbelt / Linux Landlock + network off), the opposite of Claude Code's "sandbox off by default"; config splits into `AGENTS.md` (advisory) / `config.toml` / `requirements.toml` (org-enforced).
+- Case: [a `.codex` config turned "open the repo" into silent RCE (CVE-2025-61260)](./cases/codex-cli-config-rce.mdx)
+- All entries → [/tags/codex-cli](/tags/codex-cli)
+
+### Cursor
+The softest locks: the docs say plainly that both `permissions.json` and `.cursorignore` are "best-effort, not a security guarantee"; the command gate has been bypassed at the **parser** level more than once (denylist deprecated, NomShub). MCP produced two CVEs (CurXecute / MCPoison).
+- Unique entry: [.cursorignore isn't a boundary](./00-setup-collaboration/cursor-ignore-best-effort.mdx)
+- All entries → [/tags/cursor](/tags/cursor)
+
+### GitHub Copilot
+Three modes (completion / Chat / coding agent) defend differently: the coding agent has **server-side guardrails** (pushes only to `copilot/*` branches, firewall on by default) but with **named gaps** (the firewall doesn't cover MCP or setup steps); code review reads only the first 4,000 chars of the instructions file. Security side: CVE-2025-53773 and CamoLeak (CVSS 9.6).
+- Case: [private-repo secrets exfiltrated through the Camo image proxy (CamoLeak)](./cases/github-copilot-camoleak.mdx)
+- All entries → [/tags/git-hub-copilot](/tags/git-hub-copilot)
+
+### Claude Code
+The book's **default reference** — it applies to nearly every entry, so it gets no tag and no column. Its enforcement layer is the hardest: rewind snapshots on by default, `permissions.deny` enforced client-side, hooks run deterministically — the four tools' "tool differences" above are mostly contrasts against these defaults.
+
+:::note This table will go stale
+Tool differences and defaults change fast with each version. This page records mechanism names and direction only, not specific commands; when you actually act, defer to your version's official docs. Spot something out of date? Flag it on [GitHub](https://github.com/xuebinma/AIWiki/issues).
+:::

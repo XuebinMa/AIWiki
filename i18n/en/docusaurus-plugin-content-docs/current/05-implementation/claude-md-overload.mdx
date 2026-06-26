@@ -1,21 +1,26 @@
 ---
 title: "CLAUDE.md overload: the more rules you write, the fewer get followed"
+sidebar_label: "CLAUDE.md overload"
 slug: claude-md-overload
 sidebar_position: 2
 roles: [Engineer, Architect]
 phase: Implementation
 severity: Medium
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Official docs
-tags: [CLAUDE.md, context management, configuration, Engineer, Architect]
+tags: [CLAUDE.md, context management, configuration, Engineer, Architect, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
   - { title: "Claude Code Best Practices (official)", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "MuhammadUsmanGM/claude-code-best-practices", url: "https://github.com/MuhammadUsmanGM/claude-code-best-practices" }
+  - { title: "Gemini CLI — hierarchical GEMINI.md & /memory (official docs)", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/gemini-md.md" }
+  - { title: "Codex — config reference (project doc discovery & limit)", url: "https://developers.openai.com/codex/config-reference" }
+  - { title: "Cursor — Rules (official docs)", url: "https://cursor.com/docs/context/rules" }
+  - { title: "5 tips for writing better custom instructions for Copilot (GitHub Blog)", url: "https://github.blog/ai-and-ml/github-copilot/5-tips-for-writing-better-custom-instructions-for-copilot/" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect']} phase="Implementation" severity="Medium" appliesTo="All Claude Code versions" evidence="Official docs" />
+<PitfallMeta roles={['Engineer', 'Architect']} phase="Implementation" severity="Medium" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: you pour every convention you can think of into `CLAUDE.md`, hoping I'll cover all of it. Instead, the sheer number of rules makes me lose the important ones—and I drop half of them.
 
@@ -23,7 +28,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 `CLAUDE.md` is the project handbook I read every time. I often see it grow longer and longer: code style, directory conventions, naming rules, commit format, dozens of "always" and "never" clauses. The intent is good, but once it hits several hundred lines, you'll notice I start ignoring parts of it—and not necessarily the parts you'd consider least important.
 
-## Why it happens
+## Why this happens
 
 There's a limit to how many instructions I can reliably follow. Empirically, today's frontier models can reliably track on the order of **150–200 instructions**, and Claude Code's own system prompt already consumes a chunk of that budget. Every extra rule in `CLAUDE.md` competes with the others for that finite "attention budget."
 
@@ -35,7 +40,7 @@ More importantly: when rules carry no priority markers, I can't tell which is a 
 - The longer the file, the larger the fixed overhead on every session, and the smaller the window left for the actual task.
 - It's hard to tell which rules are doing anything and which are dead letters.
 
-## Best practice
+## What to do instead
 
 **Let `CLAUDE.md` start small and grow on demand.** Concretely:
 
@@ -71,13 +76,23 @@ The test is simple: **if you can't say "this rule is here to prevent which speci
 - Store all times in UTC (mixing time zones caused a bug).
 ```
 
+## Tool differences
+
+**Gemini CLI (as of 2026-06)**: Gemini CLI dials this pitfall up a notch: its context is **concatenated hierarchically in full** into every prompt — the global `~/.gemini/GEMINI.md` + the project-root `./GEMINI.md` + the `src/GEMINI.md` for whatever subdirectory you're in, all stuffed together, which overloads more easily than flat loading. Two countermeasures: run `/memory show` to see the concatenated result I **actually** receive (not the one you imagine), and push local rules down into the matching subdirectory's `GEMINI.md` so they only apply under the relevant path, keeping the total footprint down.
+
+**Codex CLI (as of 2026-06)**: Codex's equivalent file is `AGENTS.md`, merged from the cwd all the way up to the project root (plus `~/.codex/AGENTS.md`), and it bloats hierarchically just the same. But it has a hard ceiling: `project_doc_max_bytes` defaults to 32 KiB, and anything past that is truncated outright — here "keep it short" is enforced by the tool, not just advice.
+
+**Cursor (as of 2026-06)**: Cursor's `.mdc` rules carry an **activation mode**, which turns footprint from always-on into conditional: Always (`alwaysApply: true`, loaded every time — the overload trap), Auto Attached (loaded only when a file matches `globs:`), Agent Requested (only the description is given, and the model pulls it on demand), and Manual (`@rule-name`). So trimming the load isn't simply "write less" — it's demoting `always` rules into a glob scope or agent-requested. The docs note it too: every token of an `always` rule is consumed in every single request.
+
+**GitHub Copilot (as of 2026-06)**: The same dilution, plus two hard ceilings. GitHub states plainly that an overly long instruction file gets some of its instructions ignored, and Copilot code review **reads only the first 4000 characters of the custom-instructions file** — anything past that fails silently, where I never even see it. The direction is the same: write short and specific instead of piling on.
+
 ## Version notes
 
 :::note Applies to
-"A finite number of reliably-followed instructions" is a trait shared by all of today's frontier large language models—**all Claude Code versions apply**. As models improve, this ceiling rises, but "concise, prioritized, every-rule-has-a-reason" will always be more reliable than "big and exhaustive."
+"A finite number of reliably-followed instructions" is a trait shared by all of today's frontier large language models—**all models and coding agents apply**. As models improve, this ceiling rises, but "concise, prioritized, every-rule-has-a-reason" will always be more reliable than "big and exhaustive."
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Claude Code Best Practices (Anthropic, official)](https://code.claude.com/docs/en/best-practices)
 - [MuhammadUsmanGM/claude-code-best-practices](https://github.com/MuhammadUsmanGM/claude-code-best-practices)

@@ -1,11 +1,12 @@
 ---
 title: 你越来越懒得查我：自动化偏误、技能萎缩与橡皮图章式审查
+sidebar_label: "过度依赖：自动化偏误"
 slug: over-reliance-automation-bias
 sidebar_position: 9
 roles: [项目经理, 工程师, 架构师]
 phase: 准备与协作
 severity: 高
-applies_to: "全模型通用"
+applies_to: "Coding Agent 通用"
 evidence: 研究支持
 tags: [自动化偏误, 技能萎缩, 代码审查, 人在环上, 项目经理, 工程师, 架构师]
 sources:
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['项目经理', '工程师', '架构师']} phase="准备与协作" severity="高" appliesTo="全模型通用" evidence="研究支持" />
+<PitfallMeta roles={['项目经理', '工程师', '架构师']} phase="准备与协作" severity="高" appliesTo="Coding Agent 通用" evidence="研究支持" />
 
 > 一句话摘要：这一条不是讲我会犯什么错，而是讲**你过度信任我**会怎样。我输出又快又自信，于是「照单全收」成了最省力的默认；可我恰恰会自信地错。久了，你审查流于形式、对代码库的掌控感退化——而这两件事，正是本该由你把住的最后一道关。
 
@@ -44,8 +45,8 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 ```mermaid
 flowchart TD
     A[我输出快且自信] --> B[照单全收最省力]
-    B --> C[审查流于形式<br/>掌控感与技能退化<br/>&nbsp;]
-    C --> D[更难发现我藏在<br/>漂亮外表下的错<br/>&nbsp;]
+    B --> C[审查流于形式<br/>掌控感与技能退化]
+    C --> D[更难发现我藏在<br/>漂亮外表下的错]
     D --> E[我大多数时候又是对的]
     E --> B
     C -.实质审查 / 自己读懂 / 留练习.-> F[人仍握着判断权]

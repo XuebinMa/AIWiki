@@ -18,8 +18,23 @@ description: 把一条 AiWiki 中文误区条目（docs/ 下的 .mdx）翻译成
 
 1. **术语统一**：所有术语、以及 frontmatter 与 `<PitfallMeta>` 里的枚举值（roles / phase / severity），一律以 `terminology.md` 为准。表里没有的新术语，先补进 `terminology.md` 再用。
 2. **保结构原样**：
-   - frontmatter：key 不动；`title`/`tags`/`applies_to` 译；`roles`/`phase`/`severity`/`evidence` 用 `terminology.md` 的英文枚举；`slug`、`sidebar_position` 不变；`sources` 的 url 不变，title 可译。
+   - frontmatter：key 不动；`title`/`tags`/`applies_to` 译；**中文有 `sidebar_label` 时，英文也要译一个对应的短 `sidebar_label`**（导航/卡片用短名）；`roles`/`phase`/`severity`/`evidence` 用 `terminology.md` 的英文枚举；`slug`、`sidebar_position` 不变；`sources` 的 url 不变，title 可译。
    - 保留 `import … PitfallMeta`、`<PitfallMeta .../>`（props 改成英文枚举值）、所有 ```mermaid``` 代码块（节点内文字可译，结构与箭头不动）、`:::note` admonition。
+   - **七段小标题用下面这套固定的地道英文，每节只用规范说法、不得另造变体**（允许与中文字面不字字对应——尤其「最佳实践 → What to do instead」）：
+
+     | 中文小标题 | 规范英文 `##` |
+     |------------|---------------|
+     | 现象 | `## Symptom` |
+     | 为什么会这样 | `## Why this happens` |
+     | 后果 | `## Consequences` |
+     | 最佳实践 | `## What to do instead` |
+     | 示例 | `## Example` |
+     | 版本说明 | `## Version notes` |
+     | 延伸阅读与出处 | `## Further reading and sources` |
+     | 什么时候例外 | `## When the exception applies` |
+     | 工具差异 | `## Tool differences` |
+
+     条目专属的「与《X》的区别」边界小节按 `## How this differs from X` 自然表达即可。
 3. **像母语，不逐字**：用英文母语者的说法把同一件事讲清楚（见 `STYLE-GUIDE.md`「中英一致性」），但事实、数字、出处、结论必须与中文完全一致。
 4. **防编造自查**（翻完逐项打勾）：
    - [ ] 没有中文里不存在的新论断或新例子
@@ -28,3 +43,4 @@ description: 把一条 AiWiki 中文误区条目（docs/ 下的 .mdx）翻译成
    - [ ] 元数据（角色 / 阶段 / 严重度 / 适用版本 / 证据类型）与中文版语义相同
 5. **分类标签**：若该条目是其所在阶段目录在英文站的**第一条**（此前该目录没有条目），还要在 `i18n/en/docusaurus-plugin-content-docs/current.json` 补上该分类的英文 `label` 与 generated-index 的 `title` / `description`——否则英文站的侧边栏 / 面包屑 / 分类首页会回退显示中文。
 6. 翻完跑英文向 linter（Vale / cspell）。
+7. **索引页同步**：若中文侧改了 `docs/mechanisms.mdx`（新条目挂桶）、`docs/core-20.mdx`、或某条 `cases/` 的「印证 / 不证明」块、某个 `toolkit/` 模板的「适用边界」三段，对应英文镜像必须同步翻译——`check:mirror` 会卡中英不成对，但不会卡「英文漏了某一节」，靠这一步守住。

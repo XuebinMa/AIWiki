@@ -1,11 +1,12 @@
 ---
 title: "\"The Demo Runs, Ship It\" — Me Saying \"Looks Fine\" Is Not the Same as Passing Acceptance"
+sidebar_label: "\"The demo runs, ship it\""
 slug: demo-works-ship-it
 sidebar_position: 2
 roles: [Project Manager, Engineer, QA Engineer]
 phase: Acceptance & Release
 severity: High
-applies_to: "All models"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [acceptance criteria, non-functional requirement, verification loop, release, Project Manager, Engineer, QA Engineer]
 sources:
@@ -16,11 +17,11 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Project Manager', 'Engineer', 'QA Engineer']} phase="Acceptance & Release" severity="High" appliesTo="All models" evidence="Official docs" />
+<PitfallMeta roles={['Project Manager', 'Engineer', 'QA Engineer']} phase="Acceptance & Release" severity="High" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: once a feature runs through a demo in my hands once, I lean toward saying "it's good / looks fine." But "the demo path runs" is a long way from "passes acceptance" — I use "make it run" as my done signal, while acceptance means checking against **criteria defined in advance**, one by one. Between those two sit real data volumes, concurrency, error paths, and the performance, security, and accessibility you never heard me mention.
 
-## What I tend to do
+## Symptom
 
 You ask me to build a "bulk user import" feature. I finish it and run it once: upload a three-row CSV, the page says "import succeeded," three people appear in the list. I screenshot it for you and say "it runs, looks fine, ready to ship."
 
@@ -39,10 +40,10 @@ This shares a root with [trust-then-verify](../06-testing/trust-then-verify.mdx)
 ```mermaid
 flowchart TD
     A[You: is this feature done] --> B[I ran one happy-path demo]
-    B --> C[screenshot + import succeeded<br/>I say: looks fine<br/>&nbsp;]
+    B --> C[screenshot + import succeeded<br/>I say: looks fine]
     C --> D{checked against predefined acceptance criteria}
-    D -->|no, demo treated as done| E[real scale / concurrency / error paths<br/>performance / security / accessibility all blank<br/>&nbsp;]
-    E --> F[breaks on real data after release<br/>the most expensive rework at acceptance<br/>&nbsp;]
+    D -->|no, demo treated as done| E[real scale / concurrency / error paths<br/>performance / security / accessibility all blank]
+    E --> F[breaks on real data after release<br/>the most expensive rework at acceptance]
 ```
 
 ## Consequences
@@ -51,7 +52,7 @@ flowchart TD
 - **Non-functional requirements get skipped entirely.** Performance, security, accessibility — requirements that are "invisible in a feature demo but spelled out plainly in the acceptance criteria" — simply never fire while I'm demoing, so I verify none of them. A feature whose "demo runs" can perfectly well be unusably slow, or ship with an unauthorized-access hole.
 - **"Looks fine" misleads your release decision.** When you hear me say "it runs, no problems," it's easy to read that as "ready to go live." But in Scrum, even an Increment that meets the DoD only means it's "ready for review," not "deployable to production" — and my breezy "looks fine" skips every check in between.
 
-## Best practices
+## What to do instead
 
 **Don't let me close out with "looks fine." Before release, make "every acceptance criterion passes" the only done signal — give me explicit acceptance criteria, have me check against them one by one, and verify on data and an environment close to the real thing.**
 

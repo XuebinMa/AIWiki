@@ -15,7 +15,7 @@
 
 | 阶段 | 目标 | 已发布 |
 |------|------|--------|
-| 00 准备与协作 | 8–10 | 10 |
+| 00 准备与协作 | 8–10 | 12 |
 | 01 灵感与可行性 | 4–6 | 6 |
 | 02 需求分析 | 5–7 | 6 |
 | 03 概要设计 | 5–7 | 7 |
@@ -23,6 +23,9 @@
 | 05 编码实现 | 12–15 | 15 |
 | 06 测试 | 5–7 | 6 |
 | 07 验收与发布 | 6–8 | 8 |
+| **合计** | 50–66 | **66** |
+
+> 另有：案例库 5 例（`docs/cases/`）+ 索引页 `/tool-matrix`、`/mechanisms`（机制索引）、`/core-20`（必读 20 条）。条数以 `docs/` 实际为准。
 
 ## 00 准备与协作
 
@@ -129,11 +132,29 @@
 - ⬜ **核对并同步「现状」计数**：`CLAUDE.md`「现状」（写 56）与本表「进度总览」、`docs/` 实际条数已对不上（main 又合并进若干条目）；按「以 `docs/` 实际为准」核一次、同步两处。
 - 🟡 **首屏角色 CTA 分流**（评审 P0）：首页首屏加「我是工程师 / 架构师 / 负责发布·安全」角色按钮，把新访客直接分流到 `/roles`，让角色入口承担转化。
 - ✅ **模板库 / 清单**（评审 P2，「拿来即用」）：已建 `docs/toolkit/`「🧰 模板与清单」区，5 件（权限配置模板、PR review 清单、任务启动模板、上线前安全清单、坏 → 好 prompt 对照），中英镜像 + 与相关误区双链。
+- ⬜ **跨工具「世界可写配置」误区候选**（工具扩展研究沉淀，用户定先入库）：**CVE-2026-35603**——`C:\ProgramData` 配置目录默认人人可写，**Codex / Cursor / Gemini CLI / Claude Code 四家都中**，可植入「每轮必跑」命令做本地提权。属**范式级跨工具**新误区（不属某一工具），宜单开一条挂 `00-setup`、打多工具 tag；本波（Cursor/Copilot/Codex 扩展）未做。出处：Cymulate、The Hacker News（写时复核各家修复状态）。
+- ⬜ **其余工具差异候选（证据弱 / 跨工具，暂存）**：Cursor 的 VS Code Workspace-Trust 默认关（继承机制、无独有 bug）→ 宜作 `over-permissioning` 小节而非单条；GitHub Copilot 免费档训练默认 + content exclusion 不覆盖 agent（易过时）→ 训练默认作观察项、exclusion 事实可并入 `mcp-over-access`。来自 Cursor / Copilot 研究 List B 的弱项，按证据关未写。
+
+- ⬜ **`evidenceLevel`：证据「强度」字段（评审第三轮 #5；本轮只留接口，未实现）**。现有 `evidence`（证据**类型**）已确定性派生自 `sources`；评审建议再加一个**强度**轴，但双方一致要求**必须可机械派生、不靠作者打分**，否则会变成新漂移源。已定取值（比「高/中/低」更不主观，确定性派生）：`incident-backed`（有 CVE/GHSA/真实事故/安全公司复盘）｜`mechanism-documented`（仅官方文档证明机制存在）｜`experience-based`（仅博客/社区/作者经验）｜`speculative`（无可核查来源）。**做法**：写进 `terminology.md` 的确定性派生规则 → 扩 `PitfallMeta` 徽章 → 回填全站。待规则定稿后单独 PR。
+- ⬜ **工具矩阵「机制格」升级（评审第三轮 #6；本轮未做）**：保留现有 ✓ 概览，另加一版**机制名级**矩阵（如「project memory / settings split」「trust / sandbox」级别），让读者看到「差异是什么」而不仅是「有差异」。**铁律**：只写机制名，**不写具体命令 / JSON 字段 / 默认值，除非带版本戳 + 出处**（延续 `CLAUDE.md` 反过时铁律；矩阵页已标「截至 2026-06」）。
+- ⬜ **`sidebar_label` 短名回填其余阶段（评审第三轮 #4 续）**：本轮已给 cases + 工具特有 + 00 超长标题配短 `sidebar_label`；01–07 其余叙事长标题条目仍用长 title 占侧边栏，按 `STYLE-GUIDE`/skill 的约定逐阶段回填（非阻塞，新条目按约定自带）。
+
+#### 索引/可信度层（评审第四轮，用户选 #3+#1+#4+#5）
+
+- ✅ **机制索引页（#3，首推）**：`docs/mechanisms.mdx`（+英镜像，slug `/mechanisms`，navbar「机制索引 / Mechanisms」）。6 个根因桶（长上下文退化 / 概率性补全与遵守 / 工具与权限外溢 / 目标函数错位 / 全局视野不足 / 反馈循环退化），全 66 条**各挂恰好一个主桶**、每桶带一句机制说明 + 一句「正向镜像」。手工策展页，不给条目加 `mechanism:` 元数据（避免又一层会漂的字段）；与 `intro` 互链。**新增条目须顺手挂进对应桶。**
+- ✅ **必读 20 条（#1）**：`docs/core-20.mdx`（+英镜像，slug `/core-20`）；入选规则写在页顶（`severity: 高` 为主 + 「新手最早踩 + 后果最不可逆」粗排，含少数基础项）。入口在 `intro` 顶部 CTA + 侧边栏置顶（`sidebar_position: 0.5`），**不挤 navbar**。
+- ✅ **案例「印证 / 不证明」块（#4）**：5 条案例（中英）末尾加固定块——「印证的误区」清单 + 「不证明」防过度泛化（接续 PR #29 归因严谨化）。
+- ✅ **模板「适用边界」（#5）**：5 个 `docs/toolkit/*.mdx`（中英）各加「适合什么时候用 / 不适合什么时候用 / 使用前请替换」三段，让模板从「万能 prompt」变「可裁剪工件」。
+- ⬜ **#2 阶段总论**：每个生命周期阶段开头加一段「这一阶段 AI 最容易整体性翻车的地方」总论，把零散条目串成叙事。评审第四轮提出，本轮未做。
+- ⬜ **#7 人类职责边界（升级 `/roles` 页）**：在按角色浏览页之上，加一层「这个角色对 AI 产出该守住哪些不可外包的判断」。本轮未做。
+- ⬜ **#8 新专题候选**：评审第四轮建议补 code review / db migration / 多 agent 协作 / 成本治理等专题；其中「**AI 评审自己写的代码**」最值得先做。逐条按现有去重 + 出处标准走流水线，本轮未做。
+- ⬜ **#9 成熟度 status（仅收可机械派生）**：若做，只收 `case-backed`（被某案例 `cases/` 反链印证）/ `template-linked`（被某 toolkit 模板引用）这类**可机械派生**的标记，**不收**主观 `draft/reviewed`（与 `evidenceLevel` 同一治理标准）。本轮未做。
+- ❌ **#6 正用法独立区（评审第四轮）**：不做——会稀释「第一人称误区手册」的定位；正向镜像已分布在每条「What to do instead」+ 机制页每桶一句「正向镜像」里，无需另起独立站区。
 
 ### 待触发（条件未到，不算欠债）
 
-- ⏸️ **工具矩阵页 + 各条「工具差异」实际内容**：站点现为 Claude-only，无第 2 个工具就没内容可填。结构定调已在 `CLAUDE.md`「目录与双语约定」；接入 ChatGPT / Codex / Gemini 等第 2 个工具时再建 `docs/tool-matrix` 与各条小节。
-- ⏸️ **「适用范围」字段**（通用 LLM / Coding Agent 通用 / 某工具特有 / 未验证）：标注每条误区跨哪些 AI 系统。站点现为 Claude-only，全部会落在「Coding Agent 通用」，价值要等第 2 个工具才显现；与工具矩阵同批做。
+- 🟡 **工具矩阵页 + 各条「工具差异」实际内容**（**已扩到 5 工具**）：结构定调见 `CLAUDE.md`「目录与双语约定」与 `terminology.md`「tool 工具 / agent」（轴按工具 / agent 非模型）。已落地（中英镜像）：8 条主条目各带 **Gemini CLI / Codex CLI / Cursor / GitHub Copilot** 工具差异小节（Codex 略 skipping-plan-mode）+ 独立条目 `gemini-folder-trust-inheritance`、`cursor-ignore-best-effort` + 案例库 `gemini-cli-tracebit-rce`、`codex-cli-config-rce`、`github-copilot-camoleak` + `docs/tool-matrix`（已重构为「覆盖网格 + 每工具小节」）。后续可选：补更多工具、回填 Codex 的 plan-mode 近似。
+- 🟡 **「适用范围」字段**（**已触发**，与工具矩阵同批）：取值已落到 `terminology.md`「applies_to」（Coding Agent 通用 / 通用 LLM / 某工具特有 等）+「tool」枚举轴；条目用工具名作 tag（沿用 roles 的 tag 聚合）。先在 Gemini CLI 试点条目上铺。
 
 ### 评估后不照做（存档，便于追溯）
 

@@ -1,5 +1,6 @@
 ---
 title: You put it in a prompt when it needed a hook
+sidebar_label: "A hook's job written as a prompt"
 slug: hooks-not-prompts
 sidebar_position: 4
 roles: [Engineer, DevOps Engineer]
@@ -20,7 +21,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: You wrote "always run format after editing," "always run tests before committing," and "never touch these files" into CLAUDE.md, then expected me to do it every time. But to me a prompt is a suggestion, not a mechanism — I forget, I skip, I drift as the context grows. If it has to happen, don't leave it to my goodwill. Make it a hook.
 
-## What you're doing
+## Symptom
 
 Here's how I often see you set the rules: you write into CLAUDE.md "run `prettier` after every edit," "run `npm test` before committing," "do not modify `package-lock.json` or `.env`" — all spelled out plainly, and then you consider the matter settled.
 
@@ -39,10 +40,10 @@ One line to keep them apart: **a prompt is a suggestion, a hook is a mechanism.*
 ```mermaid
 flowchart TB
     subgraph P[Written into a prompt / CLAUDE.md]
-        P1["Enters the context window"] --> P2["I follow it probabilistically<br/>forget / drift / lost after compaction<br/>&nbsp;"]
+        P1["Enters the context window"] --> P2["I follow it probabilistically<br/>forget / drift / lost after compaction"]
     end
     subgraph H[Made into a hook]
-        H1["Harness fires it at a fixed point"] --> H2["Deterministic execution<br/>does not pass through my judgment<br/>&nbsp;"]
+        H1["Harness fires it at a fixed point"] --> H2["Deterministic execution<br/>does not pass through my judgment"]
     end
     P2 -.->|mismatch when it must always happen| X[Rule gets skipped]
 ```
@@ -54,7 +55,7 @@ flowchart TB
 - **Discipline you can't reproduce.** The same rule is followed this time and ignored the next, so no one on the team can rely on it — and CI eventually catches the leaks, turning something that could have been fixed locally in seconds into a failed pipeline.
 - **CLAUDE.md keeps growing.** You keep adding "please be sure to…" to compensate for my unreliability, and the bloating file dilutes every instruction — a vicious cycle.
 
-## Best practice
+## What to do instead
 
 **First ask: does this have to happen every time, or do I just want it noticed? What must happen becomes a hook; what you want noticed stays in the prompt.**
 
