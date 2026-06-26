@@ -184,6 +184,7 @@ Claude Code · Cursor · GitHub Copilot · Codex CLI · Gemini CLI · CLAUDE.md 
 | 中文 | English |
 |------|---------|
 | Claude Code 全版本 | All Claude Code versions |
+| Claude Code（支持 /rewind 的版本效果最佳） | Best results on versions that support /rewind |
 | Coding Agent 通用 | All coding agents |
 | 通用 LLM | All LLMs |
 | Gemini CLI 特有 | Gemini CLI only |

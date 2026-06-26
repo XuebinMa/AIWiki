@@ -7,6 +7,7 @@ roles: [Engineer, Architect]
 phase: Ideation & Feasibility
 severity: High
 applies_to: "All LLMs"
+evidence: Research
 tags: [hallucination, confidence, calibration, explanation faithfulness, root cause analysis, Engineer, Architect]
 sources:
   - { title: "Measuring Faithfulness in Chain-of-Thought Reasoning (Anthropic)", url: "https://www.anthropic.com/research/measuring-faithfulness-in-chain-of-thought-reasoning" }
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect']} phase="Ideation & Feasibility" severity="High" appliesTo="All LLMs" />
+<PitfallMeta roles={['Engineer', 'Architect']} phase="Ideation & Feasibility" severity="High" appliesTo="All LLMs" evidence="Research" />
 
 > In one sentence: You ask me to explain "why this code is written this way," "what's the root cause of this bug," or "what this error means," and I'll hand you a fluent, well-organized, authoritative-sounding explanation — that may be wrong. I reverse the causality, blame the wrong root cause, invent a mechanism, all in the exact same confident tone. You believe me, and you go fix the wrong thing.
 

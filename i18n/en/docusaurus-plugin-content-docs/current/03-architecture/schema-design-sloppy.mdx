@@ -7,6 +7,7 @@ roles: [Architect, Engineer]
 phase: Architecture
 severity: High
 applies_to: "All coding agents"
+evidence: Community case
 tags: [architecture, data model, schema, migration, evolutionary design, Architect, Engineer]
 sources:
   - { title: "Evolutionary Database Design (Martin Fowler & Pramod Sadalage)", url: "https://martinfowler.com/articles/evodb.html" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="High" appliesTo="All coding agents" />
+<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="High" appliesTo="All coding agents" evidence="Community case" />
 
 > In one sentence: you ask me to design a table structure or an interface contract, and I'll quickly hand you a schema that "can store the data" — but the field types are picked carelessly (a `float` where it should be `decimal`, free text where it should be an enum), constraints and indexes are missing, and I never thought about how you'll query it or evolve it. Code is cheap to change; schema is not. Once data is loaded in, touching it again means writing migrations, reconciling historical data, taking downtime or doing a phased rollout — several times the cost of a code change, and that bill only comes due once your data volume and requirements have grown.
 
