@@ -47,3 +47,9 @@
   margin-bottom: 2rem;
   font-size: 0.95rem;
 }
+
+/* 侧边栏层级字号：默认所有层级同字号，分不清主次。让二级（分类下的条目）
+   比一级（分类标题 / 顶层文档）小一号，做出清晰的层级感。 */
+.theme-doc-sidebar-item-link-level-2 > .menu__link {
+  font-size: 0.85rem;
+}
