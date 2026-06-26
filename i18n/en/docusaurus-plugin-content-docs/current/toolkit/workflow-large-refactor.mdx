@@ -1,0 +1,41 @@
+---
+title: A workflow for a large refactor with AI
+slug: workflow-large-refactor
+sidebar_position: 7
+tags: [workflow, template, refactoring]
+---
+
+> In one sentence: a large refactor is the job where I crash most easily — I'll [lose track of which files I've already changed](../05-implementation/lost-track-in-refactor.mdx), [edit away things you never asked for](../05-implementation/over-editing-scope-creep.mdx), and [forget why the design was the way it was](../03-architecture/no-memory-of-decisions.mdx). Don't let me "rewrite it all in one shot" — give me a small-step pipeline with checkpoints, where every step can be verified and rolled back.
+
+## The workflow: slice a big refactor into verifiable small steps
+
+1. **Pin down the invariants first, and weave a regression net.** Be explicit about "what must not change after the refactor" (external behavior, interface contracts, data formats), and confirm there are [regression tests](../07-acceptance-release/missing-regression.mdx) guarding them. With no regression net, a large refactor is walking a tightrope blindfolded — add the tests before touching structure.
+2. **Produce a change list, sliced into small steps.** Have me first lay out "what to change, in what order, with each step a unit that can be committed independently," and **show you the list first — don't start editing**. Do one step at a time; don't let a single giant diff smear all the risk into one blur.
+3. **Each step: change → run regression → atomic commit.** After each small step, run the regression tests; once they're green, immediately make an [atomic commit](../05-implementation/git-hygiene.mdx) as a checkpoint — that way, if any step crashes, you can roll back cleanly to the last green point instead of starting over.
+4. **Maintain a "done / to-do" list explicitly.** At the end of each step, have me update the progress list (what's finished, which step is next). My memory over long processes is unreliable; surface the state externally so I don't lose track, re-edit, or skip something.
+5. **Wrap up: full regression + review.** Once all the small steps are done, run a complete regression, then go over the whole thing against the [PR review checklist](./pr-review-checklist.mdx).
+
+```text
+What you can say to me directly:
+"First confirm the regression tests cover the existing behavior of X; then give me a step-by-step
+change list (each step independently committable), and don't start yet. Once I confirm, we'll go
+one step at a time: do one thing per step, run regression, and on green make an atomic commit,
+updating the 'done/to-do' list. At the end, run a full regression + an overall review."
+```
+
+## When to use this
+
+### A good fit when
+
+- A structural change spanning multiple files / modules (reworking architecture, swapping patterns, splitting or merging modules), with external behavior required to stay the same.
+- You're worried a one-shot big change will be hard to review and hard to roll back.
+
+### Not a fit when
+
+- A small change in a single file or single function — just edit and test; stepping it out is pure overhead.
+- The "refactor" actually smuggles in behavior changes / new requirements — split it first into "pure refactor" and "change behavior" as two separate tracks; don't mix them, or the regression net stops working.
+
+### Replace before using
+
+- Swap "regression tests / commits" for your project's real test commands and commit conventions.
+- For modules with no regression tests, step 1 is to first add characterization tests that capture the existing behavior, then begin the refactor.

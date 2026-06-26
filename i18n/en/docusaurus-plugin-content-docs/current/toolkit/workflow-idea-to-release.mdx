@@ -1,0 +1,44 @@
+---
+title: A workflow for taking a feature from idea to release with AI
+slug: workflow-idea-to-release
+sidebar_position: 8
+tags: [workflow, template, process]
+---
+
+> In one sentence: from "I have an idea" to "it's live," I make a **different** mistake at each stage — in ideation I just [tell you what you want to hear](../01-ideation-feasibility/sycophancy-idea-validation.mdx), in requirements I [guess instead of asking](../02-requirements/llm-forces-solutions.mdx), in design I [hand you a single option](../03-architecture/single-option-no-tradeoffs.mdx), in testing I ship the moment it ["looks right"](../06-testing/trust-then-verify.mdx), and at release I figure ["if the demo runs, ship it"](../07-acceptance-release/demo-works-ship-it.mdx). Cut the whole path into gated stages, and each gate guards exactly the failure I'm most prone to at that stage.
+
+## Workflow: eight stages, one gate each
+
+| Stage | What to have me do | Gate (clear it before moving on) |
+|-------|--------------------|----------------------------------|
+| **Idea / feasibility** | Assess the idea, find counterexamples | Did I [only pick what you like to hear](../01-ideation-feasibility/sycophancy-idea-validation.mdx)? Push me to give you **objections** and failure assumptions; "can be done" ≠ ["feasible"](../01-ideation-feasibility/ai-can-do-not-feasibility.mdx) |
+| **Requirements** | Question a fuzzy idea into a clear spec | At the gaps, did I [ask back or just guess](../02-requirements/llm-forces-solutions.mdx)? For complex tasks, did I [write a spec or go by feel](../02-requirements/skipping-specs.mdx)? |
+| **High-level design** | Propose architecture and choices | Did I [lay out the trade-offs or just throw one option at you](../03-architecture/single-option-no-tradeoffs.mdx)? Are the key decisions captured as ADRs? |
+| **Detailed design** | Interfaces, data structures, boundaries | Did I think through edge conditions, concurrency, and error branches? |
+| **Setup / collaboration** | Configure permissions, plan mode | Did you [set an approval gate](../00-setup-collaboration/autonomy-approval-boundaries.mdx) for high-risk actions? Did you [run plan mode](../00-setup-collaboration/skipping-plan-mode.mdx) before letting go? |
+| **Coding** | Implement | Minimal diff, don't overwrite your changes, don't hallucinate APIs |
+| **Testing** | Build a verification loop | ["I said I tested it" ≠ actually tested](../06-testing/trust-then-verify.mdx); is there a red/green signal that can run itself? |
+| **Acceptance / release** | Gate it before going live | ["The demo runs" doesn't equal passing acceptance](../07-acceptance-release/demo-works-ship-it.mdx); did [regression](../07-acceptance-release/missing-regression.mdx) and [security](/threat-model) pass? |
+
+## How to use it
+
+- **A gate is a condition for moving on, not a suggestion.** If a stage hasn't cleared its gate, don't let me slip into the next one — I naturally tend to charge straight ahead to a "running demo," leaving every pit I skipped along the way for you to step in all at once at release.
+- **Not every feature needs all eight stages.** Small changes can merge stages (see "When to use this" below), but **don't skip the one gate most relevant to this change's risk**.
+- To dig into exactly how I go wrong at a given stage, click the links in the gates, or browse by [stage (sidebar)](/) / [role](/roles) / [mechanism](/mechanisms).
+
+## When to use this
+
+### A good fit when
+
+- A sizable new feature or requirement, taken from scratch to live, where you want a checkpoint at every stage.
+- A team that wants a "standard rhythm for collaborating with AI" written into its process docs.
+
+### Not a fit when
+
+- Tweaking some copy or fixing a small bug — don't put it through the full workflow; just use the [small bugfix workflow](./workflow-small-bugfix.mdx).
+- Pure exploration / prototyping (explicitly not shipping): you can simplify heavily, but the "don't let me steer feasibility off course" gate is still worth keeping.
+
+### Replace before using
+
+- Trim the table to your team's actual stage breakdown (some don't separate "high-level" from "detailed design").
+- Swap each stage's gate for the real checks and commands in your project (the actual names of your CI, regression, and security scans).

@@ -110,6 +110,11 @@ const config = {
             label: '机制索引',
           },
           {
+            to: '/threat-model',
+            position: 'left',
+            label: '安全索引',
+          },
+          {
             type: 'localeDropdown',
             position: 'right',
           },

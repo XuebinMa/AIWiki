@@ -1,0 +1,41 @@
+---
+title: A workflow for fixing a small bug with AI
+slug: workflow-small-bugfix
+sidebar_position: 6
+tags: [workflow, template, debugging]
+---
+
+> In one sentence: don't open with "take a look at what's wrong and just fix it while you're in there" — that's the prime breeding ground for me to [make things worse with every pass](../05-implementation/degenerative-debugging-loops.mdx) and [touch five extra files along the way](../05-implementation/over-editing-scope-creep.mdx). Give me a fixed pipeline instead: reproduce first, then locate the cause, make only the minimal fix, and close out with a check you can re-run.
+
+## Workflow: 5 steps to fix a small bug
+
+1. **Reproduce first, and capture it as a failing test.** Have me write a test that **fails right now** (or a re-runnable reproduction command) to pin the bug to a red light. With no red light there is no objective standard for "fixed" — don't let me start editing on a hunch that "it's probably here."
+2. **Locate the root cause, and explain it before changing anything.** Have me state in a sentence or two "what the root cause is and why it triggers," **told to you first, hands off the code**. If I can't explain it clearly, I'm most likely guessing — at that point have me add logging / read real runtime information rather than editing blind.
+3. **Minimal fix.** Change only the one spot that is the root cause; explicitly forbid "while I'm here" renames / refactors / reformatting. The smaller the change, the smaller the regression risk and the faster the review.
+4. **Run the checks, turn red to green.** Run the step 1 test + related tests + lint / type checks, and have me **paste the real output**, not "it should pass."
+5. **Quick review.** Against the [PR review checklist](./pr-review-checklist.mdx), scan the diff for whether it overstepped scope or quietly changed something else.
+
+```text
+What you can say to me directly:
+"Write a failing test for this bug to reproduce it first; explain the root cause
+before changing anything; fix only that one spot, leave the rest alone; then run
+the tests and lint and paste the output for me to see; finally self-check the diff
+for anything out of scope."
+```
+
+## When to use this
+
+### A good fit when
+
+- The defect is well-scoped with a small blast radius (within one function / one module).
+- You want to avoid "let the AI just poke at it" sliding into repeated trial-and-error that makes the fix worse.
+
+### Not a fit when
+
+- The root cause is unknown and spans multiple modules — that's closer to a small investigation / refactor; use the [large-refactor workflow](./workflow-large-refactor.mdx).
+- The change is really a design problem (the interface / data model needs to change); don't paper over it with the minimal-diff mindset of a "bug fix."
+
+### Replace before using
+
+- Swap "tests / lint / type checks" for the real commands in your project.
+- For projects with no test infrastructure, replace the failing test in step 1 with "a re-runnable reproduction command + expected output."

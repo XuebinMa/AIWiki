@@ -1,0 +1,44 @@
+---
+title: 用 AI 把一个需求从想法做到发布的全流程
+slug: workflow-idea-to-release
+sidebar_position: 8
+tags: [工作流, 模板, 流程]
+---
+
+> 一句话摘要：从「我有个想法」到「上线」，我在每个阶段会犯**不同**的错——灵感期[一味迎合你](../01-ideation-feasibility/sycophancy-idea-validation.mdx)、需求期[硬猜不反问](../02-requirements/llm-forces-solutions.mdx)、设计期[只给一个方案](../03-architecture/single-option-no-tradeoffs.mdx)、测试期[「看起来对」就交](../06-testing/trust-then-verify.mdx)、发布期[「demo 能跑就发」](../07-acceptance-release/demo-works-ship-it.mdx)。把整条路切成带闸门的阶段，每个闸门专挡那一阶段我最容易翻的车。
+
+## 工作流：八个阶段，每段一道闸门
+
+| 阶段 | 让我做什么 | 闸门（过了才往下走） |
+|------|------------|----------------------|
+| **想法 / 可行性** | 评估想法、找反例 | 我有没有[只挑你爱听的说](../01-ideation-feasibility/sycophancy-idea-validation.mdx)？逼我给出**反对意见**与失败前提；「能做」≠[「可行」](../01-ideation-feasibility/ai-can-do-not-feasibility.mdx) |
+| **需求** | 把模糊想法问成明确规格 | 缺口处我[反问了还是硬猜](../02-requirements/llm-forces-solutions.mdx)？复杂任务[写了 spec 还是凭感觉](../02-requirements/skipping-specs.mdx)？ |
+| **概要设计** | 给架构与选型 | 我[摊开了权衡还是只甩一个方案](../03-architecture/single-option-no-tradeoffs.mdx)？关键决策落成 ADR 没？ |
+| **详细设计** | 接口、数据结构、边界 | 边界条件、并发、错误分支想全了吗？ |
+| **准备 / 协作** | 配权限、计划模式 | 高风险动作[设了审批门](../00-setup-collaboration/autonomy-approval-boundaries.mdx)吗？放手前[过了 plan mode](../00-setup-collaboration/skipping-plan-mode.mdx)吗？ |
+| **编码** | 实现 | 最小 diff、不覆盖你的改动、不幻觉 API |
+| **测试** | 建验证闭环 | [「我说测过了」≠ 真测过](../06-testing/trust-then-verify.mdx)；有能自跑的红绿信号吗？ |
+| **验收 / 发布** | 上线前把关 | [「demo 能跑」不等于过验收](../07-acceptance-release/demo-works-ship-it.mdx)；[回归](../07-acceptance-release/missing-regression.mdx)与[安全](/threat-model)过了吗？ |
+
+## 怎么用
+
+- **闸门是「往下走的条件」，不是建议。** 每段没过闸门，就别让我滑进下一段——我天然倾向一路向前冲到「能跑的 demo」，把前面跳过的坑全留给你在发布期一起踩。
+- **不是每个需求都要走全八段。** 小改动可以合并阶段（见下「适用边界」），但**别跳过和你这次风险最相关的那道闸门**。
+- 想深挖某一阶段我具体怎么翻车，点闸门里的链接，或按[阶段（侧边栏）](/) / [角色](/roles) / [机制](/mechanisms)浏览。
+
+## 适用边界
+
+### 适合什么时候用
+
+- 一个有一定体量的新功能 / 新需求，从头走到上线，想要每阶段都有把关点。
+- 团队想要一份「和 AI 协作的标准节奏」放进流程文档。
+
+### 不适合什么时候用
+
+- 改个文案、修个小 bug——别套全流程，用[小 bug 修复工作流](./workflow-small-bugfix.mdx)即可。
+- 纯探索 / 原型阶段（明确不发布）：可大幅简化，但「可行性别被我带偏」这道闸门仍值得留。
+
+### 使用前请替换
+
+- 按你团队的实际阶段划分（有的没有「概要 / 详细设计」之分）裁剪表格。
+- 把各阶段闸门换成你项目里真实的检查项与命令（CI、回归、安全扫描的真实名字）。

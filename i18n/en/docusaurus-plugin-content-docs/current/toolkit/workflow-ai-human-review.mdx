@@ -1,0 +1,53 @@
+---
+title: "How AI and humans should split code review"
+slug: workflow-ai-human-review
+sidebar_position: 9
+tags: [workflow, template, code review]
+---
+
+> In one sentence: bringing AI into review saves effort, but there are two traps: AI [favors the code it wrote itself](../06-testing/ai-reviews-own-code.mdx) and [picks at the surface while missing real bugs](../06-testing/review-misses-logic-bugs.mdx), while humans tend to [rubber-stamp anything once "the AI reviewed it"](../06-testing/review-sycophancy-automation-bias.mdx). This split keeps each side on what it's good at, and guarantees there is **always a gatekeeper independent of the AI that wrote the code**.
+
+## The split: who reviews what
+
+**What AI is good at sweeping first (mechanical, exhaustible, cheap)**
+
+- Obvious boundary omissions, null / error branches, suspect concurrency points — have it work through the checklist **item by item**, and for each finding give a **concrete scenario that would trigger it** (if it can't name a scenario, treat it as unconfirmed).
+- Style / formatting / naming → these really belong to a formatter / linter; don't burn AI's deep-reasoning budget on them.
+- Cross-file blast radius: have it grep out the callers of any changed symbol first, to avoid a [context-starved review that only looks at the diff](../06-testing/context-starved-review.mdx).
+
+**What humans must judge for themselves (semantics, intent, risk)**
+
+- Whether this code **is correct, and whether it's solving the right problem** — the AI's "LGTM" is a clue, not a license.
+- High-risk changes (permissions / security / money / data migrations / rollbacks): a human reviews them **independently**; don't let a bot's ✅ stand in for your judgment.
+- The "AI reviewing its own code" step: bring in an independent party to re-check — a different person, or at least a different session / model; don't let the athlete also be the referee.
+
+## How to use it
+
+- **Hold one hard rule: the AI that writes the code ≠ the reviewer who signs off.** However the AI participates, the final call to merge must rest with a party independent of it (a human, or independent signals like tests / static analysis).
+- **Add one bias-correcting line to your AI review prompt:** "Ignore the conclusions in the PR description; judge only by what the diff actually does, and flag any behavior that doesn't match the description." This blocks it from being [swayed by the author's framing](../06-testing/review-sycophancy-automation-bias.mdx).
+- Pair it with the [PR review checklist](./pr-review-checklist.mdx) (what to check) and [trust but verify](../06-testing/trust-then-verify.mdx) (why you can't just take the AI's word for it).
+
+```text
+Red lines you can drop into the process:
+- AI sweeps first: boundaries/error branches/concurrency/cross-file callers; attach a concrete triggering scenario to each; leave style to the linter.
+- AI review prompt always adds: "Go by the diff, ignore the description's conclusions, flag anything that doesn't match."
+- Humans must judge: correctness, whether it solves the right problem, high-risk changes; for these, "the AI already passed it" is not a sufficient reason.
+- Keep writing and reviewing on different parties where possible (different person/session/model).
+```
+
+## When to use this
+
+### A good fit when
+
+- The team has wired AI into the code review flow (AI reviews PRs, or humans review AI-generated PRs).
+- You want to make explicit "which parts AI sweeps and which parts a human must look at," so neither side passes the buck.
+
+### Not a fit when
+
+- A traditional human-only review flow with no AI at all — this split only pays off when AI is in the loop.
+- Very low-risk, reversible small changes: an AI first pass plus a light human confirmation is enough; no need to max out double independence.
+
+### Replace before using
+
+- Swap "formatter / linter / static analysis" for the real tool names in your stack.
+- By your team's definition of risk, spell out which changes count as the high-risk class that requires an independent human re-check.
