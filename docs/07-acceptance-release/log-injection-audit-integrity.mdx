@@ -1,0 +1,110 @@
+---
+title: 我写的日志既可能被投毒成注入面，也可能写脏写漏，让你事后重建不出我做了什么
+sidebar_label: "日志注入与审计链"
+slug: log-injection-audit-integrity
+sidebar_position: 10
+roles: [运维工程师, 工程师]
+phase: 验收与发布
+severity: 中
+applies_to: "Coding Agent 通用"
+evidence: 安全报告
+tags: [日志注入, 审计链, 可观测性, 问责, 安全, 运维工程师, 工程师]
+sources:
+  - { title: "Log Injection (OWASP Foundation, CWE-117)", url: "https://owasp.org/www-community/attacks/Log_Injection" }
+  - { title: "Logging Cheat Sheet (OWASP Cheat Sheet Series)", url: "https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html" }
+  - { title: "A09:2025 Security Logging and Alerting Failures (OWASP Top 10)", url: "https://owasp.org/Top10/2025/A09_2025-Security_Logging_and_Alerting_Failures/" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['运维工程师', '工程师']} phase="验收与发布" severity="中" appliesTo="Coding Agent 通用" evidence="安全报告" />
+
+> 一句话摘要：日志是你事后追究「AI 到底做了什么」的唯一底座，但它本身是个攻击面。我会把没转义的外部输入直接写进日志（让攻击者伪造日志行、骗过 SIEM），也可能漏记关键动作；反过来，我读到被投毒的日志时还会被它误导。日志一脏，审计链就断——出事时你重建不出真相。
+
+## 现象
+
+你给我配了日志，觉得「有记录就能追责」。但这条记录在两个方向上都不可靠：
+
+- **写的方向**：我处理外部输入（用户名、URL、第三方返回）时，常把它**原样**拼进日志行。攻击者只要在输入里塞进换行符（CR/LF），就能在你的日志里**伪造一整条看似合法的日志**——比如假装某操作成功、或栽赃给别人。更糟时，被污染的日志会破坏下游 SIEM 的解析，让告警失灵。
+- **读的方向**：当我读日志来决定下一步（「看看上次为什么失败」），被投毒的日志条目就成了一条注入通道，把我往攻击者想要的方向带。
+
+与此同时，我**不会主动保证审计链完整**：高风险操作我可能没结构化地记下来、记了也可能和别的输出混在一起、甚至可被后续动作覆盖。于是真出事时，你打开日志，看到的是一份被污染、有缺漏、可能被篡改的记录——它没法回答「AI 当时到底做了什么、谁批准的」。
+
+## 为什么会这样
+
+因为**日志既是 agent 的问责底座，又是一个经典的、我默认不设防的攻击面。**
+
+OWASP 把这归为 **Log Injection（CWE-117，Improper Output Neutralization for Logs）**：当未经转义的输入被写进日志，攻击者就能用 CR/LF 和分隔符**伪造日志行、破坏日志解析、或注入内容**。OWASP 的 Logging Cheat Sheet 给的对策很具体——对所有事件数据做 sanitization（处理掉 CR、LF、分隔符），并且审计轨迹要有**完整性控制**（如 append-only 表）防止事后被篡改或删除；OWASP Top 10 也专列了 **A09:2025 安全日志与告警失败**。而我，作为一个被训练去「把任务做完」的生成器，默认会顺手把外部数据拼进日志、不会主动去转义，也不会主动去保证「这条审计记录无法被我后面的动作抹掉」。
+
+这件事对 agent 尤其要紧，因为日志往往是你**唯一**能复盘「我做了什么」的东西。一旦你给了我[较高的自主度](../00-setup-collaboration/autonomy-approval-boundaries.mdx)，「哪些动作我自己做了、哪些被批准 / 否决了」就只能靠审计轨迹来还原——那条轨迹本身要是脏的、缺的、可改的，整套问责就架空了。
+
+## 后果
+
+- **审计失真，问责落空。** 出了事，你想追「AI 当时改了什么、谁点的头」，却发现日志被伪造行污染、关键动作没记、或已被覆盖——真相重建不出来。
+- **监控被反制。** 注入的换行 / 控制字符能让 SIEM 误解析、漏告警，等于在你的眼睛上蒙了一层。
+- **日志成为注入回路。** 我读被投毒的日志做决策时，攻击者就多了一条不经过 README / issue 的隐蔽注入通道。
+
+## 最佳实践
+
+**把日志当不可信数据来写、当完整性资产来护：写前转义，审计轨迹 append-only 防篡改，关键动作强制结构化留痕。**
+
+- **写日志前先 sanitize。** 对要写进日志的外部输入，转义 / 剥除 CR、LF、控制字符与分隔符，杜绝伪造日志行（OWASP Logging Cheat Sheet 的核心建议）。优先用结构化日志（JSON 等），让字段边界由格式保证，而不是靠拼字符串。
+- **审计轨迹做完整性控制。** 高风险操作的记录走 **append-only**、带完整性校验 / 集中转存到我改不动的地方，防止事后被覆盖或删除——这正是[审批边界](../00-setup-collaboration/autonomy-approval-boundaries.mdx)里「谁批了 / 谁否了」那条轨迹能站得住的前提。
+- **关键动作强制结构化留痕。** 别让「我做了什么」散落在自由文本里：把高风险动作（删除、改生产、对外发数据、审批结果）记成带时间、主体、上下文的结构化事件，可被机器审计。
+- **读日志时当不可信输入。** 当我读日志来驱动决策，把它和任何外部内容一样对待——别无条件相信日志里写的「结论」。
+- **别把 secret 写进日志。** 这条和[默认埋漏洞 / 泄露敏感数据](./security-data-leaks.mdx)交叠：日志会被很多人看到、会被长期留存，密钥 / PII 写进去就是一次泄露。
+
+## 示例
+
+**改之前：**
+
+```text
+我：（把用户提交的 name 直接写进日志）
+   logger.info("user login: " + name)
+攻击者提交 name = "alice\n2026-06-26 12:00:00 INFO admin deleted audit log"
+日志里出现：
+   user login: alice
+   2026-06-26 12:00:00 INFO admin deleted audit log   ← 伪造的一行，栽赃 admin
+后果：审计日志被注入伪造条目，事后追责指向错误的人，SIEM 也被这条假日志带偏。
+```
+
+**改之后：**
+
+```text
+我：（结构化日志 + 转义，name 作为字段值而非拼进消息）
+   logger.info({event: "user_login", name: sanitize(name)})
+   → {"event":"user_login","name":"alice\\n2026-06-26 ..."}  ← 换行被转义，留在字段内
+   高风险操作另走 append-only 审计表，带时间/主体/审批人，集中转存、不可覆盖。
+后果：注入的换行进不了新日志行，伪造失败；关键动作有不可篡改的轨迹，追责站得住。
+```
+
+同一条用户输入，直接拼是把日志变成攻击者的画布，结构化 + 转义 + append-only 审计则让日志重新成为可信的问责记录。
+
+## 什么时候例外
+
+「上日志完整性治理」针对的是**有问责 / 合规 / 多方追责需求**的系统；有些场景可以从简：
+
+- **纯本地、一次性的调试日志**：你自己看完即弃、不进任何审计 / 合规链路的临时输出，不必为它套 append-only 与完整性校验。
+- **无外部输入进入的日志**：如果写进日志的全是你可信的、受控的内容，日志注入面就小——但这种情况比你以为的少。
+
+但有两条**不豁免**：**别把 secret 写进日志**（泄露面，见 [security-data-leaks](./security-data-leaks.mdx)），以及**读外部 / 历史日志驱动决策时把它当不可信输入**（注入面）。这两条在任何场景都成立。
+
+判据：从简的前提是**这条日志既不承担问责 / 合规，也不含敏感数据、且不被我读回去做决策**。一旦它要用于追责、要满足合规、要喂回给我，就回到默认——转义、结构化、append-only、护住完整性。
+
+## 与相邻误区的区别
+
+- [默认埋漏洞 / 泄露敏感数据](./security-data-leaks.mdx)：那条覆盖「别把 secret 写进日志」的**泄露**面；本条讲日志的**完整性与注入**面——伪造条目、破坏审计、注入回我。一个怕「日志泄密」，一个怕「日志被伪造 / 失真」。
+- [开发期读到投毒内容被劫持](../05-implementation/dev-time-prompt-injection.mdx)：那条讲注入**怎么发生**（恶意 README / issue）；本条讲**日志**作为一种特定的注入载体，以及它作为审计链被破坏的后果。
+- [自主性审批边界](../00-setup-collaboration/autonomy-approval-boundaries.mdx)：那条要求给高风险动作留「谁批 / 谁否」的轨迹；本条讲**那条轨迹本身**怎么不被污染、不被篡改——前者要求记录存在，后者保证记录可信。
+
+## 版本说明
+
+:::note 适用版本
+日志注入（CWE-117）与审计完整性是与具体模型无关的经典安全工程问题，**跨模型、跨工具适用**；放到 agent 场景下尤为关键，因为日志常是复盘「AI 做了什么」的唯一依据。模型越自主、动作越多，可信审计链的价值越高——转义、append-only、结构化留痕这些做法不随模型变强而过时。
+:::
+
+## 延伸阅读与出处
+
+- [Log Injection（OWASP Foundation，CWE-117）](https://owasp.org/www-community/attacks/Log_Injection)：未转义输入写入日志导致伪造日志行、破坏解析、注入内容的攻击与成因。
+- [Logging Cheat Sheet（OWASP Cheat Sheet Series）](https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html)：对事件数据做 sanitization（处理 CR/LF/分隔符），审计轨迹用 append-only 等完整性控制防篡改。
+- [A09:2025 Security Logging and Alerting Failures（OWASP Top 10）](https://owasp.org/Top10/2025/A09_2025-Security_Logging_and_Alerting_Failures/)：安全日志与告警失败作为 Top 10 风险类目。

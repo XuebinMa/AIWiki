@@ -1,0 +1,117 @@
+---
+title: "You didn't settle who owns my code, who's liable for it, and whether you can even claim copyright—before treating it as your asset"
+sidebar_label: "AI-code IP & liability"
+slug: ai-code-ip-ownership
+sidebar_position: 9
+roles: [Project Manager, Architect, Engineer]
+phase: Acceptance & Release
+severity: Medium
+applies_to: "All coding agents"
+evidence: Official docs
+tags: [intellectual property, copyright, ownership, liability, governance, compliance, Project Manager, Architect, Engineer]
+sources:
+  - { title: "Copyright and Artificial Intelligence, Part 2: Copyrightability（U.S. Copyright Office, 2025-01）", url: "https://www.copyright.gov/ai/Copyright-and-Artificial-Intelligence-Part-2-Copyrightability-Report.pdf" }
+  - { title: "Copyright and Artificial Intelligence（U.S. Copyright Office 专题）", url: "https://www.copyright.gov/ai/" }
+  - { title: "GitHub Copilot Intellectual Property Litigation（Doe v. GitHub，Joseph Saveri Law Firm）", url: "https://www.saverilawfirm.com/our-cases/github-copilot-intellectual-property-litigation" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['Project Manager', 'Architect', 'Engineer']} phase="Acceptance & Release" severity="Medium" appliesTo="All coding agents" evidence="Official docs" />
+
+> In one sentence: I hand you a chunk of code, you merge it, stamp the company's name on it, and treat it as a proprietary asset. But you never asked three questions: code that's purely my output, with no meaningful human authorship, may not be **copyrightable at all** (anyone can reuse it); if it reproduces copyrighted code from my training data verbatim, it may **infringe** (and you're on the hook); and when something goes wrong, **who's responsible**? "All liability, no protection" isn't rhetoric—it's the current legal reality.
+
+## Symptom
+
+I write a module for you from scratch, you review it, approve it, merge it, ship it, and treat it as company intellectual property—assuming it's just like an engineer's hand-written code: copyright-protected, exclusive, claimable.
+
+But the IP status of this code may be nothing like your assumption. At acceptance/release, you never asked:
+
+- Can this "purely AI-generated" code **be registered for copyright**? If not, can you stop a competitor from copying it wholesale?
+- Does it **reproduce verbatim** some chunk of copyrighted or copyleft-protected code from the training data? If it does, are you already infringing / violating an open-source license?
+- If infringement or a defect actually surfaces, **where does liability land**—the company, you, or the tool vendor?
+
+These questions sit outside "does it run," and when I deliver, the latter is all I care about.
+
+## Why this happens
+
+Because **copyright is founded on human authorship, and I'm not human**—and that principle, once it meets "AI-generated," splits open a crack you didn't notice.
+
+The U.S. Copyright Office's January 2025 report (*Copyright and Artificial Intelligence, Part 2: Copyrightability*) draws the line clearly: **purely AI-generated output is not copyrightable**; only where a human contributes enough "expressive elements"—making creative choices, arrangements, or modifications to the output—can that portion be protected, and **merely supplying a prompt does not count** as human authorship. This produces an awkward paradox: code I generated wholesale for you may, on one hand, **leave you unable to claim copyright** (it falls into the "no human author" gray zone, and you may not be able to stop others from taking it), while on the other hand it **may still infringe someone else's copyright** (if it reproduces a protected training sample)—and that is precisely "all liability, no protection."
+
+The infringement side isn't hypothetical either. The litigation around GitHub Copilot (Doe v. GitHub) is fighting exactly this battle: developers allege its output reproduces code subject to copyright / open-source licenses. The case has been trimmed several times—the DMCA-related claims were dismissed, but claims like **breach of contract and open-source license** are still proceeding. Whatever the final outcome, it already shows that the IP and license status of AI-generated code is a real question that ends up in court.
+
+And I have **zero awareness** of any of this. I only produce code that "reads right and runs"; who it belongs to, who it resembles, what license it carries—none of that is in my objective function. This is the **governance layer** of [License / IP contamination](./license-ip-contamination.mdx): that entry covers the technical mechanism (how I spit out copyrighted code verbatim), this one covers the **IP and liability policy** you should set before release.
+
+## Consequences
+
+- **The asset claim falls through.** You think you're holding a piece of exclusive IP; in reality it may sit in the "no copyright" gray zone—the investment is sunk, but the moat never got dug.
+- **Infringement / license-violation liability.** Reproducing copyrighted code verbatim infringes; pulling in a copyleft (GPL/AGPL) dependency triggers viral obligations—and by default this liability lands on the **shipping party** (you), not the tool vendor.
+- **A liability vacuum.** With nothing written in advance about "how attribution, ownership, and defect/infringement liability for AI-generated code are handled," everyone counts on someone else to absorb it when something goes wrong.
+
+## What to do instead
+
+**In your release governance, set an explicit policy for the ownership, liability, and licensing of AI-generated code—don't let it default to a fuzzy "just call it ours."**
+
+- **Write down ownership and liability.** In your contribution process / contracts / internal policy, make it explicit: how AI-assisted code is attributed, who owns it, and how defect and infringement liability are allocated. Turn the default ambiguity into an explicit agreement.
+- **Critical IP needs enough human creative involvement.** For the core code you genuinely want to claim copyright on, ensure there are substantive human creative choices and modifications (not just a prompt)—this is both a quality requirement and a precondition for copyrightability.
+- **Use license / provenance scanning to block contamination.** Run license scanning and similarity / provenance detection in CI to block copyleft contagion and verbatim reproduction of copyrighted code (connecting to the technical defenses in [License / IP contamination](./license-ip-contamination.mdx)).
+- **In high-sensitivity IP scenarios, assess before you use.** For assets that "must be exclusive, must be clean," judge in advance whether and to what extent AI generation is appropriate—rather than discovering after the fact that the IP claim doesn't hold up.
+
+## Example
+
+**Before:**
+
+```text
+You: (have me generate an entire core algorithm module, then after review merge it and
+     file a patent / claim copyright)
+Me:  (deliver a working implementation, with no regard for its IP status)
+Six months later: a competitor ships a highly similar implementation; you try to block
+       it with a copyright claim, only to find the "purely AI-generated, no meaningful
+       human authorship" portion may not be protected—the moat is gone.
+       Meanwhile legal finds one chunk is highly similar to a GPL project, leaving you
+       carrying license risk instead.
+```
+
+**After:**
+
+```text
+You: This is core IP. The rule: I generate a draft, but the key design and expression
+     get substantive human choices and rewriting; CI runs license scanning + similarity
+     detection; ownership and liability are recorded per company AI policy.
+Me:  (generate a draft)
+Engineer: (make substantive architecture and implementation choices, leaving a trail of
+          human authorship; scanning confirms no copyleft, no verbatim reproduction)
+You: (this chunk now has claimable human authorship and has passed contamination
+     scanning—IP and liability both hold up)
+```
+
+Same module: "take it and call it an asset" plants a "no protection yet full liability" landmine; "set an IP and liability policy first" turns it into a genuinely clean, claimable asset with clear liability.
+
+## When the exception applies
+
+"Adding IP governance" targets code you intend to **claim copyright on, distribute externally, or treat as a core asset**; some code can be handled lightly:
+
+- **Internal one-off scripts / tools**: small, self-use tools that aren't distributed and on which you make no copyright claim can have very light IP governance—you don't profit from their copyright.
+- **Scenarios where you explicitly waive any copyright claim**: when you already plan to open-source it or place it in the public domain, "not copyrightable" is no loss.
+
+But one thing is **not exempt**: **license compliance**. Even if you make no copyright claim, pulling a copyleft dependency in verbatim, or reproducing restricted code, still leaves you carrying license obligations or infringement risk—this scan must be done in every scenario (see [License / IP contamination](./license-ip-contamination.mdx)).
+
+The test: handling it lightly is fine only if **you don't intend to profit from this code's copyright and won't distribute it externally**. Once it's going into a product, claiming exclusivity, or being distributed, you're back to the default—settle ownership, liability, and licensing first.
+
+## How this differs from neighboring pitfalls
+
+- [License / IP contamination](./license-ip-contamination.mdx): that one is the **technical side**—I reproduced copyrighted / copyleft code from the training data verbatim; it's the concrete contamination mechanism and the scanning defense. This one is the **governance side**—the policy layer of who owns, who's liable, and whether copyright can be claimed. One blocks "dirty stuff coming in," the other manages "how ownership and liability are counted."
+- [Data-boundary policy](../00-setup-collaboration/data-boundary-policy.mdx): that one governs the **input side**—which data shouldn't be fed to the AI; this one governs the **output side**—the IP and liability of the code the AI produces. One in, one out: the two ends of AI asset governance.
+
+## Version notes
+
+:::note Applicable versions
+"Copyrightability, ownership, and liability of AI-generated code" depend on law and case precedent, are **independent of any specific model, and vary by jurisdiction**—this entry uses the U.S. Copyright Office's 2025 guidance and the Doe v. GitHub litigation as reference points; conclusions in other jurisdictions may differ, so verify against your own jurisdiction before acting. A stronger model won't change the structure of "purely machine-generated code is hard to copyright, yet may still infringe"; if anything, the more it generates and the closer the resemblance, the more the IP and license review needs to move up front.
+:::
+
+## Further reading and sources
+
+- [Copyright and Artificial Intelligence, Part 2: Copyrightability (U.S. Copyright Office, 2025-01)](https://www.copyright.gov/ai/Copyright-and-Artificial-Intelligence-Part-2-Copyrightability-Report.pdf): establishes that "human authorship is the foundation of copyrightability, purely AI-generated output is not copyrightable, and merely supplying a prompt does not constitute authorship."
+- [Copyright and Artificial Intelligence (U.S. Copyright Office topic page)](https://www.copyright.gov/ai/): the entry point to the Copyright Office's AI report series (including the later parts on training data and liability).
+- [GitHub Copilot Intellectual Property Litigation (Doe v. GitHub)](https://www.saverilawfirm.com/our-cases/github-copilot-intellectual-property-litigation): litigation over AI code generation reproducing copyrighted / licensed code; the DMCA claims were dismissed, while the contract and open-source license claims are still proceeding.
