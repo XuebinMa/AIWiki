@@ -357,6 +357,20 @@
         "工程师"
       ]
     },
+    "ai-reviews-own-code": {
+      "severity": "中",
+      "roles": [
+        "工程师",
+        "测试工程师"
+      ]
+    },
+    "context-starved-review": {
+      "severity": "中",
+      "roles": [
+        "工程师",
+        "测试工程师"
+      ]
+    },
     "gaming-tests": {
       "severity": "高",
       "roles": [
@@ -380,6 +394,20 @@
     },
     "over-mocking": {
       "severity": "中",
+      "roles": [
+        "工程师",
+        "测试工程师"
+      ]
+    },
+    "review-misses-logic-bugs": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "测试工程师"
+      ]
+    },
+    "review-sycophancy-automation-bias": {
+      "severity": "高",
       "roles": [
         "工程师",
         "测试工程师"
@@ -819,6 +847,20 @@
         "Engineer"
       ]
     },
+    "ai-reviews-own-code": {
+      "severity": "Medium",
+      "roles": [
+        "Engineer",
+        "QA Engineer"
+      ]
+    },
+    "context-starved-review": {
+      "severity": "Medium",
+      "roles": [
+        "Engineer",
+        "QA Engineer"
+      ]
+    },
     "gaming-tests": {
       "severity": "High",
       "roles": [
@@ -842,6 +884,20 @@
     },
     "over-mocking": {
       "severity": "Medium",
+      "roles": [
+        "Engineer",
+        "QA Engineer"
+      ]
+    },
+    "review-misses-logic-bugs": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "QA Engineer"
+      ]
+    },
+    "review-sycophancy-automation-bias": {
+      "severity": "High",
       "roles": [
         "Engineer",
         "QA Engineer"
