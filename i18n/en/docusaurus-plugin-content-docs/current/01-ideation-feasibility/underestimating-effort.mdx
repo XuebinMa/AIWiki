@@ -7,6 +7,7 @@ roles: [Project Manager, Architect, Engineer]
 phase: Ideation & Feasibility
 severity: Medium
 applies_to: "All coding agents"
+evidence: Community case
 tags: [feasibility, effort estimation, planning fallacy, complexity, Project Manager, Architect, Engineer]
 sources:
   - { title: "Planning fallacy — Wikipedia", url: "https://en.wikipedia.org/wiki/Planning_fallacy" }
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Project Manager', 'Architect', 'Engineer']} phase="Ideation & Feasibility" severity="Medium" appliesTo="All coding agents" />
+<PitfallMeta roles={['Project Manager', 'Architect', 'Engineer']} phase="Ideation & Feasibility" severity="Medium" appliesTo="All coding agents" evidence="Community case" />
 
 > In one sentence: when you ask "how long will this take, is it hard," I lean toward a number that's too small. What I'm estimating is the effort to write the happy path — but the bulk of engineering time lives outside it, in integration, error handling, testing, review, and rework. Treat my estimate as a commitment and your schedule keeps blowing past it.
 

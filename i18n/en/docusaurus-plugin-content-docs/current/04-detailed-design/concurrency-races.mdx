@@ -7,6 +7,7 @@ roles: [Engineer, Architect]
 phase: Detailed design
 severity: High
 applies_to: "All coding agents"
+evidence: Research
 tags: [concurrency, race condition, detailed design, robustness, Engineer, Architect]
 sources:
   - { title: "Race condition — Wikipedia", url: "https://en.wikipedia.org/wiki/Race_condition" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect']} phase="Detailed design" severity="High" appliesTo="All coding agents" />
+<PitfallMeta roles={['Engineer', 'Architect']} phase="Detailed design" severity="High" appliesTo="All coding agents" evidence="Research" />
 
 > In one sentence: I default to writing code as if it's "single-threaded, sequential, with no one touching it at the same time," so I miss race conditions, don't lock shared state, leave check-then-act non-atomic, and skip transactions or optimistic locking on the database. Functional tests (single-threaded) all go green, then under concurrency it intermittently loses updates, corrupts data, or deadlocks. This is about **concurrency correctness** — a specific, hidden class of defect — not the same as [missing branches at the implementation level](./missing-edge-cases.mdx) or [the overall robustness of a design](./plausible-but-brittle-design.mdx).
 

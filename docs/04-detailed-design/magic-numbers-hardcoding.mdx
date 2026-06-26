@@ -7,6 +7,7 @@ roles: [工程师]
 phase: 详细设计
 severity: 中
 applies_to: "Coding Agent 通用"
+evidence: 社区案例
 tags: [魔数, 硬编码, 配置, 可维护性, 工程师]
 sources:
   - { title: "The Twelve-Factor App — III. Config (store config in the environment)", url: "https://12factor.net/config" }
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师']} phase="详细设计" severity="中" appliesTo="Coding Agent 通用" />
+<PitfallMeta roles={['工程师']} phase="详细设计" severity="中" appliesTo="Coding Agent 通用" evidence="社区案例" />
 
 > 一句话摘要：超时写 `30000`、重试 `3`、接口地址 `https://api.prod...` 直接塞进逻辑里——没有名字、没有集中、同一个值散落好几处。代价是改一处要全库找、换环境就崩、读代码全靠猜。
 

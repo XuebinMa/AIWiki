@@ -7,6 +7,7 @@ roles: [Architect, Engineer, Project Manager]
 phase: Acceptance & Release
 severity: High
 applies_to: "All coding agents"
+evidence: Research
 tags: [license compliance, copyright, copyleft, intellectual property, quality gate, Architect, Engineer, Project Manager]
 sources:
   - { title: "LiCoEval: Evaluating LLMs on License Compliance in Code Generation (arXiv 2408.02487, ICSE 2025)", url: "https://arxiv.org/abs/2408.02487" }
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Architect', 'Engineer', 'Project Manager']} phase="Acceptance & Release" severity="High" appliesTo="All coding agents" />
+<PitfallMeta roles={['Architect', 'Engineer', 'Project Manager']} phase="Acceptance & Release" severity="High" appliesTo="All coding agents" evidence="Research" />
 
 > In one sentence: the "original code" I hand you may contain a chunk of open-source implementation I memorized verbatim from training data — possibly carrying a viral copyleft license like GPL. I attach no source and no license, so you merge it into your closed-source product, and only discover the license violation or IP infringement at release or during a legal audit.
 
