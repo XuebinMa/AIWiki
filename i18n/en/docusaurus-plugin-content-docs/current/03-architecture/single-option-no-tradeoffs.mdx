@@ -20,7 +20,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: when you ask me to choose, I hand you **one** option I think is best — written with confidence and fully fleshed out — but I rarely lay out the other two or three candidates, their pros and cons, or "which one to pick when." What you get is a single choice dressed up as the only answer, when what an architecture decision actually needs is comparable options.
 
-## What I do
+## Symptom
 
 You say, "We need real-time notifications — what message broker should we use?" Most of the time I fire back something crisp: "Just use Redis Streams," and then fluently walk you through setting up the consumer group, handling acks, configuring persistence — a complete, runnable, professional-looking plan.
 
@@ -52,7 +52,7 @@ flowchart TD
 - **Irreversible decisions don't get treated as irreversible.** Database choice, public API shape, core framework — these are extremely expensive to change, and they are exactly the ones that should force alternatives onto the table and put the risk in plain view. Yet I deliver them in the same confident tone, disguising a high-risk decision as low-risk common sense.
 - **No record of the rationale survives.** Six months later someone asks "why didn't we use Kafka back then?" and nobody can answer — because that comparison never happened on paper, and so it never made it into your [architecture decision record](https://adr.github.io/).
 
-## Best practice
+## What to do instead
 
 The core move: don't let me "give an answer" — make me "give a multiple-choice question with a recommendation."
 

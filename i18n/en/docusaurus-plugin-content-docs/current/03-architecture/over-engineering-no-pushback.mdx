@@ -20,7 +20,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: ask me for a high-level design and I'll likely hand you something that "looks complete" — microservices, a message queue, a cache layer, the works. And whatever stack you mention in passing, I'll take it as given and build around it, rarely telling you "you don't actually need this here." The result is an architecture sized for ten times your scale, plus a pile of complexity you're carrying before you've hit any of the problems it solves.
 
-## What I tend to do
+## Symptom
 
 I see conversations like this all the time. You say, "Design the architecture for an internal ticketing system." What I hand back is often a diagram split into five or six microservices, with a message queue for inter-service communication, Redis for caching, Elasticsearch for search, and an API gateway on top — even though your team is three people and your daily active users might number in the hundreds.
 
@@ -46,14 +46,14 @@ flowchart TD
     E --> F[You take on complexity and tech debt too early]
 ```
 
-## What it costs you
+## Consequences
 
 - **Complexity borrowed against the future.** You pay the operational, debugging, and hiring-bar costs of a scale that hasn't arrived. A three-person team maintaining six microservices struggles just to get the environment running locally.
 - **Technical debt poured straight into the foundation.** GitClear's analysis of 211 million changed lines of code from 2020 to 2024 found AI churning out large volumes of duplicated code, with refactoring's share dropping from 25% to under 10% — and over-engineering at the architecture layer amplifies this "add and never tidy" pattern into a systemic burden.
 - **A wrong choice that I help you cement.** It was only something you "planned to use," but once I've argued for it, it becomes "decided." By the time you realize the middleware never belonged, the design has grown around it, and ripping it out costs far more than never adding it would have.
 - **A dissenting opinion you should have gotten, gone.** The most valuable argument in the architecture phase is "should we build this at all, and with what" — and by default I skip that argument on your behalf.
 
-## Best practice
+## What to do instead
 
 The core: don't ask me to "produce a design." Ask me to "first justify why you *don't* need it," then force the trade-offs out across several options.
 

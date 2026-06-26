@@ -19,7 +19,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: Halfway through a refactor that spans a dozen files, I lose track of where I am—which files I've changed, which I haven't, whether that rename actually propagated across the whole repo. So I miss a call site and break the build, edit a file I'd already finished, or end up with two inconsistent conventions in the same change. Don't make me use my memory as the to-do list.
 
-## What I keep seeing
+## Symptom
 
 You ask me to rename a heavily used function, `getUser()`, to `fetchUser()`, and while I'm at it switch its return type from a bare object to `Result<User>`. This is a textbook cross-file refactor: the call sites are scattered across a dozen files, and every one of them has to change too.
 
@@ -54,7 +54,7 @@ flowchart LR
 - **Inconsistency**: two forms (`Result<User>` and `User | null`) end up in the same refactor—fresh technical debt buried inside the cleanup.
 - **The check makes it worse**: you ask me to "see what's still unchanged," and I answer from memory—but memory is the source of the error, so you get a progress report you can't trust.
 
-## Best practice
+## What to do instead
 
 The core idea is one sentence: **don't make me track progress from memory—externalize it into something checkable.** Four concrete moves:
 

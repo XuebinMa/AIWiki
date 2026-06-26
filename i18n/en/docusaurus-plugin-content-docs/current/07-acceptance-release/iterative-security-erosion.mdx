@@ -57,7 +57,7 @@ flowchart TD
 - **Homegrown / misused crypto and auth are the deadliest.** These are where "runs" and "secure" diverge most; when I swap a standard library for a homegrown implementation, I often swap out battle-tested protection with it.
 - **Surfacing only at the release gate costs the most.** If the security erosion is found at acceptance (if at all), the rework is a whole data flow spanning rounds, not one line.
 
-## Best practice
+## What to do instead
 
 **Core: treat security as a gate that "must pass every round," not a one-time check before release; and audit the accumulated code as a whole, not just the last diff.**
 
@@ -95,7 +95,7 @@ The difference isn't that I was more careful on some one round — it's that sec
 "Each round minds only the local part, with no global security guard, so vulnerabilities accumulate across iterations" is a **general trait** of sampling-based code generation, independent of the specific model or version; the quantified findings above come from a systematic study across multiple models. The specific tools (SAST / dependency scan / secret scan in CI, in-IDE security hints) evolve with the ecosystem, but "security is a global property and must be guarded every round" does not change.
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Security Degradation in Iterative AI Code Generation: A Systematic Analysis of the Paradox (IEEE-ISTAS 2025; arXiv 2506.11022)](https://arxiv.org/abs/2506.11022) — function improves while security degrades across iterations; severe vulnerabilities rise ~37.6% after about five rounds
 - [Misuse of Java Security APIs by LLMs (arXiv 2404.03823)](https://arxiv.org/abs/2404.03823) — LLMs widely misuse security / crypto APIs, corroborating the "refactor replaces standard secure calls" root cause

@@ -19,7 +19,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: let me work for a stretch and what I pile up is usually one giant commit — dozens of files, a thousand-plus lines — with a message that just says "update code." On top of that, I'll sweep build artifacts, `.env`, and commented-out dead code straight into the commit. The result is an unreadable history: `git bisect`, rollback, and code review all stop working, and when something breaks you can't tell which change caused it.
 
-## What you'll see
+## Symptom
 
 Here's how it tends to end: you ask me to "finish this feature," I head down for twenty minutes, touch a dozen files, and then do one `git add -A && git commit`. You open the history and find:
 
@@ -65,7 +65,7 @@ flowchart TD
 - **A message with no information strips the history of navigational value.** Six months later you `git log` to find "why did we change the timeout to 60 seconds back then" and you see a row of "update code / fix stuff." The history was supposed to be the project's record of decisions; now it's degraded into noise.
 - **Things mixed into the repo cost extra to clean out.** Artifacts bloat the repo; dead code misleads whoever comes next; and once a `.env` is in the Git history, deleting one line isn't enough — that secret has leaked and must be rotated (see the security entry above).
 
-## Best practice
+## What to do instead
 
 **Conclusion first: don't let me accumulate one big commit. Require small, atomic commits, make each message explain *why*, and have me list the plan for your review before committing.**
 

@@ -21,7 +21,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: you ask me to "make the feature work," so I focus only on making it work. Security is a non-functional requirement that is invisible by default — unless you ask for it explicitly, I won't reason in terms of least privilege, data sensitivity tiers, or defense in depth. The result: hardcoded keys committed to the repo, endpoints left unauthenticated, and sensitive data written into logs and error messages.
 
-## What you'll see
+## Symptom
 
 You ask me to "add an endpoint that calls a third-party payment API," "write a SQL query for looking up users," or "return the error message to the frontend to make debugging easier." I deliver all of it quickly, and it all appears to work. But if you read it line by line, you'll keep hitting the same class of problems:
 
@@ -57,7 +57,7 @@ flowchart TD
 - **Sensitive data in logs / errors / the frontend is a quiet, ongoing leak.** No error, no failure — the data just trickles into your logging system, monitoring, frontend source, and browser console. By the time it's noticed, it's often already a compliance incident requiring public disclosure.
 - **Security debt is most expensive at the acceptance stage.** Adding a parameterized query while coding costs almost nothing; discovering the hole after release means rollbacks, credential rotation, user notifications, and a post-incident audit — an order-of-magnitude difference.
 
-## Best practice
+## What to do instead
 
 **Turn security from "an implicit requirement I can't see" into "an explicit acceptance item," then back it with automated gates.** Don't count on me to think of it on my own — write it into the task and the pipeline.
 

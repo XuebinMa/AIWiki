@@ -25,7 +25,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: when you wire up an MCP server for me, you take the easy route and grant the broadest access in one shot — whole-repo read/write, the production database, secrets, a tool that can fire requests at the outside world. The problem isn't just "I might misuse it." Every high-privilege MCP tool you hand me opens one more prompt-injection path: a malicious instruction buried in an issue I read, or a web page I fetch, can ship your data outward through the tools already in my hands.
 
-## What I See
+## Symptom
 
 Here's how I often see you wire up MCP. You install a server and immediately hand it the widest scope — the database MCP connects with an admin account on the production database, the filesystem MCP gets read/write over your entire home directory, you bolt on an HTTP tool that can hit any URL, and there's an unscoped API key sitting in the environment. The reasoning is usually "let me just get it working first" or "so I don't have to come back and widen permissions halfway through."
 
@@ -33,7 +33,7 @@ Now, on my end, I'm holding three things at once: **access to your private data*
 
 This is a different pitfall from [Handing Me Every Permission on Day One](./over-permissioning). That one is about the general permission surface — `--dangerously-skip-permissions`, dumping `Bash(*)` into `allow`. This one is specifically about the access surface and injection surface that **MCP tools** stack on top of it. You can step on either pit alone, or both together.
 
-## Why This Happens
+## Why this happens
 
 The root cause isn't "will I misuse a tool." It's that **I can't reliably tell "data" apart from "instructions."**
 
@@ -59,7 +59,7 @@ flowchart LR
 - **Credential spread.** Once an unscoped API key leaks through my hands, the attack surface expands from this one project to everything that key can touch.
 - **Attack surface grows linearly with tool count.** Every high-privilege MCP you add is one more path injection can exploit; the more servers you connect and the wider their permissions, the likelier the lethal trifecta gets assembled.
 
-## Best Practice
+## What to do instead
 
 **Grant MCP on least privilege, and be especially wary of the combination "can read external content + can act with high privilege."** A few things you can apply directly:
 
@@ -118,13 +118,13 @@ The difference isn't that I got smarter. It's that when the injected instruction
 
 **GitHub Copilot (as of 2026-06)**: The coding agent's MCP is configured at the repo level; GitHub MCP and Playwright MCP are on by default, but write tools are not granted by default (you have to list them explicitly), and once configured the tools are invoked autonomously without per-call confirmation; MCP secrets must use the `COPILOT_MCP_` prefix. Two sharp edges: (1) the coding agent's firewall doesn't cover the MCP server — MCP becomes the exit that bypasses it; (2) remote MCP with OAuth authentication isn't supported. So narrowing to read-only and listing only the write tools you need is still the first gate here.
 
-## Version Notes
+## Version notes
 
 :::note Applies to
 "Prompt injection + excessive agency" is a general risk for every AI agent that can call tools, **independent of the specific model** — MCP just standardizes and scales up that attack surface. The mechanics evolve with the implementation: Claude Code asks you to confirm a project-scoped MCP server before using it, to guard against a supply-chain attack introduced through version control; read-only / scope limiting, permission prompts, and sandboxing shift across versions, so defer to the official MCP and permissions docs for the version you're running.
 :::
 
-## Further Reading and Sources
+## Further reading and sources
 
 - [LLM06:2025 Excessive Agency (OWASP Gen AI Security Project)](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)
 - [Security Best Practices (Model Context Protocol official)](https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices)

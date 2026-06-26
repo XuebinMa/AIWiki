@@ -21,7 +21,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: when the product I help you build has an LLM inside it — a support bot, an agent, the kind of feature that "reads user content / a web page / an email, then acts" — attackers will hide malicious instructions in content I'm going to read and trick that backend LLM into overstepping: leaking data, calling tools it shouldn't, bypassing the rules you set. During development I default to assuming "all input is benign," so I treat a release surface that should be modeled as an attack surface like an ordinary feature delivery.
 
-## The symptom
+## Symptom
 
 What you asked me to build isn't a script — it's a **product feature with an LLM inside**. For example: a support bot that reads a user's message and can then look up orders and issue refunds; an email assistant that reads your inbox and helps you reply and forward; an agent that fetches a web page or a document, summarizes it, then calls a few internal APIs.
 
@@ -47,14 +47,14 @@ flowchart LR
     C -->|Isolated / needs confirmation| E[Injection has nowhere to land<br/>or is stopped before it acts]
 ```
 
-## The consequences
+## Consequences
 
 - **Data leaks.** Injection drives the model to send private data — other users' profiles, internal records, secrets — out through the outbound-communication tool you already handed it. The whole thing is "legitimate" tool calls; in the logs it looks like a normal request.
 - **Tools get called beyond their remit.** The support bot is tricked into issuing a refund it shouldn't, the email assistant is tricked into forwarding the entire inbox to a stranger's address. Whatever permissions the model has, injection can borrow.
 - **Rules get bypassed.** The "don't reveal internal information," "only answer product questions" you wrote into the system prompt often can't hold against a carefully crafted injection — the system prompt is just one more piece of text in the context, not an impassable guardrail.
 - **This is the release surface, not the internal one.** Unlike me misreading an issue during development, after launch it's **real attackers actively crafting input** — at scale, replayable, motivated. Failing to treat it as an attack surface at acceptance time is shipping with an outward-facing door left wide open.
 
-## Best practices
+## What to do instead
 
 **Isolate "untrusted content" from "high-privilege actions," do it as defense in depth, and run an injection threat-modeling pass against OWASP before release.** Don't expect to solve it by "telling the model in the system prompt not to fall for tricks" — that isn't a defense.
 
@@ -77,7 +77,7 @@ flowchart LR
 - [ ] Are credentials minimally scoped? How far does the blast radius reach if they leak?
 ```
 
-## Examples
+## Example
 
 **Before (I wired user input straight to tools and assumed benign input):**
 
@@ -115,7 +115,7 @@ The difference isn't that the model got smarter — it's that when the injected 
 This isn't a defect in some Claude Code version — it's a risk **common to every product with an LLM inside**: prompt injection is an attack class unique to LLM applications and still without a deterministic, complete fix, and OWASP ranks it LLM01 (the top risk) in the 2025 edition. The point here isn't "the Claude Code tool gets injected," but "**the LLM feature you built with Claude Code's help** gets injected after launch" — the root cause (the model can't tell data from instructions; I default to benign input during development) is independent of any specific model or framework. The available mitigations (least privilege, human confirmation, tool allowlists, Dual LLM isolation, output filtering) evolve with the ecosystem; defer to the security docs of the model / framework you use and to the latest OWASP LLM Top 10.
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [LLM01:2025 Prompt Injection (OWASP Gen AI Security Project)](https://genai.owasp.org/llmrisk/llm01-prompt-injection/)
 - [LLM06:2025 Excessive Agency (OWASP Gen AI Security Project)](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)

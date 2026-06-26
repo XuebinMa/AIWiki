@@ -53,7 +53,7 @@ flowchart TD
 - **Deadlocks bring the service to a halt.** Two executors each hold one lock and wait on the other's, requests pile up, threads exhaust — harder to locate live than a single-point crash.
 - **Fixing it often means touching the data model.** Adding a lock, a transaction, a unique constraint, or an optimistic-lock version number — these are design-level decisions, and patching them in after concurrency surfaces costs far more rework than designing them in from the start.
 
-## Best practice
+## What to do instead
 
 **Don't let me treat the world as single-threaded — tell me the concurrent scenario explicitly, force me to mark shared mutable state and critical sections, and say what synchronization nails them down.**
 
@@ -119,7 +119,7 @@ The test: the exception holds when "no concurrency / no sharing" is a fact you'v
 "Defaulting to generating code as single-threaded sequential logic" is an inherent tendency of LLMs writing code, applying to **all models and coding agents**. Research shows even the strongest models still struggle significantly with concurrency reasoning (see [arXiv 2501.14326](https://arxiv.org/html/2501.14326v1)). The stronger the model, the prettier the sequential code, and the easier it is to forget it didn't consider concurrency by default — so "explicitly give a concurrency profile, mark critical sections, and verify with concurrency tests" won't go obsolete as models get stronger.
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Race condition — Wikipedia](https://en.wikipedia.org/wiki/Race_condition)
 - [Assessing Large Language Models in Comprehending and Verifying Concurrent Programs across Memory Models (arXiv 2501.14326)](https://arxiv.org/html/2501.14326v1)

@@ -23,7 +23,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 I hand you an implementation that's wrong. You say, "No, use approach B." I revise it, but it still carries the original flaw. You correct me again, I revise again, and it drifts further. Three or four rounds in, you start wondering whether I understand the requirement at all.
 
-## Why it happens
+## Why this happens
 
 With each correction, **my earlier faulty reasoning and faulty code are all still sitting in the context.** When I generate a new answer, I draw on the entire history—so it's easy for my own earlier mistakes to lead me astray, building on a broken foundation.
 
@@ -45,7 +45,7 @@ flowchart TD
 - The context fills with failed attempts, further dragging down later quality (see [the kitchen-sink session](./kitchen-sink-session.mdx)).
 - The time you spend correcting exceeds what starting over would have cost.
 
-## Best practice
+## What to do instead
 
 **Don't wrestle inside a polluted context—roll back to before the mistake.**
 
@@ -82,7 +82,7 @@ Me: (gives the iterative version directly)
 "A polluted context causes drift the more you correct" is a mechanism-level effect and applies across versions. But **rollback capability depends on the specific version**: `/rewind` and `Esc` checkpoint rollback are features of newer releases. If your version doesn't support them, you can `/clear` and rewrite the initial prompt for a similar effect (you just can't preserve the useful parts from before the `/clear`).
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Claude Code Best Practices (Anthropic, official)](https://code.claude.com/docs/en/best-practices)
 - [MuhammadUsmanGM/claude-code-best-practices](https://github.com/MuhammadUsmanGM/claude-code-best-practices)

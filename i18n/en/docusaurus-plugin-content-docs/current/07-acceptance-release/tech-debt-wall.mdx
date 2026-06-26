@@ -21,7 +21,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: with me, you can stack up a pile of "working" features blazingly fast in the first few weeks — fast enough to assume it will always be this fast. But the moment you keep asking only for "make it run, quickly" and ignore structure, tests, and docs, technical debt compounds. At some point (often called "three months") you hit a wall: change one thing and three break, nobody dares touch it, every new feature gets slower — the speed falls off a cliff, and the time you "saved" earlier comes due with interest.
 
-## What I tend to do
+## Symptom
 
 For the first two weeks we work like we're cheating. You say "build a user center," and ten minutes later I hand you code that logs in, edits profiles, and runs. You say "add a favorites feature," and ten minutes later I jam it in. For every requirement I take the shortest path to **make it run right now**: skip a layer if I can, copy-paste if it's faster, no tests for now, docs "later." What you see is a demo that looks different every day and a progress bar that flies.
 
@@ -53,7 +53,7 @@ This is two sides of the same coin as [When You Ask Me for an Architecture, I Te
 - **Nobody dares touch it, including me.** Without docs and tests, nobody knows why a given piece of code is written the way it is or what it'll blow up if changed. The code freezes into "if it runs, don't touch it," new features get patched on at the edges, and the debt thickens further.
 - **It's deadliest at the acceptance stage.** The debt borrowed early to hit demos comes due exactly during the acceptance-and-release phase, when you need stable delivery and ongoing maintenance. You think you're wrapping up; you're actually repaying — principal plus interest.
 
-## Best practice
+## What to do instead
 
 The core in one line: **treat maintainability as an ongoing requirement every round, not a last-minute fix before launch — and tell me so explicitly, because by default I won't pick up that tab myself.**
 

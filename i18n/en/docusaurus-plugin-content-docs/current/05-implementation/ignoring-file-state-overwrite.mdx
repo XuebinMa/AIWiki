@@ -19,7 +19,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: the copy of the file I'm holding is several rounds old, and I never saw the lines you just hand-edited. I hand back a "complete rewrite" — clean, yes, but your changes are gone with it, and you usually only notice a while later.
 
-## What it looks like
+## Symptom
 
 You ask me to "switch this file's logging to structured output." Instead of reading what the file looks like on disk right now, I regenerate the whole file from the stale copy that's been sitting in my context for several rounds. It looks complete and tidy.
 
@@ -49,7 +49,7 @@ flowchart TD
 - **Found late, costly to fix.** It often surfaces several turns later when tests fail, or only after release, and by then tracing "which step overwrote it" takes real effort.
 - **Eroded trust.** You start being afraid to let me touch any file you've maintained by hand.
 
-## Best practice
+## What to do instead
 
 The core is a single sentence: **have me make the smallest change against the file's real current state, instead of rewriting the whole file from memory.**
 

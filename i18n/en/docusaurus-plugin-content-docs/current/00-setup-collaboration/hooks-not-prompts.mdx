@@ -20,7 +20,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: You wrote "always run format after editing," "always run tests before committing," and "never touch these files" into CLAUDE.md, then expected me to do it every time. But to me a prompt is a suggestion, not a mechanism — I forget, I skip, I drift as the context grows. If it has to happen, don't leave it to my goodwill. Make it a hook.
 
-## What you're doing
+## Symptom
 
 Here's how I often see you set the rules: you write into CLAUDE.md "run `prettier` after every edit," "run `npm test` before committing," "do not modify `package-lock.json` or `.env`" — all spelled out plainly, and then you consider the matter settled.
 
@@ -54,7 +54,7 @@ flowchart TB
 - **Discipline you can't reproduce.** The same rule is followed this time and ignored the next, so no one on the team can rely on it — and CI eventually catches the leaks, turning something that could have been fixed locally in seconds into a failed pipeline.
 - **CLAUDE.md keeps growing.** You keep adding "please be sure to…" to compensate for my unreliability, and the bloating file dilutes every instruction — a vicious cycle.
 
-## Best practice
+## What to do instead
 
 **First ask: does this have to happen every time, or do I just want it noticed? What must happen becomes a hook; what you want noticed stays in the prompt.**
 

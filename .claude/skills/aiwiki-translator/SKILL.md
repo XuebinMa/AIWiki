@@ -20,6 +20,21 @@ description: 把一条 AiWiki 中文误区条目（docs/ 下的 .mdx）翻译成
 2. **保结构原样**：
    - frontmatter：key 不动；`title`/`tags`/`applies_to` 译；`roles`/`phase`/`severity`/`evidence` 用 `terminology.md` 的英文枚举；`slug`、`sidebar_position` 不变；`sources` 的 url 不变，title 可译。
    - 保留 `import … PitfallMeta`、`<PitfallMeta .../>`（props 改成英文枚举值）、所有 ```mermaid``` 代码块（节点内文字可译，结构与箭头不动）、`:::note` admonition。
+   - **七段小标题用下面这套固定的地道英文，每节只用规范说法、不得另造变体**（允许与中文字面不字字对应——尤其「最佳实践 → What to do instead」）：
+
+     | 中文小标题 | 规范英文 `##` |
+     |------------|---------------|
+     | 现象 | `## Symptom` |
+     | 为什么会这样 | `## Why this happens` |
+     | 后果 | `## Consequences` |
+     | 最佳实践 | `## What to do instead` |
+     | 示例 | `## Example` |
+     | 版本说明 | `## Version notes` |
+     | 延伸阅读与出处 | `## Further reading and sources` |
+     | 什么时候例外 | `## When the exception applies` |
+     | 工具差异 | `## Tool differences` |
+
+     条目专属的「与《X》的区别」边界小节按 `## How this differs from X` 自然表达即可。
 3. **像母语，不逐字**：用英文母语者的说法把同一件事讲清楚（见 `STYLE-GUIDE.md`「中英一致性」），但事实、数字、出处、结论必须与中文完全一致。
 4. **防编造自查**（翻完逐项打勾）：
    - [ ] 没有中文里不存在的新论断或新例子
