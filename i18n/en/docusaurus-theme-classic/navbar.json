@@ -19,6 +19,10 @@
     "message": "Tool Matrix",
     "description": "Navbar item with label 工具矩阵"
   },
+  "item.label.机制索引": {
+    "message": "Mechanisms",
+    "description": "Navbar item with label 机制索引"
+  },
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"

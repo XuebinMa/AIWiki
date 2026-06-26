@@ -53,6 +53,16 @@ Each maps to a mechanism in the linked entries:
 
 For the full mechanism, see [Dev-time prompt injection](../05-implementation/dev-time-prompt-injection.mdx) and [MCP over-access](../00-setup-collaboration/mcp-over-access.mdx).
 
+## What this case shows — and what it doesn't
+
+**Pitfalls it confirms** (click through for the full mechanism reasoning):
+
+- [Dev-time prompt injection](../05-implementation/dev-time-prompt-injection.mdx)
+- [MCP over-access](../00-setup-collaboration/mcp-over-access.mdx)
+- [Over-permissioning / skipping approval](../00-setup-collaboration/over-permissioning.mdx)
+
+**What it does not prove:** This is a specific, already-patched vulnerability (CVE-2025-61260, fixed in v0.23.0) in Codex CLI ≤ v0.22 — not evidence that today's Codex CLI is still exploitable this way, nor that "all MCP configs" or "all coding agents" lead to RCE. It backs a *class* of mechanism risk (a config the agent auto-loads is itself an execution surface), not a verdict that one tool is "unsafe."
+
 ## Sources
 
 - [OpenAI Codex CLI Command Injection Vulnerability (Check Point Research)](https://research.checkpoint.com/2025/openai-codex-cli-command-injection-vulnerability/)

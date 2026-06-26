@@ -57,6 +57,16 @@ Each maps to a mechanism in the linked entries — not "trust me to behave":
 
 For the full mechanism, see [Dev-time prompt injection](../05-implementation/dev-time-prompt-injection.mdx).
 
+## What this case shows — and what it doesn't
+
+**Pitfalls it confirms** (click through for the full mechanism reasoning):
+
+- [Dev-time prompt injection](../05-implementation/dev-time-prompt-injection.mdx)
+- [Over-permissioning (weak allowlist)](../00-setup-collaboration/over-permissioning.mdx)
+- [Rubber-stamp review](../00-setup-collaboration/over-reliance-automation-bias.mdx)
+
+**What it does not prove:** Tracebit reproduced this RCE on a *specific version under specific coercion*, and the behavior has since been tightened — it doesn't mean every Gemini CLI default configuration reproduces it, nor that Gemini is more dangerous than other tools. It backs the mechanism class "weak allowlist + auto-execute + reading poisoned content," which holds on other tools too.
+
 ## Sources
 
 - [Google patches Gemini CLI tool after prompt injection flaw uncovered (CSO Online)](https://www.csoonline.com/article/4030700/google-patches-gemini-cli-tool-after-prompt-injection-flaw-uncovered.html)

@@ -47,6 +47,14 @@ Samsung 的反应是收紧：在公司设备与内网上**全面禁用** ChatGPT
 3. **上 DLP 兜底**：在出口侧加数据防泄露扫描，挡住凭据、源码、敏感字段被粘贴外发。
 4. **把「数据边界」当成显式约束告诉我**：正如 [安全那条](../07-acceptance-release/security-data-leaks.mdx) 所说，我不会自发按最小权限和数据敏感度行事——你要把它写进规则，我才会当成目标的一部分。
 
+## 这个案例印证什么、不证明什么
+
+**印证的误区**（点进去看完整机制推理）：
+
+- [泄露敏感数据](../07-acceptance-release/security-data-leaks.mdx)
+
+**它不证明**：这是**把机密贴进外部 LLM 的人因 / 流程风险**，不是 ChatGPT 的漏洞——模型按设计工作，问题在「敏感数据离开了可控边界」。不代表所有用 ChatGPT 的场景都会泄露；规避靠的是数据边界，不是停用工具。
+
 ## 出处
 
 - [Samsung bans use of generative AI tools like ChatGPT after April internal data leak (TechCrunch)](https://techcrunch.com/2023/05/02/samsung-bans-use-of-generative-ai-tools-like-chatgpt-after-april-internal-data-leak/)

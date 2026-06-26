@@ -105,6 +105,11 @@ const config = {
             label: '工具矩阵',
           },
           {
+            to: '/mechanisms',
+            position: 'left',
+            label: '机制索引',
+          },
+          {
             type: 'localeDropdown',
             position: 'right',
           },

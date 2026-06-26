@@ -136,6 +136,18 @@
 - ⬜ **工具矩阵「机制格」升级（评审第三轮 #6；本轮未做）**：保留现有 ✓ 概览，另加一版**机制名级**矩阵（如「project memory / settings split」「trust / sandbox」级别），让读者看到「差异是什么」而不仅是「有差异」。**铁律**：只写机制名，**不写具体命令 / JSON 字段 / 默认值，除非带版本戳 + 出处**（延续 `CLAUDE.md` 反过时铁律；矩阵页已标「截至 2026-06」）。
 - ⬜ **`sidebar_label` 短名回填其余阶段（评审第三轮 #4 续）**：本轮已给 cases + 工具特有 + 00 超长标题配短 `sidebar_label`；01–07 其余叙事长标题条目仍用长 title 占侧边栏，按 `STYLE-GUIDE`/skill 的约定逐阶段回填（非阻塞，新条目按约定自带）。
 
+#### 索引/可信度层（评审第四轮，用户选 #3+#1+#4+#5）
+
+- ✅ **机制索引页（#3，首推）**：`docs/mechanisms.mdx`（+英镜像，slug `/mechanisms`，navbar「机制索引 / Mechanisms」）。6 个根因桶（长上下文退化 / 概率性补全与遵守 / 工具与权限外溢 / 目标函数错位 / 全局视野不足 / 反馈循环退化），全 66 条**各挂恰好一个主桶**、每桶带一句机制说明 + 一句「正向镜像」。手工策展页，不给条目加 `mechanism:` 元数据（避免又一层会漂的字段）；与 `intro` 互链。**新增条目须顺手挂进对应桶。**
+- ✅ **必读 20 条（#1）**：`docs/core-20.mdx`（+英镜像，slug `/core-20`）；入选规则写在页顶（`severity: 高` 为主 + 「新手最早踩 + 后果最不可逆」粗排，含少数基础项）。入口在 `intro` 顶部 CTA + 侧边栏置顶（`sidebar_position: 0.5`），**不挤 navbar**。
+- ✅ **案例「印证 / 不证明」块（#4）**：5 条案例（中英）末尾加固定块——「印证的误区」清单 + 「不证明」防过度泛化（接续 PR #29 归因严谨化）。
+- ✅ **模板「适用边界」（#5）**：5 个 `docs/toolkit/*.mdx`（中英）各加「适合什么时候用 / 不适合什么时候用 / 使用前请替换」三段，让模板从「万能 prompt」变「可裁剪工件」。
+- ⬜ **#2 阶段总论**：每个生命周期阶段开头加一段「这一阶段 AI 最容易整体性翻车的地方」总论，把零散条目串成叙事。评审第四轮提出，本轮未做。
+- ⬜ **#7 人类职责边界（升级 `/roles` 页）**：在按角色浏览页之上，加一层「这个角色对 AI 产出该守住哪些不可外包的判断」。本轮未做。
+- ⬜ **#8 新专题候选**：评审第四轮建议补 code review / db migration / 多 agent 协作 / 成本治理等专题；其中「**AI 评审自己写的代码**」最值得先做。逐条按现有去重 + 出处标准走流水线，本轮未做。
+- ⬜ **#9 成熟度 status（仅收可机械派生）**：若做，只收 `case-backed`（被某案例 `cases/` 反链印证）/ `template-linked`（被某 toolkit 模板引用）这类**可机械派生**的标记，**不收**主观 `draft/reviewed`（与 `evidenceLevel` 同一治理标准）。本轮未做。
+- ❌ **#6 正用法独立区（评审第四轮）**：不做——会稀释「第一人称误区手册」的定位；正向镜像已分布在每条「What to do instead」+ 机制页每桶一句「正向镜像」里，无需另起独立站区。
+
 ### 待触发（条件未到，不算欠债）
 
 - 🟡 **工具矩阵页 + 各条「工具差异」实际内容**（**已扩到 5 工具**）：结构定调见 `CLAUDE.md`「目录与双语约定」与 `terminology.md`「tool 工具 / agent」（轴按工具 / agent 非模型）。已落地（中英镜像）：8 条主条目各带 **Gemini CLI / Codex CLI / Cursor / GitHub Copilot** 工具差异小节（Codex 略 skipping-plan-mode）+ 独立条目 `gemini-folder-trust-inheritance`、`cursor-ignore-best-effort` + 案例库 `gemini-cli-tracebit-rce`、`codex-cli-config-rce`、`github-copilot-camoleak` + `docs/tool-matrix`（已重构为「覆盖网格 + 每工具小节」）。后续可选：补更多工具、回填 Codex 的 plan-mode 近似。

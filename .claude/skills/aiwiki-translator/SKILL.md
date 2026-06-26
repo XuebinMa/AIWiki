@@ -43,3 +43,4 @@ description: 把一条 AiWiki 中文误区条目（docs/ 下的 .mdx）翻译成
    - [ ] 元数据（角色 / 阶段 / 严重度 / 适用版本 / 证据类型）与中文版语义相同
 5. **分类标签**：若该条目是其所在阶段目录在英文站的**第一条**（此前该目录没有条目），还要在 `i18n/en/docusaurus-plugin-content-docs/current.json` 补上该分类的英文 `label` 与 generated-index 的 `title` / `description`——否则英文站的侧边栏 / 面包屑 / 分类首页会回退显示中文。
 6. 翻完跑英文向 linter（Vale / cspell）。
+7. **索引页同步**：若中文侧改了 `docs/mechanisms.mdx`（新条目挂桶）、`docs/core-20.mdx`、或某条 `cases/` 的「印证 / 不证明」块、某个 `toolkit/` 模板的「适用边界」三段，对应英文镜像必须同步翻译——`check:mirror` 会卡中英不成对，但不会卡「英文漏了某一节」，靠这一步守住。

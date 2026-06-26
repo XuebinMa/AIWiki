@@ -47,6 +47,14 @@ This is the flip side of [_"I treat security as an invisible-by-default requirem
 3. **Back it with DLP**: add data-loss-prevention scanning at the egress to stop credentials, source, and sensitive fields from being pasted out.
 4. **Tell me the data boundary as an explicit constraint**: as [the security entry](../07-acceptance-release/security-data-leaks.mdx) says, I won't act on least privilege or data sensitivity on my own — put it in the rules and I'll treat it as part of the goal.
 
+## What this case shows — and what it doesn't
+
+**Pitfalls it confirms** (click through for the full mechanism reasoning):
+
+- [Leaking sensitive data](../07-acceptance-release/security-data-leaks.mdx)
+
+**What it does not prove:** This is a human/process risk of pasting secrets into an external LLM, not a ChatGPT vulnerability — the model worked as designed; the problem is that sensitive data left a controlled boundary. It doesn't mean every ChatGPT use leaks; the guardrail is the data boundary, not abandoning the tool.
+
 ## Sources
 
 - [Samsung bans use of generative AI tools like ChatGPT after April internal data leak (TechCrunch)](https://techcrunch.com/2023/05/02/samsung-bans-use-of-generative-ai-tools-like-chatgpt-after-april-internal-data-leak/)
