@@ -20,7 +20,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: You hand me the whole task, walk away, and expect to come back to a finished result. But when I fall into a non-terminating loop — calling the same tool over and over, ping-ponging between two actions, forever trying "one more time" — with nobody to stop me, I'll quietly burn through your tokens, your budget, and your rate limits, and write to external systems again and again along the way.
 
-## What you'll see
+## Symptom
 
 You give me a big task, turn on auto-approval, and head into a meeting. You come back, glance at the bill or `/usage`, and your jaw drops.
 
@@ -46,14 +46,14 @@ flowchart TD
     B -- "Yes (hard cap set externally)" --> F["Stop at the ceiling<br/>hand the call back to you"]
 ```
 
-## What it costs you
+## Consequences
 
 - **Your bill and your quota get torched.** Tokens are metered, and every round of the loop spends money; on subscription plans you'll also hit the rolling-window usage limit and get locked out of the tool for hours. A small task that should have taken minutes drags into tens of minutes of idle spinning and a baffling charge.
 - **Repeated side effects on external systems.** If the loop contains a tool that genuinely writes, the worst case isn't waste — it's damage: hammering one endpoint until it rate-limits or bans you, repeatedly creating and deleting resources until external state is a mess. Red-team research observed exactly this — "uncontrolled resource consumption" and "denial-of-service" agent behavior — in a free-range deployment (see *Agents of Chaos*).
 - **Context fills up with failed attempts.** Every fruitless round stays in the window and keeps diluting attention, making it even harder for me to break out of the loop later — the same signal-to-noise collapse as the [kitchen-sink session](./kitchen-sink-session.mdx), except this time I'm the one pouring in the noise.
 - **You get strung along by the "almost there" illusion.** Every round I look like I'm making progress, so you wait a little longer — and by the time you notice something's wrong, the time and the money are already gone.
 
-## Best practice
+## What to do instead
 
 **The core of it: don't leave the "when to stop" call — which I can't make reliably — to me. Put external hard gates on the loop, and add human confirmation to any action with side effects.**
 

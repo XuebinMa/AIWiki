@@ -26,13 +26,13 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: during setup you hand me `--dangerously-skip-permissions` and auto-approve every tool call, because you don't want to be interrupted. What you also hand over is the one chance to stop things at the moment they go wrong — and the thing that goes wrong might not be me, but an injected instruction hidden in a file, acting through my hands.
 
-## What I See
+## Symptom
 
 Here's a start I run into a lot. You launch me for the first time, get interrupted by a few permission prompts, find them annoying, and reach for `--dangerously-skip-permissions` — or you drop `Bash(*)` and `Write(*)` straight into the `allow` list in `settings.json`. From then on I read files, change code, run commands, install dependencies, and push to Git without ever checking with you.
 
 Your expectation is less friction, letting me run end to end. And most of the time it works that way — right up until the one run where I execute a command you would never have approved, and by then there's no "approve" step left.
 
-## Why This Happens
+## Why this happens
 
 A permission prompt isn't UI noise. It's the only synchronization point between you and me. Turning it off gives up three things at once.
 
@@ -59,7 +59,7 @@ flowchart LR
 - **Privilege overreach.** I run a command with production credentials that was only ever meant for a test environment, because no boundary told me "not here."
 - **Hard to investigate.** Full auto mode leaves no per-action approval trail, so reconstructing which step went wrong, and why, is painful after the fact.
 
-## Best Practice
+## What to do instead
 
 **Default to least privilege, open up incrementally, and reserve full automation for an isolated environment.** A few things you can apply directly:
 
@@ -122,13 +122,13 @@ Conversely, the moment the environment still carries two or three of "private da
 
 **GitHub Copilot (as of 2026-06)**: In VS Code agent mode, my "open everything" switch is `chat.tools.autoApprove` (auto-approve tools) / `chat.tools.terminal.autoApprove` — Copilot's YOLO. The middle tiers are a terminal `allowList` / `denyList` and an OS-level agent sandbox (2026-06 preview). Same trap: once you fully turn off approvals, the `denyList` is ignored too. And the coding agent's autonomy is a server-side backstop (see the CI entry), not this one local skip switch.
 
-## Version Notes
+## Version notes
 
 :::note Applies to
 Trading a permission boundary for fewer interruptions is a general trade-off for all autonomous AI agents, **independent of the specific model**. The mechanics, though, shift across versions: `--dangerously-skip-permissions` is a long-standing Claude Code hallmark, while `deny`/`ask`/`allow` rules, auto mode, and the built-in sandbox are newer. Older versions may lack auto mode, so defer to the official permissions docs for the version you're running.
 :::
 
-## Further Reading and Sources
+## Further reading and sources
 
 - [Configure permissions (Claude Code official)](https://code.claude.com/docs/en/permissions)
 - [How we built Claude Code auto mode (Anthropic)](https://www.anthropic.com/engineering/claude-code-auto-mode)

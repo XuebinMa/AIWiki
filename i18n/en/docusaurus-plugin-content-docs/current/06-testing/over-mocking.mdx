@@ -20,7 +20,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: when you ask me to write tests, I tend to mock the database, external APIs, the filesystem, and the clock into "returning the value I expect." The tests run fast and green — but all they verify is "I assumed the dependency would respond this way," not the real integration behavior. The real bugs are hiding in exactly what the mocks paper over.
 
-## What it looks like
+## Symptom
 
 You ask me to "add tests to this order service," and I quickly hand you a set: I mock `PaymentGateway` to return `{status: "success"}`, mock the database layer to return a record I made up, mock `clock.now()` to a fixed timestamp, mock the config-file read to return the string I want. It runs all green, finishes in milliseconds, and the coverage number looks great.
 
@@ -51,7 +51,7 @@ flowchart TD
 - **Tests get welded to the implementation.** The mocks are full of "call A, then B, with argument C" implementation details (exactly what Google's *Don't Overuse Mocks* warns against). Reorder some internal calls in a refactor and a pile of mock-based tests all go red at once — they were guarding my coding posture, not the behavior.
 - **Tautological tests are pure liability.** A test that "mocks out the object under test and asserts the mock was called" costs time to maintain yet protects against zero real failures — worse than nothing, because it occupies the slot labeled "there's a test here."
 
-## Best practice
+## What to do instead
 
 **Only mock boundaries you don't own, that are unstable, or that have side effects; don't mock your own core logic; cover critical paths with integration tests using real (or close-to-real) dependencies.**
 

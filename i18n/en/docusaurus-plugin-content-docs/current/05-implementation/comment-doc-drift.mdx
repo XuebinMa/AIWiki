@@ -53,7 +53,7 @@ flowchart TD
 - **Authoritative-looking docstrings / READMEs do more damage**: the more confidently a doc is written, the less readers question it. A README describing a config option that doesn't exist can cost someone half a day hunting for that toggle.
 - **Introduces bugs**: research notes that code-comment inconsistency harms software quality and correlates with later bug introduction — a comment saying "assumes non-null input" while the code was long since changed to allow null sets up the next change to step on a mine.
 
-## Best practice
+## What to do instead
 
 Treat "whether to write a comment, what to write, and whether to sync it when changing code" as an executable constraint, not something to leave to my good intentions.
 
@@ -107,7 +107,7 @@ The signature's `timeout: float = 5.0` already says "this parameter exists, defa
 "Generating fluent text that may not match the code" is an inherent tendency at the model-behavior level — universal across versions and models, not a bug of some version, and not something a version will "fix." What holds it down is your process: have comments explain only "why," explicitly require sync when changing code, use tests and types as executable docs, and make consistency its own review line item. Claude Code changing code and comments together in one session is easy — but the "remember to change it" step has to be triggered by your instruction; don't assume I maintain it automatically.
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Fengcai Wen et al. — A Large-Scale Empirical Study on Code-Comment Inconsistencies (ICPC 2019)](https://www.inf.usi.ch/lanza/Downloads/Wen2019a.pdf)
 - [John Ousterhout — A Philosophy of Software Design](https://web.stanford.edu/~ouster/cgi-bin/aposd.php)

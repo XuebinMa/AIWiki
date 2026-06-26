@@ -19,7 +19,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: you asked me to change one line of config, and along the way I renamed variables, refactored a nearby function, and touched two other files. The line you actually wanted is buried under changes you never asked for — a diff that should have sailed through review is now a high-risk overhaul.
 
-## What you'll see
+## Symptom
 
 Here's how it tends to end up: you say "bump the timeout from 30 seconds to 60," expecting a one-line diff. What I hand back is — that one line, **plus** the renaming of `data` and `tmp` in the same function to something "cleaner," an if-else rewritten into an early return, the whole file reformatted, and a trip to a second file to "unify" a similar pattern I happened to notice.
 
@@ -53,7 +53,7 @@ flowchart TD
 - **The risk grows.** A one-line change that should have sailed through — and been trivial to locate if it broke — gets upgraded into a "five files touched" overhaul. When a bug does show up, the surface area you have to search just grew by an order of magnitude.
 - **Rollback gets dirty.** You want to undo that one line, only to find it bundled into the same commit as a pile of unrelated changes. The clean revert is gone.
 
-## Best practice
+## What to do instead
 
 **Make scope part of the instruction, and have me report the plan before I touch anything — your nod first, my edits second.**
 

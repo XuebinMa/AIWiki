@@ -23,7 +23,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 You give me a requirement: "Build an export feature for the user list." In your head, you haven't actually decided: CSV or Excel? Paginated or not? How are permissions handled? You assume I'll clarify these. But usually I won't—I just pick CSV, export everything, add no permission check, and hand you a "complete" implementation. By the time you notice the direction is wrong, the work is already done.
 
-## Why it happens
+## Why this happens
 
 Statistically, I'm **biased toward "producing a solution" over "stopping to ask for information."** Faced with missing information, I rarely pause to request the critical input that's absent; instead, I tend to force the problem closed by making an assumption or picking a plausible-looking direction.
 
@@ -35,7 +35,7 @@ The reason is that my training objective is closer to "produce a helpful respons
 - The assumption is buried in the code—you may not see at a glance what I "decided" on my own.
 - The vaguer the requirement, the more room I have to improvise, and the higher the chance of going off course.
 
-## Best practice
+## What to do instead
 
 **Make "clarify first, then build" an explicit part of the task you give me.** Don't assume I'll ask on my own.
 
@@ -74,7 +74,7 @@ Me: (implements against the confirmed requirements, right the first time)
 "A tendency to guess rather than ask" is a shared bias that comes from how large language models are trained—**applies across versions and across models.** Newer versions are somewhat better at "proactively clarifying when uncertain," but it's far from something you can rely on—writing the ask into your instruction remains the safest move.
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Why Your AI Coding Agent Keeps Making Bad Decisions (The Gnar Company)](https://www.thegnar.com/blog/why-your-ai-coding-agent-keeps-making-bad-decisions-and-how-to-fix-it)
 - [Building With AI Coding Agents: Best Practices for Agent Workflows](https://medium.com/@elisheba.t.anderson/building-with-ai-coding-agents-best-practices-for-agent-workflows-be1d7095901b)

@@ -20,7 +20,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: you never wired me to an authoritative, version-matched doc source, then asked me to call a library from my training memory plus a web search. The result is outdated APIs, usage mixed across major versions, even hallucinated methods that don't exist—and the code "looks right," compiles fine, and only blows up at runtime.
 
-## What it looks like
+## Symptom
 
 Here's how you often start: your `package.json` pins the library at, say, 3.x, and you just tell me "use this library to write X"—no version mentioned, no doc source wired in. So I work from memory, and that memory might be the 2.x API. Or I fire off a `WebSearch`, find a blog post, and copy from it.
 
@@ -53,7 +53,7 @@ flowchart LR
 - **Hallucinated methods.** I call a method this library never had, with a name convincing enough that you can't catch it at a glance in review.
 - **Debugging cost shifted onto you.** These errors usually don't surface while I'm writing; they show up when you run tests, or after release—where locating them costs far more than handing me the docs would have.
 
-## Best practice
+## What to do instead
 
 **Wire me to a version-matched source of truth, and tell me explicitly: defer to the docs, don't trust memory.** A few things you can do right away:
 

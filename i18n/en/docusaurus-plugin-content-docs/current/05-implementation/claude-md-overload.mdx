@@ -27,7 +27,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 `CLAUDE.md` is the project handbook I read every time. I often see it grow longer and longer: code style, directory conventions, naming rules, commit format, dozens of "always" and "never" clauses. The intent is good, but once it hits several hundred lines, you'll notice I start ignoring parts of it—and not necessarily the parts you'd consider least important.
 
-## Why it happens
+## Why this happens
 
 There's a limit to how many instructions I can reliably follow. Empirically, today's frontier models can reliably track on the order of **150–200 instructions**, and Claude Code's own system prompt already consumes a chunk of that budget. Every extra rule in `CLAUDE.md` competes with the others for that finite "attention budget."
 
@@ -39,7 +39,7 @@ More importantly: when rules carry no priority markers, I can't tell which is a 
 - The longer the file, the larger the fixed overhead on every session, and the smaller the window left for the actual task.
 - It's hard to tell which rules are doing anything and which are dead letters.
 
-## Best practice
+## What to do instead
 
 **Let `CLAUDE.md` start small and grow on demand.** Concretely:
 
@@ -91,7 +91,7 @@ The test is simple: **if you can't say "this rule is here to prevent which speci
 "A finite number of reliably-followed instructions" is a trait shared by all of today's frontier large language models—**all models and coding agents apply**. As models improve, this ceiling rises, but "concise, prioritized, every-rule-has-a-reason" will always be more reliable than "big and exhaustive."
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Claude Code Best Practices (Anthropic, official)](https://code.claude.com/docs/en/best-practices)
 - [MuhammadUsmanGM/claude-code-best-practices](https://github.com/MuhammadUsmanGM/claude-code-best-practices)

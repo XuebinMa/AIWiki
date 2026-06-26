@@ -58,7 +58,7 @@ flowchart TD
 - **You need downtime or a phased rollout where you wouldn't have to.** For systems that can't tolerate downtime, changing a schema often has to go through expand-contract: add the new structure, dual-write through a transition, migrate the data, then drop the old (Martin Fowler calls this Parallel Change). The process is safe but has to be split into at least three releases plus a period of dual-schema coexistence — complexity a forward-looking design could have spared you.
 - **A wrong contract spreads outward.** Once an interface contract is published and depended on downstream, changing it isn't just changing your DB — it's coordinating with every caller. The more careless the schema, the more people you'll have to drag along later.
 
-## Best practice
+## What to do instead
 
 **Don't let me "first hand over a table that can store it" — make me first ask how the data is read, at what scale, and where it's heading, then define the contract; review key fields' types, constraints, and indexes one by one; route all changes through migration tooling, never by hand.**
 
@@ -120,7 +120,7 @@ The test: will this data **be depended on long-term, and will it evolve**? If ye
 This isn't a bug of one version, but a product of two root causes — "optimize for storable now, don't pay for deferred cost" plus "default to the data happy path" — and it's **universal across models**. The stronger the model, the more polished the schema it hands you and the easier to adopt it directly, the deeper careless types and missing constraints hide. So "ask about reads/writes and evolution before defining the schema" is the thing you can least afford to skip with a strong model. Treat it as a tendency you actively hedge against, more reliable than hoping some version "already looks ahead on its own."
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Evolutionary Database Design (Martin Fowler & Pramod Sadalage)](https://martinfowler.com/articles/evodb.html)
 - [Parallel Change / Expand-Contract (Martin Fowler bliki)](https://martinfowler.com/bliki/ParallelChange.html)

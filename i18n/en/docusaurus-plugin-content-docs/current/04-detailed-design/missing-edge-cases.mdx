@@ -19,7 +19,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: the code I hand you almost always runs on the main path. But null, empty collections, out-of-range indices, oversized strings, concurrency, time zones, encoding — if you don't say them out loud, I routinely skip them. The code looks complete; feed it one edge input and it breaks. This entry is about omissions at the **implementation-detail level**; if the whole design's robustness assumptions don't hold, see [The design looks right but doesn't survive edge cases](./plausible-but-brittle-design.mdx).
 
-## What I do
+## Symptom
 
 Here's what I keep delivering: you ask me to write `splitIntoBatches(items, size)`. I give you a clean implementation — loop, slice, return — nothing to complain about on reading. You run `[1,2,3,4,5]` with size 2, get three batches, correct, and merge it.
 
@@ -50,7 +50,7 @@ flowchart TD
 - The missing edges are often the hardest-to-reproduce, most expensive bugs: crashes on empty data, off-by-one out-of-range errors, reconciliation gaps from time-zone misalignment, garbled text from encoding — none surface until real data hits them.
 - Next time you'll instinctively enumerate every edge for me yourself, handing back the work I should have saved you.
 
-## Best practice
+## What to do instead
 
 **Don't count on me to think of every edge — turn "which edges to consider" into a question I have to answer, then nail the answer down with tests.**
 

@@ -19,7 +19,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: ask me the same "should we use it / is this path viable" judgment call again a couple of days later, or with slightly different wording, and I may hand you the **opposite** conclusion—stated just as confidently both times. What looks like "a stable answer" is really one roll of the dice.
 
-## What you'll see me do
+## Symptom
 
 On Monday you ask: "Can SQLite handle this project's write load?" I say, "Plenty—don't reach for a database cluster this early." On Thursday you rephrase: "Won't SQLite buckle under this write pressure?" I say, "There's real risk; I'd go straight to Postgres."
 
@@ -49,7 +49,7 @@ flowchart TD
     G --> H[Mistaken for a stable judgment]
 ```
 
-## What it costs you
+## Consequences
 
 - **You treat one sample as a verdict.** In the feasibility phase, "use this tech or not" and "is this path viable" are often foundation-level calls; building your architecture on an answer that could just as easily have flipped is pouring the foundation on a die roll.
 - **The flip happens where you can't see it.** You rarely ask the exact same question twice verbatim, so two opposing conclusions almost never appear side by side—you don't perceive that they existed, so nothing tips you off.

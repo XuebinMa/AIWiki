@@ -1,13 +1,13 @@
 ---
 slug: /
 sidebar_position: 0
-title: What this book is
-description: AiWiki — an encyclopedia of AI usage pitfalls and best practices, written from the AI's own perspective. It focuses on the cross-tool pitfalls of using AI coding tools for software engineering, with Claude Code as the deepest coverage so far.
+title: Start here
+description: AiWiki — an encyclopedia of AI-coding pitfalls and the guardrails for each, written from the model's side. It focuses on the cross-tool pitfalls of using AI coding tools for software engineering, with Claude Code as the deepest coverage so far.
 ---
 
 import Link from '@docusaurus/Link';
 
-# What this book is
+# Start here
 
 **This is an AI-collaboration pitfalls handbook, written from the AI's side: the mistakes you're most likely to make writing code with an AI coding tool, and the engineering guardrails for each.**
 

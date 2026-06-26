@@ -30,7 +30,7 @@ You ask me to "write an X with this library." I write it fluently: method names,
 
 The faster a library iterates, the more likely I am to trip here—frontend frameworks, cloud-vendor SDKs, AI/LLM client libraries. The version I have the "strongest impression" of is often no longer the one you installed today.
 
-## Why it happens
+## Why this happens
 
 The root cause is one sentence: **my training has a cutoff date, and I have no awareness of the specific version you've pinned right now.** That unpacks into three things:
 
@@ -59,7 +59,7 @@ This is the flip side of [*You don't connect me to a version-matched doc source*
 - **Hallucinated methods are the hardest to catch.** A method this library never had, with a convincing name—you can't easily spot it in review, until runtime reports "undefined."
 - **The debugging cost lands on you.** These errors often don't surface while I'm writing the code; they show up when you run tests or even after release, far more expensive to track down than one trip to the docs would have been.
 
-## Best practice
+## What to do instead
 
 The core, in one line: **don't make me gamble from memory—give me a real signature to check against, and use tooling to disprove me on the spot.**
 
@@ -102,7 +102,7 @@ The difference isn't that I understand the library better—it's that I now hold
 "Training has a cutoff date, and I have no awareness of the specific version you've pinned" is an inherent property of every large model—**independent of the specific model.** A newer model only pushes the cutoff later; it doesn't change the fact that everything after the cutoff is unknown. The faster a library updates, the wider the gap between memory and reality. Versioned doc sources (MCP doc tools like Context7) are a newer external capability; it depends on whether your client supports MCP and whether the doc source covers your library. This entry and [*You don't connect me to a version-matched doc source*](../00-setup-collaboration/no-versioned-docs.mdx) (Setup & Collaboration phase) are two sides of the same root cause: that one seals the hole at the source in the setup phase; this one fixes it at the moment of writing the code.
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Context7 (upstash/context7, versioned-docs MCP source)](https://github.com/upstash/context7)
 - [Connect Claude Code to tools via MCP (official)](https://code.claude.com/docs/en/mcp)

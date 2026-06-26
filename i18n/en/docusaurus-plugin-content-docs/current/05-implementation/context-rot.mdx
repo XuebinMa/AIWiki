@@ -53,7 +53,7 @@ flowchart LR
 - **More is worse; past a point it's negative return.** You pour in more context "to be safe," which instead pushes key info into the middle and thins attention overall — quality falls, not rises.
 - **Long sessions quietly get dumber.** As the conversation stretches, key decisions and constraints set early slide into the middle and fade, and I start contradicting myself — you think the model "got tired," but it's context rot.
 
-## Best practice
+## What to do instead
 
 **Core: feed a few relevant, high-quality snippets, put the most critical ones where they're seen, and don't count on "stuff it all in."**
 
@@ -100,7 +100,7 @@ The test: the exception holds only when you've actively managed the length (cura
 U-shaped attention, lost-in-the-middle, and "length itself drags performance down" are **model-mechanism** phenomena rooted in self-attention + positional encoding, **common to all models**, regardless of vendor or version. The nominal context-window size keeps growing across versions (hundreds of thousands, even millions of tokens), but "can hold it" has never meant "can use it evenly well" — the bigger the window, the more you must actively curate rather than feel freer to dump everything in.
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Lost in the Middle: How Language Models Use Long Contexts (TACL; arXiv 2307.03172)](https://arxiv.org/abs/2307.03172) — U-shaped performance on long context, middle info drops sharply
 - [Context Length Alone Hurts LLM Performance Despite Perfect Retrieval (arXiv 2510.05381)](https://arxiv.org/abs/2510.05381) — even with perfect retrieval and irrelevant tokens masked, length alone still degrades performance

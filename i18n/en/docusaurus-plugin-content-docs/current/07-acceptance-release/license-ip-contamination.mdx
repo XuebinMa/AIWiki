@@ -19,7 +19,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: the "original code" I hand you may contain a chunk of open-source implementation I memorized verbatim from training data — possibly carrying a viral copyleft license like GPL. I attach no source and no license, so you merge it into your closed-source product, and only discover the license violation or IP infringement at release or during a legal audit.
 
-## What you'll see
+## Symptom
 
 You ask me to "implement an LRU cache," "write the core loop of a Markdown parser," or "give me a B-tree delete." I hand back a complete, polished implementation that obviously works, you assume I wrote it on the spot, and you merge it into your closed-source codebase.
 
@@ -58,7 +58,7 @@ flowchart TD
 - **The later you find it, the more it costs.** Caught at coding time, swapping in an in-house implementation is nearly free. Caught at investor due diligence, a customer's compliance scan, or when the author asserts rights, you're doing code archaeology, wholesale replacement, public disclosure, even legal settlement — orders of magnitude more than at coding time.
 - **"Indistinguishable" lets it slip past normal review.** It compiles, runs, and reads naturally; code review hunts bugs, not provenance. Without dedicated origin / license detection, this problem is fully invisible under a functional lens.
 
-## Best practice
+## What to do instead
 
 **Treat license compliance as a release gate that sits alongside your security scans — don't count on me to volunteer provenance.** I can't give reliable license info, so the guardrail has to live outside me.
 

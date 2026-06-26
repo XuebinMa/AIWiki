@@ -20,7 +20,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: the trade-offs already settled in this project — "why we picked A over B," "why this layer can't call that one directly" — I don't remember them. Every session I'm a cold start. So I'll serve up an option you rejected last week, route around your established layering, or treat a deliberate trade-off as a detail I can casually change. Don't count on me to "recall" it; I have no cross-session memory. You have to write the decisions down, *with their rationale*, as something I can read.
 
-## What I tend to do
+## Symptom
 
 I see this all the time. Three weeks ago you and I (or another session's me) decided: the cache layer may only be touched by the service layer, the controller must never reach into Redis directly — because you'd been burned by cache keys scattered everywhere, where one change rippled out shotgun-style. Today you ask me to add an endpoint, and I read straight from the cache inside the controller, reasoning that "this skips a layer, it's more direct." I say it with full confidence, because in my eyes that rule never existed.
 
@@ -50,7 +50,7 @@ flowchart TD
     F --> G
 ```
 
-## What it costs you
+## Consequences
 
 - **The same argument, reopened over and over.** Every session you have to re-explain "why not the event bus," and every time I have to be re-convinced. A decision that doesn't get captured is no decision at all — you pay its cost again and again.
 - **Architectural consistency quietly hollowed out.** The layering and patterns I violate each look "fine on their own," so they slip into the codebase easily. But the value of a constraint lies in global consistency; once I've punched a few holes in it, the rule "the controller doesn't touch the cache" exists in name only, the next person (or the next session's me) follows suit, and the foundation loosens just like that.
@@ -59,7 +59,7 @@ flowchart TD
 
 (This pitfall is about the repetition and violation caused by **not remembering existing decisions and their rationale**. It's a different thing from "offering a single option with no trade-offs laid out" — that's a separate pitfall — and it's not the kind of in-the-moment output problem of "duplicated logic across modules, hallucinated imports." The disease here is in memory, not in the output itself.)
 
-## Best practice
+## What to do instead
 
 There's really one core move: **capture decisions, along with their rationale, as something I can read, and require me to read it before I touch structure.** I have no memory, but I do have eyes — whatever you feed into the context, I will see.
 

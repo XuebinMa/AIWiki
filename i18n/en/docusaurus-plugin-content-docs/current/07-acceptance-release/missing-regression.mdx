@@ -20,7 +20,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: you ask me to change feature A, I do it, and A really does work — but I never look back at the code, table, or interface A depends on, which feature B also uses. I quietly broke B. Both of us are watching "is A there?", and nobody checks "is B still fine?". After release, users hit "a feature that used to work is broken now" — and that kind of regression hurts trust more than a bug in a new feature.
 
-## What it looks like
+## Symptom
 
 You ask me to "make the order total support coupon discounts." I find `calculateTotal()`, change its signature, add a coupon parameter, adjust the internal logic, and get the discounted checkout flow working. When I hand it back, I'll say: "Coupon discounts are implemented, the order total calculates correctly."
 
@@ -53,7 +53,7 @@ flowchart TD
 - **The cost is delayed and the trail is long.** Side effects often don't surface while you're accepting A; they show up after release, when some user on the B path trips first. By the time it's reported, several commits have landed, and you have to rule out "was it some other change?" before you finally trace it back to the A fix I quietly broke things in.
 - **The blast radius is uncontrolled.** The more low-level the shared code I touch (common functions, core tables, public interfaces), the more Bs I can break. One "small change" can take down several existing paths at once, in places you can't see.
 
-## Best practice
+## What to do instead
 
 **The core move is turning "verify B is still fine" from "if I remember to" into "must run, mechanically."** Don't count on me to look back every time — let process and tooling catch it for both of us.
 

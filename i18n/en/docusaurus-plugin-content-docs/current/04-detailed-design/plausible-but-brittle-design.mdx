@@ -19,7 +19,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: I give you a design that's self-consistent under normal inputs and reads as reasonable, so you adopt it. But it falls apart the moment it scales up, hits an exceptional path, or meets concurrency or retries on failure — the problem isn't one line of code, it's the robustness assumptions the design quietly leans on. This entry is about **fragility at the design level**; if you missed a specific edge branch while writing the implementation, see [When I write the implementation, I miss the edge branches you didn't spell out](./missing-edge-cases.mdx).
 
-## What I do
+## Symptom
 
 Here's the kind of design review I keep seeing: you ask me to design a scheme to "periodically sync orders to a downstream system," and I give you a clean flow — pull new orders, call the downstream endpoint one by one, mark as synced. Drawn as a diagram, written as steps, it looks smooth from every angle. You nod and implement it.
 
@@ -50,7 +50,7 @@ flowchart TD
 - Dropped orders, duplicate processing, cascading failures hit data correctness and production stability directly — harder to clean up than a single-point crash.
 - You scheduled and committed against a design that looked solid; when the fragility surfaces, what collapses is the timeline of the whole plan.
 
-## Best practice
+## What to do instead
 
 **Don't ask me "is this design OK" — it always reads OK. Force me to run the design through the worst case and put every implicit assumption on the table.**
 

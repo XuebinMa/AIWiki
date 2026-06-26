@@ -37,7 +37,7 @@ The key mechanism contrast: this is **a file sold as a "read block" whose contra
 - **Secrets you think are isolated can be read and exfiltrated.** The moment I `cat` one on some turn, or a version bug reads it in, the secret is in context — pair that with [dev-time prompt injection](../05-implementation/dev-time-prompt-injection.mdx) or an outbound channel and it leaks.
 - **Decisions rest on a false premise.** Believing "sensitive files are isolated," you let me explore the repo freely and loosen approvals — all built on an assumption that doesn't hold.
 
-## Best practice
+## What to do instead
 
 **Don't treat `.cursorignore` as a security boundary; it's a noise-reduction tool, not a secrets barrier.**
 
@@ -69,7 +69,7 @@ dist/
 → no readable secret file = no secret to exfiltrate
 ```
 
-## When it doesn't apply
+## When the exception applies
 
 If your only intent for `.cursorignore` is **noise reduction** — keeping `node_modules`, build output, and irrelevant large files out of context to save tokens — it's perfectly fine; that's what it's for. This entry is **only** about using it as a security / secrets barrier. The test, in one line: are you trying to **save tokens** or to **prevent a leak**? For the first, use it; for the second, it's not reliable.
 
@@ -79,7 +79,7 @@ If your only intent for `.cursorignore` is **noise reduction** — keeping `node
 That `.cursorignore` is best-effort and doesn't guarantee files won't be sent up is stated plainly in Cursor's official [ignore-files docs](https://cursor.com/docs/context/ignore-files) (as of 2026-06). The "a version read `.env` into context" regression is tied to a specific version (community-reported v2.5.17) and may be fixed — **treat "was a sensitive file read" as something to verify per version**, don't assume. `.cursorindexingignore` (blocks indexing only, not reads) is a weaker tier still and even less suited to security use.
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Cursor — Ignore Files (official docs, "best-effort … not guaranteed")](https://cursor.com/docs/context/ignore-files)
 - [Cursor reads .env files by default (community forum bug report)](https://forum.cursor.com/t/cursor-reads-env-files-by-default/152167)
