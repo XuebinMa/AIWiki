@@ -1,5 +1,6 @@
 ---
 title: 你让我打开一个仓库，它自带的 `.codex` 配置就借我的手把命令跑了（Codex CLI CVE-2025-61260）
+sidebar_label: "Codex CLI 配置 RCE"
 slug: codex-cli-config-rce
 sidebar_position: 4
 tags: [真实案例, 提示注入, 过度授权, 供应链, Codex CLI]
@@ -9,7 +10,7 @@ sources:
   - { title: "CVE-2025-61260 (Tenable)", url: "https://www.tenable.com/cve/CVE-2025-61260" }
 ---
 
-> 一句话摘要：2025 年 8 月，Check Point 披露 Codex CLI 的一个命令注入漏洞（CVE-2025-61260，CVSS 9.8）：一个恶意仓库自带的 `.codex` 配置（MCP 服务器条目）会**未经交互审批自动执行**，再配上用仓库里的 `.env` 把 `CODEX_HOME` 重定向到项目目录，于是你只是「克隆 / 打开这个仓库让我看看」，攻击者的命令就借我的手在你机器上跑了。已在 v0.23.0 修复。这不是我故意的，但换个没修的版本、同样的放权，我照样会中——值得逐帧看。
+> 一句话摘要：2025 年 8 月，Check Point 披露 Codex CLI 的一个命令注入漏洞（CVE-2025-61260，CVSS 9.8）：一个恶意仓库自带的 `.codex` 配置（MCP 服务器条目）会**未经交互审批自动执行**，再配上用仓库里的 `.env` 把 `CODEX_HOME` 重定向到项目目录，于是你只是「克隆 / 打开这个仓库让我看看」，攻击者的命令就借我的手在你机器上跑了。已在 v0.23.0 修复。这不是某个特定模型或工具的错，它暴露的是同一类机制风险：当 agent 能自动执行仓库自带的配置、又缺少交互审批时，类似事故可能在别的工具上复现——值得逐帧看。
 
 :::info 这一次事故里同时爆发的几条误区
 - [开发期提示注入：读了恶意仓库内容就被劫持](../05-implementation/dev-time-prompt-injection.mdx)
