@@ -14,6 +14,21 @@ Security pitfalls are naturally scattered across the lifecycle phases (setup, im
 
 > This page is a **curated index** only (one line per entry, linking into the existing pitfall / case), not new per-entry metadata. Scan down by dimension, then click through for "why this happens" and "how to defend against it."
 
+## Minimum security baseline
+
+The sections below are organized **by attack surface**; if you just want a checklist you can **stand up right now**, configure these 8 first — they compress the defenses from every dimension below into one "minimum viable baseline," tool-neutral, each linking to the full version:
+
+1. **Least privilege by default**: read-only where you can, scoped to a directory rather than the whole disk — see [over-permissioning](./00-setup-collaboration/over-permissioning.mdx), [permissions config template](./toolkit/permissions-config.mdx).
+2. **Confirm writes, allow reads**: set "edit a file / run a command" to require confirmation and let read-only queries through, so approval fatigue doesn't push you into clicking yes all the way down — see [permissions config template](./toolkit/permissions-config.mdx).
+3. **Force human confirmation for delete / push / install-dependency / outbound requests**: these irreversible or spillover actions never go on autopilot — see [destructive / irreversible actions](./00-setup-collaboration/destructive-irreversible-actions.mdx), [autonomy risk-tier checklist](./toolkit/autonomy-risk-tiers.mdx).
+4. **Treat unfamiliar / untrusted repos as read-only first**: read them as potentially-poisoned input before granting execution rights — see [hijacked by poisoned content at dev time](./05-implementation/dev-time-prompt-injection.mdx).
+5. **No outbound network while private data is in hand**: cut the "external communication" leg of the lethal trifecta — see [unbounded network egress](./00-setup-collaboration/network-egress-control.mdx), [no data-boundary policy](./00-setup-collaboration/data-boundary-policy.mdx).
+6. **Keep production credentials out of the dev agent**: use stand-in / read-only credentials in development, keep the real ones where it can't reach — see [no data-boundary policy](./00-setup-collaboration/data-boundary-policy.mdx), [shipping vulnerabilities / leaking sensitive data](./07-acceptance-release/security-data-leaks.mdx).
+7. **Plan high-risk tasks before executing**: have me lay out what I'm about to do for your review instead of improvising as I go — see [letting go without plan mode](./00-setup-collaboration/skipping-plan-mode.mdx), [missing autonomy / approval boundaries](./00-setup-collaboration/autonomy-approval-boundaries.mdx).
+8. **Append-only audit logs, escape before writing**: so you can reconstruct "what I actually did" afterward, and the log itself can't be poisoned or tampered with — see [log injection / audit-trail integrity](./07-acceptance-release/log-injection-audit-integrity.mdx).
+
+> These 8 are a **floor, not a ceiling**: meeting them only means you haven't skipped the most basic guardrails; your specific blast radius will need more on top (see the dimensions below). For checklists you can tick off, see the [companion artifacts at the bottom](#companion-artifacts).
+
 ## Permission & autonomy boundaries
 
 **Core threat**: I'm granted permissions that are too broad, or high-risk actions go unapproved, and so destructive, irreversible operations happen before you can react.
@@ -85,4 +100,6 @@ Security pitfalls are naturally scattered across the lifecycle phases (setup, im
 
 ---
 
-Companion artifacts: [Autonomy risk-tier checklist](./toolkit/autonomy-risk-tiers.mdx), [Data classification policy template](./toolkit/data-classification-policy.mdx), [Pre-release security checklist](./toolkit/release-security-checklist.mdx), [Permissions config template](./toolkit/permissions-config.mdx) — these compress the defenses above into checklists you can use directly.
+## Companion artifacts
+
+These compress the defenses above into checklists you can use directly: [Autonomy risk-tier checklist](./toolkit/autonomy-risk-tiers.mdx), [Data classification policy template](./toolkit/data-classification-policy.mdx), [Pre-release security checklist](./toolkit/release-security-checklist.mdx), [Permissions config template](./toolkit/permissions-config.mdx).
