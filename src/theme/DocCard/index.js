@@ -94,6 +94,12 @@ function stripSummaryPrefix(text) {
   return text.replace(SUMMARY_PREFIX, '');
 }
 
+// 剥掉「In one sentence:」前缀后，英文摘要常以小写字母开头（前缀后本是句中小写）。
+// 把第一个字母大写——跳过开头的引号 / 反引号等非字母字符，只动首个字母。
+function capitalizeFirstLetter(text) {
+  return text.replace(/^([^\p{L}]*)(\p{L})/u, (_, lead, ch) => lead + ch.toUpperCase());
+}
+
 // 条目卡片正文：标题与摘要默认各截断成一行；当任一被截断时，卡片底部出现一个
 // 「展开 / 收起」按钮，一次同时展开标题与摘要的完整内容（再点收起）。整张卡片是个
 // <Link>，故按钮必须 preventDefault + stopPropagation，避免点按钮时跳转到条目页。
@@ -139,7 +145,11 @@ function EntryCardBody({icon, title, description}) {
     }
   };
 
-  const summary = description ? stripSummaryPrefix(description) : null;
+  let summary = description ? stripSummaryPrefix(description) : null;
+  // 仅英文站把摘要首字母大写（中文无大小写，无需处理）。
+  if (summary && currentLocale === 'en') {
+    summary = capitalizeFirstLetter(summary);
+  }
   const showToggle = overflowing || expanded;
   const label =
     currentLocale === 'en'
