@@ -14,6 +14,21 @@ description: 按威胁维度浏览与 AI 编码安全 / 治理相关的全部误
 
 > 这页只做**策展索引**（每条一行内链到既有条目 / 案例），不引入新的逐条元数据。按维度往下扫，点进去看「为什么会这样」与「怎么防」。
 
+## 最小安全基线
+
+下面各节是「**按威胁面读**」；如果你只想要一份**马上能立起来的清单**，先照这 8 条配置——它把后面各维度的防线压成一条「最小可执行基线」，工具中立、每条都链到展开版：
+
+1. **默认最小权限**：能只读就不给写，能限目录就不放开全盘——见[过度授权](./00-setup-collaboration/over-permissioning.mdx)、[权限配置模板](./toolkit/permissions-config.mdx)。
+2. **写操作要确认、读操作放行**：把「改文件 / 跑命令」设成需确认，只读查询放过，这样确认疲劳才不会逼你一路点 yes——见[权限配置模板](./toolkit/permissions-config.mdx)。
+3. **删除 / push / 装依赖 / 对外请求强制人工确认**：这些不可逆或会外溢的动作不进自动档——见[破坏性 / 不可逆操作](./00-setup-collaboration/destructive-irreversible-actions.mdx)、[自主性风险分级清单](./toolkit/autonomy-risk-tiers.mdx)。
+4. **陌生 / 不可信仓库先只读探查**：先把它当「可能投毒」的输入读，别一上来就给执行权——见[开发期读到投毒内容被劫持](./05-implementation/dev-time-prompt-injection.mdx)。
+5. **手上有私有数据时禁止对外联网**：断掉「致命三件套」的对外通信腿——见[网络出口失控](./00-setup-collaboration/network-egress-control.mdx)、[数据边界策略缺失](./00-setup-collaboration/data-boundary-policy.mdx)。
+6. **生产凭据不进开发 agent**：开发态用替身 / 只读凭据，真凭据留在它够不到的地方——见[数据边界策略缺失](./00-setup-collaboration/data-boundary-policy.mdx)、[默认埋漏洞 / 泄露敏感数据](./07-acceptance-release/security-data-leaks.mdx)。
+7. **高风险任务先看计划再执行**：让我先把要做什么摊给你过目，而不是边想边改——见[不用 plan mode 直接放手](./00-setup-collaboration/skipping-plan-mode.mdx)、[自主性审批边界缺失](./00-setup-collaboration/autonomy-approval-boundaries.mdx)。
+8. **审计日志 append-only、写前转义**：让事后重建得出「我到底做了什么」，且日志本身不被投毒或篡改——见[日志注入 / 审计链污染](./07-acceptance-release/log-injection-audit-integrity.mdx)。
+
+> 这 8 条是**下限不是上限**：达标只代表没漏掉最基本的护栏，具体到你的爆炸半径还要往上加（见下各维度）。可勾选的落地清单见[页底配套工件](#配套工件)。
+
 ## 权限与自主度边界
 
 **核心威胁**：我被授予的权限过宽、或高风险动作无人审批，于是破坏性、不可逆的操作在你反应过来之前就发生了。
@@ -85,4 +100,6 @@ description: 按威胁维度浏览与 AI 编码安全 / 治理相关的全部误
 
 ---
 
-配套工件：[自主性风险分级清单](./toolkit/autonomy-risk-tiers.mdx)、[数据分级策略模板](./toolkit/data-classification-policy.mdx)、[上线前安全清单](./toolkit/release-security-checklist.mdx)、[权限配置模板](./toolkit/permissions-config.mdx)——把上面的防线压成可直接用的清单。
+## 配套工件
+
+把上面的防线压成可直接用的清单：[自主性风险分级清单](./toolkit/autonomy-risk-tiers.mdx)、[数据分级策略模板](./toolkit/data-classification-policy.mdx)、[上线前安全清单](./toolkit/release-security-checklist.mdx)、[权限配置模板](./toolkit/permissions-config.mdx)。

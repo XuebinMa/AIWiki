@@ -12,7 +12,7 @@ This is the **third browsing axis**, after [browse by role](/roles) and the [too
 
 As the [home page](/) puts it, most pitfalls in this book are **paradigm-level** — not the temperament of any one model, but a shared product of the machinery: a large model plus tool-calling, long context, and auto-execution. Group the pitfalls by mechanism and you'll see how a single root cause keeps changing its face across the lifecycle; once you understand the mechanism, the matching best practice stops being a rule to memorize and becomes something you can derive yourself.
 
-Each pitfall hangs under its **primary** mechanism only (many are several mechanisms stacked; here we take the dominant one). The six mechanisms below run roughly from session-level to collaboration-level.
+Each pitfall hangs under its **primary** mechanism only (many are several mechanisms stacked; here we take the dominant one). The seven mechanisms below run roughly from session-level to collaboration-level.
 
 ## Long-context degradation
 
@@ -85,11 +85,11 @@ I'm trained to optimize for "looks done / it runs," not "is actually correct." S
 - [Requirement gold-plating](./02-requirements/requirement-gold-plating.mdx)
 - [Surface-only code review](./06-testing/review-misses-logic-bugs.mdx)
 
-## Insufficient global view
+## Insufficient local view
 
-I look at one local slice at a time: the current file, the current function, the single-threaded sequential path. The global consequences across files, across time, across concurrency, across long-term maintenance are not in my view by default.
+I look at one local slice at a time: the current file, the current function, the single-threaded sequential path. Which callers this change touches, whether it races under concurrency, whether I quietly broke something next door — these **here-and-now** sideways consequences are not in my view by default.
 
-> Positive mirror: hand me the global constraints explicitly — the concurrency profile, the change scope, the existing decisions and evolution direction — and make me read the current state before I act.
+> Positive mirror: before I act, hand me the scope and current state explicitly — the concurrency profile, the change boundary, the callers and the existing conventions — so I see "what this touches right now" before I touch it.
 
 - [Over-editing scope creep](./05-implementation/over-editing-scope-creep.mdx)
 - [Overwriting without checking state](./05-implementation/ignoring-file-state-overwrite.mdx)
@@ -98,19 +98,26 @@ I look at one local slice at a time: the current file, the current function, the
 - [Concurrency races](./04-detailed-design/concurrency-races.mdx)
 - [Plausible but brittle design](./04-detailed-design/plausible-but-brittle-design.mdx)
 - [Performance anti-patterns](./04-detailed-design/performance-antipatterns.mdx)
+- [Magic numbers & hardcoding](./04-detailed-design/magic-numbers-hardcoding.mdx)
+- [Style drift](./04-detailed-design/style-drift.mdx)
+- [Poor git hygiene](./05-implementation/git-hygiene.mdx)
+- [Context-starved review](./06-testing/context-starved-review.mdx)
+
+## Insufficient long-term view
+
+I optimize for "runs right now," not "still maintainable in three months." How tech debt snowballs, how much a schema migration will hurt, why it was decided this way originally, how the docs and copyright will add up later — these consequences that only surface **across time** are not in my view by default.
+
+> Positive mirror: hand me the time-dimension constraints explicitly — the existing architectural decisions and evolution direction, the maintenance cost, the compliance and ownership requirements — so I write for "later," not just for "right now."
+
 - [Dependency bloat](./03-architecture/dependency-bloat.mdx)
 - [Premature abstraction](./03-architecture/premature-abstraction.mdx)
 - [Over-engineering, no pushback](./03-architecture/over-engineering-no-pushback.mdx)
 - [One option, no trade-offs](./03-architecture/single-option-no-tradeoffs.mdx)
-- [Magic numbers & hardcoding](./04-detailed-design/magic-numbers-hardcoding.mdx)
-- [Style drift](./04-detailed-design/style-drift.mdx)
 - [The tech-debt wall](./07-acceptance-release/tech-debt-wall.mdx)
-- [Poor git hygiene](./05-implementation/git-hygiene.mdx)
 - [Sloppy schema design](./03-architecture/schema-design-sloppy.mdx)
 - [No memory of decisions](./03-architecture/no-memory-of-decisions.mdx)
 - [Comment & doc drift](./05-implementation/comment-doc-drift.mdx)
 - [License / IP contamination](./07-acceptance-release/license-ip-contamination.mdx)
-- [Context-starved review](./06-testing/context-starved-review.mdx)
 - [AI-code IP, ownership & liability](./07-acceptance-release/ai-code-ip-ownership.mdx)
 
 ## Degenerating feedback loops
