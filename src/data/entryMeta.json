@@ -119,6 +119,14 @@
         "工程师"
       ]
     },
+    "world-writable-config-escalation": {
+      "severity": "高",
+      "roles": [
+        "运维工程师",
+        "架构师",
+        "工程师"
+      ]
+    },
     "ai-can-do-not-feasibility": {
       "severity": "高",
       "roles": [
@@ -651,6 +659,14 @@
     "subagent-no-boundaries": {
       "severity": "High",
       "roles": [
+        "Architect",
+        "Engineer"
+      ]
+    },
+    "world-writable-config-escalation": {
+      "severity": "High",
+      "roles": [
+        "DevOps Engineer",
         "Architect",
         "Engineer"
       ]
