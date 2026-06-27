@@ -139,6 +139,8 @@ Claude Code · Cursor · GitHub Copilot · Codex CLI · Gemini CLI · CLAUDE.md 
 | 案例库 | Case Library | 真实事故 / 复盘的可核查案例集 |
 | 复盘 | postmortem | 事后审查 |
 | 爆炸半径 | blast radius | 一次操作能波及的范围 |
+| 提权 | privilege escalation | 本地 / 跨用户提升权限 |
+| 配置安全 | config security | 配置来源信任 / 完整性 |
 | 清单 | checklist | |
 | 模板 | template | |
 | 任务启动模板 | task-kickoff template | 给 AI 下任务的开场模板 |

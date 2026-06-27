@@ -15,7 +15,7 @@
 
 | 阶段 | 目标 | 已发布 |
 |------|------|--------|
-| 00 准备与协作 | 8–10（+4 治理/安全子簇） | 16 |
+| 00 准备与协作 | 8–10（+4 治理/安全子簇） | 17 |
 | 01 灵感与可行性 | 4–6 | 6 |
 | 02 需求分析 | 5–7 | 6 |
 | 03 概要设计 | 5–7 | 7 |
@@ -23,7 +23,7 @@
 | 05 编码实现 | 12–15 | 15 |
 | 06 测试 | 5–7（+4 AI 审查子簇） | 10 |
 | 07 验收与发布 | 6–8（+2 治理/安全子簇） | 10 |
-| **合计** | 50–66 | **76** |
+| **合计** | 50–66 | **77** |
 
 > 另有：案例库 5 例（`docs/cases/`）+ 索引页 `/tool-matrix`、`/mechanisms`（机制索引）、`/core-20`（必读 20 条）。条数以 `docs/` 实际为准。
 
@@ -43,6 +43,7 @@
 - ✅ 数据边界策略：哪些数据绝不喂给外部 AI（治理子簇，OWASP LLM02）
 - ✅ 沙箱 / 文件系统隔离：软权限 vs OS 级硬隔离（基础设施安全子簇，官方文档）
 - ✅ 网络出口控制：砍掉致命三件套「对外通信」腿（基础设施安全子簇，SSRF / lethal trifecta）
+- ✅ 世界可写配置 → 跨工具提权：从 `C:\ProgramData` 等世界可写路径载入会执行的配置（CVE-2026-35603 类，四工具同根因，安全报告）
 
 ## 01 灵感与可行性
 
@@ -143,7 +144,7 @@
 - 🟡 **首屏角色 CTA 分流**（评审 P0）：首页首屏加「我是工程师 / 架构师 / 负责发布·安全」角色按钮，把新访客直接分流到 `/roles`，让角色入口承担转化。
 - ✅ **模板库 / 清单**（评审 P2，「拿来即用」）：`docs/toolkit/`「🧰 模板与清单」区共 **12 件**——5 件基础（权限配置、PR review 清单、任务启动、上线前安全清单、坏 → 好 prompt）+ 7 件新增（4 工作流模板：小 bug 修复 / 大重构 / 需求→发布 / AI+ 人 review 分工；3 治理模板：自主性风险分级 / 数据分级策略 / IP 披露清单，落地 G1/G2/G3），中英镜像 + 与误区双链。
 - ✅ **安全 threat-model 聚合页**（评审第六节方向 2 结构项）：`docs/threat-model.mdx`（`/threat-model`，navbar「安全索引 / Threat Model」第四浏览轴），按 7 个威胁维度把安全/治理条目 + 3 安全案例策展成威胁模型，中英镜像。
-- ⬜ **跨工具「世界可写配置」误区候选**（工具扩展研究沉淀，用户定先入库）：**CVE-2026-35603**——`C:\ProgramData` 配置目录默认人人可写，**Codex / Cursor / Gemini CLI / Claude Code 四家都中**，可植入「每轮必跑」命令做本地提权。属**范式级跨工具**新误区（不属某一工具），宜单开一条挂 `00-setup`、打多工具 tag；本波（Cursor/Copilot/Codex 扩展）未做。出处：Cymulate、The Hacker News（写时复核各家修复状态）。
+- ✅ **跨工具「世界可写配置」误区**（工具扩展研究沉淀）：**CVE-2026-35603**——`C:\ProgramData` 配置目录默认人人可写，**Codex / Cursor / Gemini CLI / Claude Code 四家都中**，可植入「每轮必跑」命令做本地提权。已落地 `docs/00-setup-collaboration/world-writable-config-escalation.mdx`（站里首条真·四工具范式级条目，挂机制索引「工具与权限外溢」，evidence 安全报告，出处 Cymulate + GitLab Advisory）。CVE-2026-35603 = Claude Code 实例；四家修复状态打版本戳指 Cymulate。
 - ⬜ **其余工具差异候选（证据弱 / 跨工具，暂存）**：Cursor 的 VS Code Workspace-Trust 默认关（继承机制、无独有 bug）→ 宜作 `over-permissioning` 小节而非单条；GitHub Copilot 免费档训练默认 + content exclusion 不覆盖 agent（易过时）→ 训练默认作观察项、exclusion 事实可并入 `mcp-over-access`。来自 Cursor / Copilot 研究 List B 的弱项，按证据关未写。
 
 - ⬜ **`evidenceLevel`：证据「强度」字段（评审第三轮 #5；本轮只留接口，未实现）**。现有 `evidence`（证据**类型**）已确定性派生自 `sources`；评审建议再加一个**强度**轴，但双方一致要求**必须可机械派生、不靠作者打分**，否则会变成新漂移源。已定取值（比「高/中/低」更不主观，确定性派生）：`incident-backed`（有 CVE/GHSA/真实事故/安全公司复盘）｜`mechanism-documented`（仅官方文档证明机制存在）｜`experience-based`（仅博客/社区/作者经验）｜`speculative`（无可核查来源）。**做法**：写进 `terminology.md` 的确定性派生规则 → 扩 `PitfallMeta` 徽章 → 回填全站。待规则定稿后单独 PR。
