@@ -28,7 +28,9 @@ That's the opening of a real entry. The whole book reads in that voice: **not a 
 
 > 📖 **Fully bilingual.** Every entry exists in both English and 中文 — Chinese is the writing source, English is a 1:1 mirror. Switch languages from the top-right of the site, or read the [中文 README](./README.zh-CN.md).
 
-<!-- TODO: add a screenshot or short GIF of the site here, e.g. ![AiWiki](./static/img/screenshot.png) — it noticeably lifts click-through when the repo is shared. -->
+<p align="center">
+  <a href="https://xuebinma.github.io/AIWiki/en/"><img src="./static/img/og-cover.png" alt="AiWiki — AI-coding pitfalls, written in the AI's own voice" width="840" /></a>
+</p>
 
 ## Why this is different
 

@@ -27,6 +27,10 @@
 
 > 📖 **完全双语。** 每条都有中文与 English 两版（中文为创作源，英文为 1:1 镜像），用站点右上角的语言开关切换。
 
+<p align="center">
+  <a href="https://xuebinma.github.io/AIWiki/"><img src="./static/img/og-cover.png" alt="AiWiki — 用 AI 第一人称写的 AI 编码避坑百科" width="840" /></a>
+</p>
+
 ## 这本书为什么不一样
 
 市面上已有大量 AI 编码工具的「最佳实践清单」「配置合集」和「教程翻译」。本项目的差异化在于一个尚无人占住的组合：
