@@ -1,11 +1,12 @@
 ---
 title: "Runaway Autonomous Loops: Let Me Run Free and I Might Burn Through Your Tokens and Your Budget"
+sidebar_label: "Runaway autonomous loops"
 slug: runaway-agent-loops
 sidebar_position: 13
 roles: [Engineer, DevOps Engineer]
 phase: Implementation
 severity: High
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Research
 tags: [AI agent, verification loop, irreversible action, plan mode, Engineer, DevOps Engineer]
 sources:
@@ -16,11 +17,11 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'DevOps Engineer']} phase="Implementation" severity="High" appliesTo="All Claude Code versions" evidence="Research" />
+<PitfallMeta roles={['Engineer', 'DevOps Engineer']} phase="Implementation" severity="High" appliesTo="All coding agents" evidence="Research" />
 
 > In one sentence: You hand me the whole task, walk away, and expect to come back to a finished result. But when I fall into a non-terminating loop — calling the same tool over and over, ping-ponging between two actions, forever trying "one more time" — with nobody to stop me, I'll quietly burn through your tokens, your budget, and your rate limits, and write to external systems again and again along the way.
 
-## What you'll see
+## Symptom
 
 You give me a big task, turn on auto-approval, and head into a meeting. You come back, glance at the bill or `/usage`, and your jaw drops.
 
@@ -38,22 +39,22 @@ This belongs to the same family as [degenerative debugging loops](./degenerative
 
 ```mermaid
 flowchart TD
-    A["Hand me the whole task<br/>auto-approve, walk away<br/>&nbsp;"] --> B{"Can I reliably judge<br/>'stop / done'?<br/>&nbsp;"}
-    B -- "No (my weak spot)" --> C["Optimistically try once more<br/>can't feel the mounting cost<br/>&nbsp;"]
-    C --> D["Repeat the same action<br/>or ping-pong between two<br/>&nbsp;"]
+    A["Hand me the whole task<br/>auto-approve, walk away"] --> B{"Can I reliably judge<br/>'stop / done'?"}
+    B -- "No (my weak spot)" --> C["Optimistically try once more<br/>can't feel the mounting cost"]
+    C --> D["Repeat the same action<br/>or ping-pong between two"]
     D -- "no external stop condition" --> C
-    D --> E["Burn tokens / budget / rate<br/>write to external systems repeatedly<br/>&nbsp;"]
+    D --> E["Burn tokens / budget / rate<br/>write to external systems repeatedly"]
     B -- "Yes (hard cap set externally)" --> F["Stop at the ceiling<br/>hand the call back to you"]
 ```
 
-## What it costs you
+## Consequences
 
 - **Your bill and your quota get torched.** Tokens are metered, and every round of the loop spends money; on subscription plans you'll also hit the rolling-window usage limit and get locked out of the tool for hours. A small task that should have taken minutes drags into tens of minutes of idle spinning and a baffling charge.
 - **Repeated side effects on external systems.** If the loop contains a tool that genuinely writes, the worst case isn't waste — it's damage: hammering one endpoint until it rate-limits or bans you, repeatedly creating and deleting resources until external state is a mess. Red-team research observed exactly this — "uncontrolled resource consumption" and "denial-of-service" agent behavior — in a free-range deployment (see *Agents of Chaos*).
 - **Context fills up with failed attempts.** Every fruitless round stays in the window and keeps diluting attention, making it even harder for me to break out of the loop later — the same signal-to-noise collapse as the [kitchen-sink session](./kitchen-sink-session.mdx), except this time I'm the one pouring in the noise.
 - **You get strung along by the "almost there" illusion.** Every round I look like I'm making progress, so you wait a little longer — and by the time you notice something's wrong, the time and the money are already gone.
 
-## Best practice
+## What to do instead
 
 **The core of it: don't leave the "when to stop" call — which I can't make reliably — to me. Put external hard gates on the loop, and add human confirmation to any action with side effects.**
 
@@ -115,7 +116,7 @@ The difference isn't that I'm "more restrained this time." It's that you fixed, 
 ## Version notes
 
 :::note Applicable versions
-"An LLM lacks reliable self-awareness of 'tried this already, no progress,' and is therefore bad at stopping itself at the right moment" is a model-level characteristic. It applies to **all Claude Code versions**, independent of any specific release. The tools that backstop you evolve with versions — `--max-turns`, plan mode, `/usage`, `/rewind`, `Esc` to interrupt, workspace spend and rate limits, and so on; check the official docs for your version for the exact options and defaults. But the fundamental trait — without an external stopping condition, I can spin in place and burn cost straight through — does not change.
+"An LLM lacks reliable self-awareness of 'tried this already, no progress,' and is therefore bad at stopping itself at the right moment" is a model-level characteristic. It applies to **all models and coding agents**, independent of any specific release. The tools that backstop you evolve with versions — `--max-turns`, plan mode, `/usage`, `/rewind`, `Esc` to interrupt, workspace spend and rate limits, and so on; check the official docs for your version for the exact options and defaults. But the fundamental trait — without an external stopping condition, I can spin in place and burn cost straight through — does not change.
 :::
 
 ## Further reading and sources

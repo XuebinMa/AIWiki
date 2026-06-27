@@ -1,11 +1,12 @@
 ---
 title: 跨模块、跨仓改动时，我会重复造一个已有的轮子，或 import 一个根本不存在的东西
+sidebar_label: "重复造轮子 / 幻觉 import"
 slug: duplicate-logic-hallucinated-imports
 sidebar_position: 4
 roles: [架构师, 工程师]
 phase: 概要设计
 severity: 高
-applies_to: "全模型通用"
+applies_to: "Coding Agent 通用"
 evidence: 研究支持
 tags: [架构, 一致性, 幻觉, 检索, 架构师, 工程师]
 sources:
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['架构师', '工程师']} phase="概要设计" severity="高" appliesTo="全模型通用" evidence="研究支持" />
+<PitfallMeta roles={['架构师', '工程师']} phase="概要设计" severity="高" appliesTo="Coding Agent 通用" evidence="研究支持" />
 
 > 一句话摘要：让我在一个我看不全的大仓里做跨模块改动，我会干两件你不容易当场发现的事——把项目里其实已经有的工具函数照着需求**重新实现一遍**（重复逻辑、违反 DRY），以及 `import` 一个**根本不存在**的模块、函数或导出（幻觉 import，凭「这类库一般都有」的直觉猜）。两者的同一个根因：我的上下文窗口装不下整个仓库，我没有全局符号视野。
 
@@ -40,12 +41,12 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ```mermaid
 flowchart TD
-    A[你让我做跨模块/跨仓改动] --> B{我需要一个符号<br/>函数 / 模块 / 包<br/>&nbsp;}
+    A[你让我做跨模块/跨仓改动] --> B{我需要一个符号<br/>函数 / 模块 / 包}
     B --> C{它在我的上下文里吗?}
     C -->|在| D[正确引用既有实现]
     C -->|不在 / 看不全| E[按统计直觉补位]
-    E --> F[重复实现已有的工具<br/>违反 DRY<br/>&nbsp;]
-    E --> G[import 不存在的<br/>模块 / 函数 / 包<br/>&nbsp;]
+    E --> F[重复实现已有的工具<br/>违反 DRY]
+    E --> G[import 不存在的<br/>模块 / 函数 / 包]
     F --> H[逻辑分叉 + 维护负担]
     G --> I[运行即崩 / 供应链风险]
 ```

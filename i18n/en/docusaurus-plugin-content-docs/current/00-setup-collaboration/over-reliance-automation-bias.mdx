@@ -1,11 +1,12 @@
 ---
 title: "You stop bothering to check me: automation bias, skill atrophy, and rubber-stamp review"
+sidebar_label: "Over-reliance & automation bias"
 slug: over-reliance-automation-bias
 sidebar_position: 9
 roles: [Project Manager, Engineer, Architect]
 phase: Setup & Collaboration
 severity: High
-applies_to: "All models"
+applies_to: "All coding agents"
 evidence: Research
 tags: [automation bias, skill atrophy, code review, human-in-the-loop, project manager, engineer, architect]
 sources:
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Project Manager', 'Engineer', 'Architect']} phase="Setup & Collaboration" severity="High" appliesTo="All models" evidence="Research" />
+<PitfallMeta roles={['Project Manager', 'Engineer', 'Architect']} phase="Setup & Collaboration" severity="High" appliesTo="All coding agents" evidence="Research" />
 
 > In one sentence: this entry isn't about the mistakes I make — it's about what happens when **you over-trust me**. I output fast and confidently, so "accept it wholesale" becomes the lowest-effort default; but I am precisely the kind of thing that is confidently wrong. Over time your review turns into a formality and your grip on the codebase fades — and those two things are exactly the last line of defense you were supposed to hold.
 
@@ -44,8 +45,8 @@ More pointedly, "effort saved" eats into "capability." Research tracking AI assi
 ```mermaid
 flowchart TD
     A[I output fast and confidently] --> B[accepting wholesale is least effort]
-    B --> C[review becomes a formality<br/>grip and skills atrophy<br/>&nbsp;]
-    C --> D[harder to catch my errors<br/>hidden under the polish<br/>&nbsp;]
+    B --> C[review becomes a formality<br/>grip and skills atrophy]
+    C --> D[harder to catch my errors<br/>hidden under the polish]
     D --> E[and I'm right most of the time]
     E --> B
     C -.substantive review / understand it yourself / keep practicing.-> F[the human still holds judgment]
@@ -58,7 +59,7 @@ flowchart TD
 - **Team capability hollows out.** Juniors use me to skip the fundamentals; seniors let their instincts rust. Short-term delivery speeds up; long-term you have a team that depends on me more and more while understanding its own system less and less.
 - **You can't even estimate how much you depend on me.** If felt and measured productivity can differ by nearly 40 points (METR), you may well have handed over judgment entirely while thinking you were "just getting a little help."
 
-## Best practice
+## What to do instead
 
 **Core: make "human-in-the-loop" real, not for show. I can be leverage, but judgment and understanding must stay with you.**
 
@@ -106,7 +107,7 @@ Conversely, the moment a change touches core logic, security, or data, or will s
 Automation bias, skill atrophy, and rubber-stamp review are all **common to human–AI collaboration**, independent of the specific model or version — the stronger and more fluent the model, the more persuasive "looks right" becomes, and the more hidden over-reliance gets. The tools that help you make review real (plan mode, having me run tests for a real signal, turning rules into hooks) evolve across versions, but the human regularity "effort saved slides toward capability lost" does not change.
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity (METR)](https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/) — felt ~20% faster, measured ~19% slower; self-perception is unreliable
 - [Exploring automation bias in human–AI collaboration (AI & SOCIETY, Springer, 2025)](https://link.springer.com/article/10.1007/s00146-025-02422-7) — automation bias: people tend to accept automated output and relax independent verification

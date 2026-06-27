@@ -1,11 +1,12 @@
 ---
 title: "The requirement looked clear enough, so I quietly filled in the assumptions you never stated"
+sidebar_label: "Filling in unstated assumptions"
 slug: implicit-assumptions
 sidebar_position: 4
 roles: [Project Manager, Engineer, Architect]
 phase: Requirements
 severity: High
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Community case
 tags: [requirements clarification, assumptions, prompt design, project manager, engineer, architect]
 sources:
@@ -15,11 +16,11 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Project Manager', 'Engineer', 'Architect']} phase="Requirements" severity="High" appliesTo="All Claude Code versions" evidence="Community case" />
+<PitfallMeta roles={['Project Manager', 'Engineer', 'Architect']} phase="Requirements" severity="High" appliesTo="All coding agents" evidence="Community case" />
 
 > In one sentence: the requirement looked clear enough, so I just built it—but along the way I silently filled in a pile of premises you never stated (data format, scale, concurrency, defaults, target users, error handling, tech stack). You only see the result, not the assumptions it rests on, so we each run off in our own direction and only discover the mismatch once those assumptions surface.
 
-## What I see
+## Symptom
 
 You say: "Add an endpoint that searches by username." To both of us that sounds clear enough, so I get to work. But as I write it, I make a string of decisions on your behalf: is the search exact or fuzzy (I picked exact); case-sensitive or not (I picked case-sensitive); is the data a few hundred rows or tens of millions (I wrote it for a few thousand—no index, no pagination); concurrency, caching, timeouts (I considered none of them); what happens when the username is empty or contains special characters (I assumed it never would).
 
@@ -40,7 +41,7 @@ What makes it worse: these assumptions leave no trace. They dissolve into the co
 - **Invisible assumptions can't be reviewed.** Premises buried in code are nearly impossible to catch one by one during review—you don't know what to look for.
 - **The later it surfaces, the more it costs.** Once a foundational assumption like data format or tech stack turns out wrong, undoing it tears out far more than changing a search-matching mode would.
 
-## Best practice
+## What to do instead
 
 **Make me put the key assumptions on the table before I implement.** Don't count on me to notice "this needs asking"—turn "surface your assumptions" into an instruction you give.
 

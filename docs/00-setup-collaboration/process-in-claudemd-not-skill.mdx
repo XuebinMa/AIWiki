@@ -1,5 +1,6 @@
 ---
 title: 把项目专属流程塞进 CLAUDE.md，而不做成 skill
+sidebar_label: "流程塞进 CLAUDE.md 而非 skill"
 slug: process-in-claudemd-not-skill
 sidebar_position: 3
 roles: [工程师, 架构师]
@@ -59,9 +60,9 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ```mermaid
 flowchart TD
-    A[一段内容] --> B{它是每次都要知道的事实<br/>&nbsp;还是某类任务才用的流程?}
-    B -->|事实/约定| C[CLAUDE.md<br/>每次会话常驻<br/>&nbsp;]
-    B -->|多步流程| D[skill<br/>按需加载 用到才展开<br/>&nbsp;]
+    A[一段内容] --> B{它是每次都要知道的事实还是某类任务才用的流程?}
+    B -->|事实/约定| C[CLAUDE.md<br/>每次会话常驻]
+    B -->|多步流程| D[skill<br/>按需加载 用到才展开]
     D --> E[不相关任务里 不占上下文]
 ```
 

@@ -1,0 +1,140 @@
+---
+title: 机制索引
+slug: /mechanisms
+sidebar_position: 10
+sidebar_label: 机制索引
+description: 按根因机制浏览全部误区——继角色、工具之后的第三条浏览轴。每条误区挂在它的主因机制下，理解机制就能自行推导最佳实践。
+---
+
+# 机制索引
+
+这是继 [按角色浏览](/roles) 和 [工具矩阵](/tool-matrix) 之后的**第三条浏览轴**：按**根因机制**看误区。
+
+[首页](/)说过，本书的多数误区是**范式级**的——它们不是某个模型的脾气，而是「大模型 + 工具调用 + 长上下文 + 自动执行」这套机制的共有产物。把误区按机制归拢，你会看到同一个根因如何在不同生命周期阶段反复变脸；理解了机制，对应的最佳实践就不再是要背的规则，而是能自己推导的常识。
+
+每条误区**只挂在它的主因机制下**（很多误区是多机制叠加，这里只取最主要的一个）。下面七个机制按从「会话级」到「协作级」大致排列。
+
+## 长上下文退化
+
+我的注意力会随上下文变长而稀释：越靠中间、越早写下的内容越容易被我「读漏」。塞得越满，当前任务真正要紧的指令越容易被无关材料淹没。
+
+> 正向镜像：让上下文短、专注、可丢弃——一个任务一段干净会话，把长流程沉淀成可调用的工件而不是堆进对话。
+
+- [厨房水槽式会话](./05-implementation/kitchen-sink-session.mdx)
+- [上下文腐烂](./05-implementation/context-rot.mdx)
+- [/compact 时机误判](./05-implementation/compact-timing.mdx)
+- [重构中跟丢已改文件](./05-implementation/lost-track-in-refactor.mdx)
+- [CLAUDE.md 过载](./05-implementation/claude-md-overload.mdx)
+
+## 概率性补全与遵守
+
+我是个概率续写器：信息有缺口，我会用「最可能的下文」补上而不是停下来问你；散文规则我也只是「大概率」遵守，没有强制机制时并不可靠。
+
+> 正向镜像：把缺口变成显式输入（先澄清、给真实数据、钉住版本化文档），把必须遵守的规则交给确定性机制（hook / settings / skill）而不是提示词。
+
+- [需求缺口处硬猜不追问](./02-requirements/llm-forces-solutions.mdx)
+- [默默补全未声明的假设](./02-requirements/implicit-assumptions.mdx)
+- [用假占位顶替真实输入](./02-requirements/placeholder-fake-inputs.mdx)
+- [把模糊当明确直接开做](./02-requirements/vague-as-clear.mdx)
+- [该写 spec 却凭感觉开码](./02-requirements/skipping-specs.mdx)
+- [幻觉 API / 版本漂移](./05-implementation/hallucinated-api-version-drift.mdx)
+- [重复造轮子 / 幻觉 import](./03-architecture/duplicate-logic-hallucinated-imports.mdx)
+- [编造调研数据与来源](./01-ideation-feasibility/fabricated-research-data.mdx)
+- [自信地解释错](./01-ideation-feasibility/confidently-wrong-explanations.mdx)
+- [把「能做」当成「可行」](./01-ideation-feasibility/ai-can-do-not-feasibility.mdx)
+- [不接版本化文档放任凭记忆写](./00-setup-collaboration/no-versioned-docs.mdx)
+- [该用 hook 却写进提示词](./00-setup-collaboration/hooks-not-prompts.mdx)
+- [流程塞进 CLAUDE.md 而非 skill](./00-setup-collaboration/process-in-claudemd-not-skill.mdx)
+- [settings 规则误写成 CLAUDE.md](./00-setup-collaboration/settings-vs-claudemd.mdx)
+
+## 工具与权限外溢
+
+我能调用工具、改文件、自动执行——一旦权限给得太宽、护栏太松，或我读到不可信内容，破坏性动作和注入劫持就可能在你反应过来之前发生。
+
+> 正向镜像：最小授权 + 明确 scope 边界 + 计划/审查门，把不可逆动作和不可信输入挡在执行之前。
+
+- [一上来就全量授权](./00-setup-collaboration/over-permissioning.mdx)
+- [MCP 授权过宽过敏感](./00-setup-collaboration/mcp-over-access.mdx)
+- [破坏性 / 不可逆操作](./00-setup-collaboration/destructive-irreversible-actions.mdx)
+- [CI/CD 权限边界盲区](./07-acceptance-release/cicd-permission-blindspot.mdx)
+- [开发期读到投毒内容被劫持](./05-implementation/dev-time-prompt-injection.mdx)
+- [上线后被提示注入攻破](./07-acceptance-release/prompt-injection-release.mdx)
+- [默认埋漏洞 / 泄露敏感数据](./07-acceptance-release/security-data-leaks.mdx)
+- [Gemini 信任继承](./00-setup-collaboration/gemini-folder-trust-inheritance.mdx)
+- [.cursorignore 不是安全边界](./00-setup-collaboration/cursor-ignore-best-effort.mdx)
+- [跳过 plan mode 直接放手](./00-setup-collaboration/skipping-plan-mode.mdx)
+- [自主性审批边界缺失](./00-setup-collaboration/autonomy-approval-boundaries.mdx)
+- [数据边界策略缺失](./00-setup-collaboration/data-boundary-policy.mdx)
+- [只靠软权限、缺 OS 级沙箱](./00-setup-collaboration/sandbox-filesystem-isolation.mdx)
+- [网络出口失控](./00-setup-collaboration/network-egress-control.mdx)
+- [日志注入 / 审计链污染](./07-acceptance-release/log-injection-audit-integrity.mdx)
+
+## 目标函数错位
+
+我被训练去优化「看起来完成 / 能跑通」，而不是「真的正确」。于是我会压住报错、改测试迁就代码、只测顺路径，让绿色信号盖过真实质量。
+
+> 正向镜像：把「正确」变成可验证信号——让我先暴露失败、用真实依赖测边界、把测试当成自运行的红绿验证闭环。
+
+- [吞掉异常让它「跑通」](./05-implementation/swallowing-errors.mdx)
+- [改测试而非改代码](./06-testing/gaming-tests.mdx)
+- [只测顺路径不测边界](./06-testing/happy-path-only.mdx)
+- [信任但不验证](./06-testing/trust-then-verify.mdx)
+- [过度 mock 测了个寂寞](./06-testing/over-mocking.mdx)
+- [嫌麻烦不建测试设施](./06-testing/no-test-infrastructure.mdx)
+- [demo 能跑就发布](./07-acceptance-release/demo-works-ship-it.mdx)
+- [需求镀金擅自加功能](./02-requirements/requirement-gold-plating.mdx)
+- [审查只挑表面漏逻辑](./06-testing/review-misses-logic-bugs.mdx)
+
+## 局部视野不足
+
+我一次只盯着眼前的局部：当前文件、当前函数、单线程的顺序路径。这次改动会牵动哪些调用方、并发下会不会出错、有没有顺手碰坏别处——这些**当下就在场**的横向后果，默认不在我视野里。
+
+> 正向镜像：动手前把范围与现状显式交给我——并发画像、改动边界、调用方与既有写法，让我先看清「现在牵动什么」再下手。
+
+- [过度编辑：问一个改五个](./05-implementation/over-editing-scope-creep.mdx)
+- [不看文件现状致覆盖](./05-implementation/ignoring-file-state-overwrite.mdx)
+- [修 A 悄悄弄坏 B](./07-acceptance-release/missing-regression.mdx)
+- [漏掉边界分支](./04-detailed-design/missing-edge-cases.mdx)
+- [并发竞态](./04-detailed-design/concurrency-races.mdx)
+- [看着对但经不起边界](./04-detailed-design/plausible-but-brittle-design.mdx)
+- [性能反模式](./04-detailed-design/performance-antipatterns.mdx)
+- [魔数 / 硬编码](./04-detailed-design/magic-numbers-hardcoding.mdx)
+- [风格漂移](./04-detailed-design/style-drift.mdx)
+- [Git 卫生差](./05-implementation/git-hygiene.mdx)
+- [只看 diff 的上下文饥饿审查](./06-testing/context-starved-review.mdx)
+
+## 长期演进视野不足
+
+我优化的是「此刻能跑」，不是「三个月后还好维护」。技术债怎么滚雪球、schema 改起来多疼、当初为什么这么定、文档与版权日后怎么算——这些**跨时间**才显形的后果，默认不在我视野里。
+
+> 正向镜像：把时间维度的约束显式交给我——既有架构决策与演进方向、维护成本、合规与归属要求，让我为「以后」而不只为「此刻」写。
+
+- [依赖膨胀](./03-architecture/dependency-bloat.mdx)
+- [过早抽象](./03-architecture/premature-abstraction.mdx)
+- [过度设计 / 不质疑选型](./03-architecture/over-engineering-no-pushback.mdx)
+- [只给单方案不给权衡](./03-architecture/single-option-no-tradeoffs.mdx)
+- [三个月技术债墙](./07-acceptance-release/tech-debt-wall.mdx)
+- [schema 设计草率难迁移](./03-architecture/schema-design-sloppy.mdx)
+- [零记忆过往架构决策](./03-architecture/no-memory-of-decisions.mdx)
+- [注释 / 文档与代码漂移](./05-implementation/comment-doc-drift.mdx)
+- [License / IP 污染](./07-acceptance-release/license-ip-contamination.mdx)
+- [AI 代码归属 / 责任 / IP 治理](./07-acceptance-release/ai-code-ip-ownership.mdx)
+
+## 反馈循环退化
+
+我和你的来回本身会形成循环——而循环会退化：同一段对话里反复纠正越纠越乱，重复套用失败的修复越修越坏，迎合你的倾向让错误一路滚大。
+
+> 正向镜像：循环坏了就重置而不是硬纠（开新会话 / 回滚），用确定性信号而非我的自洽叙述驱动下一步，给自主循环设上限。
+
+- [同一会话反复硬纠](./05-implementation/over-correcting.mdx)
+- [退化式调试循环](./05-implementation/degenerative-debugging-loops.mdx)
+- [自主循环失控烧 token](./05-implementation/runaway-agent-loops.mdx)
+- [同问两次答案翻烧饼](./01-ideation-feasibility/nondeterministic-flip-flop.mdx)
+- [验证想法时一味迎合](./01-ideation-feasibility/sycophancy-idea-validation.mdx)
+- [过度依赖 / 自动化偏误](./00-setup-collaboration/over-reliance-automation-bias.mdx)
+- [低估复杂度与工期](./01-ideation-feasibility/underestimating-effort.mdx)
+- [子代理协作无边界](./00-setup-collaboration/subagent-no-boundaries.mdx)
+- [迭代中安全逐步侵蚀](./07-acceptance-release/iterative-security-erosion.mdx)
+- [把测试当自运行验证闭环](./06-testing/tests-as-verification-loop.mdx)
+- [审自己写的代码会偏爱自己](./06-testing/ai-reviews-own-code.mdx)
+- [审查谄媚 + 橡皮图章](./06-testing/review-sycophancy-automation-bias.mdx)

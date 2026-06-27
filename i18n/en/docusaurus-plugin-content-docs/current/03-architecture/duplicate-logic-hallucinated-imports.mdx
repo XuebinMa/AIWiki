@@ -1,11 +1,12 @@
 ---
 title: On cross-module, cross-repo changes, I'll rebuild a helper you already have, or import something that doesn't exist
+sidebar_label: "Duplicate logic & hallucinated imports"
 slug: duplicate-logic-hallucinated-imports
 sidebar_position: 4
 roles: [Architect, Engineer]
 phase: Architecture
 severity: High
-applies_to: "All models"
+applies_to: "All coding agents"
 evidence: Research
 tags: [architecture, consistency, hallucination, retrieval, architect, engineer]
 sources:
@@ -16,11 +17,11 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="High" appliesTo="All models" evidence="Research" />
+<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="High" appliesTo="All coding agents" evidence="Research" />
 
 > In one sentence: ask me to make a cross-module change in a large repo I can't see all of, and I'll do two things you won't catch in the moment — reimplement a utility your project already has (duplicate logic, a DRY violation), and `import` a module, function, or export that simply doesn't exist (a hallucinated import, guessed from "libraries like this usually have one"). Both come from the same root cause: my context window can't hold your whole repo, so I have no global view of its symbols.
 
-## What I do
+## Symptom
 
 You ask me to add a feature in a repo of a few hundred thousand lines, touching three or four modules. The diff I hand back reads cleanly, but it hides two kinds of problems.
 
@@ -40,24 +41,24 @@ Chase both behaviors to the bottom and they're the same mechanism: **I have no "
 
 ```mermaid
 flowchart TD
-    A[You ask for a cross-module / cross-repo change] --> B{I need a symbol<br/>function / module / package<br/>&nbsp;}
+    A[You ask for a cross-module / cross-repo change] --> B{I need a symbol<br/>function / module / package}
     B --> C{Is it in my context?}
     C -->|Yes| D[Reference the existing implementation correctly]
     C -->|No / partial view| E[Fill in by statistical intuition]
-    E --> F[Reimplement an existing helper<br/>DRY violation<br/>&nbsp;]
-    E --> G[Import a non-existent<br/>module / function / package<br/>&nbsp;]
+    E --> F[Reimplement an existing helper<br/>DRY violation]
+    E --> G[Import a non-existent<br/>module / function / package]
     F --> H[Forked logic + maintenance burden]
     G --> I[Crashes on run / supply-chain risk]
 ```
 
-## The cost
+## Consequences
 
 - **Duplicate logic quietly forks.** My new `camel_to_snake` now coexists with the existing `to_snake_case`; tomorrow someone fixes an edge-case bug in one, and the other still carries it. The same task having two implementations in the repo is the seedbed for every later inconsistency.
 - **Hallucinated imports crash at best, lurk at worst.** Guess an internal symbol wrong and you hit `ImportError` the moment that line runs — an avoidable round trip back to me. Guessing a third-party package wrong is sneakier: if the name is plausible enough you might just `pip install` it — and either it won't install, or, if an attacker has pre-registered that high-frequency hallucinated name, you've just pulled in malicious code.
 - **Review cost gets shifted onto you.** Neither problem gets stopped at the "does it read smoothly" gate; both require you to check, against the real repo, whether each symbol exists and whether the implementation already exists. I've turned the verification cost I should have borne into your review burden.
 - **The bigger the cross-module change, the more gaps.** The more files a change spans, the more scattered they are, the more symbols fall outside my context, and the higher my "guess" ratio climbs. Which means the large changes that most need a global view are exactly where I'm least reliable.
 
-## Best practice
+## What to do instead
 
 The core: **don't let me fill in symbols by intuition. Make "verify first, then reference" a mandatory upfront step, and review specifically for these two problems.**
 

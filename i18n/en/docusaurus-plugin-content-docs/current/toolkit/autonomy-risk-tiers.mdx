@@ -1,0 +1,42 @@
+---
+title: "AI autonomy risk-tier checklist"
+slug: autonomy-risk-tiers
+sidebar_position: 10
+tags: [checklist, template, governance, security]
+---
+
+> In one sentence: this turns the principle from [Autonomy and approval boundaries](../00-setup-collaboration/autonomy-approval-boundaries.mdx) into a table you can use as-is. Don't hand me one blanket autonomy level — tier each class of operation by **reversibility × blast radius × data sensitivity**: low-risk runs automatically, high-risk forces a human review, irreversible gets a dry-run first. Wire it straight into your `settings` and hooks.
+
+## Tier table (approval requirement by risk)
+
+| Tier | Operation class (examples) | Approval requirement |
+|------|----------------------------|----------------------|
+| **🟢 Auto-approve** | Reading code / docs; editing comments, tests, copy; local formatting; running read-only commands | Runs automatically, notify after the fact only |
+| **🟡 Pause and ask** | Installing / upgrading dependencies; changing CI / build config; large cross-file edits; calling a paid / external API | Stop and wait for confirmation before running |
+| **🔴 Force human review + dry-run** | Deleting data / tables / files; touching production / config; data migrations; `git push --force`; sending data outward | Print "here's what I'm about to do" first, run only after a human confirms; leave an approval trail |
+
+> The rule: across the three dimensions (reversibility / blast radius / data sensitivity), **any one of them high → at least 🟡; irreversible with a large blast radius → 🔴**. When in doubt, bump it up a tier.
+
+## How to use it
+
+- **Turn the tiers into mechanism, not just prompt text.** 🟢 goes in `allow`, 🟡 in `ask`, 🔴 in `deny` or a hook that forces confirmation (pairs with the [permissions template](./permissions-config.mdx)) — a prose rule I only mostly follow, a deterministic gate I can't route around.
+- **The 🔴 tier always leaves an approval trail**: who approved / who rejected / the context at the time, written to a tamper-proof log for later review and compliance.
+- **Autonomy evolves with trust; the 🔴 gate stays put.** You can dial up my overall autonomy as I prove myself on a class of task, but "touching the irreversible / touching production / sending data outward needs a human" doesn't loosen with trust — it guards against the consequence, not the capability.
+
+## When to use this
+
+### A good fit when
+
+- You've given me auto-execution / a higher autonomy level, and I can reach real systems (production, data, credentials, the outbound network).
+- A team wants a written policy for which operations I'm allowed to do on my own and which require a human nod.
+
+### Not a fit when
+
+- Exploration in a one-shot sandbox / throwaway environment — when the environment already absorbs the risk (see [sandbox isolation](../00-setup-collaboration/sandbox-filesystem-isolation.mdx)), maxing out the approval gates is pure friction.
+- Purely read-only tasks with no path to real systems — there's no "irreversible action" to tier.
+
+### Replace before using
+
+- Swap "operation class" for the genuinely high-risk actions in your project (your deploy commands, your data-migration tool's name, your production identifiers).
+- Adjust which tier things land in to match your definition of blast radius — the same command can carry different risk across projects.
+- Wire the 🔴 tier to your real approval / record-keeping system (audit log, two-person confirmation, and so on).

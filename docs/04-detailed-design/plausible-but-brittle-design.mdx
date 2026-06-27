@@ -1,11 +1,12 @@
 ---
 title: 我给的方案看起来对，却经不起边界推敲
+sidebar_label: "看着对但经不起边界"
 slug: plausible-but-brittle-design
 sidebar_position: 2
 roles: [工程师]
 phase: 详细设计
 severity: 高
-applies_to: "Claude Code 全版本"
+applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [边界条件, 详细设计, 健壮性, 工程师]
 sources:
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师']} phase="详细设计" severity="高" appliesTo="Claude Code 全版本" evidence="官方文档" />
+<PitfallMeta roles={['工程师']} phase="详细设计" severity="高" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
 > 一句话摘要：我给你一套设计，在常规输入下自洽、读起来很合理，你就采纳了。但它一上规模、一碰异常路径、一遇并发或失败重试就垮——问题不在某一行代码，而在方案隐含的健壮性假设站不住。这讲的是**设计层面的脆弱**；如果是写实现时漏了某个具体边界分支，见[《写实现时，我会漏掉那些你没明说的边界分支》](./missing-edge-cases.mdx)。
 
@@ -39,7 +40,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 flowchart TD
     A[你要一套方案] --> B[我给出 happy path 设计]
     B --> C{有人逼它面对最坏情况吗}
-    C -->|没有，顺着读都合理| D["规模放大 / 超时重试<br/>并发与幂等 / 部分失败<br/>&nbsp;"]
+    C -->|没有，顺着读都合理| D["规模放大 / 超时重试<br/>并发与幂等 / 部分失败"]
     C -->|你显式追问失败路径| E[方案补上退化与恢复策略]
     D --> F[上了真实负载就垮]
 ```
@@ -82,7 +83,7 @@ flowchart TD
 ## 版本说明
 
 :::note 适用版本
-「优化貌似合理而非最坏情况健壮」是大语言模型的本质倾向，**Claude Code 全版本、且跨模型适用**。模型越强，给出的方案越完整、越顺滑，脆弱假设反而藏得越深——所以「逼方案直面最坏情况」这件事，越是用强模型越不能省。
+「优化貌似合理而非最坏情况健壮」是大语言模型的本质倾向，**全模型、跨工具通用**。模型越强，给出的方案越完整、越顺滑，脆弱假设反而藏得越深——所以「逼方案直面最坏情况」这件事，越是用强模型越不能省。
 :::
 
 ## 延伸阅读与出处

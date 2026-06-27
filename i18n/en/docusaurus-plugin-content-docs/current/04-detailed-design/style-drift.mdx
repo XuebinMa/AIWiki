@@ -1,11 +1,12 @@
 ---
 title: "Style drift: in the same project, today's me and tomorrow's me write like two different people"
+sidebar_label: "Style drift"
 slug: style-drift
 sidebar_position: 3
 roles: [Engineer]
 phase: Detailed Design
 severity: Medium
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [code style, consistency, conventions, engineer]
 sources:
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Detailed Design" severity="Medium" appliesTo="All Claude Code versions" evidence="Official docs" />
+<PitfallMeta roles={['Engineer']} phase="Detailed Design" severity="Medium" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: in the same repo I'll use async/await in this file and a promise chain in the next, `camelCase` here and `snake_case` there. It's not that I'm being deliberately quirky—I just didn't read the file next door, and reached for "the default I'm most familiar with" from memory.
 
@@ -30,7 +31,7 @@ I see this all the time: you ask me to add a feature to an existing module. On i
 
 Each one is individually "also fine." Put together, they're a different accent. A week later, in a different session, I might switch to yet another style—so in the same project, today's me and tomorrow's me write like two different people.
 
-## Why it happens
+## Why this happens
 
 The root cause isn't that I "don't care about consistency." It's that **I don't know this repo's conventions by default, and by default I won't go looking for them.**
 
@@ -44,9 +45,9 @@ When no one explicitly asks for path 1, I lean toward path 2—because producing
 ```mermaid
 flowchart TD
     A[You ask me to add a feature] --> B{Did I align with the conventions}
-    B -- No --> C[Generate from memory<br/>the statistically common default<br/>&nbsp;]
+    B -- No --> C[Generate from memory<br/>the statistically common default]
     B -- Yes: read neighboring files --> D[Generate following the repo's existing style]
-    C --> E[Looks fine alone<br/>a different accent once combined<br/>&nbsp;]
+    C --> E[Looks fine alone<br/>a different accent once combined]
     D --> F[Consistent with surrounding style]
 ```
 
@@ -59,7 +60,7 @@ What makes it worse is that it self-propagates: the out-of-place style I just ad
 - **Reviews drown in trivia**: your energy gets eaten by mechanical fixes like "change the quotes back to single" and "this needs an await," squeezing out the logic you should actually be reviewing.
 - **Drift spreads**: once inconsistency lands in the repo, it becomes the template for the next round of imitation, accumulating over time—the most inconspicuous and most stubborn kind of [technical debt](../03-architecture/over-engineering-no-pushback.mdx).
 
-## Best practice
+## What to do instead
 
 Telling me to "keep the style consistent" barely works—it's too abstract, and I can't verify whether I've actually done it. What works is to **make the conventions something I can't route around.** Three layers, from hard to soft:
 
@@ -108,7 +109,7 @@ The difference isn't my ability; it's whether you put "how this repo writes" in 
 "Starting each session from scratch and leaning toward the statistically most common default" is an inherent trait of large language models, and **applies across versions and across models**—the stronger the model, the more self-consistent and polished its "default" looks, which paradoxically makes it easier to overlook that it never actually aligned with your repo. The ability to generate a starter CLAUDE.md via `/init`, and to run lint/format automatically after edits via a hook, depends on newer versions; without them, you can hand-write CLAUDE.md and explicitly name the neighboring file in your prompt for the same effect.
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Best practices for Claude Code (Anthropic, official)](https://code.claude.com/docs/en/best-practices) — see the sections "Reference existing patterns," "Write an effective CLAUDE.md," and "Set up hooks"
 - [How Claude remembers your project / CLAUDE.md (Anthropic, official)](https://code.claude.com/docs/en/memory) — CLAUDE.md is the place for coding standards / naming conventions and should be specific enough to verify; hooks are for enforcement

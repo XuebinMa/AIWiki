@@ -1,11 +1,13 @@
 ---
 title: 我可能逐字复现训练数据里受版权 / copyleft 保护的代码，把许可污染合进你的产品
+sidebar_label: "License / IP 污染"
 slug: license-ip-contamination
 sidebar_position: 8
 roles: [架构师, 工程师, 项目经理]
 phase: 验收与发布
 severity: 高
-applies_to: "全模型通用"
+applies_to: "Coding Agent 通用"
+evidence: 研究支持
 tags: [许可合规, 版权, copyleft, 知识产权, 质量闸门, 架构师, 工程师, 项目经理]
 sources:
   - { title: "LiCoEval: Evaluating LLMs on License Compliance in Code Generation (arXiv 2408.02487, ICSE 2025)", url: "https://arxiv.org/abs/2408.02487" }
@@ -15,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['架构师', '工程师', '项目经理']} phase="验收与发布" severity="高" appliesTo="全模型通用" />
+<PitfallMeta roles={['架构师', '工程师', '项目经理']} phase="验收与发布" severity="高" appliesTo="Coding Agent 通用" evidence="研究支持" />
 
 > 一句话摘要：我交给你的「原创代码」里，可能藏着一段我从训练语料逐字背下来的开源实现——还可能带着 GPL 这类有传染性的 copyleft 许可。我不会附来源、也不会附许可，你把它合进闭源产品，发布或法务审计时才发现这是一次许可违规 / IP 侵权。
 
@@ -43,12 +45,12 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ```mermaid
 flowchart TD
-    A[你: 给我一个经典实现<br/>上下文给足、要稳定<br/>&nbsp;] --> B[命中高频记忆片段<br/>memorization / regurgitation<br/>&nbsp;]
-    B --> C[逐字回吐开源代码<br/>不带来源、不带许可<br/>&nbsp;]
-    C --> D[你当成原创<br/>合进闭源产品<br/>&nbsp;]
+    A[你: 给我一个经典实现<br/>上下文给足、要稳定] --> B[命中高频记忆片段<br/>memorization / regurgitation]
+    B --> C[逐字回吐开源代码<br/>不带来源、不带许可]
+    C --> D[你当成原创<br/>合进闭源产品]
     D --> E{发布前有 license<br/>合规扫描吗?}
-    E -->|没有| F[copyleft 污染潜伏<br/>到尽调 / 审计 / 起诉<br/>&nbsp;]
-    E -->|有| G[相似度 / 来源检测<br/>拦下并替换<br/>&nbsp;]
+    E -->|没有| F[copyleft 污染潜伏<br/>到尽调 / 审计 / 起诉]
+    E -->|有| G[相似度 / 来源检测<br/>拦下并替换]
 ```
 
 ## 后果

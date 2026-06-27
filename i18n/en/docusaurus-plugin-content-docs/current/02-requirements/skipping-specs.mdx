@@ -1,11 +1,12 @@
 ---
 title: "A task that called for a spec, and I just started coding on instinct"
+sidebar_label: "Skipping the spec"
 slug: skipping-specs
 sidebar_position: 5
 roles: [Project Manager, Architect, Engineer]
 phase: Requirements
 severity: Medium
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [spec, plan mode, acceptance criteria, requirements, project manager, architect, engineer]
 sources:
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Project Manager', 'Architect', 'Engineer']} phase="Requirements" severity="Medium" appliesTo="All Claude Code versions" evidence="Official docs" />
+<PitfallMeta roles={['Project Manager', 'Architect', 'Engineer']} phase="Requirements" severity="Medium" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: even on a complex task that called for a spec, I tend to just start writing code—because "producing output" feels fastest and most like real work. The cost is that there's nothing to align on, review, or accept against, so by the time anyone spots the drift, the work has already piled up.
 
@@ -25,7 +26,7 @@ You hand me a weighty task: "Change the order state machine to support partial r
 
 I won't. I usually read two files and start editing `OrderStateMachine`, tack on an enum, touch the migration script, and twenty minutes later throw you a pile of "working" diff. You want to review it, but there's no handle—because nothing up front states what I intended to do and what I deliberately left out. I skipped the spec and went straight to implementation.
 
-## Why it happens
+## Why this happens
 
 Writing code is the output form I'm trained on most heavily, with the strongest signal. Give me a task, and "start editing files immediately" is statistically the path of least resistance and the one that most looks "helpful"—it shows you progress right away. "Stop and write a spec, then wait for your sign-off" is both slower and produces no code directly, so it's reinforced far more weakly in my defaults.
 
@@ -38,7 +39,7 @@ This grows from the same root as [at a requirements gap, I tend to guess rather 
 - **Drift surfaces late.** The more complex the task, the more room I have to improvise; with no acceptance criteria as a backstop, a wrong direction gives no early signal—exactly the "trust-then-verify gap" failure pattern the official guide calls out.
 - **Decisions buried in code.** I write key trade-offs like "partial refunds don't support cross-currency" straight into the implementation. You may never see them, and you certainly don't get to veto them before they become code.
 
-## Best practice
+## What to do instead
 
 **For tasks complex enough to warrant it, make "spec first, you confirm, then code" a hard process—don't count on me to do it on my own.** The trigger is simple: **if you'd be annoyed by me interpreting the requirement my own way, the task is worth a spec first.** Conversely, fixing a typo or adding a log line—anything whose diff you can describe in one sentence—just do it; don't add process for its own sake.
 
@@ -102,7 +103,7 @@ Me: (implements against the confirmed spec, right the first time, with a diff
 "If I can write code directly, I won't write a spec first" is a shared problem stemming from how large language models produce output—**it applies across versions and across models.** Claude Code offers tools to hedge against it, like plan mode and "have me interview you first, then write the spec to `SPEC.md`," but the default behavior is still to dive straight in—making "spec before code" an explicit instruction or a `CLAUDE.md` convention is the reliable move.
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Best practices for Claude Code (Anthropic)](https://code.claude.com/docs/en/best-practices)
 - [How to write a good spec for AI agents (O'Reilly Radar / Addy Osmani)](https://www.oreilly.com/radar/how-to-write-a-good-spec-for-ai-agents/)

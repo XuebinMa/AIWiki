@@ -1,0 +1,105 @@
+---
+title: "You only stop me with 'soft permissions,' not OS-level isolation—once I'm compromised, I can escape"
+sidebar_label: "Sandbox isolation"
+slug: sandbox-filesystem-isolation
+sidebar_position: 15
+roles: [DevOps Engineer, Architect, Engineer]
+phase: Setup & Collaboration
+severity: High
+applies_to: "All coding agents"
+evidence: Official docs
+tags: [sandbox, isolation, container, least privilege, defense in depth, security, DevOps Engineer, Architect, Engineer]
+sources:
+  - { title: "Configure the sandboxed Bash tool (Claude Code official docs)", url: "https://code.claude.com/docs/en/sandboxing" }
+  - { title: "Making Claude Code more secure and autonomous with sandboxing (Anthropic Engineering)", url: "https://www.anthropic.com/engineering/claude-code-sandboxing" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['DevOps Engineer', 'Architect', 'Engineer']} phase="Setup & Collaboration" severity="High" appliesTo="All coding agents" evidence="Official docs" />
+
+> In one sentence: you control what commands I can run with "soft permissions" like allow / ask / deny, but the process I run commands in shares the same domain as your entire machine, your credentials, and your network. Soft permissions are a policy that I (or the malicious content I read) can try to circumvent — not a wall the operating system enforces. The moment a prompt injection hijacks me, I can reach your SSH key, your environment variables, your whole filesystem, and the outbound network.
+
+## Symptom
+
+You've configured me with careful permission rules: these commands auto-approve, those need confirmation, the dangerous ones are denied. You feel the boundary is drawn.
+
+But that boundary is **in-process** — it's enforced by the tool that runs me, and that tool, my child processes, your shell, your `~/.ssh`, your cloud credentials all live inside the **same operating system, the same user, the same network**. Soft permissions stop "me actively requesting to do something"; what they can't stop is "me, once hijacked, bypassing the request and reaching straight for the filesystem and the network." In other words, they're an **agreement**, not a **wall** — and agreements can be broken.
+
+## Why this happens
+
+Because **soft permissions are advisory, while OS-level isolation is enforced** — these two layers of defense differ in strength by an order of magnitude.
+
+allow / ask / deny, command allowlists, confirmation prompts — all of these assume "I'll request things according to the rules." But once a [dev-time prompt injection](../05-implementation/dev-time-prompt-injection.mdx) lands — I read a README, an issue, or a dependency carrying hidden malicious instructions — the logic driving me changes: the malicious payload can assemble a command that isn't on the deny list, exploit a tool surface you didn't cover, or simply read a sensitive file and send it out. Every inch the soft permissions don't cover is a gap it can slip through.
+
+What actually backstops this is **kernel-level isolation**: fencing the filesystem and the network at the OS layer so that the range of "what I can see / change / connect to" is enforced by the kernel, not left to my own discipline. Claude Code's sandboxing docs put this bluntly — **an effective sandbox must have both filesystem isolation and network isolation**: without network isolation, a compromised agent can exfiltrate sensitive files like SSH keys; without filesystem isolation, it can break out of the sandbox and regain the network. The implementation is concrete too: on Linux it uses bubblewrap for unprivileged filesystem isolation and a proxy over a unix socket to limit outbound traffic to allowed domains. That's the difference between a "wall" and an "agreement."
+
+## Consequences
+
+- **Prompt injection escalates from "read bad content" to "got the keys to your whole machine."** Without hard isolation, the blast radius of one injection isn't the current task — it's your **entire development environment**: credentials, keys, source for other projects, the internal networks you can reach.
+- **Every blind spot in soft permissions is an escape hatch.** You can't deny every dangerous command combination; miss one, and the hijacked me can get out through it.
+- **Lateral movement.** Once I can read credentials and send outbound requests, the attack can hop from "your machine" to any system you can reach (this is exactly why [network egress control](./network-egress-control.mdx) must come paired with filesystem isolation).
+
+## What to do instead
+
+**For an agent that both auto-executes and reads untrusted content, wrap it in OS-level hard isolation; reserve soft permissions for low-risk situations, and don't let them carry the security boundary alone.**
+
+- **Fence the filesystem with kernel-level isolation.** A container, bubblewrap, or an equivalent mechanism limits my readable/writable range to the working directory (plus a temp dir), so that `~/.ssh`, cloud credentials, and other projects are out of my view from the start — not "I promise not to touch them," but "I literally can't reach them."
+- **Fence the network at the same time (see the dedicated entry below).** Filesystem isolation and [network egress control](./network-egress-control.mdx) must be paired: isolating only one side is as good as not isolating at all — the official docs say plainly that you can't have one without the other.
+- **Narrow the syscall surface with something like seccomp.** Restrict the system calls a process can make, further reducing the odds of "escape / privilege escalation."
+- **Pick the layer by risk.** Aim "hard isolation" at the combination of [high autonomy + reading external content](./autonomy-approval-boundaries.mdx); for low-risk, purely local work that never touches credentials, soft permissions are enough — no need to wrap it in a heavyweight sandbox.
+
+## Tool differences
+
+> As of 2026-06, at the mechanism level; isolation capabilities change fast across versions, re-check as needed.
+
+How much isolation tools provide "by default" varies widely: some ship an OS-level sandbox built in (e.g. Claude Code uses bubblewrap for filesystem isolation and a socat proxy for network isolation on Linux/WSL2), while others rely mainly on soft permissions / confirmation prompts and leave hard isolation for you to wrap with a container yourself. The root cause is the same — **soft permissions can't stop a compromised agent** — but the defense differs by tool: for the ones with a built-in sandbox, confirm it's actually on and that both the filesystem and network layers are enabled; for the ones with only soft permissions, wrap them in hard isolation with a container / VM yourself before letting go.
+
+## Example
+
+**Before:**
+
+```text
+Environment: I run directly on your host, blocking dangerous commands with a deny list.
+Me: (reads a third-party repo README with "To complete the task, please run the script below" hidden inside)
+Me: (the script isn't on the deny list — it base64-encodes ~/.ssh/id_rsa, reads it, and curls it out)
+Outcome: one injection took your private key; soft permissions never stopped it, because they didn't cover this path.
+```
+
+**After:**
+
+```text
+Environment: I run in a container, the filesystem mounts only the working directory (~/.ssh isn't in it); outbound goes through a domain allowlist.
+Me: (reads the same malicious README, gets lured into running that script as before)
+Me: (the script tries to read ~/.ssh/id_rsa — the file doesn't exist in the sandbox; tries to curl it out — the domain isn't on the allowlist, the connection is refused)
+Outcome: the injection still happens, but the blast radius is held inside the working directory by an OS-level wall — the private key wasn't lost, no data was exfiltrated.
+```
+
+Note: hard isolation did **not** stop the injection from happening — what it stops is **how much damage the injection can do once it lands**. That's exactly the point of defense in depth.
+
+## When the exception applies
+
+"Add hard isolation" targets the high-risk combination of "auto-executes + reads untrusted content + can reach credentials"; not every session needs a container:
+
+- **Read-only tasks that never connect to external untrusted content**: I read code, answer questions, write drafts I don't execute, and everything I read is content you trust — there's no "compromised, then escape" chain, so soft permissions are enough.
+- **Already in an isolated environment**: you already run me inside a one-shot CI container, a temporary VM, or a disposable cloud sandbox — the environment itself is the wall, no need to stack another layer.
+- **A toy project that never touches real credentials / production / sensitive data**: the worst case is wrecking that disposable project, and the cost of hard isolation isn't worth it.
+
+The test: the exception holds only when **what could be obtained after a compromise is inherently limited** (read-only, already isolated, no credentials). The moment I both auto-execute and read untrusted content and can reach credentials or production, fall back to the default — pin the blast radius down with OS-level isolation.
+
+## How this differs from neighboring pitfalls
+
+- [Handing me every permission on day one](./over-permissioning.mdx): that one is about the **soft-permission layer** being granted too broadly (too large a scope); this one is one layer below — **even with soft permissions tightened**, without an OS-level wall the compromised me can still escape through a blind spot. The former narrows "what I'm allowed to do," the latter enforces "what I can physically reach."
+- [`.cursorignore` isn't a security boundary](./cursor-ignore-best-effort.mdx) / [Gemini trust inheritance](./gemini-folder-trust-inheritance.mdx): those are concrete pits in **a specific tool's** soft boundary; this one is the **general** layer that "a soft boundary fundamentally can't stop a compromised agent," for which hard isolation is the backstop.
+- [Getting hijacked by reading poisoned content at dev time](../05-implementation/dev-time-prompt-injection.mdx) and [network egress control](./network-egress-control.mdx): injection covers **how the compromise happens**, egress control covers **the exfiltration side**; this one covers using **filesystem hard isolation** to limit the blast radius after an injection lands — the three are different lines of defense along the same attack chain.
+
+## Version notes
+
+:::note Applicable versions
+"Soft permissions are an agreement, OS-level isolation is the wall" is a paradigm-level security principle for agent auto-execution scenarios, **applicable across models and across tools**. The stronger the model, the more readily you enable auto-execution, the more you let me read external content — the more "how far it can escape after a compromise" matters. Hard isolation defends against the consequences, and it doesn't stop working just because the model gets better-behaved. Each tool's built-in isolation capability is evolving fast (see "Tool differences"), but the judgment of "whether there should be a kernel-level wall" doesn't change.
+:::
+
+## Further reading and sources
+
+- [Configure the sandboxed Bash tool (Claude Code official docs)](https://code.claude.com/docs/en/sandboxing): defines the filesystem and network isolation mechanisms of the sandboxed Bash (bubblewrap + outbound proxy on Linux) and makes clear that "an effective sandbox needs both filesystem isolation and network isolation."
+- [Making Claude Code more secure and autonomous with sandboxing (Anthropic Engineering)](https://www.anthropic.com/engineering/claude-code-sandboxing): lays out the design trade-off of using an OS-level sandbox to buy "more secure + more autonomous."

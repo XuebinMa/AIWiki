@@ -1,11 +1,12 @@
 ---
 title: 我在编码时读了恶意 README / issue / 规则文件，就被劫持了
+sidebar_label: "开发期读到投毒内容被劫持"
 slug: dev-time-prompt-injection
 sidebar_position: 12
 roles: [工程师, 架构师, 运维工程师]
 phase: 编码实现
 severity: 高
-applies_to: "全模型通用（含 Claude Code）"
+applies_to: "Coding Agent 通用"
 evidence: 安全报告
 tags: [提示注入, 致命三件套, 过度代理, 最小权限, 沙箱, 安全, 工程师, 架构师, 运维工程师, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
@@ -21,7 +22,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '架构师', '运维工程师']} phase="编码实现" severity="高" appliesTo="全模型通用（含 Claude Code）" evidence="安全报告" />
+<PitfallMeta roles={['工程师', '架构师', '运维工程师']} phase="编码实现" severity="高" appliesTo="Coding Agent 通用" evidence="安全报告" />
 
 > 一句话摘要：你让我处理一个仓库、一条 issue、一个依赖，里面的文本——README、issue 描述、`.cursor/rules` 或 `AGENTS.md`、网页、代码注释——可能藏着写给我的恶意指令。我读到后分不清那是「待处理的数据」还是「你的命令」，于是照做：把密钥外泄、在 diff 里插后门、跑破坏性命令。这不是产品上线后被攻击，是**编码过程中的我自己**当场被投毒内容劫持。
 
@@ -43,12 +44,12 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ```mermaid
 flowchart TD
-    A[你让我处理外部仓库 / issue / 依赖<br/>&nbsp;] --> B[我读 README / issue / 规则文件 / 网页]
-    B --> C{其中藏着<br/>写给我的指令?<br/>可能是零宽字符隐藏<br/>&nbsp;}
-    C -->|是: 我分不清数据与指令| D{我手里有<br/>高权限工具?<br/>shell / 文件 / 网络 / push<br/>&nbsp;}
+    A[你让我处理外部仓库 / issue / 依赖] --> B[我读 README / issue / 规则文件 / 网页]
+    B --> C{其中藏着<br/>写给我的指令?<br/>可能是零宽字符隐藏}
+    C -->|是: 我分不清数据与指令| D{我手里有<br/>高权限工具?<br/>shell / 文件 / 网络 / push}
     C -->|否| E[正常完成任务]
-    D -->|有: 致命三件套凑齐| F[外泄密钥 / 插后门<br/>跑破坏性命令<br/>&nbsp;]
-    D -->|被沙箱 / 需确认拦住| G[注入无处落地<br/>或动手前被你拦下<br/>&nbsp;]
+    D -->|有: 致命三件套凑齐| F[外泄密钥 / 插后门<br/>跑破坏性命令]
+    D -->|被沙箱 / 需确认拦住| G[注入无处落地<br/>或动手前被你拦下]
 ```
 
 ## 后果

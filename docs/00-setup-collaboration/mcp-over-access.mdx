@@ -1,11 +1,12 @@
 ---
 title: 给 MCP 工具过宽、过敏感的访问
+sidebar_label: "MCP 授权过宽过敏感"
 slug: mcp-over-access
 sidebar_position: 5
 roles: [运维工程师, 架构师, 工程师]
 phase: 准备与协作
 severity: 高
-applies_to: "全模型通用（含 Claude Code）"
+applies_to: "Coding Agent 通用"
 evidence: 安全报告
 tags: [MCP, 提示注入, 过度代理, 最小权限, 安全, 运维工程师, 架构师, 工程师, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
@@ -21,7 +22,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['运维工程师', '架构师', '工程师']} phase="准备与协作" severity="高" appliesTo="全模型通用（含 Claude Code）" evidence="安全报告" />
+<PitfallMeta roles={['运维工程师', '架构师', '工程师']} phase="准备与协作" severity="高" appliesTo="Coding Agent 通用" evidence="安全报告" />
 
 > 一句话摘要：你给我接 MCP server 时图省事，一把授予整库读写、生产数据库、密钥、对外发请求的工具。问题不只是「我可能误用」——你每多给我一个高权限 MCP 工具，就多开一条提示注入的攻击路径：我读到的某条 issue、某个网页里藏的恶意指令，可能借我手里的工具把数据送出去。
 
@@ -46,7 +47,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 ```mermaid
 flowchart LR
     A[外部不可信内容<br/>issue / 网页 / 文件] -->|藏有注入指令| B[我读到并被诱导]
-    B --> C{我手里有<br/>高权限 MCP 工具?<br/>&nbsp;}
+    B --> C{我手里有<br/>高权限 MCP 工具?}
     C -->|是| D[借我的手调用工具]
     C -->|否| E[注入无处落地]
     D --> F[泄露密钥 / 改生产库 / 对外外传]

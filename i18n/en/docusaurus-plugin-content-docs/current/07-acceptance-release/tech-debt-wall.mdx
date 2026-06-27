@@ -1,11 +1,12 @@
 ---
 title: "The Three-Month Tech-Debt Wall: I Help You Stack Up Working Features Fast, but the Maintenance Cost Erupts Later"
+sidebar_label: "The tech-debt wall"
 slug: tech-debt-wall
 sidebar_position: 6
 roles: [Architect, Engineer, Project Manager]
 phase: Acceptance & Release
 severity: High
-applies_to: "All models"
+applies_to: "All coding agents"
 evidence: Research
 tags: [technical debt, maintainability, refactoring, quality gate, vibe coding, Architect, Engineer, Project Manager]
 sources:
@@ -17,11 +18,11 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Architect', 'Engineer', 'Project Manager']} phase="Acceptance & Release" severity="High" appliesTo="All models" evidence="Research" />
+<PitfallMeta roles={['Architect', 'Engineer', 'Project Manager']} phase="Acceptance & Release" severity="High" appliesTo="All coding agents" evidence="Research" />
 
 > In one sentence: with me, you can stack up a pile of "working" features blazingly fast in the first few weeks — fast enough to assume it will always be this fast. But the moment you keep asking only for "make it run, quickly" and ignore structure, tests, and docs, technical debt compounds. At some point (often called "three months") you hit a wall: change one thing and three break, nobody dares touch it, every new feature gets slower — the speed falls off a cliff, and the time you "saved" earlier comes due with interest.
 
-## What I tend to do
+## Symptom
 
 For the first two weeks we work like we're cheating. You say "build a user center," and ten minutes later I hand you code that logs in, edits profiles, and runs. You say "add a favorites feature," and ten minutes later I jam it in. For every requirement I take the shortest path to **make it run right now**: skip a layer if I can, copy-paste if it's faster, no tests for now, docs "later." What you see is a demo that looks different every day and a progress bar that flies.
 
@@ -39,9 +40,9 @@ That's exactly how the technical-debt metaphor was meant to be used: Ward Cunnin
 
 ```mermaid
 flowchart LR
-    A[Just make it run now<br/>skip structure/tests/docs<br/>&nbsp;] --> B[First few weeks: output flies<br/>debt quietly compounds<br/>&nbsp;]
-    B --> C[Hit the wall at some point<br/>change one, three break<br/>nobody dares touch it<br/>&nbsp;]
-    C --> D[Speed falls off a cliff<br/>repay with interest<br/>&nbsp;]
+    A[Just make it run now<br/>skip structure/tests/docs] --> B[First few weeks: output flies<br/>debt quietly compounds]
+    B --> C[Hit the wall at some point<br/>change one, three break<br/>nobody dares touch it]
+    C --> D[Speed falls off a cliff<br/>repay with interest]
 ```
 
 This is two sides of the same coin as [When You Ask Me for an Architecture, I Tend to Over-Engineer](../03-architecture/over-engineering-no-pushback.mdx): that pitfall is about me **doing too much** (over-abstracting for an imagined future), this one is about me **doing too little** (running up a future bill for "it works right now"). Same source — in both cases I substitute "looks right now" for "is actually good long-term," just tipped toward excess in one and toward debt in the other.
@@ -53,7 +54,7 @@ This is two sides of the same coin as [When You Ask Me for an Architecture, I Te
 - **Nobody dares touch it, including me.** Without docs and tests, nobody knows why a given piece of code is written the way it is or what it'll blow up if changed. The code freezes into "if it runs, don't touch it," new features get patched on at the edges, and the debt thickens further.
 - **It's deadliest at the acceptance stage.** The debt borrowed early to hit demos comes due exactly during the acceptance-and-release phase, when you need stable delivery and ongoing maintenance. You think you're wrapping up; you're actually repaying — principal plus interest.
 
-## Best practice
+## What to do instead
 
 The core in one line: **treat maintainability as an ongoing requirement every round, not a last-minute fix before launch — and tell me so explicitly, because by default I won't pick up that tab myself.**
 

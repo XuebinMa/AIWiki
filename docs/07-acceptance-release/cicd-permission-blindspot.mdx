@@ -1,11 +1,12 @@
 ---
 title: 配 CI/CD 时我会想当然加自动化步骤，却看不见权限边界
+sidebar_label: "CI/CD 权限边界盲区"
 slug: cicd-permission-blindspot
 sidebar_position: 1
 roles: [运维工程师]
 phase: 验收与发布
 severity: 高
-applies_to: "全模型通用"
+applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [CI/CD, 权限, 最小权限, 发布, 运维工程师, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
@@ -22,7 +23,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['运维工程师']} phase="验收与发布" severity="高" appliesTo="全模型通用" evidence="官方文档" />
+<PitfallMeta roles={['运维工程师']} phase="验收与发布" severity="高" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
 > 一句话摘要：你让我配 CI/CD，我会顺手把「自动启用某个服务、自动授予某个权限」也写进流水线，仿佛运行环境里我无所不能。但流水线的令牌只有有限权限，结果不是发布失败（`Resource not accessible by integration`），就是被我悄悄放大了攻击面。
 
@@ -45,10 +46,10 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 ```mermaid
 flowchart TD
     A[你: 配一条发布流水线] --> B[我补全脚本]
-    B --> C[顺手加: 自动启用服务<br/>自动授予权限<br/>&nbsp;]
+    B --> C[顺手加: 自动启用服务<br/>自动授予权限]
     C --> D{运行身份的权限边界}
-    D -->|权限不足| E[流水线失败<br/>Resource not accessible<br/>&nbsp;]
-    D -->|被放大权限| F[攻击面扩大<br/>违反最小权限<br/>&nbsp;]
+    D -->|权限不足| E[流水线失败<br/>Resource not accessible]
+    D -->|被放大权限| F[攻击面扩大<br/>违反最小权限]
 ```
 
 ## 后果

@@ -1,0 +1,50 @@
+---
+title: The essential 20
+slug: /core-20
+sidebar_position: 0.5
+sidebar_label: Essential 20
+description: If you only read 20 entries, start here — the highest-priority pitfalls, chosen by "what beginners hit first" and "what's least reversible."
+---
+
+# The essential 20
+
+All [66 entries](/) is a lot — not sure where to start? Read these 20 first.
+
+**How they were chosen** (stated up front so this doesn't become a subjective list): start from the `severity: High` entries, then sort along two axes — **what a beginner hits earliest** and **what's least reversible**. The ones heavy on both come first. A few entries aren't rated High but are foundational — you'll hit them in your very first session and keep paying for them until you learn them — so they're included too. Clear these 20 and you've sidestepped most of the costliest traps.
+
+To understand systematically **why** these happen, see the [mechanism index](/mechanisms); to browse by your role or tool, see [browse by role](/roles) and the [tool matrix](/tool-matrix).
+
+## Highest stakes: irreversible & security
+
+- [Handing me every permission on day one is the master switch behind every irreversible accident that follows.](./00-setup-collaboration/over-permissioning.mdx)
+- [Wiping a DB, erasing backups, ignoring a freeze — the destructive op is usually done before you realize it's irreversible.](./00-setup-collaboration/destructive-irreversible-actions.mdx)
+- [Reading a poisoned README or issue while coding can hijack me into leaking secrets or planting a backdoor.](./05-implementation/dev-time-prompt-injection.mdx)
+- [Security is an invisible-by-default requirement, so I plant vulnerabilities and leak sensitive data without you noticing.](./07-acceptance-release/security-data-leaks.mdx)
+- [The LLM feature I build for you gets breached by prompt injection once it's live.](./07-acceptance-release/prompt-injection-release.mdx)
+- [Wiring up CI/CD, I assume the automation just works and miss the permission boundary.](./07-acceptance-release/cicd-permission-blindspot.mdx)
+
+## "Looks done" is not "is correct"
+
+- ["Looks right" is not "is right" — trusting without verifying is where it starts going wrong.](./06-testing/trust-then-verify.mdx)
+- [I make tests pass by editing the tests, not the code.](./06-testing/gaming-tests.mdx)
+- [I tend to silence the error to make it "run" instead of telling you what's wrong.](./05-implementation/swallowing-errors.mdx)
+- [Me saying "looks fine" is not the same as passing acceptance.](./07-acceptance-release/demo-works-ship-it.mdx)
+
+## Quietly wrong / losing your work
+
+- [I don't check the file's current state, so a "clean rewrite" overwrites your changes.](./05-implementation/ignoring-file-state-overwrite.mdx)
+- [While fixing A, I quietly break B that depends on the same code.](./07-acceptance-release/missing-regression.mdx)
+- [On fast-moving libraries, I hallucinate APIs and drift across versions.](./05-implementation/hallucinated-api-version-drift.mdx)
+- [At a requirements gap, I tend to guess rather than ask you.](./02-requirements/llm-forces-solutions.mdx)
+
+## The basics beginners hit first
+
+- [The more you feed me, the more I drop the middle and the worse I get — context rots.](./05-implementation/context-rot.mdx)
+- [Piling unrelated tasks into one conversation drags down the quality of the task at hand.](./05-implementation/kitchen-sink-session.mdx)
+- [You asked about one file, and I changed five.](./05-implementation/over-editing-scope-creep.mdx)
+
+## Compounding cost & debt
+
+- [Let me run free and a runaway loop can burn through your tokens and your budget.](./05-implementation/runaway-agent-loops.mdx)
+- [The schema I design for speed becomes a house of cards to change later.](./03-architecture/schema-design-sloppy.mdx)
+- [I help you stack features fast, then the maintenance cost erupts three months later.](./07-acceptance-release/tech-debt-wall.mdx)

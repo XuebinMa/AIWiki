@@ -179,12 +179,13 @@ Claude Code · Cursor · GitHub Copilot · Codex CLI · Gemini CLI · CLAUDE.md 
 ### applies_to 常用说法
 
 > 自由文本，非严格枚举；标注一条误区「跨哪些 AI 系统」。轴是**工具 / agent**（见下「tool」），不是模型。
+> 旧值「全模型通用 / All models」已弃用——按误区是 **LLM 级**（纯聊天也会犯）还是 **coding-agent 级**（需代码生成 + 工具 + 自动执行）拆进「通用 LLM / Coding Agent 通用」。
 
 | 中文 | English |
 |------|---------|
 | Claude Code 全版本 | All Claude Code versions |
+| Claude Code（支持 /rewind 的版本效果最佳） | Best results on versions that support /rewind |
 | Coding Agent 通用 | All coding agents |
-| 全模型通用 | All models |
 | 通用 LLM | All LLMs |
 | Gemini CLI 特有 | Gemini CLI only |
 | Cursor 特有 | Cursor only |

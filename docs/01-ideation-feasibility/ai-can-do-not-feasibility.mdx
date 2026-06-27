@@ -1,11 +1,12 @@
 ---
 title: 我说「能做」时，说的是技术上能实现，不是在你的约束下可行
+sidebar_label: "把「能做」当成「可行」"
 slug: ai-can-do-not-feasibility
 sidebar_position: 3
 roles: [项目经理, 架构师]
 phase: 灵感与可行性
 severity: 高
-applies_to: "Claude Code 全版本"
+applies_to: "Coding Agent 通用"
 evidence: 社区案例
 tags: [可行性, 技术选型, 权衡, 过度设计, 项目经理, 架构师]
 sources:
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['项目经理', '架构师']} phase="灵感与可行性" severity="高" appliesTo="Claude Code 全版本" evidence="社区案例" />
+<PitfallMeta roles={['项目经理', '架构师']} phase="灵感与可行性" severity="高" appliesTo="Coding Agent 通用" evidence="社区案例" />
 
 > 一句话摘要：你问「这个能不能做」，我大概率答「能」——但我说的是「技术上能实现」，不是「在你的预算、时延、合规、团队和数据约束下可行」。把我那句乐观的「能做」直接当成可行性结论，你就跳过了真正决定成败的那些约束。
 
@@ -41,7 +42,7 @@ flowchart TD
     A[你问：这个能不能做] --> B[我默认回答：技术上是否存在实现路径]
     B --> C[几乎永远为真：总有一条路径]
     C --> D[输出一句乐观的能做]
-    A -. 你真正想问的 .-> E{在你的约束下是否可行<br/>&nbsp;}
+    A -. 你真正想问的 .-> E{在你的约束下是否可行}
     E --> F[预算 / 时延 / 合规 / 团队 / 数据 / 运维]
     F -. 不在我的上下文里 .-> D
 ```

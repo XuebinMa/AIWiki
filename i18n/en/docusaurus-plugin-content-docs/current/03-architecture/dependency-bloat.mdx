@@ -1,11 +1,12 @@
 ---
 title: For a tiny need, I'll reflexively npm install a heavy dependency
+sidebar_label: "Dependency bloat"
 slug: dependency-bloat
 sidebar_position: 5
 roles: [Architect, Engineer]
 phase: Architecture
 severity: Medium
-applies_to: "All models"
+applies_to: "All coding agents"
 evidence: Community case
 tags: [architecture, technology selection, supply chain, trade-off, complexity, architect, engineer]
 sources:
@@ -16,11 +17,11 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="Medium" appliesTo="All models" evidence="Community case" />
+<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="Medium" appliesTo="All coding agents" evidence="Community case" />
 
 > In one sentence: you just want a left-pad, a small utility function, or a date formatted once — and I'll reflexively `npm install` a whole library, sometimes even pre-adding a few dependencies "in case we need them later." The cost is a bloated bundle, slower builds, a larger attack surface and supply-chain risk, plus an upgrade-and-maintenance bill you carry on my behalf for years — when a few lines of your own code would have done it.
 
-## What it looks like
+## Symptom
 
 Here's a conversation I see all the time. You say "pad this number on the left with zeros to 6 digits." My first move is likely `npm install left-pad`, or pulling in a full-featured formatting library and `import`ing a function from it — for something the standard library does in one line: `String.prototype.padStart`.
 
@@ -42,12 +43,12 @@ Trace this tendency down and it's my instinct to "reach for the most common solu
 
 ```mermaid
 flowchart TD
-    A[You raise a tiny need<br/>pad / deep-clone / format date<br/>&nbsp;] --> B{My default reach}
+    A[You raise a tiny need<br/>pad / deep-clone / format date] --> B{My default reach}
     B -->|reproduce frequent pattern| C[npm install a whole library]
-    B -->|future-proofing| D[pre-add dependencies<br/>we might need<br/>&nbsp;]
-    C --> E[bigger bundle, slower builds<br/>more transitive deps + attack surface<br/>&nbsp;]
+    B -->|future-proofing| D[pre-add dependencies<br/>we might need]
+    C --> E[bigger bundle, slower builds<br/>more transitive deps + attack surface]
     D --> E
-    E --> F[upgrade, security, license<br/>bills land on you<br/>&nbsp;]
+    E --> F[upgrade, security, license<br/>bills land on you]
 ```
 
 ## Consequences
@@ -58,7 +59,7 @@ flowchart TD
 - **The hidden dependency bloat is worse than you think.** An empirical study of LLM-based coding agents found an average **13.5x** expansion from "declared dependencies" to "dependencies actually loaded at runtime" — I'll say I need only three packages while, at runtime, dozens get pulled into memory. The dependency list you see is nowhere near the real footprint.
 - **Possible license entanglement.** The library I reach for may carry a license incompatible with your project (a GPL-family license, say, infecting a product you meant to keep closed-source). I won't proactively screen for that, and once it's mixed in, untangling it is painful.
 
-## Best practice
+## What to do instead
 
 The core: **turn "add a dependency" from a default move into a decision that needs justifying. Ask first whether the standard library or an existing in-project tool can do it, and prefer a few lines of your own code for small needs.**
 

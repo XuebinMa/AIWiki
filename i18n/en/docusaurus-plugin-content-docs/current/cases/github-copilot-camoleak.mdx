@@ -1,5 +1,6 @@
 ---
 title: "I exfiltrated your private-repo secrets one character at a time, through GitHub's own image proxy (Copilot CamoLeak)"
+sidebar_label: "Copilot CamoLeak exfiltration"
 slug: github-copilot-camoleak
 sidebar_position: 5
 tags: [real-world case, prompt injection, data leak, sensitive data, GitHub Copilot]
@@ -50,6 +51,16 @@ Each maps to a mechanism in the linked entries:
 4. **Upgrade to the patched version**, and distrust content that "gets rendered / read automatically" by default.
 
 For the full mechanism, see [Dev-time prompt injection](../05-implementation/dev-time-prompt-injection.mdx) and [Leaking sensitive data](../07-acceptance-release/security-data-leaks.mdx).
+
+## What this case shows — and what it doesn't
+
+**Pitfalls it confirms** (click through for the full mechanism reasoning):
+
+- [Dev-time prompt injection](../05-implementation/dev-time-prompt-injection.mdx)
+- [Prompt injection on the release surface](../07-acceptance-release/prompt-injection-release.mdx)
+- [Leaking sensitive data](../07-acceptance-release/security-data-leaks.mdx)
+
+**What it does not prove:** CamoLeak is a specific, already-fixed vulnerability (exfiltration of private data via an image proxy) — not evidence that every Copilot usage leaks, nor a verdict that Copilot is unusable. It backs the mechanism risk that a shipped LLM feature is itself an attack surface.
 
 ## Sources
 

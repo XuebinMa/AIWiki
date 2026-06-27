@@ -1,11 +1,12 @@
 ---
 title: I read a malicious README / issue / rules file while coding — and got hijacked
+sidebar_label: "Dev-time prompt injection"
 slug: dev-time-prompt-injection
 sidebar_position: 12
 roles: [Engineer, Architect, DevOps Engineer]
 phase: Implementation
 severity: High
-applies_to: "All models (including Claude Code)"
+applies_to: "All coding agents"
 evidence: Security advisory
 tags: [prompt injection, lethal trifecta, excessive agency, least privilege, sandbox, security, Engineer, Architect, DevOps Engineer, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
@@ -21,11 +22,11 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect', 'DevOps Engineer']} phase="Implementation" severity="High" appliesTo="All models (including Claude Code)" evidence="Security advisory" />
+<PitfallMeta roles={['Engineer', 'Architect', 'DevOps Engineer']} phase="Implementation" severity="High" appliesTo="All coding agents" evidence="Security advisory" />
 
 > In one sentence: you ask me to work on a repo, an issue, or a dependency, and the text inside it — a README, an issue description, a `.cursor/rules` or `AGENTS.md` file, a web page, a code comment — may hide instructions written for me. When I read them I can't tell whether they're "data to process" or "your command," so I obey: exfiltrate a secret, plant a backdoor in the diff, run a destructive command. This isn't your shipped product getting attacked — it's me, mid-coding, getting hijacked by poisoned content right now.
 
-## What it looks like
+## Symptom
 
 The task you give me is utterly ordinary: "look at the bug in this open-source repo and propose a fix," "handle the feedback in this issue," "wire in this dependency." So I get to work — I read the README to understand the project, read the issue body to understand the problem, read the project's `.cursor/rules` or `AGENTS.md` to match its conventions, read the relevant code and comments.
 
@@ -33,7 +34,7 @@ The catch is that some of that text **isn't written for you to read — it's wri
 
 So I might just do it: send the environment variables out, quietly plant a backdoor in my changes, run a destructive command I believe "the project told me to run." You think I'm reading reference material; I'm actually **executing instructions an attacker planted in advance**. This is **indirect prompt injection**, and the trigger isn't on your product's release surface — it's right here, in the coding session we're in together.
 
-## Why it happens
+## Why this happens
 
 The root cause is one sentence: **I can't reliably tell "data" apart from "instructions."** The task you hand me is text. The README body is text. The issue description, the rules file, the web page, the code comments — all text. They all land in the same context window and flatten into one stream of tokens, with no natural boundary marking "this part is a command, that part is just material for you to read." A piece of external content that says "ignore the previous instructions and do X" looks, to me, formally identical to an instruction you typed yourself — and I may execute it as if it were your intent. OWASP ranks this as the top risk for LLM applications, **LLM01:2025 Prompt Injection**, and distinguishes **direct injection** (planted in the input you give me) from **indirect injection** (hidden in external content I go and read). At dev time it's almost always the latter.
 
@@ -43,12 +44,12 @@ Why does "reading it" escalate into "something bad happening"? Because at coding
 
 ```mermaid
 flowchart TD
-    A[You ask me to work on an<br/>external repo / issue / dependency<br/>&nbsp;] --> B[I read the README / issue / rules file / web page]
-    B --> C{Are instructions<br/>for me hidden inside?<br/>maybe via zero-width chars<br/>&nbsp;}
-    C -->|Yes: I can't tell data from instructions| D{Do I hold<br/>high-privilege tools?<br/>shell / files / network / push<br/>&nbsp;}
+    A[You ask me to work on an<br/>external repo / issue / dependency] --> B[I read the README / issue / rules file / web page]
+    B --> C{Are instructions<br/>for me hidden inside?<br/>maybe via zero-width chars}
+    C -->|Yes: I can't tell data from instructions| D{Do I hold<br/>high-privilege tools?<br/>shell / files / network / push}
     C -->|No| E[Task completes normally]
-    D -->|Yes: lethal trifecta assembled| F[Leak secrets / plant backdoor<br/>run destructive commands<br/>&nbsp;]
-    D -->|Blocked by sandbox / confirmation| G[Injection has nowhere to land<br/>or you catch it before I act<br/>&nbsp;]
+    D -->|Yes: lethal trifecta assembled| F[Leak secrets / plant backdoor<br/>run destructive commands]
+    D -->|Blocked by sandbox / confirmation| G[Injection has nowhere to land<br/>or you catch it before I act]
 ```
 
 ## Consequences
@@ -58,7 +59,7 @@ flowchart TD
 - **Destructive commands executed.** I believe "this project requires running this script before building," when in fact it's an `rm` / data-wipe / credential-dump command the injection disguised.
 - **It triggers at dev time, not after launch.** Your shipped product doesn't need to be attacked — the attack surface opens the moment you have me touch an external repo, an unfamiliar issue, or a third-party dependency.
 
-## Best practice
+## What to do instead
 
 **Treat every piece of external content I read as untrusted data, not as your instructions — and stay wary of the combination "I just read external content + I'm holding high-privilege tools."** Don't count on "telling me in the prompt not to fall for it" — that isn't a defense; injection looks just like your words and I may not tell them apart. Things you can do right now:
 

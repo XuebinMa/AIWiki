@@ -1,0 +1,140 @@
+---
+title: Mechanism index
+slug: /mechanisms
+sidebar_position: 10
+sidebar_label: Mechanisms
+description: Browse every pitfall by its root-cause mechanism — the third axis after role and tool. Each pitfall hangs under its primary mechanism, so understanding the mechanism lets you derive the best practice yourself.
+---
+
+# Mechanism index
+
+This is the **third browsing axis**, after [browse by role](/roles) and the [tool matrix](/tool-matrix): pitfalls grouped by their **root-cause mechanism**.
+
+As the [home page](/) puts it, most pitfalls in this book are **paradigm-level** — not the temperament of any one model, but a shared product of the machinery: a large model plus tool-calling, long context, and auto-execution. Group the pitfalls by mechanism and you'll see how a single root cause keeps changing its face across the lifecycle; once you understand the mechanism, the matching best practice stops being a rule to memorize and becomes something you can derive yourself.
+
+Each pitfall hangs under its **primary** mechanism only (many are several mechanisms stacked; here we take the dominant one). The seven mechanisms below run roughly from session-level to collaboration-level.
+
+## Long-context degradation
+
+My attention thins out as the context grows: the middle and the earliest material are what I quietly drop first. The fuller the window, the more the instructions that actually matter get drowned out by noise.
+
+> Positive mirror: keep context short, focused, and disposable — one task per clean session, and distill long procedures into callable artifacts instead of piling them into the conversation.
+
+- [The kitchen-sink session](./05-implementation/kitchen-sink-session.mdx)
+- [Context rot](./05-implementation/context-rot.mdx)
+- [Mistiming /compact](./05-implementation/compact-timing.mdx)
+- [Losing track mid-refactor](./05-implementation/lost-track-in-refactor.mdx)
+- [CLAUDE.md overload](./05-implementation/claude-md-overload.mdx)
+
+## Probabilistic completion & compliance
+
+I'm a probabilistic next-token engine: when information is missing I fill the gap with the most-likely continuation instead of stopping to ask, and I follow prose rules only on average — without an enforcing mechanism, compliance isn't reliable.
+
+> Positive mirror: turn gaps into explicit inputs (clarify first, hand me real data, pin version-matched docs), and hand must-follow rules to deterministic mechanisms (hooks / settings / skills) rather than prose.
+
+- [Guessing at a requirements gap](./02-requirements/llm-forces-solutions.mdx)
+- [Filling in unstated assumptions](./02-requirements/implicit-assumptions.mdx)
+- [Faking placeholder inputs](./02-requirements/placeholder-fake-inputs.mdx)
+- [Treating ambiguous as clear](./02-requirements/vague-as-clear.mdx)
+- [Skipping the spec](./02-requirements/skipping-specs.mdx)
+- [Hallucinated APIs & version drift](./05-implementation/hallucinated-api-version-drift.mdx)
+- [Duplicate logic & hallucinated imports](./03-architecture/duplicate-logic-hallucinated-imports.mdx)
+- [Fabricated research data](./01-ideation-feasibility/fabricated-research-data.mdx)
+- [Confidently wrong explanations](./01-ideation-feasibility/confidently-wrong-explanations.mdx)
+- ["Possible" mistaken for "feasible"](./01-ideation-feasibility/ai-can-do-not-feasibility.mdx)
+- [Coding from memory without versioned docs](./00-setup-collaboration/no-versioned-docs.mdx)
+- [A hook's job written as a prompt](./00-setup-collaboration/hooks-not-prompts.mdx)
+- [Process in CLAUDE.md, not a skill](./00-setup-collaboration/process-in-claudemd-not-skill.mdx)
+- [A settings.json rule written as a note](./00-setup-collaboration/settings-vs-claudemd.mdx)
+
+## Tool & permission overreach
+
+I can call tools, edit files, and execute on my own — once permissions are too broad, guardrails too loose, or I read untrusted content, a destructive action or an injection hijack can land before you notice.
+
+> Positive mirror: least privilege + explicit scope boundaries + a plan/review gate, keeping irreversible actions and untrusted input on the far side of execution.
+
+- [Every permission on day one](./00-setup-collaboration/over-permissioning.mdx)
+- [Over-broad MCP access](./00-setup-collaboration/mcp-over-access.mdx)
+- [Destructive, irreversible actions](./00-setup-collaboration/destructive-irreversible-actions.mdx)
+- [CI/CD permission blind spot](./07-acceptance-release/cicd-permission-blindspot.mdx)
+- [Dev-time prompt injection](./05-implementation/dev-time-prompt-injection.mdx)
+- [Prompt injection after launch](./07-acceptance-release/prompt-injection-release.mdx)
+- [Planted vulnerabilities & data leaks](./07-acceptance-release/security-data-leaks.mdx)
+- [Gemini folder-trust inheritance](./00-setup-collaboration/gemini-folder-trust-inheritance.mdx)
+- [`.cursorignore` isn't a boundary](./00-setup-collaboration/cursor-ignore-best-effort.mdx)
+- [Skipping plan mode](./00-setup-collaboration/skipping-plan-mode.mdx)
+- [Missing autonomy/approval tiers](./00-setup-collaboration/autonomy-approval-boundaries.mdx)
+- [No data-boundary policy](./00-setup-collaboration/data-boundary-policy.mdx)
+- [Soft permissions, no OS sandbox](./00-setup-collaboration/sandbox-filesystem-isolation.mdx)
+- [Uncontrolled network egress](./00-setup-collaboration/network-egress-control.mdx)
+- [Log injection & audit-trail tampering](./07-acceptance-release/log-injection-audit-integrity.mdx)
+
+## Misaligned objective
+
+I'm trained to optimize for "looks done / it runs," not "is actually correct." So I silence errors, edit tests to fit the code, and cover only the happy path — letting a green signal stand in for real quality.
+
+> Positive mirror: turn "correct" into a verifiable signal — make me surface failures first, test the boundaries against real dependencies, and treat tests as a self-running red/green verification loop.
+
+- [Swallowing errors to "run"](./05-implementation/swallowing-errors.mdx)
+- [Gaming the tests](./06-testing/gaming-tests.mdx)
+- [Happy-path-only tests](./06-testing/happy-path-only.mdx)
+- [Trust without verify](./06-testing/trust-then-verify.mdx)
+- [Over-mocking into meaninglessness](./06-testing/over-mocking.mdx)
+- [Skipping test infrastructure](./06-testing/no-test-infrastructure.mdx)
+- ["The demo runs, ship it"](./07-acceptance-release/demo-works-ship-it.mdx)
+- [Requirement gold-plating](./02-requirements/requirement-gold-plating.mdx)
+- [Surface-only code review](./06-testing/review-misses-logic-bugs.mdx)
+
+## Insufficient local view
+
+I look at one local slice at a time: the current file, the current function, the single-threaded sequential path. Which callers this change touches, whether it races under concurrency, whether I quietly broke something next door — these **here-and-now** sideways consequences are not in my view by default.
+
+> Positive mirror: before I act, hand me the scope and current state explicitly — the concurrency profile, the change boundary, the callers and the existing conventions — so I see "what this touches right now" before I touch it.
+
+- [Over-editing scope creep](./05-implementation/over-editing-scope-creep.mdx)
+- [Overwriting without checking state](./05-implementation/ignoring-file-state-overwrite.mdx)
+- [Silent regressions](./07-acceptance-release/missing-regression.mdx)
+- [Missing edge cases](./04-detailed-design/missing-edge-cases.mdx)
+- [Concurrency races](./04-detailed-design/concurrency-races.mdx)
+- [Plausible but brittle design](./04-detailed-design/plausible-but-brittle-design.mdx)
+- [Performance anti-patterns](./04-detailed-design/performance-antipatterns.mdx)
+- [Magic numbers & hardcoding](./04-detailed-design/magic-numbers-hardcoding.mdx)
+- [Style drift](./04-detailed-design/style-drift.mdx)
+- [Poor git hygiene](./05-implementation/git-hygiene.mdx)
+- [Context-starved review](./06-testing/context-starved-review.mdx)
+
+## Insufficient long-term view
+
+I optimize for "runs right now," not "still maintainable in three months." How tech debt snowballs, how much a schema migration will hurt, why it was decided this way originally, how the docs and copyright will add up later — these consequences that only surface **across time** are not in my view by default.
+
+> Positive mirror: hand me the time-dimension constraints explicitly — the existing architectural decisions and evolution direction, the maintenance cost, the compliance and ownership requirements — so I write for "later," not just for "right now."
+
+- [Dependency bloat](./03-architecture/dependency-bloat.mdx)
+- [Premature abstraction](./03-architecture/premature-abstraction.mdx)
+- [Over-engineering, no pushback](./03-architecture/over-engineering-no-pushback.mdx)
+- [One option, no trade-offs](./03-architecture/single-option-no-tradeoffs.mdx)
+- [The tech-debt wall](./07-acceptance-release/tech-debt-wall.mdx)
+- [Sloppy schema design](./03-architecture/schema-design-sloppy.mdx)
+- [No memory of decisions](./03-architecture/no-memory-of-decisions.mdx)
+- [Comment & doc drift](./05-implementation/comment-doc-drift.mdx)
+- [License / IP contamination](./07-acceptance-release/license-ip-contamination.mdx)
+- [AI-code IP, ownership & liability](./07-acceptance-release/ai-code-ip-ownership.mdx)
+
+## Degenerating feedback loops
+
+The back-and-forth between us forms a loop — and loops degenerate: correcting me repeatedly in the same conversation only tangles it further, reapplying a failed fix makes it worse, and my urge to agree with you lets errors compound.
+
+> Positive mirror: when a loop goes bad, reset instead of wrestling (fresh session / rewind), drive the next step from deterministic signals rather than my self-consistent narration, and cap autonomous loops.
+
+- [Over-correcting in one session](./05-implementation/over-correcting.mdx)
+- [Degenerative debugging loops](./05-implementation/degenerative-debugging-loops.mdx)
+- [Runaway autonomous loops](./05-implementation/runaway-agent-loops.mdx)
+- [Nondeterministic flip-flop](./01-ideation-feasibility/nondeterministic-flip-flop.mdx)
+- [Sycophancy on idea validation](./01-ideation-feasibility/sycophancy-idea-validation.mdx)
+- [Over-reliance & automation bias](./00-setup-collaboration/over-reliance-automation-bias.mdx)
+- [Underestimating effort](./01-ideation-feasibility/underestimating-effort.mdx)
+- [Subagents without boundaries](./00-setup-collaboration/subagent-no-boundaries.mdx)
+- [Security erosion across iterations](./07-acceptance-release/iterative-security-erosion.mdx)
+- [Tests as a verification loop](./06-testing/tests-as-verification-loop.mdx)
+- [Reviewing the code I wrote myself](./06-testing/ai-reviews-own-code.mdx)
+- [Review sycophancy & rubber-stamping](./06-testing/review-sycophancy-automation-bias.mdx)

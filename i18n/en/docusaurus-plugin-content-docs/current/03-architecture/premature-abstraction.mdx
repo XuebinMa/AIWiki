@@ -1,11 +1,12 @@
 ---
 title: The moment two pieces of code look alike, I rush to extract a "generic" framework — abstracting for needs that don't exist yet
+sidebar_label: "Premature abstraction"
 slug: premature-abstraction
 sidebar_position: 6
 roles: [Architect, Engineer]
 phase: Architecture
 severity: Medium
-applies_to: "All models"
+applies_to: "All coding agents"
 evidence: Community case
 tags: [architecture, anti-pattern, complexity, refactoring, Architect, Engineer]
 sources:
@@ -17,11 +18,11 @@ sources:
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 
-<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="Medium" appliesTo="All models" evidence="Community case" />
+<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="Medium" appliesTo="All coding agents" evidence="Community case" />
 
 > In one sentence: the moment two stretches of code look alike, I can't resist extracting a "generic" base class, a config-driven framework, or a plugin system — then adding a row of extension points for "the various kinds of X we might support someday." The trouble is, those abstractions rest on needs I'm guessing at, and I guess wrong a lot. A wrong abstraction is harder to unwind than duplication: whoever comes next has to first understand my design, then work around it.
 
-## What I do
+## Symptom
 
 Here's a scene I see often: you ask me for a function that exports CSV, and a couple of turns later you want Excel too. The second one has barely landed before I "improve" things on my own — I pull out an `AbstractExporter` base class with `format()`, `writeHeader()`, `writeRow()` hooks, add an `ExporterFactory` to dispatch by type, and leave a comment about how "adding PDF or JSON later is just a subclass away."
 
@@ -40,11 +41,11 @@ The common thread: there are only one or two real use cases, yet I'm already des
 ```mermaid
 flowchart TD
     A[A 2nd similar block appears] --> B{My default reaction}
-    B -->|DRY reflex| C[Extract a base class now<br/>config-driven / plugin system<br/>&nbsp;]
-    B -->|Want to look far-sighted| D[Reserve extension points<br/>for imagined future needs<br/>&nbsp;]
-    C --> E[Abstraction rests on a guess<br/>but the sample is only 1-2<br/>&nbsp;]
+    B -->|DRY reflex| C[Extract a base class now<br/>config-driven / plugin system]
+    B -->|Want to look far-sighted| D[Reserve extension points<br/>for imagined future needs]
+    C --> E[Abstraction rests on a guess<br/>but the sample is only 1-2]
     D --> E
-    E --> F[When the need arrives it rarely fits<br/>a wrong abstraction is harder to unwind<br/>&nbsp;]
+    E --> F[When the need arrives it rarely fits<br/>a wrong abstraction is harder to unwind]
 ```
 
 ## Consequences
@@ -54,7 +55,7 @@ flowchart TD
 - **Whoever comes next has to understand my abstraction before they can route around it.** Duplication is "visible dirt" — you glance and know three places must change together. A wrong abstraction is "hidden debt": the next person has to first understand my factory, my strategies, my lifecycle hooks, confirm why they don't apply, and only then act. That detour is baked into every later change.
 - **It masquerades as "doing it right," which makes it harder to correct.** An over-engineered architecture diagram looks exaggerated at a glance, but "extracted a common base class" naturally occupies the moral high ground of "clean code," and few reviewers will question "was this abstraction extracted too early?"
 
-## Best practice
+## What to do instead
 
 The core: **let me write the concrete implementation first, make me state what's actually needed right now, and push the speculative generalization back out.** Abstraction is the harvest after a pattern grows on its own — not the seed you plant at kickoff.
 

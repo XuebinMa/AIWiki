@@ -1,11 +1,12 @@
 ---
 title: 长重构中途，我跟丢了「已经改过哪些文件」
+sidebar_label: "重构中跟丢已改文件"
 slug: lost-track-in-refactor
 sidebar_position: 8
 roles: [工程师, 架构师]
 phase: 编码实现
 severity: 高
-applies_to: "Claude Code 全版本"
+applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [上下文管理, 风格漂移, 重构, 工程师, 架构师]
 sources:
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '架构师']} phase="编码实现" severity="高" appliesTo="Claude Code 全版本" evidence="官方文档" />
+<PitfallMeta roles={['工程师', '架构师']} phase="编码实现" severity="高" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
 > 一句话摘要：跨十几个文件的大重构做到一半，我就记不清改到哪了——哪些文件已改、哪些没改、那个改名是否全仓同步了。于是漏改一处编译挂掉、把已改的又改一遍、前后用了两种不一致的写法。别让我用记忆当待办清单。
 
@@ -43,7 +44,7 @@ flowchart LR
     B --> C[...]
     C --> D[文件8 在改]
     D --> E{上下文窗口}
-    E --> F["已改集合越长越靠前<br/>compaction 抹掉早期决定<br/>&nbsp;"]
+    E --> F["已改集合越长越靠前<br/>compaction 抹掉早期决定"]
     F --> G[漏改 / 重改 / 前后不一致]
 ```
 
@@ -104,7 +105,7 @@ flowchart LR
 ## 版本说明
 
 :::note 适用版本
-这是上下文窗口与上下文压缩机制带来的固有现象，与具体版本无关，**Claude Code 全版本适用**。窗口更大的模型能把「开始跟丢」的临界点往后推（能多撑几个文件再糊），但只要重构规模足够大、会话足够长，「靠记忆跟踪不断增长的已改集合」这个根本问题不会消失。把进度外置（commit / 清单 / 搜索）才是不依赖窗口大小的解法。
+这是上下文窗口与上下文压缩机制带来的固有现象，与具体版本无关，**全模型、跨工具通用**。窗口更大的模型能把「开始跟丢」的临界点往后推（能多撑几个文件再糊），但只要重构规模足够大、会话足够长，「靠记忆跟踪不断增长的已改集合」这个根本问题不会消失。把进度外置（commit / 清单 / 搜索）才是不依赖窗口大小的解法。
 :::
 
 ## 延伸阅读与出处

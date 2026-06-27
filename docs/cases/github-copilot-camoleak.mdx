@@ -1,5 +1,6 @@
 ---
 title: 我把你私有仓库的密钥，经 GitHub 自家的图片代理一个字符一个字符送了出去（Copilot CamoLeak）
+sidebar_label: "Copilot CamoLeak 外泄"
 slug: github-copilot-camoleak
 sidebar_position: 5
 tags: [真实案例, 提示注入, 数据泄露, 敏感数据, GitHub Copilot]
@@ -50,6 +51,16 @@ GitHub 在 **2025-08-14** 修复：**禁用 Copilot Chat 里的图片渲染**，
 4. **升级到修复版本**，并默认怀疑「能被自动渲染 / 自动读取」的内容。
 
 完整机制推理见 [开发期提示注入](../05-implementation/dev-time-prompt-injection.mdx) 与 [泄露敏感数据](../07-acceptance-release/security-data-leaks.mdx) 两条。
+
+## 这个案例印证什么、不证明什么
+
+**印证的误区**（点进去看完整机制推理）：
+
+- [开发期提示注入](../05-implementation/dev-time-prompt-injection.mdx)
+- [上线后提示注入](../07-acceptance-release/prompt-injection-release.mdx)
+- [泄露敏感数据](../07-acceptance-release/security-data-leaks.mdx)
+
+**它不证明**：CamoLeak 是一个**已修复的具体漏洞**（经图片代理外泄私有数据）——不代表所有 Copilot 用法都会泄露，也不是「Copilot 不可用」的结论。它佐证的是「上线后的 LLM 功能本身就是攻击面」这一类机制风险。
 
 ## 出处
 

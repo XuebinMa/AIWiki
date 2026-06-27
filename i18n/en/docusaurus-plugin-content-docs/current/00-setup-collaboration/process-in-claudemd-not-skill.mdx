@@ -1,5 +1,6 @@
 ---
 title: You Stuffed a Project Procedure Into CLAUDE.md Instead of a skill
+sidebar_label: "Process in CLAUDE.md, not a skill"
 slug: process-in-claudemd-not-skill
 sidebar_position: 3
 roles: [Engineer, Architect]
@@ -19,7 +20,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 > In one sentence: You drop your "twelve-step release process" and your "full database-migration SOP" straight into `CLAUDE.md`, figuring I'll always remember them. The result: they sit in context on every session, so even a "fix a typo" task has to read through them first — yet these steps, useful only for specific tasks, belong in a skill that loads on demand.
 
-## What I see you do
+## Symptom
 
 I often see a block like this grow inside `CLAUDE.md`:
 
@@ -59,9 +60,9 @@ This entry is only about the boundary between the latter two: **the always-loade
 
 ```mermaid
 flowchart TD
-    A[A chunk of content] --> B{Is it a fact I need every time<br/>&nbsp;or a procedure for a certain task?}
-    B -->|Fact/convention| C[CLAUDE.md<br/>resident every session<br/>&nbsp;]
-    B -->|Multi-step procedure| D[skill<br/>loaded on demand, unfolds when used<br/>&nbsp;]
+    A[A chunk of content] --> B{Is it a fact I need every timeor a procedure for a certain task?}
+    B -->|Fact/convention| C[CLAUDE.md<br/>resident every session]
+    B -->|Multi-step procedure| D[skill<br/>loaded on demand, unfolds when used]
     D --> E[On unrelated tasks, takes no context]
 ```
 
@@ -71,7 +72,7 @@ flowchart TD
 - **`CLAUDE.md` keeps swelling.** Procedures are the content most prone to growing long; dropping a whole one in quickly pushes the file past the "overload" line and triggers the dilution problems from CLAUDE.md Overload.
 - **The procedure is hard to maintain and hard to discover.** A set of steps buried in the middle of a several-hundred-line `CLAUDE.md` is awkward to update on its own, and the team is unlikely to even realize "oh, there's a procedure for this." As a skill it has its own file and can be invoked directly with `/`.
 
-## Best practice
+## What to do instead
 
 **Pull multi-step procedures out of `CLAUDE.md` and make them skills; keep `CLAUDE.md` to facts you need every time.**
 

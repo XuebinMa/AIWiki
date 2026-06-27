@@ -1,11 +1,12 @@
 ---
 title: My tests only cover the happy path, never the boundaries
+sidebar_label: "Happy-path-only tests"
 slug: happy-path-only
 sidebar_position: 3
 roles: [Engineer, QA Engineer]
 phase: Testing
 severity: High
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [Testing, boundary conditions, happy path, verification loop, Engineer, QA Engineer]
 sources:
@@ -15,11 +16,11 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="High" appliesTo="All Claude Code versions" evidence="Official docs" />
+<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="High" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: most of the tests I write for you verify that "it works when everything is fine." Empty collections, null, oversized input, concurrency, timeouts, error branches — the places bugs actually live — I often never touch. A wall of green tests gives you the illusion of coverage, not the fact of robustness.
 
-## What you see
+## Symptom
 
 You ask me to "add tests for this function." I hand you a set in seconds: typical input, assert the typical output, all green. The coverage number ticks up, and you merge with confidence.
 
@@ -38,7 +39,7 @@ flowchart TD
     A[You: add tests for this function] --> B[What I reach for: typical input → typical output]
     B --> C[All green + coverage rises]
     C --> D{What I didn't think to do}
-    D --> E["empty / null / out of range / concurrency / timeout / permission failure<br/>error branches never executed<br/>&nbsp;"]
+    D --> E["empty / null / out of range / concurrency / timeout / permission failure<br/>error branches never executed"]
     E --> F[bugs hide in the boundaries nothing touched]
 ```
 
@@ -48,7 +49,7 @@ flowchart TD
 - **The most bug-prone spots have zero tests.** Defects naturally cluster around boundaries and error handling, which is precisely what I skipped. The reassurance of green tests papers over the highest-risk area.
 - **Problems get deferred to more expensive stages.** Empty input, concurrency, and timeouts that the tests never surface will surface during integration, in a canary release, or in production — where locating and fixing them costs several times more.
 
-## Best practice
+## What to do instead
 
 **Don't let me "just handle it" when adding tests. Force me to list the boundaries and error paths first, then write one test for each.** Order matters: list first, write second, look at coverage last — and only treat coverage as a map of "what hasn't been tested," never as a certificate of "tested enough."
 

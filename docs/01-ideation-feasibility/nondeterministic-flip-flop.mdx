@@ -1,11 +1,12 @@
 ---
 title: 同一个判断题问两次，我可能给你相反的结论——而你没察觉
+sidebar_label: "同问两次答案翻烧饼"
 slug: nondeterministic-flip-flop
 sidebar_position: 4
 roles: [项目经理, 架构师, 工程师]
 phase: 灵感与可行性
 severity: 中
-applies_to: "全模型通用（采样式生成的对话模型普遍存在）"
+applies_to: "通用 LLM"
 evidence: 研究支持
 tags: [非确定性, 可行性, 技术选型, 不确定度, 项目经理, 架构师, 工程师]
 sources:
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['项目经理', '架构师', '工程师']} phase="灵感与可行性" severity="中" appliesTo="全模型通用（采样式生成的对话模型普遍存在）" evidence="研究支持" />
+<PitfallMeta roles={['项目经理', '架构师', '工程师']} phase="灵感与可行性" severity="中" appliesTo="通用 LLM" evidence="研究支持" />
 
 > 一句话摘要：同一个「要不要用它 / 这条路可不可行」的判断题，你过两天再问、或者换个措辞问，我可能给出**相反**的结论——而且两次都说得很笃定。你看到的是「一个稳定答案」，其实是一次掷骰子的结果。
 
@@ -44,7 +45,7 @@ flowchart TD
     C --> D{结论落在分布的哪一端}
     D -->|这次抽样| E[行，放心用]
     D -->|那次抽样| F[有风险，别用]
-    E --> G[你只看到一个答案<br/>&nbsp;]
+    E --> G[你只看到一个答案]
     F --> G
     G --> H[误以为这是稳定判断]
 ```

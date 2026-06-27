@@ -1,11 +1,13 @@
 ---
 title: "When I design data models I optimize for speed, and the schema becomes a house of cards to change later"
+sidebar_label: "Sloppy schema design"
 slug: schema-design-sloppy
 sidebar_position: 7
 roles: [Architect, Engineer]
 phase: Architecture
 severity: High
-applies_to: "All models"
+applies_to: "All coding agents"
+evidence: Community case
 tags: [architecture, data model, schema, migration, evolutionary design, Architect, Engineer]
 sources:
   - { title: "Evolutionary Database Design (Martin Fowler & Pramod Sadalage)", url: "https://martinfowler.com/articles/evodb.html" }
@@ -14,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="High" appliesTo="All models" />
+<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="High" appliesTo="All coding agents" evidence="Community case" />
 
 > In one sentence: you ask me to design a table structure or an interface contract, and I'll quickly hand you a schema that "can store the data" — but the field types are picked carelessly (a `float` where it should be `decimal`, free text where it should be an enum), constraints and indexes are missing, and I never thought about how you'll query it or evolve it. Code is cheap to change; schema is not. Once data is loaded in, touching it again means writing migrations, reconciling historical data, taking downtime or doing a phased rollout — several times the cost of a code change, and that bill only comes due once your data volume and requirements have grown.
 
@@ -44,7 +46,7 @@ The root cause in one line: **I optimize for "can store the data now," and the c
 flowchart TD
     A[You want a schema] --> B[I hand over a careless structure that can store the data]
     B --> C{Does anyone force me to look ahead at read/write patterns and evolution}
-    C -->|No, looks storable so it passes| D["careless types float-as-money<br/>free text as enum, missing constraints/indexes<br/>no thought to multi-value or future query dimensions<br/>&nbsp;"]
+    C -->|No, looks storable so it passes| D["careless types float-as-money<br/>free text as enum, missing constraints/indexes<br/>no thought to multi-value or future query dimensions"]
     C -->|You explicitly ask about scale and evolution| E[key fields' types/constraints/indexes get explicitly reviewed]
     D --> F[After data is loaded in]
     F --> G[change schema = migration + reconcile history + downtime or phased rollout]
@@ -58,7 +60,7 @@ flowchart TD
 - **You need downtime or a phased rollout where you wouldn't have to.** For systems that can't tolerate downtime, changing a schema often has to go through expand-contract: add the new structure, dual-write through a transition, migrate the data, then drop the old (Martin Fowler calls this Parallel Change). The process is safe but has to be split into at least three releases plus a period of dual-schema coexistence — complexity a forward-looking design could have spared you.
 - **A wrong contract spreads outward.** Once an interface contract is published and depended on downstream, changing it isn't just changing your DB — it's coordinating with every caller. The more careless the schema, the more people you'll have to drag along later.
 
-## Best practice
+## What to do instead
 
 **Don't let me "first hand over a table that can store it" — make me first ask how the data is read, at what scale, and where it's heading, then define the contract; review key fields' types, constraints, and indexes one by one; route all changes through migration tooling, never by hand.**
 
@@ -120,7 +122,7 @@ The test: will this data **be depended on long-term, and will it evolve**? If ye
 This isn't a bug of one version, but a product of two root causes — "optimize for storable now, don't pay for deferred cost" plus "default to the data happy path" — and it's **universal across models**. The stronger the model, the more polished the schema it hands you and the easier to adopt it directly, the deeper careless types and missing constraints hide. So "ask about reads/writes and evolution before defining the schema" is the thing you can least afford to skip with a strong model. Treat it as a tendency you actively hedge against, more reliable than hoping some version "already looks ahead on its own."
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Evolutionary Database Design (Martin Fowler & Pramod Sadalage)](https://martinfowler.com/articles/evodb.html)
 - [Parallel Change / Expand-Contract (Martin Fowler bliki)](https://martinfowler.com/bliki/ParallelChange.html)

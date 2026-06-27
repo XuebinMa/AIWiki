@@ -1,0 +1,105 @@
+---
+title: AI 编码安全：威胁模型索引
+slug: /threat-model
+sidebar_position: 11
+sidebar_label: 安全索引
+description: 按威胁维度浏览与 AI 编码安全 / 治理相关的全部误区与案例——继角色、工具、机制之后的第四条浏览轴。把分散在各阶段的安全条目串成一张可对照的威胁模型。
+---
+
+# AI 编码安全：威胁模型索引
+
+这是继 [按角色浏览](/roles)、[工具矩阵](/tool-matrix)、[机制索引](/mechanisms) 之后的**第四条浏览轴**：把全站与**安全 / 治理**相关的误区，按**威胁维度**重新归拢成一张威胁模型。
+
+安全条目天然散落在各生命周期阶段（准备、编码、验收……），单独看每条像孤立的坑；放进威胁模型，你会看到它们其实是同一套攻击面的不同切片。一个有用的起点是 Simon Willison 的「**致命三件套**」——**私有数据访问 + 接触不可信内容 + 对外通信**，三者齐备的 agent 即可被利用；下面多数维度，都是在给这三条腿之一上锁。机制层面，这些大多落在 [机制索引](/mechanisms) 的「工具与权限外溢」桶里。
+
+> 这页只做**策展索引**（每条一行内链到既有条目 / 案例），不引入新的逐条元数据。按维度往下扫，点进去看「为什么会这样」与「怎么防」。
+
+## 最小安全基线
+
+下面各节是「**按威胁面读**」；如果你只想要一份**马上能立起来的清单**，先照这 8 条配置——它把后面各维度的防线压成一条「最小可执行基线」，工具中立、每条都链到展开版：
+
+1. **默认最小权限**：能只读就不给写，能限目录就不放开全盘——见[过度授权](./00-setup-collaboration/over-permissioning.mdx)、[权限配置模板](./toolkit/permissions-config.mdx)。
+2. **写操作要确认、读操作放行**：把「改文件 / 跑命令」设成需确认，只读查询放过，这样确认疲劳才不会逼你一路点 yes——见[权限配置模板](./toolkit/permissions-config.mdx)。
+3. **删除 / push / 装依赖 / 对外请求强制人工确认**：这些不可逆或会外溢的动作不进自动档——见[破坏性 / 不可逆操作](./00-setup-collaboration/destructive-irreversible-actions.mdx)、[自主性风险分级清单](./toolkit/autonomy-risk-tiers.mdx)。
+4. **陌生 / 不可信仓库先只读探查**：先把它当「可能投毒」的输入读，别一上来就给执行权——见[开发期读到投毒内容被劫持](./05-implementation/dev-time-prompt-injection.mdx)。
+5. **手上有私有数据时禁止对外联网**：断掉「致命三件套」的对外通信腿——见[网络出口失控](./00-setup-collaboration/network-egress-control.mdx)、[数据边界策略缺失](./00-setup-collaboration/data-boundary-policy.mdx)。
+6. **生产凭据不进开发 agent**：开发态用替身 / 只读凭据，真凭据留在它够不到的地方——见[数据边界策略缺失](./00-setup-collaboration/data-boundary-policy.mdx)、[默认埋漏洞 / 泄露敏感数据](./07-acceptance-release/security-data-leaks.mdx)。
+7. **高风险任务先看计划再执行**：让我先把要做什么摊给你过目，而不是边想边改——见[不用 plan mode 直接放手](./00-setup-collaboration/skipping-plan-mode.mdx)、[自主性审批边界缺失](./00-setup-collaboration/autonomy-approval-boundaries.mdx)。
+8. **审计日志 append-only、写前转义**：让事后重建得出「我到底做了什么」，且日志本身不被投毒或篡改——见[日志注入 / 审计链污染](./07-acceptance-release/log-injection-audit-integrity.mdx)。
+
+> 这 8 条是**下限不是上限**：达标只代表没漏掉最基本的护栏，具体到你的爆炸半径还要往上加（见下各维度）。可勾选的落地清单见[页底配套工件](#配套工件)。
+
+## 权限与自主度边界
+
+**核心威胁**：我被授予的权限过宽、或高风险动作无人审批，于是破坏性、不可逆的操作在你反应过来之前就发生了。
+
+**正向防线**：最小授权 + 按风险分级的审批门 + 计划/审查关，把不可逆动作挡在执行之前。
+
+- [一上来就全量授权](./00-setup-collaboration/over-permissioning.mdx)
+- [自主性审批边界缺失](./00-setup-collaboration/autonomy-approval-boundaries.mdx)
+- [MCP 授权过宽过敏感](./00-setup-collaboration/mcp-over-access.mdx)
+- [不用 plan mode 直接放手](./00-setup-collaboration/skipping-plan-mode.mdx)
+- [破坏性 / 不可逆操作](./00-setup-collaboration/destructive-irreversible-actions.mdx)
+- [CI/CD 权限边界盲区](./07-acceptance-release/cicd-permission-blindspot.mdx)
+
+## 隔离与沙箱
+
+**核心威胁**：只有「软权限」拦我，没有 OS 级的墙——一旦被攻破，我能逃到整台机器的文件系统、凭据与网络。
+
+**正向防线**：用内核级隔离（容器 / bubblewrap / seccomp）圈住文件系统，用 allowlist 圈住网络出口，两者成对。
+
+- [只靠软权限、缺 OS 级沙箱](./00-setup-collaboration/sandbox-filesystem-isolation.mdx)
+- [网络出口失控](./00-setup-collaboration/network-egress-control.mdx)
+- [Gemini 信任继承](./00-setup-collaboration/gemini-folder-trust-inheritance.mdx)
+- [.cursorignore 不是安全边界](./00-setup-collaboration/cursor-ignore-best-effort.mdx)
+
+## 不可信内容与注入
+
+**核心威胁**：我会读到外部内容（README、issue、网页、工具返回、日志），其中藏的恶意指令能劫持我的行为。
+
+**正向防线**：把不可信输入挡在执行之前，配合隔离与出口控制限制注入得手后的爆炸半径。
+
+- [开发期读到投毒内容被劫持](./05-implementation/dev-time-prompt-injection.mdx)
+- [上线后被提示注入攻破](./07-acceptance-release/prompt-injection-release.mdx)
+
+## 数据边界与外泄
+
+**核心威胁**：我把不该出公司的数据当普通上下文用了，或写出会泄露敏感数据的代码——出了边界就收不回。
+
+**正向防线**：先定数据分级（哪些绝不进外部 AI），在边界处用机制把关，代码侧不把敏感数据写进日志 / 响应。
+
+- [数据边界策略缺失](./00-setup-collaboration/data-boundary-policy.mdx)
+- [默认埋漏洞 / 泄露敏感数据](./07-acceptance-release/security-data-leaks.mdx)
+
+## 审计、问责与日志
+
+**核心威胁**：日志既可能被投毒成注入面，也可能被我写脏 / 写漏 / 被篡改，让你事后重建不出「AI 到底做了什么」。
+
+**正向防线**：写前转义、审计轨迹 append-only 防篡改、关键动作强制结构化留痕。
+
+- [日志注入 / 审计链污染](./07-acceptance-release/log-injection-audit-integrity.mdx)
+
+## 迭代与治理责任
+
+**核心威胁**：反复让我改，漏洞越积越多；而 AI 生成代码的归属、责任、版权状态没想清，「全是责任、没有保护」。
+
+**正向防线**：把安全当持续闸门而非一次性检查；为 AI 代码立成文的归属 / 责任 / 许可策略。
+
+- [迭代中安全逐步侵蚀](./07-acceptance-release/iterative-security-erosion.mdx)
+- [AI 代码归属 / 责任 / IP 治理](./07-acceptance-release/ai-code-ip-ownership.mdx)
+
+## 真实事故（案例库）
+
+**核心威胁**：上面的机制不是假想——下面是公开、可核查的真实事故，每个都踩中了某条威胁维度。
+
+**正向防线**：把它们当「犯罪现场照片」逐帧看：先在条目里理解机制，再来这里看它在现实里翻车的样子与代价。
+
+- [Gemini CLI 在野 RCE（Tracebit）](./cases/gemini-cli-tracebit-rce.mdx)
+- [Codex CLI 配置 RCE（CVE-2025-61260）](./cases/codex-cli-config-rce.mdx)
+- [GitHub Copilot CamoLeak 数据外泄（CVE-2025-59145）](./cases/github-copilot-camoleak.mdx)
+
+---
+
+## 配套工件
+
+把上面的防线压成可直接用的清单：[自主性风险分级清单](./toolkit/autonomy-risk-tiers.mdx)、[数据分级策略模板](./toolkit/data-classification-policy.mdx)、[上线前安全清单](./toolkit/release-security-checklist.mdx)、[权限配置模板](./toolkit/permissions-config.mdx)。

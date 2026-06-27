@@ -1,11 +1,12 @@
 ---
 title: CLAUDE.md 过载：规则写得越多，被遵守的越少
+sidebar_label: "CLAUDE.md 过载"
 slug: claude-md-overload
 sidebar_position: 2
 roles: [工程师, 架构师]
 phase: 编码实现
 severity: 中
-applies_to: "Claude Code 全版本"
+applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [CLAUDE.md, 上下文管理, 配置, 工程师, 架构师, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
@@ -19,7 +20,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '架构师']} phase="编码实现" severity="中" appliesTo="Claude Code 全版本" evidence="官方文档" />
+<PitfallMeta roles={['工程师', '架构师']} phase="编码实现" severity="中" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
 > 一句话摘要：你把所有想到的规范都写进 `CLAUDE.md`，希望我面面俱到。结果规则太多，我反而抓不住重点，把一半都漏掉了。
 
@@ -88,7 +89,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 ## 版本说明
 
 :::note 适用版本
-「可靠遵循的指令数量有限」是当前所有前沿大模型的共性，**Claude Code 全版本适用**。随着模型能力提升，这个上限会上移，但「精简、有优先级、每条有理由」永远比「大而全」更可靠。
+「可靠遵循的指令数量有限」是当前所有前沿大模型的共性，**全模型、跨工具通用**。随着模型能力提升，这个上限会上移，但「精简、有优先级、每条有理由」永远比「大而全」更可靠。
 :::
 
 ## 延伸阅读与出处

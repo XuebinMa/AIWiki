@@ -1,11 +1,13 @@
 ---
 title: "Magic numbers and hardcoding: I bake values that belong in config straight into the code"
+sidebar_label: "Magic numbers & hardcoding"
 slug: magic-numbers-hardcoding
 sidebar_position: 6
 roles: [Engineer]
 phase: Detailed design
 severity: Medium
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
+evidence: Community case
 tags: [magic number, hardcoding, config, maintainability, Engineer]
 sources:
   - { title: "The Twelve-Factor App — III. Config (store config in the environment)", url: "https://12factor.net/config" }
@@ -14,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Detailed design" severity="Medium" appliesTo="All Claude Code versions" />
+<PitfallMeta roles={['Engineer']} phase="Detailed design" severity="Medium" appliesTo="All coding agents" evidence="Community case" />
 
 > In one sentence: timeout written as `30000`, retries as `3`, the API address as `https://api.prod...` stuffed straight into the logic — no name, no central place, the same value scattered across several spots. The cost: changing one spot means searching the whole repo, switching environments breaks it, and reading the code is all guesswork.
 
@@ -44,9 +46,9 @@ When you haven't explicitly asked for road 2, I default to road 1. Because gener
 ```mermaid
 flowchart TD
     A[need a value: timeout/retries/URL/threshold] --> B{do I stop to judge<br/>whether it changes / varies by environment}
-    B -- No: fill in a literal --> C[welded in place<br/>no name, no central place, scattered<br/>&nbsp;]
-    B -- Yes: distinguish true constant from config value --> D[named constant + inject by environment<br/>single source<br/>&nbsp;]
-    C --> E[change one spot, search the whole repo<br/>switch environments and it breaks, read code by guessing<br/>&nbsp;]
+    B -- No: fill in a literal --> C[welded in place<br/>no name, no central place, scattered]
+    B -- Yes: distinguish true constant from config value --> D[named constant + inject by environment<br/>single source]
+    C --> E[change one spot, search the whole repo<br/>switch environments and it breaks, read code by guessing]
     D --> F[change one line<br/>switch environments by changing config, not code]
 ```
 
@@ -60,7 +62,7 @@ There's also a multiplier effect: the `5000` I welded in gets copied next time b
 - **Credential-leak risk**: writing secrets and tokens straight into source means they enter version history once committed — 12-Factor has a crisp test: could your codebase be open-sourced at any moment without leaking any credentials? Hardcoding means no.
 - **Adds technical debt**: like [style drift](./style-drift.mdx), this kind of inconsistency becomes a template for the next round of imitation once it's in the repo, accumulating into something harder to clean up.
 
-## Best practice
+## What to do instead
 
 Saying "don't use magic numbers" out loud is nearly useless to me — too abstract, I can't verify it. **Spell out the criteria and the landing spot, and back it with tooling** to make it work.
 
@@ -136,7 +138,7 @@ The test: the exception holds only when the value **won't change, won't differ b
 "Optimize the shortest path, weld the value in place nearby" is an inherent tendency of LLMs generating code, applying **across all versions and models** — the stronger the model, the more self-consistent and polished that welded-in code, the easier to overlook the pile of magic numbers and hardcoded config inside. The ability to auto-validate with lint (`no-magic-numbers`) + a hook after edits depends on a more recent version; without it, spell out in CLAUDE.md "config goes in one place, hardcoding environment-related values is forbidden" and name the config module explicitly in the prompt for the same effect.
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [The Twelve-Factor App — III. Config](https://12factor.net/config) — config (values that change with deployment: credentials, backend addresses, per-environment parameters) must be strictly separated from code and stored in environment variables; the test is "can the codebase be open-sourced at any time without leaking credentials"
 - [Replace Magic Literal (Martin Fowler, Refactoring catalog)](https://refactoring.com/catalog/replaceMagicLiteral.html) — replace a literal carrying a specific meaning with a named symbolic constant, gaining a single source and improving readability and maintainability

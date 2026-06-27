@@ -1,11 +1,12 @@
 ---
 title: 「demo 能跑就发布」——我说「看起来没问题」不等于通过验收
+sidebar_label: "demo 能跑就发布"
 slug: demo-works-ship-it
 sidebar_position: 2
 roles: [项目经理, 工程师, 测试工程师]
 phase: 验收与发布
 severity: 高
-applies_to: "全模型通用"
+applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [验收标准, 非功能需求, 验证闭环, 发布, 项目经理, 工程师, 测试工程师]
 sources:
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['项目经理', '工程师', '测试工程师']} phase="验收与发布" severity="高" appliesTo="全模型通用" evidence="官方文档" />
+<PitfallMeta roles={['项目经理', '工程师', '测试工程师']} phase="验收与发布" severity="高" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
 > 一句话摘要：功能在我手里跑通一次 demo，我就倾向说「可以了 / 看起来没问题」。但「演示路径跑通」离「通过验收」差得远——我用「让它跑起来」当完成信号，而验收是拿**预先定义好的标准**逐条核对。这两件事之间，正藏着真实数据规模、并发、异常路径，和你从没听我提过的性能、安全、可访问性。
 
@@ -39,10 +40,10 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 ```mermaid
 flowchart TD
     A[你: 这个功能做完了吗] --> B[我跑了一次 happy-path demo]
-    B --> C[截图 + 导入成功<br/>我说: 看起来没问题<br/>&nbsp;]
+    B --> C[截图 + 导入成功<br/>我说: 看起来没问题]
     C --> D{对照预定义的验收标准了吗}
-    D -->|没有, 把 demo 当完成| E[真实规模 / 并发 / 异常路径<br/>性能 / 安全 / 可访问性 全是空白<br/>&nbsp;]
-    E --> F[发布后在真实数据上崩<br/>验收阶段最贵的返工<br/>&nbsp;]
+    D -->|没有, 把 demo 当完成| E[真实规模 / 并发 / 异常路径<br/>性能 / 安全 / 可访问性 全是空白]
+    E --> F[发布后在真实数据上崩<br/>验收阶段最贵的返工]
 ```
 
 ## 后果

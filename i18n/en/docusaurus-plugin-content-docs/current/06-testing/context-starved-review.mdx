@@ -1,0 +1,110 @@
+---
+title: "I review by staring at the diff alone, blind to the context it touches"
+sidebar_label: "Context-starved review"
+slug: context-starved-review
+sidebar_position: 9
+roles: [Engineer, QA Engineer]
+phase: Testing
+severity: Medium
+applies_to: "All coding agents"
+evidence: Research
+tags: [code review, context, cross-file, regression, Engineer, QA Engineer]
+sources:
+  - { title: "Automated Code Review Using Large Language Models at Ericsson: An Experience Report (arXiv:2507.19115)", url: "https://arxiv.org/abs/2507.19115" }
+  - { title: "AACR-Bench: Evaluating Automatic Code Review with Holistic Repository-Level Context (arXiv:2601.19494)", url: "https://arxiv.org/abs/2601.19494" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['Engineer', 'QA Engineer']} phase="Testing" severity="Medium" appliesTo="All coding agents" evidence="Research" />
+
+> In one sentence: you show me a red-and-green diff and I look at those few lines and say "looks fine." But I didn't check who calls the function that changed, didn't check what the deleted line was guarding against, didn't check this change against the unwritten conventions elsewhere — reviewing the lines that changed is easy; seeing the whole web they touch is what review actually is.
+
+## Symptom
+
+You paste me a PR's diff, or the review tool feeds me only "the lines that changed." I stare at the plus and minus signs and pronounce, "logic is sound, ready to merge."
+
+But I never went to check: this function whose signature changed — what else calls it; that deleted "looks-useless" check — which boundary it was actually catching; this newly added field — whether it lines up with the database schema and with the frontend's expectations; whether this change quietly violates an assumption some other module makes about it. The result: **viewed on its own, the diff is flawless; put back into the whole repo, it's wrong.** And the "LGTM" I gave only answers for the former.
+
+## Why this happens
+
+Part of it is that **all that gets fed in is the diff**. To save tokens and to be fast, code review tools default to feeding in just the changed block itself. The Ericsson experience report puts it bluntly: in their review setup, the context handed to the model is "the change set plus the function that the changed method lives in," and it's explicitly limited by the size of the context window — callers, dependencies, and contracts beyond that one ring are something the model simply cannot see.
+
+The other part is that **even when I could look, I default to the shortest path.** This is a textbook case of my [insufficient local view](../05-implementation/ignoring-file-state-overwrite.mdx): I fix my eyes on the local piece in front of me, and consequences across files and across modules are by default outside my field of vision. You hand me a diff, and I shrink the boundary of the review down to that diff; asking me to go grep the callers, read the depended-on files, dig up the original requirements is extra effort — and unless something forces me to, I won't do it on my own.
+
+Yet code review is precisely a **global** job. Whether a change is right often hinges not on whether it's written well in isolation, but on whether it still fits the web around it. AACR-Bench quantified exactly this: feeding the review model the **holistic repository-level context** produces markedly higher review quality than seeing only the local change — context isn't a nice-to-have, it's the precondition for review being valid at all.
+
+## Consequences
+
+- **Cross-file breakage gets waved through.** A signature changed without checking every caller, a defense deleted without knowing what it defended against — these don't show up in the diff, yet they blow up in other files (echoing [fixing A quietly breaks B](../07-acceptance-release/missing-regression.mdx)).
+- **"Locally sound" masks "globally wrong."** A yes I give based on half the picture is more dangerous than plainly saying "I can't see all of it," because it makes you believe the change was evaluated in full.
+- **The bigger the change, the less reliable.** The more files a change touches and the more tangled its implicit contracts, the more "just the diff" misses — and changes like that are exactly the ones that most need a global review.
+
+## What to do instead
+
+**Feed in enough context before the review, or give me the ability to fetch it myself; don't let the review's field of vision stop at the diff boundary.**
+
+- **Proactively feed the adjacent context.** At minimum, give me: the definition of the changed symbol and **every caller**, the relevant fragments of depended-on files, the corresponding tests, and the original requirement / spec this change is meant to satisfy. Let what I review be "the change plus the web it sits in," not a few isolated lines.
+- **Have me map the blast radius first, then review.** Require me to open by answering "which files / which callers / which conventions does this change affect," lay the global picture out first, then review item by item — forcing my vision to stretch from the diff out to the repo.
+- **Make deletions and signature changes trigger a whole-repo reference check.** For changes like "what got deleted" and "signature / schema / interface changed," make it a rule to grep whole-repo references first: does anyone still depend on this deleted code? does anywhere else still assume the changed contract is the old one?
+- **Use a review setup that can access the repo.** When you can let the review agent actually read the repo (rather than just pasting a diff), give it that capability; the more it can pull callers and dependencies on its own, the less it gets trapped in the local view.
+
+## Tool differences
+
+> As of 2026-06, at the mechanism level; specific capabilities change fast across versions, re-check as needed.
+
+How much repo context a review tool "sees by default" varies widely: some feed the model only the changed block, some bring along the whole file the changed method lives in, and some (the agent form with repo indexing / retrieval) can pull callers and dependencies themselves. The root cause is the same — **review quality is capped by the context fed in**; the guard differs by tool: a diff-only tool relies on you to supply context by hand, while a repo-retrieving tool needs you to confirm it actually retrieved rather than cutting corners and looking only at the changed block.
+
+## Example
+
+**Before:**
+
+```text
+You: (pastes only the diff) Review this: change getUser()'s return from User to User | null.
+Me: Nice change, it handles the user-not-found case. LGTM.
+Prod: 14 places across the repo read user.name directly, none check for null;
+      when the user doesn't exist, NPEs everywhere. The change itself is fine —
+      what's wrong is that I never looked at those 14 callers.
+```
+
+**After:**
+
+```text
+You: Before reviewing this, grep the whole repo for getUser()'s callers
+    and list which ones don't handle null.
+Me: Found 14 calls, 11 of which read .name/.email directly without a null check:
+   src/profile.ts:30, src/email.ts:12 … (listed one by one)
+   Making the return type nullable is correct, but these 11 must add null
+   handling in step, otherwise they'll NPE.
+You: (fixes the 11 first, then merges the signature change)
+```
+
+For the same change, "just the diff" yields an LGTM that answers for half the picture, while "grep the whole repo for callers first" yields the list that actually stops the production NPE.
+
+## When the exception applies
+
+"Don't look at just the diff" targets changes that move the whole; for some changes, the diff really is all the context there is:
+
+- **Small, self-contained changes**: tweaking a constant, adjusting a string, fixing an obvious typo — it touches no contract elsewhere, the diff is the complete information, and dragging in a pile of context is just waste.
+- **When the context is already in hand**: if you and I just wrote this code together in the same session and the callers are all already in context, then walking through a "whole-repo grep" again is redundant.
+- **Purely additive code that nothing depends on**: a brand-new file, a new function with no callers yet — there's no "who does it touch" question, so reviewing it on its own is enough.
+
+The test: an exception holds only when **the change genuinely touches nothing outside the diff**. The moment it involves a deletion, a signature / interface / schema change, or shared code that many places depend on, it goes back to the default — feed in enough context before reviewing.
+
+## How this differs from neighboring pitfalls
+
+- [Review that only nitpicks the surface, missing the logic bugs](./review-misses-logic-bugs.mdx): that one is me **having** the context and still not digging deeper, picking only at the surface; this one is me **never having gotten** the repo context at all — no straw, no bricks. One lacks the will, the other lacks the material.
+- [Fixing A quietly breaks B (missing regression)](../07-acceptance-release/missing-regression.mdx): that one is about a change that **actually** broke old functionality without a regression test to catch it; this one is about the **review** stage not looking at the context and failing to stop it. They're often cause and effect: a context-starved review is precisely the upstream of a regression slipping through.
+- [A design that looks right but can't survive the edges](../04-detailed-design/plausible-but-brittle-design.mdx): that's the design layer's "plausible but actually brittle"; this is the review layer's "looks reasonable because I only looked at the local piece."
+
+## Version notes
+
+:::note Applicable versions
+"Review quality is capped by the context fed in" is a structural constraint of large-model review, **applying across models and across tools**; how much of the repo a given tool "sees by default" changes fast with the tool and version (see "Tool differences" above). Longer windows and stronger retrieval will ease it, but as long as the review's field of vision might stop at the diff boundary, proactively supplying the global context remains the steadier move.
+:::
+
+## Further reading and sources
+
+- Related topic: [AI code review](/code-review) — the hub for the "AI as reviewer" cluster this entry belongs to.
+- [Automated Code Review Using LLMs at Ericsson: An Experience Report (arXiv:2507.19115)](https://arxiv.org/abs/2507.19115) — in industrial practice the context fed to the review model is "the change set plus the changed method," and it's explicitly limited by the context window.
+- [AACR-Bench: Evaluating Automatic Code Review with Holistic Repository-Level Context (arXiv:2601.19494)](https://arxiv.org/abs/2601.19494) — quantifies the marked effect of holistic repository-level context on review quality — context is the precondition for review being valid, not a decoration.

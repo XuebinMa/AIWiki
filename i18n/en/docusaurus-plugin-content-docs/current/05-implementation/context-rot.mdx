@@ -1,11 +1,12 @@
 ---
 title: "Context rot: the more you feed me, the more I drop the middle and the worse I get"
+sidebar_label: "Context rot"
 slug: context-rot
 sidebar_position: 10
 roles: [Engineer, Architect]
 phase: Implementation
 severity: Medium
-applies_to: "All models"
+applies_to: "All LLMs"
 evidence: Research
 tags: [context management, context window, attention dilution, retrieval, engineer, architect]
 sources:
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect']} phase="Implementation" severity="Medium" appliesTo="All models" evidence="Research" />
+<PitfallMeta roles={['Engineer', 'Architect']} phase="Implementation" severity="Medium" appliesTo="All LLMs" evidence="Research" />
 
 > In one sentence: "feed it the whole repo / the whole long doc and it surely saw all of it" is an illusion. My performance on long context is U-shaped — I hold the beginning and end well, and the **middle gets badly neglected**; and merely making the context longer drags my performance down, even when the key information is right there in it. More context ≠ better.
 
@@ -42,9 +43,9 @@ The mechanistic root is attention itself: a Transformer's self-attention is a pr
 ```mermaid
 flowchart LR
     A["info at the start"] --> G["I use it accurately"]
-    B["info in the middle<br/>thinnest attention<br/>&nbsp;"] --> H["easily missed / misused"]
+    B["info in the middle<br/>thinnest attention"] --> H["easily missed / misused"]
     C["info at the end"] --> G
-    D["very long context<br/>(even if all relevant)<br/>&nbsp;"] --> H
+    D["very long context<br/>(even if all relevant)"] --> H
 ```
 
 ## Consequences
@@ -53,7 +54,7 @@ flowchart LR
 - **More is worse; past a point it's negative return.** You pour in more context "to be safe," which instead pushes key info into the middle and thins attention overall — quality falls, not rises.
 - **Long sessions quietly get dumber.** As the conversation stretches, key decisions and constraints set early slide into the middle and fade, and I start contradicting myself — you think the model "got tired," but it's context rot.
 
-## Best practice
+## What to do instead
 
 **Core: feed a few relevant, high-quality snippets, put the most critical ones where they're seen, and don't count on "stuff it all in."**
 
@@ -100,7 +101,7 @@ The test: the exception holds only when you've actively managed the length (cura
 U-shaped attention, lost-in-the-middle, and "length itself drags performance down" are **model-mechanism** phenomena rooted in self-attention + positional encoding, **common to all models**, regardless of vendor or version. The nominal context-window size keeps growing across versions (hundreds of thousands, even millions of tokens), but "can hold it" has never meant "can use it evenly well" — the bigger the window, the more you must actively curate rather than feel freer to dump everything in.
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Lost in the Middle: How Language Models Use Long Contexts (TACL; arXiv 2307.03172)](https://arxiv.org/abs/2307.03172) — U-shaped performance on long context, middle info drops sharply
 - [Context Length Alone Hurts LLM Performance Despite Perfect Retrieval (arXiv 2510.05381)](https://arxiv.org/abs/2510.05381) — even with perfect retrieval and irrelevant tokens masked, length alone still degrades performance

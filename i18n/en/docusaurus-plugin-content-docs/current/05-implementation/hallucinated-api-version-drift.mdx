@@ -1,11 +1,12 @@
 ---
 title: "On fast-moving libraries, I hallucinate APIs and drift across versions"
+sidebar_label: "Hallucinated APIs & version drift"
 slug: hallucinated-api-version-drift
 sidebar_position: 5
 roles: [Engineer, Architect]
 phase: Implementation
 severity: High
-applies_to: "All models"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [hallucination, version drift, retrieval, doc source, API, Engineer, Architect]
 sources:
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect']} phase="Implementation" severity="High" appliesTo="All models" evidence="Official docs" />
+<PitfallMeta roles={['Engineer', 'Architect']} phase="Implementation" severity="High" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: when you ask me to call into a fast-moving library, I fill the gaps from training memory—I may use an API that's deprecated or has a changed signature, mix usage from different major versions, or even hallucinate a method that doesn't exist. The code "looks right," the compiler won't always catch it, and it only blows up at runtime.
 
@@ -30,7 +31,7 @@ You ask me to "write an X with this library." I write it fluently: method names,
 
 The faster a library iterates, the more likely I am to trip here—frontend frameworks, cloud-vendor SDKs, AI/LLM client libraries. The version I have the "strongest impression" of is often no longer the one you installed today.
 
-## Why it happens
+## Why this happens
 
 The root cause is one sentence: **my training has a cutoff date, and I have no awareness of the specific version you've pinned right now.** That unpacks into three things:
 
@@ -44,7 +45,7 @@ The root cause is one sentence: **my training has a cutoff date, and I have no a
 flowchart TD
     A[Ask me to call a library] --> B{Do I have the real, version-correct signature?}
     B -- No --> C[Fill in from training memory]
-    C --> D["Old API / mixed versions / hallucinated method<br/>all of it looks right<br/>&nbsp;"]
+    C --> D["Old API / mixed versions / hallucinated method<br/>all of it looks right"]
     D --> E[Compiler may not catch it → blows up at runtime]
     B -- Yes --> F[Write against the real signature]
     F --> G[Version-correct calls]
@@ -59,7 +60,7 @@ This is the flip side of [*You don't connect me to a version-matched doc source*
 - **Hallucinated methods are the hardest to catch.** A method this library never had, with a convincing name—you can't easily spot it in review, until runtime reports "undefined."
 - **The debugging cost lands on you.** These errors often don't surface while I'm writing the code; they show up when you run tests or even after release, far more expensive to track down than one trip to the docs would have been.
 
-## Best practice
+## What to do instead
 
 The core, in one line: **don't make me gamble from memory—give me a real signature to check against, and use tooling to disprove me on the spot.**
 
@@ -102,7 +103,7 @@ The difference isn't that I understand the library better—it's that I now hold
 "Training has a cutoff date, and I have no awareness of the specific version you've pinned" is an inherent property of every large model—**independent of the specific model.** A newer model only pushes the cutoff later; it doesn't change the fact that everything after the cutoff is unknown. The faster a library updates, the wider the gap between memory and reality. Versioned doc sources (MCP doc tools like Context7) are a newer external capability; it depends on whether your client supports MCP and whether the doc source covers your library. This entry and [*You don't connect me to a version-matched doc source*](../00-setup-collaboration/no-versioned-docs.mdx) (Setup & Collaboration phase) are two sides of the same root cause: that one seals the hole at the source in the setup phase; this one fixes it at the moment of writing the code.
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Context7 (upstash/context7, versioned-docs MCP source)](https://github.com/upstash/context7)
 - [Connect Claude Code to tools via MCP (official)](https://code.claude.com/docs/en/mcp)

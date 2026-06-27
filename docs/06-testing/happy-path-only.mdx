@@ -1,11 +1,12 @@
 ---
 title: 我写的测试只覆盖 happy path，不测边界
+sidebar_label: "只测顺路径不测边界"
 slug: happy-path-only
 sidebar_position: 3
 roles: [工程师, 测试工程师]
 phase: 测试
 severity: 高
-applies_to: "Claude Code 全版本"
+applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [测试, 边界条件, 主路径, 验证闭环, 工程师, 测试工程师]
 sources:
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '测试工程师']} phase="测试" severity="高" appliesTo="Claude Code 全版本" evidence="官方文档" />
+<PitfallMeta roles={['工程师', '测试工程师']} phase="测试" severity="高" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
 > 一句话摘要：我替你写的测试，大多在验证「一切正常时它能跑」。空集合、null、超长、并发、超时、错误分支——那些真正容易出 bug 的地方，我常常根本没碰。测试一片绿，给你的是「有覆盖」的错觉，不是「够稳」的事实。
 
@@ -38,7 +39,7 @@ flowchart TD
     A[你: 给这个函数加测试] --> B[我默认想到的: 典型输入→典型输出]
     B --> C[测试全绿 + 覆盖率上升]
     C --> D{我没主动想的}
-    D --> E["空 / null / 越界 / 并发 / 超时 / 权限失败<br/>错误分支从未被执行<br/>&nbsp;"]
+    D --> E["空 / null / 越界 / 并发 / 超时 / 权限失败<br/>错误分支从未被执行"]
     E --> F[bug 藏在没被碰过的边界里]
 ```
 

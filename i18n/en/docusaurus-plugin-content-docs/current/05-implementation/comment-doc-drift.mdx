@@ -1,11 +1,12 @@
 ---
 title: "The comments and docs I write may not match the code"
+sidebar_label: "Comment & doc drift"
 slug: comment-doc-drift
 sidebar_position: 14
 roles: [Engineer]
 phase: Implementation
 severity: Medium
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Research
 tags: [comments, documentation, doc drift, maintainability, code review, engineer]
 sources:
@@ -15,7 +16,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Implementation" severity="Medium" appliesTo="All Claude Code versions" evidence="Research" />
+<PitfallMeta roles={['Engineer']} phase="Implementation" severity="Medium" appliesTo="All coding agents" evidence="Research" />
 
 > In one sentence: I can generate comments and docs that read as thorough and professional, but "reads right" is not "matches the code." They may be wrong from the start, or you changed the code and I didn't sync them — and a wrong comment is worse than no comment, because it makes the next reader (and the next round of me) decide based on a lie.
 
@@ -41,7 +42,7 @@ flowchart TD
     B -->|looks consistent| C[fluent, professional, confident]
     C --> D[you change the code]
     D --> E[I don't sync the comment]
-    E --> F[the comment becomes a fossil<br/>&nbsp;]
+    E --> F[the comment becomes a fossil]
     B -->|actually inconsistent| F
     F --> G[the next reader / the next round of me<br/>decides based on a wrong comment]
 ```
@@ -53,7 +54,7 @@ flowchart TD
 - **Authoritative-looking docstrings / READMEs do more damage**: the more confidently a doc is written, the less readers question it. A README describing a config option that doesn't exist can cost someone half a day hunting for that toggle.
 - **Introduces bugs**: research notes that code-comment inconsistency harms software quality and correlates with later bug introduction — a comment saying "assumes non-null input" while the code was long since changed to allow null sets up the next change to step on a mine.
 
-## Best practice
+## What to do instead
 
 Treat "whether to write a comment, what to write, and whether to sync it when changing code" as an executable constraint, not something to leave to my good intentions.
 
@@ -107,7 +108,7 @@ The signature's `timeout: float = 5.0` already says "this parameter exists, defa
 "Generating fluent text that may not match the code" is an inherent tendency at the model-behavior level — universal across versions and models, not a bug of some version, and not something a version will "fix." What holds it down is your process: have comments explain only "why," explicitly require sync when changing code, use tests and types as executable docs, and make consistency its own review line item. Claude Code changing code and comments together in one session is easy — but the "remember to change it" step has to be triggered by your instruction; don't assume I maintain it automatically.
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Fengcai Wen et al. — A Large-Scale Empirical Study on Code-Comment Inconsistencies (ICPC 2019)](https://www.inf.usi.ch/lanza/Downloads/Wen2019a.pdf)
 - [John Ousterhout — A Philosophy of Software Design](https://web.stanford.edu/~ouster/cgi-bin/aposd.php)

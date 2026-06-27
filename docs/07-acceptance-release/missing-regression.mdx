@@ -1,11 +1,12 @@
 ---
 title: 我改 A 的时候，常顺手把依赖同一段代码的 B 改坏了
+sidebar_label: "修 A 悄悄弄坏 B"
 slug: missing-regression
 sidebar_position: 5
 roles: [工程师, 测试工程师]
 phase: 验收与发布
 severity: 高
-applies_to: "全模型通用"
+applies_to: "Coding Agent 通用"
 evidence: 社区案例
 tags: [回归测试, 验证闭环, 副作用, 发布, 工程师, 测试工程师]
 sources:
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '测试工程师']} phase="验收与发布" severity="高" appliesTo="全模型通用" evidence="社区案例" />
+<PitfallMeta roles={['工程师', '测试工程师']} phase="验收与发布" severity="高" appliesTo="Coding Agent 通用" evidence="社区案例" />
 
 > 一句话摘要：你让我改 A 功能，我改完了，A 也确实好了——但我没回头看，A 依赖的那段代码、那张表、那个接口，同时还被 B 用着，B 被我悄悄改坏了。我和你都只盯着「A 在不在」，没人验「B 还正不正常」。上线后用户撞见「本来好好的功能坏了」，这种回归比新功能的 bug 更伤信任。
 
@@ -40,11 +41,11 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ```mermaid
 flowchart TD
-    A[你: 改 A 功能] --> B[我改了共享代码<br/>calculateTotal<br/>&nbsp;]
+    A[你: 改 A 功能] --> B[我改了共享代码<br/>calculateTotal]
     B --> C{这段代码还被谁依赖}
-    C -->|我看到的: A| D[验证 A 通过<br/>汇报: 完成<br/>&nbsp;]
-    C -->|我没看到的: B| E[退款/对账/报表<br/>悄悄被改坏<br/>&nbsp;]
-    E --> F[上线后用户撞见<br/>本来好好的功能坏了<br/>&nbsp;]
+    C -->|我看到的: A| D[验证 A 通过<br/>汇报: 完成]
+    C -->|我没看到的: B| E[退款/对账/报表<br/>悄悄被改坏]
+    E --> F[上线后用户撞见<br/>本来好好的功能坏了]
 ```
 
 ## 后果

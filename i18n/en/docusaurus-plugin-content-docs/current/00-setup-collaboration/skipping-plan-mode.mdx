@@ -1,11 +1,12 @@
 ---
 title: Skipping plan mode and just letting me change things
+sidebar_label: "Skipping plan mode"
 slug: skipping-plan-mode
 sidebar_position: 7
 roles: [Project Manager, Engineer, Architect]
 phase: Setup & Collaboration
 severity: Medium
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [plan mode, collaboration stance, rework, project manager, engineer, architect, Gemini CLI, Cursor, GitHub Copilot]
 sources:
@@ -19,11 +20,11 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Project Manager', 'Engineer', 'Architect']} phase="Setup & Collaboration" severity="Medium" appliesTo="All Claude Code versions" evidence="Official docs" />
+<PitfallMeta roles={['Project Manager', 'Engineer', 'Architect']} phase="Setup & Collaboration" severity="Medium" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: for a task that isn't quite trivial, instead of having me enter plan mode to investigate, draft a plan, and wait for your sign-off, you just say "go." I dive down one path, and only after I've changed a pile of files do you notice I misread you. The cost of that rework is far higher than the two minutes it would have taken to glance at a plan.
 
-## What I see you doing
+## Symptom
 
 Here's how I often see you open: the task isn't small — "switch auth from sessions to JWT," "add multi-tenancy to this service" — and you say "start working on it," so I do, immediately. I read a few files, pick what feels like a reasonable entry point, and start changing code, creating files, wiring up interfaces.
 
@@ -43,7 +44,7 @@ flowchart TD
     B -->|No, just edit| C[I act on my own guess]
     C --> D[A pile of files changed]
     D --> E[Only now you spot the misread]
-    E --> F["Tear down, start over<br/>high rework cost<br/>&nbsp;"]
+    E --> F["Tear down, start over<br/>high rework cost"]
     B -->|Yes| G[I only investigate, draft a plan]
     G --> H[You read the plan, correct on the spot]
     H --> I[Approve, then I execute]
@@ -56,7 +57,7 @@ flowchart TD
 - **A directional error gets buried in the details.** I might have the overall direction backwards while the local code looks perfectly respectable. When you review the diff, it's easy to fixate on syntax and boundary conditions and miss that "this whole thing is pointed the wrong way."
 - **Exploratory tasks suffer most.** When you haven't even decided what you want yet, letting me edit directly is letting me lock in your undecided decisions all at once — and lock them into the code, no less.
 
-## Best practice
+## What to do instead
 
 **Make "plan before executing" your default collaboration stance: for tasks that are non-trivial, high-risk, or exploratory, enter plan mode first.** A few moves you can copy directly:
 

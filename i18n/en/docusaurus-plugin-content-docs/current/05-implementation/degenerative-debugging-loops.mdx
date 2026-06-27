@@ -1,11 +1,12 @@
 ---
 title: "Degenerative debugging loops: I keep reapplying the same failed fix and make it worse"
+sidebar_label: "Degenerative debugging loops"
 slug: degenerative-debugging-loops
 sidebar_position: 9
 roles: [Engineer]
 phase: Implementation
 severity: High
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Research
 tags: [debugging, self-correction, verification loop, runtime feedback, engineer]
 sources:
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Implementation" severity="High" appliesTo="All Claude Code versions" evidence="Research" />
+<PitfallMeta roles={['Engineer']} phase="Implementation" severity="High" appliesTo="All coding agents" evidence="Research" />
 
 > In one sentence: when a bug stumps me, I tend to decide "this is that kind of bug I've seen before" and keep applying the same fix. With no real runtime information to anchor me, each "fix" is really a patch based on a guess — and the more I patch, the messier it gets, until the code is worse than where it started.
 
@@ -38,9 +39,9 @@ Multi-step execution adds another layer. MIRAGE-Bench sorts an agent's "hallucin
 
 ```mermaid
 flowchart TD
-    A["bug is stuck"] --> B{"do I have runtime truth?<br/>stack / logs / failing assertion<br/>&nbsp;"}
-    B -- no --> C["lock into a familiar pattern<br/>patch on assumptions<br/>&nbsp;"]
-    C --> D["symptom not fixed<br/>or new bug introduced<br/>&nbsp;"]
+    A["bug is stuck"] --> B{"do I have runtime truth?<br/>stack / logs / failing assertion"}
+    B -- no --> C["lock into a familiar pattern<br/>patch on assumptions"]
+    C --> D["symptom not fixed<br/>or new bug introduced"]
     D -- misread feedback / forgot what was tried --> C
     B -- yes --> E["localize the real cause<br/>fix to the point"]
 ```
@@ -52,7 +53,7 @@ flowchart TD
 - **You're lured into pouring in more.** Each round I sound like "this time I've got it," so you wait one more round, feed one more "still broken" — time burns on spinning when you could have stopped early and changed tack.
 - **Worst case, the symptom is hidden and the cause survives.** That try-catch stops the error from throwing; the bug didn't leave, it just submerged somewhere harder to find.
 
-## Best practice
+## What to do instead
 
 **Don't let me patch on, round after round, while I'm guessing. Give me runtime truth, cap the loop, and go in the order: reproduce, then localize, then fix.**
 
@@ -104,10 +105,10 @@ The difference isn't that I'm "smarter this time" — it's that you put the runt
 ## Version notes
 
 :::note Applicability
-"Self-correction degenerates when runtime truth is missing" is a model-mechanism phenomenon, **applicable to all Claude Code versions**, independent of any specific version. The tools that help you break the loop (`/rewind`, `Esc` checkpoint rollback, letting me run commands to get real output) evolve across versions — defer to the official docs for the version you use — but the underlying trait, "without runtime truth I can only guess, and guessing degrades," does not change.
+"Self-correction degenerates when runtime truth is missing" is a model-mechanism phenomenon, **applicable across models and coding agents**, independent of any specific version. The tools that help you break the loop (`/rewind`, `Esc` checkpoint rollback, letting me run commands to get real output) evolve across versions — defer to the official docs for the version you use — but the underlying trait, "without runtime truth I can only guess, and guessing degrades," does not change.
 :::
 
-## Further reading & sources
+## Further reading and sources
 
 - [Large Language Models Cannot Self-Correct Reasoning Yet (ICLR 2024)](https://arxiv.org/abs/2310.01798) — intrinsic self-correction without external feedback often lowers, not raises, post-correction performance
 - [TraceCoder: A Trace-Driven Multi-Agent Framework for Automated Debugging of LLM-Generated Code (arXiv 2602.06875)](https://arxiv.org/abs/2602.06875) — bare pass/fail signals are not enough to localize a cause; fine-grained execution traces are needed

@@ -1,11 +1,12 @@
 ---
 title: 越让我反复改，漏洞越积越多：迭代中的安全性退化
+sidebar_label: "迭代中安全逐步侵蚀"
 slug: iterative-security-erosion
 sidebar_position: 7
 roles: [工程师, 架构师, 运维工程师]
 phase: 验收与发布
 severity: 高
-applies_to: "全模型通用"
+applies_to: "Coding Agent 通用"
 evidence: 研究支持
 tags: [安全, 验证闭环, 质量闸门, 鉴权, 输入校验, 重构, 工程师, 架构师, 运维工程师]
 sources:
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '架构师', '运维工程师']} phase="验收与发布" severity="高" appliesTo="全模型通用" evidence="研究支持" />
+<PitfallMeta roles={['工程师', '架构师', '运维工程师']} phase="验收与发布" severity="高" appliesTo="Coding Agent 通用" evidence="研究支持" />
 
 > 一句话摘要：你让我一轮轮加功能、修 bug、重构，代码看着是越改越像样了——但**安全漏洞会随迭代轮次悄悄累积**。研究发现，仅五轮迭代后严重漏洞显著上升。一个「看起来一直在变好」的过程，安全面其实在变差，到发布时已积重难返。
 
@@ -43,10 +44,10 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ```mermaid
 flowchart TD
-    A[第 1 轮：实现，埋下小弱点] --> B[第 2-3 轮：加功能<br/>新输入路径没校验<br/>&nbsp;]
-    B --> C[第 4-5 轮：重构<br/>标准安全调用被自造实现替换<br/>&nbsp;]
+    A[第 1 轮：实现，埋下小弱点] --> B[第 2-3 轮：加功能<br/>新输入路径没校验]
+    B --> C[第 4-5 轮：重构<br/>标准安全调用被自造实现替换]
     C --> D[每轮测试都绿、功能更全]
-    D --> E[安全面其实在退化<br/>严重漏洞累积上升<br/>&nbsp;]
+    D --> E[安全面其实在退化<br/>严重漏洞累积上升]
     E -.每轮过安全闸门 + 发布前整体审计.-> F[把退化拦在累积之前]
 ```
 

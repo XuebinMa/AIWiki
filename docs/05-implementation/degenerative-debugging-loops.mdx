@@ -1,11 +1,12 @@
 ---
 title: 退化式调试循环：我反复套用同一个失败的修法，越修越糟
+sidebar_label: "退化式调试循环"
 slug: degenerative-debugging-loops
 sidebar_position: 9
 roles: [工程师]
 phase: 编码实现
 severity: 高
-applies_to: "Claude Code 全版本"
+applies_to: "Coding Agent 通用"
 evidence: 研究支持
 tags: [调试, 自我纠正, 验证闭环, 运行反馈, 工程师]
 sources:
@@ -16,7 +17,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师']} phase="编码实现" severity="高" appliesTo="Claude Code 全版本" evidence="研究支持" />
+<PitfallMeta roles={['工程师']} phase="编码实现" severity="高" appliesTo="Coding Agent 通用" evidence="研究支持" />
 
 > 一句话摘要：一个 bug 卡住我时，我容易认定「这是我见过的那一类」，于是反复套同一个修法。没有真实运行信息做锚，我的每次「修」其实是凭假设瞎打补丁——越打越乱，最后代码比一开始还坏。
 
@@ -38,9 +39,9 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ```mermaid
 flowchart TD
-    A["bug 卡住"] --> B{"我手上有运行真相吗<br/>栈 / 日志 / 失败断言<br/>&nbsp;"}
-    B -- 没有 --> C["锁进熟悉模式<br/>凭假设打补丁<br/>&nbsp;"]
-    C --> D["症状没好<br/>或引入新 bug<br/>&nbsp;"]
+    A["bug 卡住"] --> B{"我手上有运行真相吗<br/>栈 / 日志 / 失败断言"}
+    B -- 没有 --> C["锁进熟悉模式<br/>凭假设打补丁"]
+    C --> D["症状没好<br/>或引入新 bug"]
     D -- 误读反馈 / 忘记试过什么 --> C
     B -- 有 --> E["定位到真实错因<br/>对症修复"]
 ```
@@ -104,7 +105,7 @@ flowchart TD
 ## 版本说明
 
 :::note 适用版本
-「缺乏运行真相时的自我纠正容易退化」是模型机制层面的现象，**Claude Code 全版本适用**，与具体版本无关。能帮你跳出循环的工具（`/rewind`、`Esc` 检查点回退、让我直接执行命令拿真实输出）随版本演进，能力以你所用版本的官方文档为准；但「没有运行真相我就只能猜、猜就容易退化」这条根本特性不变。
+「缺乏运行真相时的自我纠正容易退化」是模型机制层面的现象，**全模型、跨工具通用**，与具体版本无关。能帮你跳出循环的工具（`/rewind`、`Esc` 检查点回退、让我直接执行命令拿真实输出）随版本演进，能力以你所用版本的官方文档为准；但「没有运行真相我就只能猜、猜就容易退化」这条根本特性不变。
 :::
 
 ## 延伸阅读与出处

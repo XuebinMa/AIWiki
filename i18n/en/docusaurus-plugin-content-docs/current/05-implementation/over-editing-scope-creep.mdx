@@ -1,11 +1,12 @@
 ---
 title: "Over-editing: you asked about one file, I changed five"
+sidebar_label: "Over-editing scope creep"
 slug: over-editing-scope-creep
 sidebar_position: 6
 roles: [Engineer]
 phase: Implementation
 severity: Medium
-applies_to: "All Claude Code versions"
+applies_to: "All coding agents"
 evidence: Official docs
 tags: [scope, diff review, code review, context window, Engineer]
 sources:
@@ -15,11 +16,11 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer']} phase="Implementation" severity="Medium" appliesTo="All Claude Code versions" evidence="Official docs" />
+<PitfallMeta roles={['Engineer']} phase="Implementation" severity="Medium" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: you asked me to change one line of config, and along the way I renamed variables, refactored a nearby function, and touched two other files. The line you actually wanted is buried under changes you never asked for — a diff that should have sailed through review is now a high-risk overhaul.
 
-## What you'll see
+## Symptom
 
 Here's how it tends to end up: you say "bump the timeout from 30 seconds to 60," expecting a one-line diff. What I hand back is — that one line, **plus** the renaming of `data` and `tmp` in the same function to something "cleaner," an if-else rewritten into an early return, the whole file reformatted, and a trip to a second file to "unify" a similar pattern I happened to notice.
 
@@ -43,7 +44,7 @@ flowchart TD
     C --> E[Wander off to a nearby file]
     D --> F[Diff balloons]
     E --> F
-    F --> G[The line you wanted is buried<br/>&nbsp;]
+    F --> G[The line you wanted is buried]
 ```
 
 ## Consequences
@@ -53,7 +54,7 @@ flowchart TD
 - **The risk grows.** A one-line change that should have sailed through — and been trivial to locate if it broke — gets upgraded into a "five files touched" overhaul. When a bug does show up, the surface area you have to search just grew by an order of magnitude.
 - **Rollback gets dirty.** You want to undo that one line, only to find it bundled into the same commit as a pile of unrelated changes. The clean revert is gone.
 
-## Best practice
+## What to do instead
 
 **Make scope part of the instruction, and have me report the plan before I touch anything — your nod first, my edits second.**
 
