@@ -1,70 +1,95 @@
-# AiWiki
+<p align="center">
+  <img src="./static/img/logo.svg" alt="AiWiki logo" width="120" />
+</p>
 
-> AI 最理解 AI。这是一本**从 AI 视角写的「AI 使用误区与最佳实践」百科**——告诉你人们在使用 AI 时反复踩的坑，以及怎么绕开它们。
->
-> _An encyclopedia of AI usage pitfalls and best practices, written from the AI's own perspective._
+<h1 align="center">AiWiki</h1>
 
-**聚焦：用 AI 编码工具做软件工程**，覆盖从灵感、调研、需求、设计、编码、测试到发布的完整流程。绝大多数误区是范式级的、跨工具通用；当前以 [Claude Code](https://code.claude.com/docs) 覆盖最深，正逐步把同类工具（Cursor、GitHub Copilot、Codex CLI、Gemini CLI…）的差异补齐。
+<p align="center">
+  <strong>An encyclopedia of AI-coding pitfalls &amp; best practices — written from the AI's own first-person perspective.</strong><br/>
+  <sub>用 AI 第一人称视角写的「AI 编码误区与最佳实践」百科</sub>
+</p>
 
-🌐 中文 / English 双语 · 📚 按软件工程生命周期组织 · 🏷️ 按角色与版本检索
+<p align="center">
+  <a href="https://xuebinma.github.io/AIWiki/en/"><img src="https://img.shields.io/badge/read-online-2ea44f" alt="Read online" /></a>
+  <a href="https://github.com/xuebinma/AIWiki/actions/workflows/deploy.yml"><img src="https://github.com/xuebinma/AIWiki/actions/workflows/deploy.yml/badge.svg" alt="Deploy" /></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-CC%20BY--SA%204.0-blue.svg" alt="License: CC BY-SA 4.0" /></a>
+  <a href="https://github.com/xuebinma/AIWiki/stargazers"><img src="https://img.shields.io/github/stars/xuebinma/AIWiki?style=social" alt="Stars" /></a>
+</p>
+
+<p align="center">
+  <b>English</b> · <a href="./README.zh-CN.md">中文</a> · <a href="https://xuebinma.github.io/AIWiki/en/">Live site</a> · <a href="https://xuebinma.github.io/AIWiki/en/tool-matrix">Tool matrix</a>
+</p>
 
 ---
 
-## 这本书为什么不一样
+> You said "just start," so I did. I assumed "multi-tenant" meant splitting the database by header — you meant routing by subdomain. Eight files later, you noticed I'd misread you.
 
-市面上已有大量 AI 编码工具的「最佳实践清单」「配置合集」和「教程翻译」。本项目的差异化在于一个尚无人占住的组合：
+That's the opening of a real entry. The whole book reads in that voice: **not a third-person tutorial on how to use AI, but the AI telling you, in the first person, where you most often go wrong working with it.**
 
-- **AI 第一人称叙述** —— 不是第三人称教程，而是「我作为模型，看到你常这样做」。
-- **从机制讲根因** —— 把表面现象追到模型的工作方式，让最佳实践成为能自己推导的常识。
-- **按软件工程角色检索** —— 每条误区标注适用角色（项目经理 / 架构师 / 工程师 / 测试 / 运维）。
-- **按 AI 版本区分** —— 版本是内容的一等公民；旧版本的坑可能在新版本已被填上。
+> 📖 **Fully bilingual.** Every entry exists in both English and 中文 — Chinese is the writing source, English is a 1:1 mirror. Switch languages from the top-right of the site, or read the [中文 README](./README.zh-CN.md).
 
-## 内容结构
+<!-- TODO: add a screenshot or short GIF of the site here, e.g. ![AiWiki](./static/img/screenshot.png) — it noticeably lifts click-through when the repo is shared. -->
 
-以软件工程生命周期为主线：
+## Why this is different
 
-| 阶段 | 目录 |
+Plenty of "best-practice lists" and "config dumps" for AI coding tools already exist. AiWiki fills a gap none of them do:
+
+- **First-person AI narration** — "here's what I, the model, see you doing," not a detached how-to.
+- **Root cause from mechanism** — every pitfall is traced back to how the model actually works, so the fix becomes something you can re-derive yourself.
+- **Verifiable, not vibes** — each entry tags its evidence (official docs / arXiv / CVE &amp; security advisories) and is version-stamped; the case library cites real incidents, three of them with CVE numbers.
+- **Cross-tool, honestly scoped** — the same pitfall compared across five coding tools, with each tool's coverage depth labeled rather than padded out.
+
+## What's inside
+
+- **76 pitfall entries** across the 8 phases of the software lifecycle
+- **5 real-world case studies** (3 CVE-backed)
+- **12 toolkit pieces** — checklists, prompt templates, and ready-to-copy workflows
+- **5 coding tools** covered, indexed in one [tool matrix](https://xuebinma.github.io/AIWiki/en/tool-matrix)
+
+| Phase | Directory |
 |------|------|
-| 准备与协作 | `docs/00-setup-collaboration/` |
-| 灵感与可行性 | `docs/01-ideation-feasibility/` |
-| 需求分析 | `docs/02-requirements/` |
-| 概要设计 | `docs/03-architecture/` |
-| 详细设计 | `docs/04-detailed-design/` |
-| 编码实现 | `docs/05-implementation/` |
-| 测试 | `docs/06-testing/` |
-| 验收与发布 | `docs/07-acceptance-release/` |
+| Setup &amp; collaboration | `docs/00-setup-collaboration/` |
+| Ideation &amp; feasibility | `docs/01-ideation-feasibility/` |
+| Requirements | `docs/02-requirements/` |
+| Architecture | `docs/03-architecture/` |
+| Detailed design | `docs/04-detailed-design/` |
+| Implementation | `docs/05-implementation/` |
+| Testing | `docs/06-testing/` |
+| Acceptance &amp; release | `docs/07-acceptance-release/` |
 
-每一条误区都用统一结构呈现：现象 → 为什么会这样 → 后果 → 最佳实践 → 示例 → 版本说明 → 出处。
+Every entry follows one structure: **what I see you doing → why it happens → consequences → best practice → example → version notes → sources.**
 
-## 本地运行
+## Start here
 
-基于 [Docusaurus](https://docusaurus.io/)（原生支持版本化、双语 i18n、全文搜索）。
+New here? A few ways in:
+
+- 🌐 **[Read the site](https://xuebinma.github.io/AIWiki/en/)** (English) · [中文站点](https://xuebinma.github.io/AIWiki/)
+- 🧭 **[Tool matrix](https://xuebinma.github.io/AIWiki/en/tool-matrix)** — what differs between Claude Code, Cursor, Copilot, Codex, and Gemini
+- 👤 **[Browse by role](https://xuebinma.github.io/AIWiki/en/roles)** — PM / architect / engineer / QA / ops
+- A few representative pitfalls: *Skipping plan mode and just letting me change things* · *Context-file overload* · *You ask me to "fix the test," I make it green instead of correct*
+
+## Covered tools
+
+**Claude Code** has the deepest coverage and is the book's default reference. **Cursor, GitHub Copilot, Codex CLI, and Gemini CLI** each get their own "tool differences" sections, plus a standalone entry wherever a pitfall comes from a mechanism unique to one tool. Coverage depth is labeled honestly — proprietary, fast-changing tools lean on security disclosures and official docs, and are thinner. See the [tool matrix](https://xuebinma.github.io/AIWiki/en/tool-matrix).
+
+## Run locally
+
+Built on [Docusaurus](https://docusaurus.io/) (native versioning, bilingual i18n, full-text search).
 
 ```bash
 npm install
-npm run start                 # 中文站点
-npm run start -- --locale en  # 英文站点
-npm run build                 # 全量构建（两个语言）
+npm run start                 # Chinese site
+npm run start -- --locale en  # English site
+npm run build                 # full build (both locales)
 ```
 
-## 参与贡献
+## Contributing
 
-这是一个开放的、长期演进的项目。欢迎补充新的误区条目、修正错误、完善翻译。
+An open, long-running project. New pitfall entries, corrections, and translation fixes are all welcome.
 
-- 📖 [贡献指南 CONTRIBUTING.md](./CONTRIBUTING.md) —— 条目模板与提交流程
-- ✍️ [写作规范 STYLE-GUIDE.md](./STYLE-GUIDE.md) —— 如何写得像真人、可靠、有出处
+- 📖 [CONTRIBUTING.md](./CONTRIBUTING.md) — entry template &amp; submission flow
+- ✍️ [STYLE-GUIDE.md](./STYLE-GUIDE.md) — how to write human, reliable, well-sourced prose
 
-## 路线图
+## License
 
-- [x] 站点骨架（Docusaurus + 双语 + Mermaid）
-- [x] 内容模型、条目模板、写作规范
-- [x] 首批样板条目（编码 / 测试 / 需求阶段）
-- [ ] 铺量其余生命周期阶段
-- [ ] 接入 Algolia DocSearch 全文搜索
-- [ ] 按需启用 Docusaurus 原生版本快照
-- [ ] 扩展到其他 AI 编码工具（Cursor / GitHub Copilot / Codex CLI / Gemini CLI…）：反模式主条目 + 「工具差异」小节 + 工具矩阵（进行中）
-- [ ] 扩展到其他领域（写作 / 视频 / 商业 / 数据分析）
-
-## 许可与版权
-
-内容以 **CC BY-SA 4.0** 共享，引用来源已在各条目末尾标注。配图优先自绘（Mermaid），外部素材仅采用授权清晰者并注明出处。如发现任何引用不当，请提 [Issue](https://github.com/xuebinma/AIWiki/issues)。
+Content is shared under **[CC BY-SA 4.0](./LICENSE)**; sources are cited at the foot of each entry. Diagrams are self-drawn (Mermaid) where possible; external material is used only when clearly licensed and attributed. Spot a problem? Open an [issue](https://github.com/xuebinma/AIWiki/issues).
