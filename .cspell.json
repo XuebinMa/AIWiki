@@ -10,10 +10,19 @@
     "terminology.md"
   ],
   "patterns": [
-    { "name": "cjk", "pattern": "[\\u3400-\\u9fff\\uf900-\\ufaff\\u3000-\\u303f\\uff00-\\uffef]+" },
-    { "name": "mermaid", "pattern": "/```mermaid[\\s\\S]*?```/g" }
+    {
+      "name": "cjk",
+      "pattern": "[\\u3400-\\u9fff\\uf900-\\ufaff\\u3000-\\u303f\\uff00-\\uffef]+"
+    },
+    {
+      "name": "mermaid",
+      "pattern": "/```mermaid[\\s\\S]*?```/g"
+    }
   ],
-  "ignoreRegExpList": ["cjk", "mermaid"],
+  "ignoreRegExpList": [
+    "cjk",
+    "mermaid"
+  ],
   "words": [
     "Claude",
     "Anthropic",
@@ -192,6 +201,12 @@
     "logprobs",
     "Opacus",
     "Syft",
-    "unlearning"
+    "unlearning",
+    "dedup",
+    "Nasr",
+    "autoregressive",
+    "extractability",
+    "recomputable",
+    "MinHash"
   ]
 }
