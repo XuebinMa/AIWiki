@@ -4,6 +4,11 @@
       "severity": "高",
       "maturity": "研究",
       "technique": "记忆与训练数据抽取"
+    },
+    "dp-fine-tuning": {
+      "severity": "中",
+      "maturity": "试验",
+      "technique": "差分隐私"
     }
   },
   "en": {
@@ -11,6 +16,11 @@
       "severity": "High",
       "maturity": "Research",
       "technique": "Memorization & training-data extraction"
+    },
+    "dp-fine-tuning": {
+      "severity": "Medium",
+      "maturity": "Experimental",
+      "technique": "Differential privacy"
     }
   }
 }

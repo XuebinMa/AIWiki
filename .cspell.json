@@ -207,6 +207,12 @@
     "autoregressive",
     "extractability",
     "recomputable",
-    "MinHash"
+    "MinHash",
+    "Abadi",
+    "DPIA",
+    "FTRL",
+    "Gboard",
+    "distinguishability",
+    "hyperparameters"
   ]
 }
