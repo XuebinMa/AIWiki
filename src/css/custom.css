@@ -147,11 +147,10 @@
   box-shadow: 0 8px 40px rgb(0 0 0 / 40%);
 }
 .mermaid-zoom-stage svg {
+  /* 尺寸由 mermaidZoom.js 按视口等比设定（内联 width/height）。这里不再用
+     width/height:auto——auto 在收缩到内容的舞台里会让没有 width/height 属性的
+     Mermaid SVG 塌成 0×0（叠层全黑、看不到图）。 */
   display: block;
-  width: auto;
-  height: auto;
-  max-width: 92vw;
-  max-height: 84vh;
 }
 .mermaid-zoom-close {
   position: fixed;
