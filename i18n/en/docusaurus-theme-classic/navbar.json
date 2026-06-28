@@ -34,5 +34,9 @@
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
+  },
+  "item.label.误区总览（按阶段）": {
+    "message": "All pitfalls (by stage)",
+    "description": "Navbar item with label 误区总览（按阶段）"
   }
 }
