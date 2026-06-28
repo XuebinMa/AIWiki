@@ -150,7 +150,8 @@ const config = {
           {
             title: '关于',
             items: [
-              { label: '这本书是什么', to: '/' },
+              { label: 'AiWiki 是什么', to: '/' },
+              { label: 'AI 编码误区', to: '/welcome' },
               { label: '贡献指南', href: 'https://github.com/xuebinma/AIWiki/blob/main/CONTRIBUTING.md' },
               { label: '写作规范', href: 'https://github.com/xuebinma/AIWiki/blob/main/STYLE-GUIDE.md' },
             ],

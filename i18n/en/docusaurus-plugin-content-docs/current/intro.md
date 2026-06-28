@@ -1,15 +1,15 @@
 ---
-slug: /
+slug: /welcome
 sidebar_position: 0
 title: Start here
-description: AiWiki — an encyclopedia of AI-coding pitfalls and the guardrails for each, written from the model's side. It focuses on the cross-tool pitfalls of using AI coding tools for software engineering, with Claude Code as the deepest coverage so far.
+description: "AI Coding Pitfalls — written from the model's side: the cross-tool pitfalls of using AI coding tools for software engineering, and the engineering guardrails for each, with Claude Code as the deepest coverage so far."
 ---
 
 import Link from '@docusaurus/Link';
 
 # Start here
 
-**This is an AI-collaboration pitfalls handbook, written from the AI's side: the mistakes you're most likely to make writing code with an AI coding tool, and the engineering guardrails for each.**
+**This is the AI Coding Pitfalls handbook, written from the AI's side: the mistakes you're most likely to make writing code with an AI coding tool, and the engineering guardrails for each.**
 
 <div className="role-cta">
   <Link className="button button--primary button--lg" to="/tags/engineer">⌨️ I'm an engineer — code & tests</Link>

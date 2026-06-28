@@ -1,15 +1,15 @@
 ---
-slug: /
+slug: /welcome
 sidebar_position: 0
 title: 这本书是什么
-description: AiWiki —— 从 AI 视角写的「AI 使用误区与最佳实践」百科。聚焦用 AI 编码工具做软件工程的通用误区，当前以 Claude Code 覆盖最深。
+description: 「AI 编码误区」—— 从 AI 第一人称视角，讲用 AI 编码工具做软件工程最容易踩的坑，以及对应的工程护栏；当前以 Claude Code 覆盖最深。
 ---
 
 import Link from '@docusaurus/Link';
 
 # 这本书是什么
 
-**这是一本从 AI 视角写的「AI 协作误区手册」：用 AI 编码工具写代码时最容易踩的坑，以及对应的工程护栏。**
+**这是一本从 AI 视角写的「AI 编码误区」手册：用 AI 编码工具写代码时最容易踩的坑，以及对应的工程护栏。**
 
 <div className="role-cta">
   <Link className="button button--primary button--lg" to="/tags/工程师">⌨️ 我是工程师 —— 看编码与测试</Link>

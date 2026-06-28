@@ -48,6 +48,47 @@
   font-size: 0.95rem;
 }
 
+/* 项目主页（/）：并列主题的入口卡片。主题增多时自动换行成网格。 */
+.subject-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0 2rem;
+}
+.subject-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1.4rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 10px;
+  background: var(--ifm-background-surface-color);
+  color: var(--ifm-font-color-base);
+  text-decoration: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+.subject-card:hover {
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 10%);
+  transform: translateY(-2px);
+  text-decoration: none;
+  color: var(--ifm-font-color-base);
+}
+.subject-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+}
+.subject-card p {
+  flex: 1;
+  margin: 0 0 0.75rem;
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: var(--ifm-color-emphasis-700);
+}
+.subject-card__enter {
+  font-weight: 600;
+  color: var(--ifm-color-primary);
+}
+
 /* 侧边栏层级字号：默认所有层级同字号，分不清主次。让二级（分类下的条目）
    比一级（分类标题 / 顶层文档）小一号，做出清晰的层级感。 */
 .theme-doc-sidebar-item-link-level-2 > .menu__link {
