@@ -34,6 +34,10 @@ const config = {
       onBrokenMarkdownLinks: 'warn',
     },
   },
+
+  // 客户端模块：Mermaid 图「点击放大」（全屏叠层 + 滚轮缩放 + 拖拽）。
+  clientModules: [require.resolve('./src/clientModules/mermaidZoom.js')],
+
   themes: [
     '@docusaurus/theme-mermaid',
     // 本地全文搜索（构建即用、零外部依赖、支持中英）。导航栏出现搜索框 + Ctrl/Cmd-K。

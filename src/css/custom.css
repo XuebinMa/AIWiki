@@ -94,3 +94,84 @@
 .theme-doc-sidebar-item-link-level-2 > .menu__link {
   font-size: 0.85rem;
 }
+
+/* Mermaid 图「点击放大」（逻辑见 src/clientModules/mermaidZoom.js）。
+   图在内容栏里常被压窄、字偏小；点击即可在全屏叠层里放大看。 */
+.docusaurus-mermaid-container {
+  cursor: zoom-in;
+  position: relative;
+}
+/* 悬停时右上角给个放大提示，弱化、不抢图。 */
+.docusaurus-mermaid-container::after {
+  content: '⤢';
+  position: absolute;
+  top: 0.4rem;
+  right: 0.5rem;
+  font-size: 0.95rem;
+  line-height: 1;
+  padding: 0.15rem 0.3rem;
+  border-radius: 0.25rem;
+  color: var(--ifm-color-emphasis-600);
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  opacity: 0;
+  transition: opacity var(--ifm-transition-fast) ease;
+  pointer-events: none;
+}
+.docusaurus-mermaid-container:hover::after {
+  opacity: 0.85;
+}
+
+.mermaid-zoom-overlay {
+  position: fixed;
+  inset: 0;
+  /* 高于 Docusaurus 所有固定元素（navbar 等），确保叠层全覆盖 */
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: rgb(0 0 0 / 78%);
+}
+.mermaid-zoom-overlay.is-open {
+  display: flex;
+}
+.mermaid-zoom-stage {
+  cursor: grab;
+  transform-origin: center center;
+  will-change: transform;
+  padding: 1.25rem;
+  border-radius: 10px;
+  /* 跟随明暗主题：Mermaid 配色也跟随主题，背景必须同向，否则字看不清 */
+  background: var(--ifm-background-color);
+  box-shadow: 0 8px 40px rgb(0 0 0 / 40%);
+}
+.mermaid-zoom-stage svg {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 92vw;
+  max-height: 84vh;
+}
+.mermaid-zoom-close {
+  position: fixed;
+  top: 1rem;
+  right: 1.25rem;
+  z-index: 10000;
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  font-size: 1.7rem;
+  line-height: 1;
+  color: #fff;
+  background: rgb(255 255 255 / 14%);
+  border: 1px solid rgb(255 255 255 / 35%);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.mermaid-zoom-close:hover {
+  background: rgb(255 255 255 / 25%);
+}
+body.mermaid-zoom-open {
+  overflow: hidden;
+}

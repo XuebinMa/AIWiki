@@ -32,7 +32,7 @@ used to improve / train the model? → written into **abuse-monitoring logs**, k
 Red line: I shouldn't write "I promise not to keep your data" — keeping it isn't up to "me," it's defined by the provider's terms plus your configuration. What is checkable: **this data boundary is defined by written terms and actual configuration; it can be verified item by item, and it changes with versions.**
 
 ```mermaid
-flowchart LR
+flowchart TB
     P["your prompt / private data"] --> X["leaves your boundary"]
     X --> T{"used for training?"}
     T -->|most APIs default no<br/>consumer products often default yes| L["abuse-monitoring logs<br/>kept N days"]
