@@ -107,11 +107,24 @@ const config = {
           src: 'img/logo.svg',
         },
         items: [
+          // 主题一「AI 编码误区」：作下拉，把它专属的交叉索引（角色 / 工具矩阵 / 机制 /
+          // 安全）收进来作二级子项——这些索引只服务于本主题，不该与两个并列主题同级平铺。
+          // 主题二「LLM 隐私保护」保持顶层并列；待它也长出自己的索引轴后再如法改成下拉。
           {
-            type: 'docSidebar',
-            sidebarId: 'wikiSidebar',
-            position: 'left',
+            type: 'dropdown',
             label: 'AI 编码误区',
+            position: 'left',
+            items: [
+              {
+                type: 'docSidebar',
+                sidebarId: 'wikiSidebar',
+                label: '误区总览（按阶段）',
+              },
+              { to: '/roles', label: '按角色浏览' },
+              { to: '/tool-matrix', label: '工具矩阵' },
+              { to: '/mechanisms', label: '机制索引' },
+              { to: '/threat-model', label: '安全索引' },
+            ],
           },
           {
             type: 'docSidebar',
@@ -119,26 +132,6 @@ const config = {
             sidebarId: 'privacySidebar',
             position: 'left',
             label: 'LLM 隐私保护',
-          },
-          {
-            to: '/roles',
-            position: 'left',
-            label: '按角色浏览',
-          },
-          {
-            to: '/tool-matrix',
-            position: 'left',
-            label: '工具矩阵',
-          },
-          {
-            to: '/mechanisms',
-            position: 'left',
-            label: '机制索引',
-          },
-          {
-            to: '/threat-model',
-            position: 'left',
-            label: '安全索引',
           },
           {
             type: 'localeDropdown',
