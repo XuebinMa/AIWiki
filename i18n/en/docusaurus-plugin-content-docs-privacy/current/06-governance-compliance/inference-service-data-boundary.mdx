@@ -35,7 +35,7 @@ Red line: I shouldn't write "I promise not to keep your data" — keeping it isn
 flowchart TB
     P["your prompt / private data"] --> X["leaves your boundary"]
     X --> T{"used for training?"}
-    T -->|most APIs default no<br/>consumer products often default yes| L["abuse-monitoring logs<br/>kept N days"]
+    T -->|most APIs default no<br/>consumer tier may default yes| L["abuse-monitoring logs<br/>kept N days"]
     L --> H["human / automated review"]
     H --> S["subprocessors (cloud/monitoring/vector store)"]
     S --> Reg["data residency region"]
@@ -48,7 +48,7 @@ flowchart TB
 
 Treating "data boundary" as one sentence happens because you only watch the "training" hop. The real retention / leakage risk is spread across the whole chain:
 
-- **Training use**: most APIs default to no training, but **consumer products often default to yes** (you must opt out) — don't conflate them.
+- **Training use**: most APIs default to no training; consumer / team / enterprise / API tiers can default differently — don't carry one tier's assumptions to another.
 - **Retention period**: how many days by default? Do abuse-monitoring copies count?
 - **Human review / abuse monitoring**: has a person / model looked at the retained data?
 - **Subprocessors**: who did the provider hand the data to (cloud, monitoring, third parties)? The boundary widens accordingly.
@@ -82,13 +82,21 @@ This checklist is the seed of the toolkit's "LLM Vendor Data Boundary Checklist"
 
 ## A real case / current vendor state (stamped 2026-06; verify current terms before deploying)
 
-:::caution The following are point-in-time vendor terms and change — verify the latest docs before citing
-- **OpenAI (API)**: since 2023-03-01, API data is **not used for training by default** (unless you explicitly opt in); abuse-monitoring logs are kept by default for **about 30 days** then deleted (longer if legally required or to prevent abuse); **zero data retention (ZDR)** is offered to eligible enterprise customers, not a self-serve toggle — enabled per endpoint by your account team (OpenAI, *Data controls in the OpenAI platform*).
-- **Anthropic (API)**: under commercial terms (Claude for Work / Enterprise / Education / Gov), **inputs and outputs are not used for training**; API log retention dropped **from 30 days to 7 days as of 2025-09-14**, auto-deleted at expiry; eligible enterprises can sign ZDR (Anthropic, *API and data retention*).
-- **"Deletion" can be overridden by law**: in its litigation with The New York Times, OpenAI was at one point ordered by a court to **preserve** data it would otherwise delete — showing that a legal hold sits above any retention promise, and "deleted at expiry" is not absolute.
+:::caution The following are point-in-time vendor terms, **broken out by endpoint / feature / model and subject to change** — verify the latest official docs and your contract before citing
+The table below is stamped 2026-06 and only illustrates "verify the boundary cell by cell"; it is not a basis for deployment:
+
+| Vendor | Scope | Trained on by default | Default retention | ZDR / exceptions |
+|---|---|---|---|---|
+| OpenAI | API (most endpoints) | No (unless you opt in) | abuse-monitoring logs commonly ~30 days then deleted (longer if legally required / to prevent abuse); **but application state, retention, and ZDR eligibility vary by endpoint / feature** | ZDR offered to eligible enterprises, not a self-serve toggle — enabled per endpoint by your account team |
+| Anthropic | API (commercial terms) | No (not used for training without your express permission) | **conversation content (your inputs and Claude's outputs) is not retained by default**; features that must store use the shortest practical TTL; **certain models (Covered Models) require 30-day retention** | ZDR covers the Messages and Token Counting APIs; **not** Console / Workbench, consumer products, Teams / Enterprise interfaces, or Managed Agents; data may be kept up to 2 years for violations or where required by law |
+
+- **Verify cell by cell — don't stretch one cell across the platform.** At the same vendor, retention and ZDR eligibility can differ widely by API / feature / model (e.g. Anthropic's Batch ~29 days, code-execution containers up to 30 days, Files until explicitly deleted). Treating "one cell" as the whole boundary is exactly the false security this entry breaks.
+- **"Deletion" can be overridden by law.** In its litigation with The New York Times, OpenAI was at one point ordered by a court to **preserve** data it would otherwise delete — a legal hold sits above any retention promise, and "deleted at expiry" is not absolute.
+
+(Stamped 2026-06: the Anthropic row is verified against its official *API and data retention* page; the OpenAI row is per its *Data controls in the OpenAI platform* page — verify the current official docs and your contract before deploying.)
 :::
 
-These three confirm the same thing: **a data boundary is a set of terms that are checkable, changeable, and subject to outside law — not a line that says "we take privacy seriously."**
+They confirm the same thing: **a data boundary is a set of terms that are checkable, changeable, and subject to outside law — not a line that says "we take privacy seriously."**
 
 ## Residual risk and trade-offs
 
@@ -96,7 +104,7 @@ Calling out each false security:
 
 - **"Default no training" ≠ "no retention."** Not training on it doesn't mean not logging it — abuse-monitoring copies are usually still kept for N days.
 - **"We deleted it" can be overridden by a legal hold.** See OpenAI / NYT above: litigation or regulators can force retention of data you thought was deleted.
-- **Consumer tier vs. API tier default differently.** At the same vendor, consumer products often default to training on your data (you must opt out), while APIs often default not to — don't carry one tier's assumptions to the other.
+- **Tiers default differently.** At the same vendor, the default data use of consumer / team / enterprise / API tiers can differ (some consumer products default to training on your data, requiring opt-out) — don't carry one tier's assumptions to another.
 - **ZDR is not a self-serve toggle.** It usually needs eligibility review + account-team enablement + specific endpoints; if you haven't signed it, don't assume you have it.
 - **Opt-out may not cover the whole chain.** Opting out of "training" may not also cover logs, caches, eval sets, and human-review samples — confirm coverage item by item.
 - **Subprocessors widen the boundary.** You trust the vendor, but the data may flow to its cloud / monitoring / third parties — the boundary is larger than the contract's front page.

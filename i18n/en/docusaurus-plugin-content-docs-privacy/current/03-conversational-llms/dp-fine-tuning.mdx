@@ -25,14 +25,14 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 ## Mechanism: what happens on my side
 
-In ordinary fine-tuning, how much a single sample can "tug" my parameters has, in principle, no ceiling — one extreme, distinctive sample can leave an **externally detectable imprint** on me (this is the shared root of memorization, extraction, and membership inference).
+In ordinary fine-tuning, how much a single sample can "tug" my parameters has **no uniform bound in the differential-privacy sense** — there are of course engineering limits (learning rate, gradient clipping, numerical range), but none of those is a provable privacy bound; one extreme, distinctive sample can still leave an **externally detectable imprint** on me (this is the shared root of memorization, extraction, and membership inference).
 
 DP-SGD (Abadi et al., CCS 2016) changes two things:
 
 1. **Per-sample gradient clipping**: clip each sample's gradient contribution to a norm bound C — putting a ceiling on any single sample's maximum influence.
 2. **Gaussian noise**: add noise on top of the clipped, summed gradient — blurring out "was this particular sample in this batch or not."
 
-The result is a provable property: whether any one sample is **present or absent**, its effect on my final parameter distribution is bounded by (ε, δ). Mind the red line: this is **not** "DP made me forget it" — I can't introspect that. What is externally arguable is: **after training, the advantage an attacker can get at telling apart 'was this sample in training or not' — from my parameters or outputs — is bounded by (ε, δ).**
+The result is a provable property: whether any one sample is **present or absent**, its effect on my final parameter distribution is bounded by (ε, δ). Mind the red line: this is **not** "DP made me forget it" — I can't introspect that. What is externally arguable is: **within the defined neighboring relation, privacy unit, and accounting assumptions, the extra information an attacker can gain at telling apart 'was this sample in training or not' — from my parameters or outputs — is bounded by (ε, δ)** — but the actual attack risk still depends on the prior, the query method, the number of compositions, and whether the privacy unit matches what you mean to protect.
 
 ```mermaid
 flowchart TB
@@ -74,6 +74,8 @@ In engineering it's two pieces: **clip + noise** give the per-step privacy loss,
 4. Save memory: use ghost clipping to avoid instantiating per-sample gradients
    (Li 2022); or pair parameter-efficient fine-tuning (LoRA/adapter) with DP,
    often better on utility/privacy/compute at once (Yu et al., ICLR 2022).
+   Note: parameter-efficient != private — only clipping + noise + accounting +
+   privacy unit together constitute DP; LoRA/adapter is just a cheaper carrier.
 5. Report the full set: ε, δ, privacy unit, accounting method, utility metric —
    not just "DP added."
 ```
@@ -81,6 +83,8 @@ In engineering it's two pieces: **clip + noise** give the per-step privacy loss,
 Every number (C, σ, the final ε) must carry **your own data and model conditions** when you ship it; the papers' values may not transfer to your setting.
 
 ## A real case
+
+(This entry's maturity is "Experimental": what follows is **research progress and engineering feasibility** evidence, not an endorsement that DP fine-tuning is already deployed at production scale; production-grade DP / federated deployment is in Volume 5.)
 
 DP fine-tuning had a "bad reputation" phase: bolt DP-SGD straight onto NLP and utility dropped a lot while compute got expensive, so it was deemed "impractical." Two 2022 works were the turning point: Li et al. showed that **large pretrained language models can be "strong differentially private learners"** — with DP-suited hyperparameters and ghost clipping, beating the best DP models of the time at the same privacy budget (Li et al., ICLR 2022); Yu et al. combined **parameter-efficient fine-tuning** (e.g. LoRA / adapters) with DP, improving utility, privacy, and compute/memory at once (Yu et al., ICLR 2022). What they confirm is not "DP fine-tuning is now free," but that "**at a reasonable ε, the utility cost of DP fine-tuning has gone from 'unusable' to 'an engineering trade-off you can make.'**" (Larger production-scale DP / federated deployments, like Gboard's DP-FTRL, are federated learning — see Volume 5.)
 
