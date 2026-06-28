@@ -140,7 +140,7 @@
   cursor: grab;
   transform-origin: center center;
   will-change: transform;
-  padding: 1.25rem;
+  padding: 0.75rem;
   border-radius: 10px;
   /* 跟随明暗主题：Mermaid 配色也跟随主题，背景必须同向，否则字看不清 */
   background: var(--ifm-background-color);
@@ -170,6 +170,23 @@
 }
 .mermaid-zoom-close:hover {
   background: rgb(255 255 255 / 25%);
+}
+/* 操作提示：固定在叠层底部居中，弱化、不抢图 */
+.mermaid-zoom-hint {
+  position: fixed;
+  bottom: 0.9rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: rgb(255 255 255 / 80%);
+  background: rgb(0 0 0 / 35%);
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 999px;
+  pointer-events: none;
+  white-space: nowrap;
 }
 body.mermaid-zoom-open {
   overflow: hidden;
