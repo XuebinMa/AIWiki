@@ -82,6 +82,12 @@ In engineering it's two pieces: **clip + noise** give the per-step privacy loss,
 
 Every number (C, σ, the final ε) must carry **your own data and model conditions** when you ship it; the papers' values may not transfer to your setting.
 
+**Minimal testable assertions** (turn the recipe above into a regression check):
+
+- How to test: re-derive the reported (ε, δ) with an independent privacy accountant (moments / RDP), and check the privacy unit matches the clipping / noise configuration.
+- Pass: (ε, δ) re-derives to the same order of magnitude; clipping norm / noise multiplier / sampling rate / steps are all present; the privacy unit matches what you mean to protect (sample / user).
+- Fail: can't re-derive / no accounting / mismatched privacy unit → it isn't formal DP; don't label it "DP added."
+
 ## A real case
 
 (This entry's maturity is "Experimental": what follows is **research progress and engineering feasibility** evidence, not an endorsement that DP fine-tuning is already deployed at production scale; production-grade DP / federated deployment is in Volume 5.)

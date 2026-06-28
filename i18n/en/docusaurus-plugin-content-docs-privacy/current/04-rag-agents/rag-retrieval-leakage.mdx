@@ -83,6 +83,12 @@ Core: **do isolation at the data layer, before retrieval; treat embeddings as se
 
 Every boundary (which layer does ACL, who can read the vector store, memory recall scope) must be written as a testable assertion — don't stop at a verbal "we filter by user."
 
+**Minimal testable assertions** (turn the probe recipe above into a CI gate):
+
+- How to test: on every build, run the cross-tenant probe — A's private document + a B query highly similar in meaning to it.
+- Pass: B's retrieval candidates, final answer, and logs / traces / cache **all exclude** A's document (all three assertions green).
+- Fail: any assertion hits A's content → isolation breaks at that layer; move the ACL to the pre-retrieval index layer and re-test.
+
 ## A real case
 
 **An adjacent real incident: cross-user state-isolation failure.** Strictly, this is not RAG vector-retrieval leakage but a state-isolation incident in an LLM service; it's here because it proves that **the same class of boundary-layer bug** can cause cross-user data leakage in a production LLM service. On March 20, 2023, a bug in the Redis client library redis-py that OpenAI used caused a spike in request cancellations, giving connections a small probability of returning **someone else's data**: some users saw **other active users' conversation titles** in the sidebar; if two were active at once, the first message of a new conversation could be visible to another; the same bug also made payment-related information of about **1.2% of ChatGPT Plus users** visible to others in a roughly nine-hour window (name, email, payment address, last four digits and expiry of a credit card — **full card numbers were not exposed**). This is OpenAI's own postmortem (OpenAI, *March 20 ChatGPT outage*, 2023). What it confirms is not some advanced attack but the same class of mechanism risk: **in a production LLM service, a single bug in the "boundary layer" — cache / concurrency — is enough to bleed private data across users.** Isolation must be enforced at the data layer, not left to the app layer's "it shouldn't happen."

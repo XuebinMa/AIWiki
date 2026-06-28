@@ -80,6 +80,12 @@ Ask each item, with a written answer + a date stamp (vendor terms change):
 
 This checklist is the seed of the toolkit's "LLM Vendor Data Boundary Checklist" — **use it as an artifact, file it per vendor, review it quarterly**, because the terms change.
 
+**Minimal testable assertions** (treat the checklist as a regression artifact):
+
+- How to test: keep a filled checklist per vendor, each cell carrying "source of the term + version date," reviewed quarterly.
+- Pass: every cell has a source and a date and matches your signed contract / DPA; no blank cells, no stale cells.
+- Fail: a cell has no source / contradicts the contract / is past its review date → mark it "unverified" and fill it in before any deployment decision.
+
 ## A real case / current vendor state (stamped 2026-06; verify current terms before deploying)
 
 :::caution The following are point-in-time vendor terms, **broken out by endpoint / feature / model and subject to change** — verify the latest official docs and your contract before citing

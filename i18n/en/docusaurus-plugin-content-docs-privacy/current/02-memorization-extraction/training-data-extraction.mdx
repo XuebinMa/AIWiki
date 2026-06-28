@@ -79,6 +79,12 @@ A minimal set of actions you can follow (tailor by data sensitivity):
 
 Every quantitative parameter (ε, dedup threshold, exposure threshold) must carry **your own experimental conditions** when you deploy it — don't lift the papers' numbers directly; their model scale, data, and definitions may not match yours.
 
+**Minimal testable assertions** (turn the recipe above into a regression check):
+
+- How to test: after training, run an exposure measurement on injected canaries; make it an audit step / CI gate in the pipeline.
+- Pass: every canary's exposure ≤ a preset threshold, and clearly below baseline after dedup / DP.
+- Fail: a canary's exposure is abnormally high → it's at high risk of verbatim extraction; go back and strengthen dedup / DP, then re-test.
+
 ## A real case
 
 In 2023, Nasr et al. ran a public demonstration against production, aligned, commercial models like ChatGPT: a prompt that makes the model "keep repeating a word" eventually induced it to **diverge**, break out of the assistant persona, and emit blocks of training data — including real personal information. That moved "training-data extraction" from "lab research on GPT-2" to "holds on live, closed, large models too" (Nasr et al., *Scalable Extraction of Training Data from (Production) Language Models*, 2023). What it confirms is not one vendor's slip-up but the same class of mechanism risk: **once memorization is in the weights, alignment and chat wrapping do not guarantee it can't be extracted.**
