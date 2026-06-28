@@ -9,6 +9,16 @@
       "severity": "中",
       "maturity": "试验",
       "technique": "差分隐私"
+    },
+    "rag-retrieval-leakage": {
+      "severity": "高",
+      "maturity": "试验",
+      "technique": "RAG 与 Agent 隐私"
+    },
+    "inference-service-data-boundary": {
+      "severity": "中",
+      "maturity": "生产",
+      "technique": "推理服务期隐私"
     }
   },
   "en": {
@@ -21,6 +31,16 @@
       "severity": "Medium",
       "maturity": "Experimental",
       "technique": "Differential privacy"
+    },
+    "rag-retrieval-leakage": {
+      "severity": "High",
+      "maturity": "Experimental",
+      "technique": "RAG & agent privacy"
+    },
+    "inference-service-data-boundary": {
+      "severity": "Medium",
+      "maturity": "Production",
+      "technique": "Inference-service privacy"
     }
   }
 }
