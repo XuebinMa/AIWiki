@@ -7,9 +7,13 @@
     "message": "AiWiki Logo",
     "description": "The alt text of navbar logo"
   },
-  "item.label.百科": {
-    "message": "Wiki",
-    "description": "Navbar item with label 百科"
+  "item.label.AI 编码误区": {
+    "message": "AI Coding Pitfalls",
+    "description": "Navbar item with label AI 编码误区"
+  },
+  "item.label.LLM 隐私保护": {
+    "message": "LLM Privacy",
+    "description": "Navbar item with label LLM 隐私保护"
   },
   "item.label.按角色浏览": {
     "message": "Browse by Role",

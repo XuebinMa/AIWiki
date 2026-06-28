@@ -225,3 +225,122 @@ Claude Code · Cursor · GitHub Copilot · Codex CLI · Gemini CLI · CLAUDE.md 
 - 仅博客 / Medium / 社区讨论 → 社区案例
 - 无强外部出处、主要靠机制推理 → 经验观察（实在拿不准 → 推测待验证）
 - 多类并存时取「最强」一类作为主标签。
+
+---
+
+# 「LLM 隐私保护」主题术语
+
+> 这一段服务于与「AI 编码误区」**并列的第二主题**（`privacy/` 目录）。立项见 `PROPOSAL-privacy-book.md`，看板见 `BACKLOG-privacy.md`。译名与上面同表一样以本段为准，**新增术语先补表再用**。`PrivacyMeta` 组件与隐私版 `aiwiki-entry-author`、`aiwiki-translator` 都依赖它。
+
+## 专有名词（不翻译，原样保留）
+
+DP-SGD · PATE · FHE · HE · MPC · TEE · MIA · PII · GDPR · NIST · OWASP · RAG · Opacus · canary · exposure · ε · δ · ρ-zCDP · RDP · PRV · DP-FTRL · Gboard
+
+## 隐私术语对照
+
+| 中文 | English | 备注 |
+|------|---------|------|
+| 差分隐私 | differential privacy (DP) | 以 ε/δ 量化的隐私保证 |
+| 隐私预算 | privacy budget (ε, δ) | ε 越小越私密；δ 是失败概率 |
+| 邻接关系 | adjacency / neighboring datasets | DP 定义的基准；区分样本级 / 用户级 |
+| 隐私会计 | privacy accounting | RDP / zCDP / PRV / DP-FTRL 等组合方法 |
+| 梯度裁剪 | gradient clipping | clipping norm |
+| 噪声乘子 | noise multiplier | DP-SGD 加噪强度 |
+| 用户级隐私 | user-level privacy | 保护「一个用户的全部数据」 |
+| 样本级隐私 | sample-level privacy | 保护「单条样本」，比用户级弱 |
+| 效用权衡 | utility trade-off | 隐私越强、模型效用通常越降 |
+| 联邦学习 | federated learning (FL) | 数据不出本地、只传更新 |
+| 安全聚合 | secure aggregation | 服务器只见聚合结果、不见单方更新 |
+| 同态加密 | homomorphic encryption (HE) | 密文上直接计算 |
+| 全同态加密 | fully homomorphic encryption (FHE) | 任意运算的 HE，开销最大 |
+| 安全多方计算 | secure multi-party computation (MPC) | 多方协作算函数、互不泄露输入 |
+| 可信执行环境 | trusted execution environment (TEE) | 硬件隔离的运行时飞地 |
+| 机密计算 | confidential computing | TEE 在云 / GPU 上的工程形态 |
+| 远程证明 | remote attestation | 向远端证明「我跑在可信环境里」 |
+| 信任边界 | trust boundary | 谁在边界内可信、边界外不可信 |
+| 侧信道 | side channel | 时序 / 功耗 / 缓存等非预期泄露通道 |
+| 成员推断攻击 | membership inference attack (MIA) | 判定「某样本是否在训练集」 |
+| 模型反演 | model inversion | 从模型反推输入 / 属性 |
+| 属性推断 | attribute inference | 推断未给出的敏感属性 |
+| 模型抽取 | model extraction / stealing | 通过查询复制模型功能 |
+| 训练数据抽取 | training-data extraction | 把记住的训练样本逼出来 |
+| 逐字记忆 | verbatim memorization | 模型可原样复现训练片段 |
+| 量化记忆 | quantified memorization | 以可测指标刻画记忆程度 |
+| 机器遗忘 | machine unlearning | 让模型「忘掉」指定数据 |
+| 被遗忘权 | right to be forgotten | GDPR Art.17 的数据主体权利 |
+| 输出抑制 | output suppression | 压低输出概率，≠ 真删除 |
+| 记忆审计 | memorization auditing | 用 canary / exposure 量化泄露 |
+| 探针 | canary | 注入训练集的稀有标记串 |
+| 暴露度 | exposure | canary 被模型偏好的程度指标 |
+| 个人可识别信息 | PII (personally identifiable information) | |
+| 脱敏 | redaction / de-identification | |
+| 匿名化 | anonymization | |
+| 去匿名化 | de-anonymization | 朴素匿名化可被反推还原 |
+| 合成数据 | synthetic data | 以生成数据替代真实数据 |
+| 上下文面隐私 | context-surface privacy | 系统提示词 / 会话 / 工具结果 / 检索片段的泄露面 |
+| 系统提示词提取 | system prompt extraction | |
+| 数据边界 | data boundary | 私有数据允许流到哪里的界线 |
+| 数据生命周期 | data lifecycle | 采集→训练→评估→日志→删除→备份 |
+| 数据血缘 | data lineage | 数据从哪来、流到哪、被谁复制 |
+| 数据保留 | data retention | 服务方保留输入 / 日志的时长与范围 |
+| 零数据保留 | zero data retention | 约定不留存请求数据 |
+| 假安全 | false security | 以为安全其实没有（本主题的头号靶子） |
+| 残余风险 | residual risk | 防护后仍存在的泄露可能 |
+| 威胁模型 | threat model | 防谁、防到什么程度的假设集 |
+
+## 枚举值映射（隐私 frontmatter 与 `<PrivacyMeta>`）
+
+### era 卷（阅读主线，与 `privacy/` 目录一一对应）
+
+| 目录 | 中文 | English |
+|------|------|---------|
+| `01-foundations` | 卷一 · 隐私根基 | Volume 1 · Privacy foundations |
+| `02-memorization-extraction` | 卷二 · 记忆与抽取 | Volume 2 · Memorization and extraction |
+| `03-conversational-llms` | 卷三 · 对话大模型 | Volume 3 · Conversational LLMs |
+| `04-rag-agents` | 卷四 · RAG 与 Agent | Volume 4 · RAG and agents |
+| `05-frontier-deployment` | 卷五 · 前沿与落地 | Volume 5 · Frontier and deployment |
+| `06-governance-compliance` | 卷六 · 治理与合规 | Volume 6 · Governance and compliance |
+
+### technique 技术板块（查询轴，14 选一；边界见 PROPOSAL §6.2）
+
+| 中文 | English |
+|------|---------|
+| 记忆与训练数据抽取 | Memorization & training-data extraction |
+| 推断类攻击 | Inference attacks (MIA / inversion / attribute) |
+| 模型抽取与窃取 | Model extraction & stealing |
+| 差分隐私 | Differential privacy |
+| 联邦学习与安全聚合 | Federated learning & secure aggregation |
+| 机器遗忘与被遗忘权 | Machine unlearning & right to be forgotten |
+| PII 检测与脱敏 | PII detection, redaction & synthetic data |
+| 隐私保护计算 | Privacy-preserving computation (HE / MPC / TEE) |
+| RAG 与 Agent 隐私 | RAG & agent privacy |
+| 上下文面隐私 | Context-surface privacy |
+| 推理服务期隐私 | Inference-service privacy |
+| 治理与合规 | Governance & compliance |
+| 数据生命周期与数据治理 | Data lifecycle & data governance |
+| 隐私评测与审计 | Privacy evaluation & auditing |
+
+### maturity 成熟度（硬约束；`生产` 须过硬闸门 C）
+
+| 中文 | English | 含义 |
+|------|---------|------|
+| 研究 | Research | 论文 / 原型，尚无生产验证 |
+| 试验 | Experimental | 有限试点 / 预览，未普遍可用 |
+| 生产 | Production | 真实部署 / 厂商文档 / 标准推荐且有工程实践 |
+
+### audience 受众（隐私 frontmatter 的 `audience`，对应第一主题的 roles）
+
+| 中文 | English |
+|------|---------|
+| 隐私工程师 | Privacy Engineer |
+| ML 工程师 | ML Engineer |
+| 安全工程师 | Security Engineer |
+| 合规工程师 | Compliance Engineer |
+
+### severity 隐私风险（沿用高 / 中 / 低，显示作「隐私风险」）
+
+| 中文 | English |
+|------|---------|
+| 高 | High |
+| 中 | Medium |
+| 低 | Low |

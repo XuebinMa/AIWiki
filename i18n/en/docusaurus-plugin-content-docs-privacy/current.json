@@ -1,0 +1,78 @@
+{
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.privacySidebar.category.🧱 卷一 · 隐私根基": {
+    "message": "🧱 Volume 1 · Privacy foundations",
+    "description": "The label for category '🧱 卷一 · 隐私根基' in sidebar 'privacySidebar'"
+  },
+  "sidebar.privacySidebar.category.🧱 卷一 · 隐私根基.link.generated-index.title": {
+    "message": "Volume 1 · Privacy foundations",
+    "description": "The generated-index page title for category '🧱 卷一 · 隐私根基' in sidebar 'privacySidebar'"
+  },
+  "sidebar.privacySidebar.category.🧱 卷一 · 隐私根基.link.generated-index.description": {
+    "message": "The pre-LLM, discriminative-era privacy foundation. Where membership inference attacks come from, and what differential privacy / federated learning / homomorphic encryption / secure multi-party computation / trusted execution environments each do and don't protect — only the minimum load-bearing set later volumes depend on, not a PPML textbook.",
+    "description": "The generated-index page description for category '🧱 卷一 · 隐私根基' in sidebar 'privacySidebar'"
+  },
+  "sidebar.privacySidebar.category.🧠 卷二 · 记忆与抽取": {
+    "message": "🧠 Volume 2 · Memorization and extraction",
+    "description": "The label for category '🧠 卷二 · 记忆与抽取' in sidebar 'privacySidebar'"
+  },
+  "sidebar.privacySidebar.category.🧠 卷二 · 记忆与抽取.link.generated-index.title": {
+    "message": "Volume 2 · Memorization and extraction",
+    "description": "The generated-index page title for category '🧠 卷二 · 记忆与抽取' in sidebar 'privacySidebar'"
+  },
+  "sidebar.privacySidebar.category.🧠 卷二 · 记忆与抽取.link.generated-index.description": {
+    "message": "The flagship volume: why generative pretrained models memorize training data verbatim, how an outside attacker extracts it, what factors (repetition, scale, context) amplify memorization, and defenses like deduplication / DP pretraining / memorization auditing.",
+    "description": "The generated-index page description for category '🧠 卷二 · 记忆与抽取' in sidebar 'privacySidebar'"
+  },
+  "sidebar.privacySidebar.category.💬 卷三 · 对话大模型": {
+    "message": "💬 Volume 3 · Conversational LLMs",
+    "description": "The label for category '💬 卷三 · 对话大模型' in sidebar 'privacySidebar'"
+  },
+  "sidebar.privacySidebar.category.💬 卷三 · 对话大模型.link.generated-index.title": {
+    "message": "Volume 3 · Conversational LLMs",
+    "description": "The generated-index page title for category '💬 卷三 · 对话大模型' in sidebar 'privacySidebar'"
+  },
+  "sidebar.privacySidebar.category.💬 卷三 · 对话大模型.link.generated-index.description": {
+    "message": "The privacy surface of the conversational-LLM era: PII regurgitation, context-surface privacy (system prompt / conversation context / tool-result leakage), DP fine-tuning made practical, and how membership inference evolves on LLMs.",
+    "description": "The generated-index page description for category '💬 卷三 · 对话大模型' in sidebar 'privacySidebar'"
+  },
+  "sidebar.privacySidebar.category.🔗 卷四 · RAG 与 Agent": {
+    "message": "🔗 Volume 4 · RAG and agents",
+    "description": "The label for category '🔗 卷四 · RAG 与 Agent' in sidebar 'privacySidebar'"
+  },
+  "sidebar.privacySidebar.category.🔗 卷四 · RAG 与 Agent.link.generated-index.title": {
+    "message": "Volume 4 · RAG and agents",
+    "description": "The generated-index page title for category '🔗 卷四 · RAG 与 Agent' in sidebar 'privacySidebar'"
+  },
+  "sidebar.privacySidebar.category.🔗 卷四 · RAG 与 Agent.link.generated-index.description": {
+    "message": "Data boundaries in the retrieval-and-agent era: cross-tenant / cross-user retrieval leakage from vector stores, cross-session memory bleed, tool calls sending private data outward, and data boundaries in multi-agent collaboration.",
+    "description": "The generated-index page description for category '🔗 卷四 · RAG 与 Agent' in sidebar 'privacySidebar'"
+  },
+  "sidebar.privacySidebar.category.🔬 卷五 · 前沿与落地": {
+    "message": "🔬 Volume 5 · Frontier and deployment",
+    "description": "The label for category '🔬 卷五 · 前沿与落地' in sidebar 'privacySidebar'"
+  },
+  "sidebar.privacySidebar.category.🔬 卷五 · 前沿与落地.link.generated-index.title": {
+    "message": "Volume 5 · Frontier and deployment",
+    "description": "The generated-index page title for category '🔬 卷五 · 前沿与落地' in sidebar 'privacySidebar'"
+  },
+  "sidebar.privacySidebar.category.🔬 卷五 · 前沿与落地.link.generated-index.description": {
+    "message": "The current frontier and its engineering landing, along three lines: private computation and confidential inference (TEE / GPU confidential computing / HE / MPC), verifiable deletion and machine unlearning, and production-grade differential privacy and federated learning deployment.",
+    "description": "The generated-index page description for category '🔬 卷五 · 前沿与落地' in sidebar 'privacySidebar'"
+  },
+  "sidebar.privacySidebar.category.⚖️ 卷六 · 治理与合规": {
+    "message": "⚖️ Volume 6 · Governance and compliance",
+    "description": "The label for category '⚖️ 卷六 · 治理与合规' in sidebar 'privacySidebar'"
+  },
+  "sidebar.privacySidebar.category.⚖️ 卷六 · 治理与合规.link.generated-index.title": {
+    "message": "Volume 6 · Governance and compliance",
+    "description": "The generated-index page title for category '⚖️ 卷六 · 治理与合规' in sidebar 'privacySidebar'"
+  },
+  "sidebar.privacySidebar.category.⚖️ 卷六 · 治理与合规.link.generated-index.description": {
+    "message": "The compliance index: mapping the GDPR right to be forgotten, EU AI Act training-data transparency, NIST, and OWASP LLM02 to engineering actions. Compliance runs through every volume; this one is the master index, and each technique entry embeds a short compliance-mapping note.",
+    "description": "The generated-index page description for category '⚖️ 卷六 · 治理与合规' in sidebar 'privacySidebar'"
+  }
+}

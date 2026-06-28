@@ -21,6 +21,7 @@ import {ThemeClassNames} from '@docusaurus/theme-common';
 import Heading from '@theme/DocCard/Heading';
 import Description from '@theme/DocCard/Description';
 import entryMeta from '@site/src/data/entryMeta.json';
+import privacyEntryMeta from '@site/src/data/entryMeta-privacy.json';
 import styles from './styles.module.css';
 
 // severity 文案（中英）→ 三档色键，配色对齐 PitfallMeta 的 severity。
@@ -31,6 +32,16 @@ const SEV_KEY = {
   High: 'high',
   Medium: 'med',
   Low: 'low',
+};
+
+// maturity 文案（中英）→ 成熟度色键，配色对齐 PrivacyMeta 的紫色梯度。
+const MAT_KEY = {
+  研究: 'matResearch',
+  试验: 'matExperimental',
+  生产: 'matProduction',
+  Research: 'matResearch',
+  Experimental: 'matExperimental',
+  Production: 'matProduction',
 };
 
 function getFallbackEmojiIcon(item) {
@@ -52,8 +63,38 @@ function CardMeta({href}) {
   } = useDocusaurusContext();
   // 卡片 href 末段即条目的全站唯一 slug（与 entryMeta 键对应）。
   const slug = href.replace(/\/$/, '').split('/').pop();
-  const meta = entryMeta?.[currentLocale]?.[slug];
-  if (!meta || (!meta.severity && !(meta.roles && meta.roles.length))) {
+  // 「LLM 隐私保护」主题的条目走第二实例（routeBasePath 'privacy'）：换数据源、换轴
+  // ——渲染「隐私风险 + 成熟度」而非「严重度 + 角色」。判据用 href 路由前缀（该路由由
+  // privacy 实例独占，不会与第一主题的 slug 撞）。
+  const isPrivacy = href.includes('/privacy/');
+  const meta = isPrivacy
+    ? privacyEntryMeta?.[currentLocale]?.[slug]
+    : entryMeta?.[currentLocale]?.[slug];
+  if (!meta) {
+    return null;
+  }
+
+  if (isPrivacy) {
+    if (!meta.severity && !meta.maturity) {
+      return null;
+    }
+    return (
+      <div className={styles.metaRow}>
+        {meta.severity && (
+          <span className={clsx(styles.sev, styles[SEV_KEY[meta.severity] || 'med'])}>
+            {meta.severity}
+          </span>
+        )}
+        {meta.maturity && (
+          <span className={clsx(styles.maturity, styles[MAT_KEY[meta.maturity] || 'matResearch'])}>
+            {meta.maturity}
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  if (!meta.severity && !(meta.roles && meta.roles.length)) {
     return null;
   }
   return (

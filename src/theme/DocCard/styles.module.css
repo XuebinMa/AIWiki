@@ -107,6 +107,28 @@
   color: var(--ifm-color-emphasis-600);
 }
 
+/* 隐私主题卡片的「成熟度」药丸：紫色梯度，与 PrivacyMeta 一致；和 severity 的红黄绿岔开。 */
+.maturity {
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.25rem;
+  white-space: nowrap;
+}
+.matResearch {
+  color: #6b46c1;
+  background: #ede9fe;
+}
+.matExperimental {
+  color: #6b46c1;
+  background: #e9e2fb;
+}
+.matProduction {
+  color: #fff;
+  background: #6b46c1;
+}
+
 [data-theme='dark'] .high {
   color: #feb2b2;
   background: rgb(197 48 48 / 20%);
@@ -121,4 +143,16 @@
 }
 [data-theme='dark'] .roles {
   color: var(--ifm-color-emphasis-500);
+}
+[data-theme='dark'] .matResearch {
+  color: #d6bcfa;
+  background: rgb(107 70 193 / 22%);
+}
+[data-theme='dark'] .matExperimental {
+  color: #c8b3f0;
+  background: rgb(107 70 193 / 30%);
+}
+[data-theme='dark'] .matProduction {
+  color: #fff;
+  background: #6b46c1;
 }

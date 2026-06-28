@@ -1,0 +1,9 @@
+{
+  "label": "💬 卷三 · 对话大模型",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "title": "卷三 · 对话大模型",
+    "description": "对话大模型时代的隐私面：PII 回吐、上下文面隐私（系统提示词 / 会话上下文 / 工具结果泄露）、DP 微调的实用化，以及成员推断在 LLM 上的演化。"
+  }
+}

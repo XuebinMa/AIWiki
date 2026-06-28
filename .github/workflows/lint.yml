@@ -41,7 +41,7 @@ jobs:
         run: npm install -g cspell@8
 
       - name: cspell（拼写）
-        run: cspell --no-progress "docs/**/*.{md,mdx}" "i18n/**/*.{md,mdx}"
+        run: cspell --no-progress "docs/**/*.{md,mdx}" "privacy/**/*.{md,mdx}" "i18n/**/*.{md,mdx}"
 
       - name: 配置 Node（i18n 检查需要 docusaurus）
         uses: actions/setup-node@v4

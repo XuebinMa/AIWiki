@@ -1,0 +1,9 @@
+{
+  "label": "🔬 卷五 · 前沿与落地",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "title": "卷五 · 前沿与落地",
+    "description": "当下前沿与工程落地，分三条线：私有计算与机密推理（TEE / GPU 机密计算 / HE / MPC）、可验证删除与机器遗忘、生产级差分隐私与联邦学习部署。"
+  }
+}
