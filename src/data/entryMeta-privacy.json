@@ -1,4 +1,16 @@
 {
-  "zh-Hans": {},
-  "en": {}
+  "zh-Hans": {
+    "training-data-extraction": {
+      "severity": "高",
+      "maturity": "研究",
+      "technique": "记忆与训练数据抽取"
+    }
+  },
+  "en": {
+    "training-data-extraction": {
+      "severity": "High",
+      "maturity": "Research",
+      "technique": "Memorization & training-data extraction"
+    }
+  }
 }
