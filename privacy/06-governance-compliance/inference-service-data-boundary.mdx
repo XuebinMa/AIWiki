@@ -32,7 +32,7 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 红线：我不该写「我保证不留你的数据」——留不留不由「我」决定，由服务方的条款 + 你的配置决定。可核查的是：**这条数据边界由书面条款与实际配置定义，它可被逐项核实，也会随版本变化。**
 
 ```mermaid
-flowchart LR
+flowchart TB
     P["你的 prompt / 私有数据"] --> X["离开你的边界"]
     X --> T{"用于训练？"}
     T -->|多数 API 默认否<br/>消费产品常默认是| L["滥用监控日志<br/>保留 N 天"]
