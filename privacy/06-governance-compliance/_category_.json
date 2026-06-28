@@ -1,0 +1,9 @@
+{
+  "label": "⚖️ 卷六 · 治理与合规",
+  "position": 6,
+  "link": {
+    "type": "generated-index",
+    "title": "卷六 · 治理与合规",
+    "description": "合规索引：GDPR 被遗忘权、EU AI Act 训练数据透明度、NIST、OWASP LLM02 到工程动作的映射。合规贯穿各卷，本卷做总索引；各技术条目内嵌「合规映射」小段。"
+  }
+}

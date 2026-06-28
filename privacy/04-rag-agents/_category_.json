@@ -1,0 +1,9 @@
+{
+  "label": "🔗 卷四 · RAG 与 Agent",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "title": "卷四 · RAG 与 Agent",
+    "description": "检索与 agent 时代的数据边界：向量库跨租户 / 跨用户检索泄露、跨会话记忆串味、工具调用把私有数据发往外部、多 agent 协作时的数据边界。"
+  }
+}

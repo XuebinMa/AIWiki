@@ -4,24 +4,19 @@
     "description": "The site tagline"
   },
   "pitfallMeta.phase": {
-    "message": "Phase",
-    "description": "PitfallMeta badge label: lifecycle phase"
+    "message": "Phase"
   },
   "pitfallMeta.roles": {
-    "message": "Roles",
-    "description": "PitfallMeta badge label: applicable roles"
+    "message": "Roles"
   },
   "pitfallMeta.severity": {
-    "message": "Severity",
-    "description": "PitfallMeta badge label: severity"
+    "message": "Severity"
   },
   "pitfallMeta.appliesTo": {
-    "message": "Applies to",
-    "description": "PitfallMeta badge label: applicable versions"
+    "message": "Applies to"
   },
   "pitfallMeta.evidence": {
-    "message": "Evidence",
-    "description": "PitfallMeta badge label: evidence type / strength"
+    "message": "Evidence"
   },
   "theme.ErrorPageContent.title": {
     "message": "This page crashed.",
@@ -349,5 +344,58 @@
   "theme.tags.tagsPageTitle": {
     "message": "Tags",
     "description": "The title of the tag list page"
+  },
+  "theme.SearchPage.existingResultsTitle": {
+    "message": "Search results for \"{query}\"",
+    "description": "The search page title for non-empty query"
+  },
+  "theme.SearchPage.emptyResultsTitle": {
+    "message": "Search the documentation",
+    "description": "The search page title for empty query"
+  },
+  "theme.SearchPage.searchContext.everywhere": {
+    "message": "Everywhere"
+  },
+  "theme.SearchPage.documentsFound.plurals": {
+    "message": "1 document found|{count} documents found",
+    "description": "Pluralized label for \"{count} documents found\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.SearchPage.noResultsText": {
+    "message": "No documents were found",
+    "description": "The paragraph for empty search result"
+  },
+  "theme.SearchBar.noResultsText": {
+    "message": "No results"
+  },
+  "theme.SearchBar.seeAllOutsideContext": {
+    "message": "See all results outside \"{context}\""
+  },
+  "theme.SearchBar.searchInContext": {
+    "message": "See all results within \"{context}\""
+  },
+  "theme.SearchBar.seeAll": {
+    "message": "See all results"
+  },
+  "theme.SearchBar.label": {
+    "message": "Search",
+    "description": "The ARIA label and placeholder for search button"
+  },
+  "privacyMeta.era": {
+    "message": "Volume"
+  },
+  "privacyMeta.technique": {
+    "message": "Technique"
+  },
+  "privacyMeta.audience": {
+    "message": "Audience"
+  },
+  "privacyMeta.severity": {
+    "message": "Privacy risk"
+  },
+  "privacyMeta.maturity": {
+    "message": "Maturity"
+  },
+  "privacyMeta.evidence": {
+    "message": "Evidence"
   }
 }

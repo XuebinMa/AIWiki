@@ -43,10 +43,29 @@ const config = {
       {
         hashed: true,
         language: ['en', 'zh'],
-        docsRouteBasePath: '/',
+        // 两个 docs 主题实例都入索引：'/'（AI 编码误区，preset）+ 'privacy'（LLM 隐私保护）。
+        // 该插件的 docsRouteBasePath 接受 string | string[]，无需切 Algolia 即可同时索引。
+        docsRouteBasePath: ['/', 'privacy'],
         indexBlog: false,
         highlightSearchTermsOnTargetPage: true,
       },
+    ],
+  ],
+
+  // 多实例 docs：preset 的 docs 实例承载「AI 编码误区」主题（routeBasePath '/'）；
+  // 下面这个第二实例承载并列的「LLM 隐私保护」主题（routeBasePath 'privacy'）。
+  // 两个主题并列、各有独立侧边栏，不是「一个主题两部分」。详见 PROPOSAL-privacy-book.md §8。
+  plugins: [
+    [
+      '@docusaurus/plugin-content-docs',
+      /** @type {import('@docusaurus/plugin-content-docs').Options} */
+      ({
+        id: 'privacy',
+        path: 'privacy',
+        routeBasePath: 'privacy',
+        sidebarPath: require.resolve('./sidebars-privacy.js'),
+        editUrl: 'https://github.com/xuebinma/AIWiki/tree/main/',
+      }),
     ],
   ],
 
@@ -92,7 +111,14 @@ const config = {
             type: 'docSidebar',
             sidebarId: 'wikiSidebar',
             position: 'left',
-            label: '百科',
+            label: 'AI 编码误区',
+          },
+          {
+            type: 'docSidebar',
+            docsPluginId: 'privacy',
+            sidebarId: 'privacySidebar',
+            position: 'left',
+            label: 'LLM 隐私保护',
           },
           {
             to: '/roles',

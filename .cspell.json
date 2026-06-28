@@ -179,6 +179,19 @@
     "exfiltrating",
     "exfiltrates",
     "Cymulate",
-    "ProgramData"
+    "ProgramData",
+    "PPML",
+    "homomorphic",
+    "pretrained",
+    "pretraining",
+    "PEFT",
+    "anonymization",
+    "dogfood",
+    "dogfoods",
+    "dogfooding",
+    "logprobs",
+    "Opacus",
+    "Syft",
+    "unlearning"
   ]
 }

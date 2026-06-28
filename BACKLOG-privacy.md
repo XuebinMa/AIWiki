@@ -90,15 +90,26 @@
 
 ## 结构 / 流程待办
 
-- ⬜ **M0.5（proposal 修订一轮）**：落 §6.4 并行路线叙事；落 R1 已采纳的结构性改动（卷一最小地基、卷五拆三、卷六贯穿 + 合规映射、板块 12→14 + 去重边界、定位措辞、多模态范围边界、首批样板四面）；并做「书→主题」命名清洗。
-- ⬜ **frontmatter 轴枚举**：`era` / `technique` / `attack_surface` / `maturity` / `audience`；`maturity` 取值「研究 / 试验 / 生产」设为硬约束。定稿写进 `terminology.md`。
-- ⬜ **`severity` 隐私语义**：沿用高/中/低（显示作「隐私风险」）为默认；是否另拆「数据敏感度」轴待定。
-- ⬜ **本地搜索多实例**：`docsRouteBasePath` 单值默认不索引第二实例；验证数组 / 升级 / 暂缓 / 切 Algolia。
+- ✅ **M0.5（proposal 修订一轮）**：已落（当前 `PROPOSAL-privacy-book.md` 即 M0.5 版：§6.4 并行路线、卷一最小地基、卷五拆三、卷六贯穿 + 合规映射、板块 14 + 去重边界、定位措辞、多模态范围边界、首批样板四面、「书→主题」命名清洗）。
+- ✅ **frontmatter 轴枚举**：`era` / `technique` / `attack_surface` / `maturity` / `audience` 定稿写进 `terminology.md`「枚举值映射（隐私 frontmatter 与 `<PrivacyMeta>`）」；`maturity`「研究 / 试验 / 生产」为硬约束（硬闸门 C）。
+- ✅ **`severity` 隐私语义**：沿用高/中/低（显示作「隐私风险」），已写 `terminology.md`；不另拆「数据敏感度」轴（PROPOSAL §13 已定）。
+- ✅ **本地搜索多实例**：已验证 `@easyops-cn/docusaurus-search-local` 的 `docsRouteBasePath` 接受 `string[]`，设为 `['/', 'privacy']`，**两实例都入本地索引**，无需切 Algolia。
 - ⬜ **技术评审人**：密码学准确性（尤卷一/卷五）需独立评审。**ChatGPT 作内容独立评审人**（R1 已收）；Claude 对其意见可提异议（如 R1 的数字、板块数、首批样板），目标协作。后续评审继续落「评审分诊记录」。
-- ⬜ **dogfooding-checklist**：repo 级精简清单 + `CLAUDE.md` 一行指针 + 自查步骤进 skill（别堆 CLAUDE.md）。
-- ⬜ **企业/供应商数据边界 checklist**：toolkit 工件「**LLM Vendor Data Boundary Checklist**」+ 并入板块 11（推理服务期）。覆盖：是否用于训练 / retention / abuse monitoring / fine-tuning data / zero data retention / enterprise·team·consumer plan 差异 / subprocessors / region·residency / DPA·BAA / observability·tracing 二次泄露。
-- ⬜ **第一人称纪律对照表**：写进隐私版 `STYLE-GUIDE`（可第一人称：「我可能复现反复出现的罕见串」「攻击者用大量查询逼近我的记忆边界」「DP 限制单样本对我参数的影响」；不可：「我记得这条数据」「我知道谁在我训练集里」「我真忘了」「DP 让我完全不泄露」）。
-- ⬜ **M1 最小化**：脚手架只做最小可渲染（第二实例 + 模板 + 术语 + 导读）；`PrivacyMeta` / `entryMeta-privacy` / 索引页等轴锁定且有内容后再做。
+- ✅ **dogfooding-checklist**：`DOGFOODING.md`（repo 级精简）+ `CLAUDE.md` 一行指针；三道硬闸门进 `DOGFOODING.md` pre-PR 清单 + `STYLE-GUIDE.md`「LLM 隐私保护主题专属规范」（未堆 CLAUDE.md）。
+- ⬜ **企业/供应商数据边界 checklist**：toolkit 工件「**LLM Vendor Data Boundary Checklist**」+ 并入板块 11（推理服务期）。覆盖：是否用于训练 / retention / abuse monitoring / fine-tuning data / zero data retention / enterprise·team·consumer plan 差异 / subprocessors / region·residency / DPA·BAA / observability·tracing 二次泄露。（M5）
+- ✅ **第一人称纪律对照表**：已写进 `STYLE-GUIDE.md`「第一人称红线（强规则）」的「可 / 不可第一人称对照表」。
+- ✅ **M1 最小化**：脚手架最小可渲染已落（第二实例 + 侧边栏 + 六卷 + i18n 镜像 + 模板 + 术语 + 导读 + 闸门扩面 + `PrivacyMeta` + `DocCard` 适配 + `entryMeta-privacy.json`）。**轴索引页（技术板块 / 威胁→缓解矩阵 / 案例库）等有内容后再做**（M5）。
+
+### M1 落地记录（本 PR）与遗留
+
+**本 PR 已交付**（对照「M1 脚手架执行细节」1–9）：多实例 config + navbar 双主题入口；`sidebars-privacy.js`；`privacy/` 六卷（各 `_category_.json` generated-index）+ 每卷一页「本卷导言」占位（Docusaurus 会**过滤掉空的 generated-index 分类**，故每卷需 ≥1 篇非草稿文档才在侧边栏显形）；中英镜像 + 分类翻译键译全；三脚本扩面（check-mirror / check-i18n 两实例、gen-entry-meta 另产 entryMeta-privacy）；`cspell` glob 加 `privacy/**`（CI lint.yml 同步）；`PrivacyMeta` + `DocCard` 隐私分支；模板 / 术语 / 导读 / STYLE-GUIDE / DOGFOODING。六道闸门 + 两 locale 两实例 build 通过。
+
+**本 PR 刻意不做（留后续 PR，遵「一 PR 一事」）**：
+
+- ⬜ **skill 派生**：`aiwiki-entry-author` 隐私版（九节 + 红线 + 隐私 frontmatter）、`aiwiki-research-refresh` 检索主题改隐私 + 去重基线指 `privacy/`——M2 开写样板条目前做。`aiwiki-translator` 可直接复用（术语已扩）。
+- ⬜ **M2 首批样板（3–5 条）**：横跨不同卷 / 板块，定调声音与结构，留用户过目（届时删掉对应卷的「本卷导言」占位或改写为真导言）。
+- 🟡 **卷索引页 URL（可选 polish）**：六卷 generated-index 现用 Docusaurus 默认中文派生 slug（如 `/privacy/category/-卷一--隐私根基`），与主题一行为一致；若要清洁 URL，给各 `_category_.json` 的 `link` 设显式英文 `slug`（注意别与卷内容目录路由 `/privacy/<dir>` 撞）。非阻塞。
+- 🟡 **contextual 搜索 zh 文案（可选 polish）**：`docsRouteBasePath` 设为数组后，本地搜索开启**按主题分面**（可只搜某一主题），顺带引入几个搜索 scope UI 串（`theme.SearchPage.searchContext.*` 等）；英文站已是英文，中文站沿用插件英文默认（与改动前的搜索框文案同状态）。要全中文化需建 `i18n/zh-Hans/code.json` 覆盖这几串。非阻塞。
 
 ## M1 脚手架执行细节（交接用；探查已确认，新会话照此做、无需重探）
 
