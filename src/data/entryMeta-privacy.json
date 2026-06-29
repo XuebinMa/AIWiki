@@ -10,10 +10,20 @@
       "maturity": "研究",
       "technique": "推断类攻击"
     },
+    "model-extraction-stealing": {
+      "severity": "中",
+      "maturity": "研究",
+      "technique": "模型抽取与窃取"
+    },
     "trusted-execution-environment": {
       "severity": "中",
       "maturity": "生产",
       "technique": "隐私保护计算"
+    },
+    "quantifying-memorization": {
+      "severity": "中",
+      "maturity": "研究",
+      "technique": "隐私评测与审计"
     },
     "training-data-extraction": {
       "severity": "高",
@@ -29,6 +39,11 @@
       "severity": "中",
       "maturity": "试验",
       "technique": "差分隐私"
+    },
+    "pii-regurgitation": {
+      "severity": "高",
+      "maturity": "研究",
+      "technique": "PII 检测与脱敏"
     },
     "rag-retrieval-leakage": {
       "severity": "高",
@@ -50,6 +65,11 @@
       "maturity": "试验",
       "technique": "机器遗忘与被遗忘权"
     },
+    "data-lifecycle-deletion": {
+      "severity": "中",
+      "maturity": "生产",
+      "technique": "数据生命周期与数据治理"
+    },
     "inference-service-data-boundary": {
       "severity": "中",
       "maturity": "生产",
@@ -67,10 +87,20 @@
       "maturity": "Research",
       "technique": "Inference attacks"
     },
+    "model-extraction-stealing": {
+      "severity": "Medium",
+      "maturity": "Research",
+      "technique": "Model extraction & stealing"
+    },
     "trusted-execution-environment": {
       "severity": "Medium",
       "maturity": "Production",
       "technique": "Privacy-preserving computation"
+    },
+    "quantifying-memorization": {
+      "severity": "Medium",
+      "maturity": "Research",
+      "technique": "Privacy evaluation & auditing"
     },
     "training-data-extraction": {
       "severity": "High",
@@ -86,6 +116,11 @@
       "severity": "Medium",
       "maturity": "Experimental",
       "technique": "Differential privacy"
+    },
+    "pii-regurgitation": {
+      "severity": "High",
+      "maturity": "Research",
+      "technique": "PII detection, redaction & synthetic data"
     },
     "rag-retrieval-leakage": {
       "severity": "High",
@@ -106,6 +141,11 @@
       "severity": "Medium",
       "maturity": "Experimental",
       "technique": "Machine unlearning & right to be forgotten"
+    },
+    "data-lifecycle-deletion": {
+      "severity": "Medium",
+      "maturity": "Production",
+      "technique": "Data lifecycle & data governance"
     },
     "inference-service-data-boundary": {
       "severity": "Medium",
