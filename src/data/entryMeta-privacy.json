@@ -30,6 +30,21 @@
       "maturity": "试验",
       "technique": "RAG 与 Agent 隐私"
     },
+    "confidential-inference": {
+      "severity": "中",
+      "maturity": "生产",
+      "technique": "隐私保护计算"
+    },
+    "dp-federated-learning": {
+      "severity": "中",
+      "maturity": "生产",
+      "technique": "联邦学习与安全聚合"
+    },
+    "machine-unlearning": {
+      "severity": "中",
+      "maturity": "试验",
+      "technique": "机器遗忘与被遗忘权"
+    },
     "inference-service-data-boundary": {
       "severity": "中",
       "maturity": "生产",
@@ -66,6 +81,21 @@
       "severity": "High",
       "maturity": "Experimental",
       "technique": "RAG & agent privacy"
+    },
+    "confidential-inference": {
+      "severity": "Medium",
+      "maturity": "Production",
+      "technique": "Privacy-preserving computation"
+    },
+    "dp-federated-learning": {
+      "severity": "Medium",
+      "maturity": "Production",
+      "technique": "Federated learning & secure aggregation"
+    },
+    "machine-unlearning": {
+      "severity": "Medium",
+      "maturity": "Experimental",
+      "technique": "Machine unlearning & right to be forgotten"
     },
     "inference-service-data-boundary": {
       "severity": "Medium",

@@ -21,11 +21,11 @@
 
 ### 立项 + 评审阶段遗留待核（凭知识/二手提及，未二次核）
 
-- ⬜ **Apple PCC（Private Cloud Compute）**：机密推理生产实例，本会话未检索。核机制（TEE / 远程证明）、定位、发布时间。出处：Apple Security 官方。
+- ✅ **Apple PCC（Private Cloud Compute）**：已核（Apple Security Research 官方）——设备级远程证明 + 把生产软件镜像公开上**可验证透明日志**（设备只与「证明匹配公开发布」的节点通信）+ **无特权运行角色** + 部分源码开放安全研究。已作《机密推理》（卷五）的生产实例出处。
 - ⬜ **Carlini 等 · 抽取 / 量化记忆**：核确切标题 / 年份——《Extracting Training Data from Large Language Models》（USENIX Security 2021？）、《Quantifying Memorization Across Neural Language Models》（2022/2023？）。
 - ⬜ **PATE**：全称 Private Aggregation of Teacher Ensembles、出处（Papernot 等 2017？）、与 DP-SGD 区别。
 - ⬜ **机密推理开销（高优）**：我写「H100/H200 约 95–99% 原生」过乐观；评审 R1 给「penalty 约 4–8%」与「模型换入换出场景低 45–70%」。**这三个数都待一手核**，落条目必须带条件（workload / batch / seq len / 模型规模 / 是否含权重保护 / against provider 还是 co-tenant）。
-- ⬜ **Gboard DP 模型数**：我「15+」vs 评审 R1「二十多个」——以一手论文（Xu 等 2023）为准。
+- ✅ **Gboard DP 模型数**：已核（Xu 等 2023, ACL）——论文原文「**more than twenty**」=「二十多个」，评审 R1 对；且所有下一词预测神经语言模型现均带 DP、未来发布要求 DP。已用于《生产级 DP·FL 部署》（卷五）。
 - ⬜ **二手 → 一手升级**：HE 约 10⁴× 开销；竞品 `Awesome-*` 的 star 数 / 出版年。
 - ⬜ **评审 R1 引用的数据同样待核**：4–8% / 45–70% / 「二十多个」不因来自评审而免检——一视同仁查一手。
 
@@ -118,7 +118,7 @@
 - ⬜ 卷二 · 记忆与抽取（**旗舰**）：逐字/量化记忆、抽取攻击、影响因素、去重/DP 预训练/记忆审计。
 - ⬜ 卷三 · 对话大模型：PII 回吐、上下文面隐私（系统提示词等）、DP 微调。
 - ⬜ 卷四 · RAG 与 Agent：多租户检索泄露、跨会话记忆串味、工具外联/数据边界。
-- ⬜ 卷五 · 前沿落地（**拆三小节**）：① 私有计算与机密推理（TEE/GPU CC/HE/MPC）② 可验证删除与机器遗忘 ③ 生产级 DP·FL 部署（Gboard、Apple 本地 DP）。
+- ✅ 卷五 · 前沿落地（**拆三小节，已补完**）：① 私有计算与机密推理 `confidential-inference`（接卷一 TEE+HE·MPC，PCC/NVIDIA 生产实例）；② 可验证删除与机器遗忘 `machine-unlearning`（Cao&Yang 2015 / SISA 2021，MIA 作验证）；③ 生产级 DP·FL 部署 `dp-federated-learning`（Gboard DP-FTRL 二十多个模型 / Apple 本地 DP）。三条齐。
 - ⬜ 卷六 · 治理合规（**合规索引**）：GDPR Art.17、EU AI Act、NIST、OWASP LLM02 映射；并要求各技术条目带「合规映射」小段。
 - ⬜ 技术板块新增：13 数据生命周期与数据治理；14 隐私评测与审计。**13 vs 12 边界（评审 R2）**：数据生命周期 = 数据在哪流动 / 存储 / 复制 / 删除 / 备份（where）；治理与合规（板块 12）= 谁负责 / 法律映射 / 审计证据留存（who·law）。
 
