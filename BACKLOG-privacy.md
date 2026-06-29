@@ -105,8 +105,8 @@
 
 | 评审点 | 处置 | 说明 |
 |---|---|---|
-| `evidence` 支持多证据类型 | 🟡 | schema 改动面大（frontmatter 枚举 + `PrivacyMeta` + `gen-entry-meta` + `terminology`）。**倾向轻量**：单字段标「主要证据」+ 正文/页面注「补充证据」，而非全多字段，免过度工程。见结构待办 |
-| 「真实案例/生产部署」小节按条目类型可改名 | 🟡 | 本轮先做 DP 那条的澄清句；**模板级允许改名**（研究进展/相邻事故/厂商现状）留 skill+template 演进。见结构待办 |
+| `evidence` 支持多证据类型 | ✅ | **已落（轻量）**：不扩 schema；`terminology.md` 加「主要 / 补充」约定，模板 + skill 同步；RAG 主标签 安全报告→研究支持（最强一类）、RAG + 推理服务在「延伸阅读」开头注「主要：X；补充：Y」。 |
+| 「真实案例/生产部署」小节按条目类型可改名 | ✅ | **已落**：模板 + skill 标明该小节标题可按 `maturity` 微调；四条对齐——训练抽取→「真实案例」、DP→「真实案例 / 工程可行性」、RAG→「真实案例：相邻事故」、推理服务→「厂商现状」（不再给试验级条目挂「生产部署」）。 |
 | 每条加「最小可测试断言」块 | ✅ | **已落**：并入「落地实现」小节末（怎么测 / 通过证明什么 / 失败看到什么），不新增第十节（防九节膨胀）；`entry-template` + `aiwiki-privacy-entry-author` skill + 四条全回填，后续条目沿用。 |
 | 抽 toolkit「Vendor Data Boundary Checklist」+ 正文链接 | 🟡 | 已在待办（见「结构/流程待办」M5）；推理服务条目定稿后从正文链过去 |
 
@@ -133,9 +133,9 @@
 - ⬜ **企业/供应商数据边界 checklist**：toolkit 工件「**LLM Vendor Data Boundary Checklist**」+ 并入板块 11（推理服务期）。覆盖：是否用于训练 / retention / abuse monitoring / fine-tuning data / zero data retention / enterprise·team·consumer plan 差异 / subprocessors / region·residency / DPA·BAA / observability·tracing 二次泄露。（M5）
 - ✅ **第一人称纪律对照表**：已写进 `STYLE-GUIDE.md`「第一人称红线（强规则）」的「可 / 不可第一人称对照表」。
 - ✅ **M1 最小化**：脚手架最小可渲染已落（第二实例 + 侧边栏 + 六卷 + i18n 镜像 + 模板 + 术语 + 导读 + 闸门扩面 + `PrivacyMeta` + `DocCard` 适配 + `entryMeta-privacy.json`）。**轴索引页（技术板块 / 威胁→缓解矩阵 / 案例库）等有内容后再做**（M5）。
-- ⬜ **`evidence` 多证据类型（R3）**：先决定走「轻量·单字段标主要证据 + 注补充」还是「多字段数组」；定后再改 `terminology.md` 枚举 + `PrivacyMeta` + `gen-entry-meta` + 模板。倾向轻量（见 R3 分诊）。
+- ✅ **`evidence` 多证据类型（R3）**：走**轻量**——不扩 schema。`terminology.md`「evidence」加「主要 / 补充」约定；`entry-template` + skill 同步；RAG 主标签改 研究支持（最强一类）、RAG + 推理服务在「延伸阅读」开头注「主要：X；补充：Y」。多字段数组方案**否决**（过度工程）。
 - ✅ **「最小可测试断言」模板块（R3）**：已并入「落地实现」小节末（不新增第十节）；`entry-template` + `aiwiki-privacy-entry-author` skill 均加该小块，四条样板（中英）全回填「怎么测 / 通过证明什么 / 失败看到什么」，后续条目统一带。
-- ⬜ **「真实案例」小节标题柔性（R3）**：模板/skill 允许该小节按条目类型微调命名（真实攻击演示 / 研究进展·工程可行性 / 相邻事故 / 厂商现状），避免与 `maturity` 语义冲突。
+- ✅ **「真实案例」小节标题柔性（R3）**：`entry-template` + skill 标明该小节标题可按 `maturity` 微调；四条已对齐——训练抽取「真实案例」/ DP「真实案例 / 工程可行性」/ RAG「真实案例：相邻事故」/ 推理服务「厂商现状」，不再给试验级条目挂「生产部署」。
 
 ### M1 落地记录（本 PR）与遗留
 

@@ -9,7 +9,7 @@ technique: RAG & agent privacy
 attack_surface: Retrieval store / vector store
 severity: High
 maturity: Experimental
-evidence: Security advisory
+evidence: Research
 tags: [RAG, multi-tenant, vector store, embedding inversion, cross-session memory, Privacy Engineer, Security Engineer, ML Engineer]
 sources:
   - { title: "Morris et al., Text Embeddings Reveal (Almost) As Much As Text (EMNLP 2023; arXiv 2310.06816)", url: "https://arxiv.org/abs/2310.06816" }
@@ -19,7 +19,7 @@ sources:
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
-<PrivacyMeta era="Volume 4 · RAG and agents" technique="RAG & agent privacy" audience={['Privacy Engineer', 'Security Engineer', 'ML Engineer']} severity="High" maturity="Experimental" evidence="Security advisory" />
+<PrivacyMeta era="Volume 4 · RAG and agents" technique="RAG & agent privacy" audience={['Privacy Engineer', 'Security Engineer', 'ML Engineer']} severity="High" maturity="Experimental" evidence="Research" />
 
 > In one sentence: in multi-tenant RAG, two intuitions both fail — "vectorized means anonymized" and "filtered by user means isolated." In some studied embedding settings a vector **can be inverted back to approximate original text** (including PII), so don't treat it as anonymization; retrieval ranks by **similarity**, not permission, so if the ACL runs after retrieval instead of before it, the most relevant private chunk may come from **another tenant**; and a single boundary bug in a shared cache / long-term memory can carry one user's private context into another's session.
 
@@ -89,7 +89,7 @@ Every boundary (which layer does ACL, who can read the vector store, memory reca
 - Pass: B's retrieval candidates, final answer, and logs / traces / cache **all exclude** A's document (all three assertions green).
 - Fail: any assertion hits A's content → isolation breaks at that layer; move the ACL to the pre-retrieval index layer and re-test.
 
-## A real case
+## A real case: an adjacent incident
 
 **An adjacent real incident: cross-user state-isolation failure.** Strictly, this is not RAG vector-retrieval leakage but a state-isolation incident in an LLM service; it's here because it proves that **the same class of boundary-layer bug** can cause cross-user data leakage in a production LLM service. On March 20, 2023, a bug in the Redis client library redis-py that OpenAI used caused a spike in request cancellations, giving connections a small probability of returning **someone else's data**: some users saw **other active users' conversation titles** in the sidebar; if two were active at once, the first message of a new conversation could be visible to another; the same bug also made payment-related information of about **1.2% of ChatGPT Plus users** visible to others in a roughly nine-hour window (name, email, payment address, last four digits and expiry of a credit card — **full card numbers were not exposed**). This is OpenAI's own postmortem (OpenAI, *March 20 ChatGPT outage*, 2023). What it confirms is not some advanced attack but the same class of mechanism risk: **in a production LLM service, a single bug in the "boundary layer" — cache / concurrency — is enough to bleed private data across users.** Isolation must be enforced at the data layer, not left to the app layer's "it shouldn't happen."
 
@@ -123,6 +123,8 @@ Embedding invertibility is a **property of embedding representations**, not limi
 
 ## Further reading and sources
 
-- [Text Embeddings Reveal (Almost) As Much As Text (Morris et al., EMNLP 2023; arXiv 2310.06816)](https://arxiv.org/abs/2310.06816) — vec2text inverts text embeddings back to approximate originals and recovers real names from clinical-note embeddings.
+Mixed evidence — **primary: Research** (embedding inversion); **supplementary: official incident** (OpenAI outage), **framework** (OWASP).
+
+- [Text Embeddings Reveal (Almost) As Much As Text (Morris et al., EMNLP 2023; arXiv 2310.06816)](https://arxiv.org/abs/2310.06816) — Research: vec2text inverts text embeddings back to approximate originals and recovers real names from clinical-note embeddings.
 - [March 20 ChatGPT outage (OpenAI official postmortem, 2023)](https://openai.com/index/march-20-chatgpt-outage/) — a redis-py bug made cross-user conversation titles and some payment info visible.
 - [OWASP LLM02:2025 Sensitive Information Disclosure](https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/) — the risk category and mitigations for sensitive-information disclosure in LLM applications.

@@ -9,7 +9,7 @@ technique: RAG 与 Agent 隐私
 attack_surface: 检索库 / 向量库
 severity: 高
 maturity: 试验
-evidence: 安全报告
+evidence: 研究支持
 tags: [RAG, 多租户, 向量库, 嵌入反演, 跨会话记忆, 隐私工程师, 安全工程师, ML 工程师]
 sources:
   - { title: "Morris et al., Text Embeddings Reveal (Almost) As Much As Text (EMNLP 2023；arXiv 2310.06816)", url: "https://arxiv.org/abs/2310.06816" }
@@ -19,7 +19,7 @@ sources:
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
-<PrivacyMeta era="卷四 · RAG 与 Agent" technique="RAG 与 Agent 隐私" audience={['隐私工程师', '安全工程师', 'ML 工程师']} severity="高" maturity="试验" evidence="安全报告" />
+<PrivacyMeta era="卷四 · RAG 与 Agent" technique="RAG 与 Agent 隐私" audience={['隐私工程师', '安全工程师', 'ML 工程师']} severity="高" maturity="试验" evidence="研究支持" />
 
 > 一句话摘要：在多租户 RAG 里，两个直觉都靠不住——「向量化了就匿名了」和「按用户过滤了就隔离了」。在已研究的 embedding 设置下，向量**可被反演回近似原文**（含 PII），所以别把它当匿名化结果；检索是按**相似度**排序、不是按权限，ACL 若配在检索之后而非之前，最相关的那块私有 chunk 可能来自**别的租户**；而共享缓存 / 长期 memory 的一个边界 bug，就能把一个用户的私有上下文带进另一个会话。
 
@@ -83,7 +83,7 @@ flowchart TB
 - 通过：B 的检索候选、最终答案、日志 / trace / cache **都不含** A 的文档（三条断言全绿）。
 - 失败：任一断言命中 A 的内容 → 隔离破在该层，把 ACL 移到检索前的索引层再测。
 
-## 真实案例 / 生产部署
+## 真实案例：相邻事故
 
 **相邻真实事故：跨用户状态隔离失败。** 严格说这不是 RAG 向量检索泄露，而是 LLM 服务的状态隔离事故；放在这里，是因为它证明**同类边界层 bug** 足以在生产 LLM 服务里造成跨用户数据泄露。2023 年 3 月 20 日，OpenAI 因其使用的 Redis 客户端库 redis-py 的一个缺陷，出现请求取消激增、连接有小概率返回**他人的数据**：部分用户在侧边栏看到了**其他活跃用户的对话标题**；若两人同时活跃，新建对话的首条消息也可能对他人可见；同一缺陷还让约 **1.2% 的 ChatGPT Plus 用户**在一个约九小时的窗口内，支付相关信息（姓名、邮箱、支付地址、信用卡后四位与有效期，**完整卡号未泄露**）对他人可见。这是 OpenAI 自己的事故复盘（OpenAI, *March 20 ChatGPT outage*, 2023）。它印证的不是某种高级攻击，而是同一类机制风险：**在生产 LLM 服务里，缓存 / 并发这种「边界层」的一个 bug，就足以让私有数据跨用户串味**——隔离必须在数据层做实，不能只靠应用层的「应该不会」。
 
@@ -117,6 +117,8 @@ embedding 可反演是**嵌入表示的性质**，不限某一家向量库或模
 
 ## 延伸阅读与出处
 
-- [Text Embeddings Reveal (Almost) As Much As Text（Morris 等，EMNLP 2023；arXiv 2310.06816）](https://arxiv.org/abs/2310.06816) —— vec2text 把文本 embedding 反演回近似原文，并从临床记录嵌入还原出真实姓名。
+证据为混合——**主要：研究支持**（embedding 反演）；**补充：官方事故复盘**（OpenAI outage）、**框架**（OWASP）。
+
+- [Text Embeddings Reveal (Almost) As Much As Text（Morris 等，EMNLP 2023；arXiv 2310.06816）](https://arxiv.org/abs/2310.06816) —— 研究：vec2text 把文本 embedding 反演回近似原文，并从临床记录嵌入还原出真实姓名。
 - [March 20 ChatGPT outage（OpenAI 官方事故复盘，2023）](https://openai.com/index/march-20-chatgpt-outage/) —— redis-py 缺陷致跨用户对话标题与部分支付信息可见。
 - [OWASP LLM02:2025 Sensitive Information Disclosure](https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/) —— LLM 应用敏感信息泄露的风险类目与缓解。

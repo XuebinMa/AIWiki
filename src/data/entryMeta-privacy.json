@@ -1,5 +1,10 @@
 {
   "zh-Hans": {
+    "membership-inference": {
+      "severity": "高",
+      "maturity": "研究",
+      "technique": "推断类攻击"
+    },
     "training-data-extraction": {
       "severity": "高",
       "maturity": "研究",
@@ -22,6 +27,11 @@
     }
   },
   "en": {
+    "membership-inference": {
+      "severity": "High",
+      "maturity": "Research",
+      "technique": "Inference attacks"
+    },
     "training-data-extraction": {
       "severity": "High",
       "maturity": "Research",
