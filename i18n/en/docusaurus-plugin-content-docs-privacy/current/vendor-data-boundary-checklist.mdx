@@ -1,0 +1,74 @@
+---
+title: "Artifact · LLM vendor data-boundary checklist"
+slug: vendor-data-boundary-checklist
+sidebar_label: Artifact · Vendor data-boundary checklist
+sidebar_position: 2
+description: The checklist from "Inference-service data boundary" promoted to a usable artifact — fill one per vendor, date-stamp it, review quarterly.
+---
+
+# Artifact · LLM vendor data-boundary checklist
+
+This is the **usable version** of the checklist in [Inference-service data boundary](./06-governance-compliance/inference-service-data-boundary.mdx): copy the template below, **one per vendor**, fill each cell with "answer + source of the term + version date," and **review quarterly** — because the terms change (see the OpenAI / Anthropic comparison in that entry).
+
+:::caution Why date-stamp and review quarterly
+Vendor terms are **broken out by endpoint / feature / model and change frequently**, and can be overridden by a legal order. Any cell without a "source + date" should be treated as **unverified**. File this as an **audit artifact**, don't ask once and discard.
+:::
+
+## How to use
+
+1. Create one checklist per LLM provider you use (including the same vendor's tiers: API / team / enterprise / consumer).
+2. Fill three things per cell: the **answer**, the **source of the term** (official-doc URL / contract clause), and the **verification date**.
+3. No source / contradicts the contract / past its review date → mark `unverified`, fill it in before any deployment decision.
+4. Quarterly review: re-run it, diff the changed cells.
+
+## Template (ask each item)
+
+### 1. Training use
+- [ ] Are API inputs / outputs used to train models? Default, or opt-out?
+- [ ] Do consumer / team / enterprise / API tiers default differently?
+- [ ] Does opt-out cover logs, caches, eval sets, and human-review samples **at the same time**?
+
+### 2. Retention
+- [ ] How many days by default? Are abuse-monitoring copies counted separately?
+- [ ] At expiry, **real deletion** or just "invisible"?
+- [ ] Which features / endpoints have different retention (e.g. batch, code-execution containers, Files API)?
+
+### 3. Abuse review / human access
+- [ ] Is retained data subject to human / automated review? Who can access it?
+- [ ] Any "no privileged access"–style design commitment from the vendor?
+
+### 4. Zero data retention (ZDR)
+- [ ] Offered? Self-serve toggle or account-team enabled per endpoint?
+- [ ] **Which APIs / features it covers and doesn't** (Console, consumer products, some stateful features often aren't covered)?
+
+### 5. Subprocessors
+- [ ] Where's the subprocessor list? Does it include cloud / monitoring / vector store / third parties?
+- [ ] How are changes notified?
+
+### 6. Data residency
+- [ ] Can you pin a region? Which jurisdiction does it default to?
+
+### 7. Legal docs
+- [ ] Can you sign a DPA? A BAA for healthcare? SOC2 / ISO reports?
+- [ ] Cross-border transfer mechanism (e.g. SCCs)?
+
+### 8. Secondary-leak surface
+- [ ] Do observability / tracing / logs **secondarily retain** private context?
+- [ ] Are prompt caches, eval sets, and human-review samples within opt-out / ZDR coverage?
+
+## Per-vendor record (copy and fill)
+
+| Item | Answer | Source (URL / clause) | Verified on |
+|---|---|---|---|
+| Training use | | | |
+| Retention | | | |
+| Abuse review / human access | | | |
+| ZDR (covers / doesn't) | | | |
+| Subprocessors | | | |
+| Data residency | | | |
+| DPA / BAA / compliance reports | | | |
+| Secondary-leak surface | | | |
+
+:::tip Don't take one cell for the whole boundary
+"They don't train on it" is often true — but that's only **one cell**. Filling every cell above, stamping it, and reviewing quarterly is what it takes to verify the data boundary — exactly the "one line = the whole boundary" false security that Inference-service data boundary breaks.
+:::
