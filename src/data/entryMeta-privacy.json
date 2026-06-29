@@ -30,6 +30,11 @@
       "maturity": "试验",
       "technique": "RAG 与 Agent 隐私"
     },
+    "confidential-inference": {
+      "severity": "中",
+      "maturity": "生产",
+      "technique": "隐私保护计算"
+    },
     "inference-service-data-boundary": {
       "severity": "中",
       "maturity": "生产",
@@ -66,6 +71,11 @@
       "severity": "High",
       "maturity": "Experimental",
       "technique": "RAG & agent privacy"
+    },
+    "confidential-inference": {
+      "severity": "Medium",
+      "maturity": "Production",
+      "technique": "Privacy-preserving computation"
     },
     "inference-service-data-boundary": {
       "severity": "Medium",
