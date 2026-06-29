@@ -152,33 +152,36 @@
      Mermaid SVG 塌成 0×0（叠层全黑、看不到图）。 */
   display: block;
 }
-/* 放大视图里把连接线 / 箭头强制成高对比色并锁定清晰线宽。
+/* 放大视图里把连接线 / 箭头强制成**最高对比**色并锁定较粗的线宽。
    Mermaid 默认主题的边线用偏灰的 lineColor，叠层放大后线又被 non-scaling-stroke
-   钉成细线，于是「跟背景太接近、看不清」（曾被反馈）。这里按明暗主题给到近黑 / 近白，
-   并钉一个恒定线宽（配合 mermaidZoom.js 注入的 non-scaling-stroke，缩放时线宽不变）。
+   钉成细线，于是「跟背景太接近、看不清」（曾两次被反馈）。这里按明暗主题给到纯黑 /
+   纯白（与正文字色一致、对比拉满），并钉一个偏粗的恒定线宽（配合 mermaidZoom.js
+   注入的 non-scaling-stroke，缩放时线宽不变、始终清晰）。
    !important 用来压过 Mermaid 按 #<svgId> 作用域的 id 选择器——其特异性高于类选择器。 */
 .mermaid-zoom-stage svg .edgePaths path,
+.mermaid-zoom-stage svg .edgePaths .path,
 .mermaid-zoom-stage svg .edgePath path,
 .mermaid-zoom-stage svg .flowchart-link {
-  stroke: #1a1a1a !important;
-  stroke-width: 2px !important;
+  stroke: #000 !important;
+  stroke-width: 3px !important;
 }
 .mermaid-zoom-stage svg .arrowheadPath,
 .mermaid-zoom-stage svg .edgePaths marker path,
 .mermaid-zoom-stage svg marker path {
-  fill: #1a1a1a !important;
-  stroke: #1a1a1a !important;
+  fill: #000 !important;
+  stroke: #000 !important;
 }
 [data-theme='dark'] .mermaid-zoom-stage svg .edgePaths path,
+[data-theme='dark'] .mermaid-zoom-stage svg .edgePaths .path,
 [data-theme='dark'] .mermaid-zoom-stage svg .edgePath path,
 [data-theme='dark'] .mermaid-zoom-stage svg .flowchart-link {
-  stroke: #e6e6e6 !important;
+  stroke: #fff !important;
 }
 [data-theme='dark'] .mermaid-zoom-stage svg .arrowheadPath,
 [data-theme='dark'] .mermaid-zoom-stage svg .edgePaths marker path,
 [data-theme='dark'] .mermaid-zoom-stage svg marker path {
-  fill: #e6e6e6 !important;
-  stroke: #e6e6e6 !important;
+  fill: #fff !important;
+  stroke: #fff !important;
 }
 .mermaid-zoom-close {
   position: fixed;
