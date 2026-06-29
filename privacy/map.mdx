@@ -11,7 +11,7 @@ description: 「LLM 隐私保护」主题的交叉索引——除了按卷（侧
 侧边栏按**卷**（阅读主线）组织。这页给两条**查询轴**：按**技术板块**找条目，或按**威胁 → 缓解**反查「这个泄露面有哪些条目在管、残余风险是什么」。
 
 :::note 关于覆盖
-本主题精而深、不追条数（见 [PROPOSAL](https://github.com/xuebinma/AIWiki/blob/main/PROPOSAL-privacy-book.md)）。下表里**没有链接的板块 / 行**是已规划、尚未落地的——刻意标出来，免得「看着全」其实有缺口（这正是本书反对的一种假安全）。
+本主题精而深、不追条数（见 [PROPOSAL](https://github.com/xuebinma/AIWiki/blob/main/PROPOSAL-privacy-book.md)）。**14 个技术板块现已各有至少一条落地条目，或以「贯穿各条」方式覆盖**——后续按**深度**补强，不为铺板块而注水。若某天又出现 `_规划中_` 标记，那是刻意标出的缺口，免得「看着全」其实有空白（这正是本书反对的一种假安全）。
 :::
 
 ## 按技术板块浏览
@@ -27,11 +27,11 @@ description: 「LLM 隐私保护」主题的交叉索引——除了按卷（侧
 - **RAG 与 Agent 隐私**：[多租户 RAG 检索泄露](./04-rag-agents/rag-retrieval-leakage.mdx)
 - **推理服务期隐私**：[推理服务数据边界](./06-governance-compliance/inference-service-data-boundary.mdx)
 - **上下文面隐私**：[上下文面隐私](./03-conversational-llms/context-surface-privacy.mdx)（系统提示词 / 会话上下文 / 工具结果泄露）
-- **PII 检测与脱敏**：_规划中_
-- **模型抽取与窃取**：_规划中_
+- **PII 检测与脱敏**：[PII 回吐](./03-conversational-llms/pii-regurgitation.mdx)（训练语料 PII 在对话里复现、脱敏的限度）
+- **模型抽取与窃取**：[模型抽取与窃取](./01-foundations/model-extraction-stealing.mdx)（查询 API 复刻功能 / 套出部分参数）
 - **治理与合规**：贯穿各条「合规映射」小段；索引见卷六
-- **数据生命周期与数据治理**：_规划中_（删除请求跨存储传播等）
-- **隐私评测与审计**：贯穿各条「最小可测试断言」小块；专题_规划中_
+- **数据生命周期与数据治理**：[数据生命周期与删除传播](./06-governance-compliance/data-lifecycle-deletion.mdx)（删除请求跨存储传播）
+- **隐私评测与审计**：[量化记忆与审计](./02-memorization-extraction/quantifying-memorization.mdx)（探针 / 暴露度量化记忆）；亦贯穿各条「最小可测试断言」小块
 
 ## 威胁 → 缓解矩阵
 
@@ -47,6 +47,10 @@ description: 「LLM 隐私保护」主题的交叉索引——除了按卷（侧
 | 服务方**留存 / 训练 / 转手**你发出的数据 | [推理服务数据边界](./06-governance-compliance/inference-service-data-boundary.mdx) | 「不训练」≠「不保留」、条款按端点 / 功能而异、法律令可推翻删除 |
 | **设备数据被集中**、或更新泄露训练数据 | [生产级 DP·FL](./05-frontier-deployment/dp-federated-learning.mdx) | FL ≠ 私有（更新会泄露）、本地 DP 的 ε 常偏大、用户级 vs 样本级 |
 | 系统提示词 / 会话上下文 / 工具结果被套出 | [上下文面隐私](./03-conversational-llms/context-surface-privacy.mdx) | 指令式「别复述」≠ 隔离、提取检测是猫鼠游戏、边界须落在后端鉴权 / 密钥管理 / 按权限检索 |
+| 私有 **PII** 被模型在对话里**复现** | [PII 回吐](./03-conversational-llms/pii-regurgitation.mdx) | 脱敏减不根除（NER 漏检）、去标识 ≠ 去关联、输出过滤是猫鼠 |
+| **模型本身**被查询复刻 / 部分参数被套出 | [模型抽取与窃取](./01-foundations/model-extraction-stealing.mdx) | 防护是抬成本非消除、窃取放大离线 MIA / 抽取、限输出损可用性 |
+| 删了主库，**副本仍残留**在备份 / 日志 / 向量库 / 派生模型 | [数据生命周期与删除传播](./06-governance-compliance/data-lifecycle-deletion.mdx) | 传播只覆盖已知副本、备份过期窗口内仍在、派生模型那份要机器遗忘 |
+| 想在发布前**量出「我记住了多少」** | [量化记忆与审计](./02-memorization-extraction/quantifying-memorization.mdx) | canary 是代理非全量、高暴露度 ≠ 必可抽取、记忆随规模涨需每版重测 |
 
 :::tip 怎么用这张图
 先按「威胁」定位你当下最担心的泄露面，进对应条目读**机制 + 落地配方 + 最小可测试断言**；再顺着条目末尾的「与相邻技术的区别」横向跳，把整条防线连起来。每条都点破了对应的**假安全**——别只看「用了什么」，要看「它没解决什么」。

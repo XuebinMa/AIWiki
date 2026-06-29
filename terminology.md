@@ -274,16 +274,21 @@ DP-SGD · PATE · FHE · HE · MPC · TEE · MIA · PII · GDPR · NIST · OWASP
 | 记忆审计 | memorization auditing | 用 canary / exposure 量化泄露 |
 | 探针 | canary | 注入训练集的稀有标记串 |
 | 暴露度 | exposure | canary 被模型偏好的程度指标 |
+| 困惑度 | perplexity | 模型对序列的预测不确定度，记忆审计常用 |
 | 个人可识别信息 | PII (personally identifiable information) | |
 | 脱敏 | redaction / de-identification | |
+| 命名实体识别 | NER (named entity recognition) | 识别文本中姓名 / 邮箱 / 电话等实体，脱敏的基础 |
+| PII 回吐 | PII regurgitation | 模型在生成中复现训练语料里的个人信息 |
 | 匿名化 | anonymization | |
 | 去匿名化 | de-anonymization | 朴素匿名化可被反推还原 |
 | 合成数据 | synthetic data | 以生成数据替代真实数据 |
 | 上下文面隐私 | context-surface privacy | 系统提示词 / 会话 / 工具结果 / 检索片段的泄露面 |
 | 系统提示词提取 | system prompt extraction | |
+| 模型抽取与窃取 | model extraction & stealing | 借查询 API 复刻模型功能 / 解出部分参数 |
 | 数据边界 | data boundary | 私有数据允许流到哪里的界线 |
 | 数据生命周期 | data lifecycle | 采集→训练→评估→日志→删除→备份 |
 | 数据血缘 | data lineage | 数据从哪来、流到哪、被谁复制 |
+| 删除传播 | deletion propagation | 删除请求扇出到所有副本（备份 / 日志 / 向量库 / 派生模型 / 第三方）|
 | 数据保留 | data retention | 服务方保留输入 / 日志的时长与范围 |
 | 零数据保留 | zero data retention | 约定不留存请求数据 |
 | 假安全 | false security | 以为安全其实没有（本主题的头号靶子） |
