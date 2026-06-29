@@ -21,10 +21,10 @@ description: 「LLM 隐私保护」主题的交叉索引——除了按卷（侧
 - **推断类攻击（MIA / 反演 / 属性）**：[成员推断攻击](./01-foundations/membership-inference.mdx)
 - **记忆与训练数据抽取**：[训练数据抽取](./02-memorization-extraction/training-data-extraction.mdx)
 - **差分隐私**：[DP 微调](./03-conversational-llms/dp-fine-tuning.mdx)
-- **联邦学习与安全聚合**：[生产级 DP·FL 部署](./05-frontier-deployment/dp-federated-learning.mdx)
+- **联邦学习与安全聚合**：[生产级 DP·FL 部署](./05-frontier-deployment/dp-federated-learning.mdx) · [梯度泄露](./05-frontier-deployment/gradient-leakage.mdx) · [安全聚合](./05-frontier-deployment/secure-aggregation.mdx)
 - **机器遗忘与被遗忘权**：[可验证删除与机器遗忘](./05-frontier-deployment/machine-unlearning.mdx)
 - **隐私保护计算（HE / MPC / TEE）**：[可信执行环境](./01-foundations/trusted-execution-environment.mdx) · [同态加密 / 安全多方计算](./01-foundations/he-mpc.mdx) · [机密推理](./05-frontier-deployment/confidential-inference.mdx)
-- **RAG 与 Agent 隐私**：[多租户 RAG 检索泄露](./04-rag-agents/rag-retrieval-leakage.mdx)
+- **RAG 与 Agent 隐私**：[多租户 RAG 检索泄露](./04-rag-agents/rag-retrieval-leakage.mdx) · [跨会话记忆串味](./04-rag-agents/cross-session-memory-bleed.mdx) · [Agent 工具外联外泄](./04-rag-agents/agent-tool-exfiltration.mdx)
 - **推理服务期隐私**：[推理服务数据边界](./06-governance-compliance/inference-service-data-boundary.mdx)
 - **上下文面隐私**：[上下文面隐私](./03-conversational-llms/context-surface-privacy.mdx)（系统提示词 / 会话上下文 / 工具结果泄露）
 - **PII 检测与脱敏**：[PII 回吐](./03-conversational-llms/pii-regurgitation.mdx)（训练语料 PII 在对话里复现、脱敏的限度）
@@ -43,9 +43,11 @@ description: 「LLM 隐私保护」主题的交叉索引——除了按卷（侧
 | 判定**某人是否在训练集**（成员身份本身敏感） | [成员推断](./01-foundations/membership-inference.mdx) · [DP 微调](./03-conversational-llms/dp-fine-tuning.mdx) | 平均准确率掩盖尾部、降过拟合无形式保证、ε 要看清 |
 | 行使**被遗忘权 / 删除**，但模型还记得 | [机器遗忘](./05-frontier-deployment/machine-unlearning.mdx) | 输出抑制 ≠ 真删、近似遗忘无保证、验证本身难 |
 | **向量库 / 检索**泄露：向量反演、跨租户串味 | [RAG 检索泄露](./04-rag-agents/rag-retrieval-leakage.mdx) | 向量化 ≠ 匿名、检索后过滤留窗口、缓存 / memory 边界 bug |
+| 多用户共享**记忆 / 缓存 / 会话**，A 的数据串给 B | [跨会话记忆串味](./04-rag-agents/cross-session-memory-bleed.mdx) | 隔离靠系统非模型、竞态难穷尽测、持久 memory 放大窗口、第三方缓存审计不到底 |
+| Agent 被注入后经**工具把私有上下文外发** | [Agent 工具外联外泄](./04-rag-agents/agent-tool-exfiltration.mdx) | 指令式防御不可靠、allowlist / 人确认可被绕、多工具组合放大、注入鲁棒防御未解 |
 | **云厂商 / 同租户看到** prompt 或权重 | [机密推理](./05-frontier-deployment/confidential-inference.mdx) · [TEE](./01-foundations/trusted-execution-environment.mdx) · [HE·MPC](./01-foundations/he-mpc.mdx) | 不验证明 = 没用、信任根仍是芯片厂商 + 侧信道、密码学路线太贵 |
 | 服务方**留存 / 训练 / 转手**你发出的数据 | [推理服务数据边界](./06-governance-compliance/inference-service-data-boundary.mdx) | 「不训练」≠「不保留」、条款按端点 / 功能而异、法律令可推翻删除 |
-| **设备数据被集中**、或更新泄露训练数据 | [生产级 DP·FL](./05-frontier-deployment/dp-federated-learning.mdx) | FL ≠ 私有（更新会泄露）、本地 DP 的 ε 常偏大、用户级 vs 样本级 |
+| **设备数据被集中**、或**共享梯度 / 更新泄露训练数据** | [生产级 DP·FL](./05-frontier-deployment/dp-federated-learning.mdx) · [梯度泄露](./05-frontier-deployment/gradient-leakage.mdx) · [安全聚合](./05-frontier-deployment/secure-aggregation.mdx) | FL ≠ 私有（梯度可反演）、安全聚合防单点不防聚合和 / 串通、DP 有 ε 代价、经验手段非形式保证 |
 | 系统提示词 / 会话上下文 / 工具结果被套出 | [上下文面隐私](./03-conversational-llms/context-surface-privacy.mdx) | 指令式「别复述」≠ 隔离、提取检测是猫鼠游戏、边界须落在后端鉴权 / 密钥管理 / 按权限检索 |
 | 私有 **PII** 被模型在对话里**复现** | [PII 回吐](./03-conversational-llms/pii-regurgitation.mdx) | 脱敏减不根除（NER 漏检）、去标识 ≠ 去关联、输出过滤是猫鼠 |
 | **模型本身**被查询复刻 / 部分参数被套出 | [模型抽取与窃取](./01-foundations/model-extraction-stealing.mdx) | 防护是抬成本非消除、窃取放大离线 MIA / 抽取、限输出损可用性 |

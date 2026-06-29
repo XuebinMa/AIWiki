@@ -45,6 +45,16 @@
       "maturity": "研究",
       "technique": "PII 检测与脱敏"
     },
+    "agent-tool-exfiltration": {
+      "severity": "高",
+      "maturity": "研究",
+      "technique": "RAG 与 Agent 隐私"
+    },
+    "cross-session-memory-bleed": {
+      "severity": "高",
+      "maturity": "生产",
+      "technique": "RAG 与 Agent 隐私"
+    },
     "rag-retrieval-leakage": {
       "severity": "高",
       "maturity": "试验",
@@ -60,10 +70,20 @@
       "maturity": "生产",
       "technique": "联邦学习与安全聚合"
     },
+    "gradient-leakage": {
+      "severity": "高",
+      "maturity": "研究",
+      "technique": "联邦学习与安全聚合"
+    },
     "machine-unlearning": {
       "severity": "中",
       "maturity": "试验",
       "technique": "机器遗忘与被遗忘权"
+    },
+    "secure-aggregation": {
+      "severity": "中",
+      "maturity": "生产",
+      "technique": "联邦学习与安全聚合"
     },
     "data-lifecycle-deletion": {
       "severity": "中",
@@ -122,6 +142,16 @@
       "maturity": "Research",
       "technique": "PII detection, redaction & synthetic data"
     },
+    "agent-tool-exfiltration": {
+      "severity": "High",
+      "maturity": "Research",
+      "technique": "RAG & agent privacy"
+    },
+    "cross-session-memory-bleed": {
+      "severity": "High",
+      "maturity": "Production",
+      "technique": "RAG & agent privacy"
+    },
     "rag-retrieval-leakage": {
       "severity": "High",
       "maturity": "Experimental",
@@ -137,10 +167,20 @@
       "maturity": "Production",
       "technique": "Federated learning & secure aggregation"
     },
+    "gradient-leakage": {
+      "severity": "High",
+      "maturity": "Research",
+      "technique": "Federated learning & secure aggregation"
+    },
     "machine-unlearning": {
       "severity": "Medium",
       "maturity": "Experimental",
       "technique": "Machine unlearning & right to be forgotten"
+    },
+    "secure-aggregation": {
+      "severity": "Medium",
+      "maturity": "Production",
+      "technique": "Federated learning & secure aggregation"
     },
     "data-lifecycle-deletion": {
       "severity": "Medium",

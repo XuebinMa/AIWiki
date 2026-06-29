@@ -254,6 +254,14 @@
     "CSWP",
     "NeurIPS",
     "untargeted",
-    "logits"
+    "logits",
+    "Greshake",
+    "Geiping",
+    "Bonawitz",
+    "exfil",
+    "sparsification",
+    "misrouting",
+    "misrouted",
+    "reconstructable"
   ]
 }
