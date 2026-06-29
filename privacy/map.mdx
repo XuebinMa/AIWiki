@@ -1,0 +1,53 @@
+---
+title: 隐私地图：技术板块 + 威胁 → 缓解
+slug: map
+sidebar_label: 隐私地图（索引）
+sidebar_position: 1
+description: 「LLM 隐私保护」主题的交叉索引——除了按卷（侧边栏）读，还可按技术板块、或按「威胁 → 缓解」矩阵反查。
+---
+
+# 隐私地图
+
+侧边栏按**卷**（阅读主线）组织。这页给两条**查询轴**：按**技术板块**找条目，或按**威胁 → 缓解**反查「这个泄露面有哪些条目在管、残余风险是什么」。
+
+:::note 关于覆盖
+本主题精而深、不追条数（见 [PROPOSAL](https://github.com/xuebinma/AIWiki/blob/main/PROPOSAL-privacy-book.md)）。下表里**没有链接的板块 / 行**是已规划、尚未落地的——刻意标出来，免得「看着全」其实有缺口（这正是本书反对的一种假安全）。
+:::
+
+## 按技术板块浏览
+
+14 个技术板块是查询轴（边界见 PROPOSAL §6.2）。已落地的条目挂在其主板块下：
+
+- **推断类攻击（MIA / 反演 / 属性）**：[成员推断攻击](./01-foundations/membership-inference.mdx)
+- **记忆与训练数据抽取**：[训练数据抽取](./02-memorization-extraction/training-data-extraction.mdx)
+- **差分隐私**：[DP 微调](./03-conversational-llms/dp-fine-tuning.mdx)
+- **联邦学习与安全聚合**：[生产级 DP·FL 部署](./05-frontier-deployment/dp-federated-learning.mdx)
+- **机器遗忘与被遗忘权**：[可验证删除与机器遗忘](./05-frontier-deployment/machine-unlearning.mdx)
+- **隐私保护计算（HE / MPC / TEE）**：[可信执行环境](./01-foundations/trusted-execution-environment.mdx) · [同态加密 / 安全多方计算](./01-foundations/he-mpc.mdx) · [机密推理](./05-frontier-deployment/confidential-inference.mdx)
+- **RAG 与 Agent 隐私**：[多租户 RAG 检索泄露](./04-rag-agents/rag-retrieval-leakage.mdx)
+- **推理服务期隐私**：[推理服务数据边界](./06-governance-compliance/inference-service-data-boundary.mdx)
+- **上下文面隐私**：[上下文面隐私](./03-conversational-llms/context-surface-privacy.mdx)（系统提示词 / 会话上下文 / 工具结果泄露）
+- **PII 检测与脱敏**：_规划中_
+- **模型抽取与窃取**：_规划中_
+- **治理与合规**：贯穿各条「合规映射」小段；索引见卷六
+- **数据生命周期与数据治理**：_规划中_（删除请求跨存储传播等）
+- **隐私评测与审计**：贯穿各条「最小可测试断言」小块；专题_规划中_
+
+## 威胁 → 缓解矩阵
+
+按「你担心的泄露面」反查：哪些条目在管、它们**没**解决什么。
+
+| 威胁（你担心什么） | 在管的条目 | 残余风险 / 没解决的 |
+|---|---|---|
+| 私有数据被模型**记住、逐字吐回** | [训练数据抽取](./02-memorization-extraction/training-data-extraction.mdx) | 去重 ≠ 消除、DP ≠ 零泄露、输出过滤是猫鼠游戏 |
+| 判定**某人是否在训练集**（成员身份本身敏感） | [成员推断](./01-foundations/membership-inference.mdx) · [DP 微调](./03-conversational-llms/dp-fine-tuning.mdx) | 平均准确率掩盖尾部、降过拟合无形式保证、ε 要看清 |
+| 行使**被遗忘权 / 删除**，但模型还记得 | [机器遗忘](./05-frontier-deployment/machine-unlearning.mdx) | 输出抑制 ≠ 真删、近似遗忘无保证、验证本身难 |
+| **向量库 / 检索**泄露：向量反演、跨租户串味 | [RAG 检索泄露](./04-rag-agents/rag-retrieval-leakage.mdx) | 向量化 ≠ 匿名、检索后过滤留窗口、缓存 / memory 边界 bug |
+| **云厂商 / 同租户看到** prompt 或权重 | [机密推理](./05-frontier-deployment/confidential-inference.mdx) · [TEE](./01-foundations/trusted-execution-environment.mdx) · [HE·MPC](./01-foundations/he-mpc.mdx) | 不验证明 = 没用、信任根仍是芯片厂商 + 侧信道、密码学路线太贵 |
+| 服务方**留存 / 训练 / 转手**你发出的数据 | [推理服务数据边界](./06-governance-compliance/inference-service-data-boundary.mdx) | 「不训练」≠「不保留」、条款按端点 / 功能而异、法律令可推翻删除 |
+| **设备数据被集中**、或更新泄露训练数据 | [生产级 DP·FL](./05-frontier-deployment/dp-federated-learning.mdx) | FL ≠ 私有（更新会泄露）、本地 DP 的 ε 常偏大、用户级 vs 样本级 |
+| 系统提示词 / 会话上下文 / 工具结果被套出 | [上下文面隐私](./03-conversational-llms/context-surface-privacy.mdx) | 指令式「别复述」≠ 隔离、提取检测是猫鼠游戏、边界须落在后端鉴权 / 密钥管理 / 按权限检索 |
+
+:::tip 怎么用这张图
+先按「威胁」定位你当下最担心的泄露面，进对应条目读**机制 + 落地配方 + 最小可测试断言**；再顺着条目末尾的「与相邻技术的区别」横向跳，把整条防线连起来。每条都点破了对应的**假安全**——别只看「用了什么」，要看「它没解决什么」。
+:::
