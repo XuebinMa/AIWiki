@@ -11,7 +11,7 @@ description: Cross-index for the LLM Privacy Protection theme — beyond reading
 The sidebar organizes by **volume** (the reading spine). This page adds two **query axes**: find entries by **technique board**, or look up by **threat → mitigation** — "which entries cover this leak surface, and what residual risk remains."
 
 :::note On coverage
-This theme is deep-not-wide and doesn't chase entry count (see [PROPOSAL](https://github.com/xuebinma/AIWiki/blob/main/PROPOSAL-privacy-book.md)). Boards / rows below **without a link** are planned but not yet written — called out on purpose, so "looks complete" doesn't hide a gap (exactly the kind of false security this book argues against).
+This theme is deep-not-wide and doesn't chase entry count (see [PROPOSAL](https://github.com/xuebinma/AIWiki/blob/main/PROPOSAL-privacy-book.md)). **All 14 technique boards now have at least one shipped entry, or are covered "running through every entry"** — from here we deepen rather than pad the board count. If a `_planned_` marker ever reappears, it's a gap called out on purpose, so "looks complete" doesn't hide a blank (exactly the kind of false security this book argues against).
 :::
 
 ## Browse by technique board
@@ -27,11 +27,11 @@ The 14 technique boards are the query axis (boundaries in PROPOSAL §6.2). Shipp
 - **RAG & agent privacy**: [Multi-tenant RAG retrieval leakage](./04-rag-agents/rag-retrieval-leakage.mdx)
 - **Inference-service privacy**: [Inference-service data boundary](./06-governance-compliance/inference-service-data-boundary.mdx)
 - **Context-surface privacy**: [Context-surface privacy](./03-conversational-llms/context-surface-privacy.mdx) (system prompt / conversation context / tool-result leakage)
-- **PII detection, redaction & synthetic data**: _planned_
-- **Model extraction & stealing**: _planned_
+- **PII detection, redaction & synthetic data**: [PII regurgitation](./03-conversational-llms/pii-regurgitation.mdx) (training-corpus PII reproduced in conversation, the limits of scrubbing)
+- **Model extraction & stealing**: [Model extraction & stealing](./01-foundations/model-extraction-stealing.mdx) (clone behavior / solve some parameters via the query API)
 - **Governance & compliance**: runs through each entry's "Compliance mapping" section; index in Volume 6
-- **Data lifecycle & data governance**: _planned_ (cross-store propagation of deletion requests, etc.)
-- **Privacy evaluation & auditing**: runs through each entry's "Minimal testable assertions" block; a dedicated entry is _planned_
+- **Data lifecycle & data governance**: [Data lifecycle & deletion propagation](./06-governance-compliance/data-lifecycle-deletion.mdx) (cross-store propagation of deletion requests)
+- **Privacy evaluation & auditing**: [Quantifying memorization & auditing](./02-memorization-extraction/quantifying-memorization.mdx) (canaries / exposure to quantify memorization); also runs through each entry's "Minimal testable assertions" block
 
 ## Threat → mitigation matrix
 
@@ -47,6 +47,10 @@ Look up by "the leak surface you worry about": which entries cover it, and what 
 | The provider **retaining / training on / handing off** what you send | [Inference-service data boundary](./06-governance-compliance/inference-service-data-boundary.mdx) | "no training" ≠ "no retention", terms vary by endpoint / feature, a legal hold can override deletion |
 | **Device data centralized**, or updates leaking training data | [Production-grade DP·FL](./05-frontier-deployment/dp-federated-learning.mdx) | FL ≠ private (updates leak), local DP's ε is often large, user-level vs sample-level |
 | System prompt / conversation context / tool results extracted | [Context-surface privacy](./03-conversational-llms/context-surface-privacy.mdx) | instruction-style "don't recite" ≠ isolation, extraction detection is cat-and-mouse, the boundary must land on backend authn / secret management / permission-scoped retrieval |
+| Private **PII** **reproduced** by the model in conversation | [PII regurgitation](./03-conversational-llms/pii-regurgitation.mdx) | scrubbing reduces ≠ eliminates (NER misses), de-identification ≠ de-association, output filtering is cat-and-mouse |
+| The **model itself** cloned by queries / some parameters solved | [Model extraction & stealing](./01-foundations/model-extraction-stealing.mdx) | defense raises cost ≠ eliminates, stealing amplifies offline MIA / extraction, limiting output hurts usability |
+| Deleted from the primary DB, but **copies still remain** in backups / logs / vector store / derived models | [Data lifecycle & deletion propagation](./06-governance-compliance/data-lifecycle-deletion.mdx) | propagation only covers known copies, still present within the backup expiry window, the derived-model copy needs unlearning |
+| Wanting to **measure "how much I memorized"** before release | [Quantifying memorization & auditing](./02-memorization-extraction/quantifying-memorization.mdx) | a canary is a proxy not ground truth, high exposure ≠ necessarily extractable, memorization rises with scale so re-measure per version |
 
 :::tip How to use this map
 First locate the **threat** you worry about most, read that entry's **mechanism + buildable recipe + minimal testable assertions**, then jump laterally via each entry's "How this differs from neighboring techniques" to connect the whole line of defense. Every entry calls out the corresponding **false security** — don't just look at "what was used," look at "what it doesn't solve."
