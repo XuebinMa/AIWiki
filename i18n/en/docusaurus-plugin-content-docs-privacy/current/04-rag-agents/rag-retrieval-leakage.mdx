@@ -21,13 +21,13 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="Volume 4 · RAG and agents" technique="RAG & agent privacy" audience={['Privacy Engineer', 'Security Engineer', 'ML Engineer']} severity="High" maturity="Experimental" evidence="Security advisory" />
 
-> In one sentence: in multi-tenant RAG, two intuitions both fail — "vectorized means anonymized" and "filtered by user means isolated." An embedding **can be inverted back to approximate original text** (including PII); retrieval ranks by **similarity**, not permission, so if the ACL runs after retrieval instead of before it, the most relevant private chunk may come from **another tenant**; and a single boundary bug in a shared cache / long-term memory can carry one user's private context into another's session.
+> In one sentence: in multi-tenant RAG, two intuitions both fail — "vectorized means anonymized" and "filtered by user means isolated." In some studied embedding settings a vector **can be inverted back to approximate original text** (including PII), so don't treat it as anonymization; retrieval ranks by **similarity**, not permission, so if the ACL runs after retrieval instead of before it, the most relevant private chunk may come from **another tenant**; and a single boundary bug in a shared cache / long-term memory can carry one user's private context into another's session.
 
 ## Mechanism: what happens on my side
 
 In RAG, what I do is: chunk your private documents, embed them into vectors in a store, and at query time retrieve the most relevant chunks by similarity and put them into my context to answer. This chain has three independent leak points:
 
-1. **An embedding is not a one-way hash.** It retains enough lexical and semantic information to be **inverted back to approximate original text** by a learned decoder — Morris et al.'s vec2text iteratively approaches the target vector and reconstructs sentences with high fidelity, recovering **real names** from embeddings of clinical notes (Morris et al., EMNLP 2023). So "we only stored vectors, not the text" is **not** anonymization.
+1. **An embedding is not a one-way hash.** It retains enough lexical and semantic information that, under the right conditions, it can be **inverted back to approximate original text** by a learned decoder — Morris et al.'s vec2text iteratively approaches the target vector and, in its research setting, reconstructs sentences with high fidelity, recovering **real names** from embeddings of clinical notes (Morris et al., EMNLP 2023). Inversion fidelity depends on the embedding model, whether the attacker can query the same model, text length, and domain distribution; but the conclusion is clear enough: "we only stored vectors, not the text" is **not** anonymization.
 2. **Retrieval is by similarity, not permission.** I bring back "the chunks most like the question," not "the chunks you're allowed to see." If tenant / user access control runs **after retrieval** (or is forgotten), then during ranking another tenant's private chunk may already enter the candidate set — even enter my context.
 3. **Shared state bleeds.** Caches, session state, and long-term memory, if keyed wrong or mismatched under concurrency, can put A's private context into B's session.
 
@@ -70,18 +70,28 @@ Core: **do isolation at the data layer, before retrieval; treat embeddings as se
    encryption on read/export/backup; don't assume "just vectors, not sensitive."
 3. Minimize before ingest: PII scan/redact chunks before writing; decide by
    sensitivity whether they may enter a retrievable store at all.
-4. Isolation regression tests: inject cross-tenant/cross-user probe documents,
-   automatically test "can A's query recall B's chunks"; make it a CI gate, not
-   a one-off manual spot check.
+4. Isolation regression tests: inject cross-tenant probes, auto-test "can A's
+   query recall/answer B's chunks," as a CI gate:
+   - seeds: tenant_a_secret = "TENANT_A_ONLY_<random>"; tenant_b_probe = a
+     question highly similar in meaning to A's document
+   - assert: B's retrieval candidates exclude A's doc / B's final answer excludes
+     A's content / logs, traces, caches don't record A's doc for B
+   make it a CI gate, not a one-off manual spot check.
 5. Memory containment: retrieved results/tool outputs don't enter long-term
    memory by default; if they do, explicit grant + scoped + clearable.
 ```
 
 Every boundary (which layer does ACL, who can read the vector store, memory recall scope) must be written as a testable assertion — don't stop at a verbal "we filter by user."
 
+**Minimal testable assertions** (turn the probe recipe above into a CI gate):
+
+- How to test: on every build, run the cross-tenant probe — A's private document + a B query highly similar in meaning to it.
+- Pass: B's retrieval candidates, final answer, and logs / traces / cache **all exclude** A's document (all three assertions green).
+- Fail: any assertion hits A's content → isolation breaks at that layer; move the ACL to the pre-retrieval index layer and re-test.
+
 ## A real case
 
-On March 20, 2023, a bug in the Redis client library redis-py that OpenAI used caused a spike in request cancellations, giving connections a small probability of returning **someone else's data**: some users saw **other active users' conversation titles** in the sidebar; if two were active at once, the first message of a new conversation could be visible to another; the same bug also made payment-related information of about **1.2% of ChatGPT Plus users** visible to others in a roughly nine-hour window (name, email, payment address, last four digits and expiry of a credit card — **full card numbers were not exposed**). This is OpenAI's own postmortem (OpenAI, *March 20 ChatGPT outage*, 2023). What it confirms is not some advanced attack but the same class of mechanism risk: **in a production LLM service, a single bug in the "boundary layer" — cache / concurrency — is enough to bleed private data across users.** Isolation must be enforced at the data layer, not left to the app layer's "it shouldn't happen."
+**An adjacent real incident: cross-user state-isolation failure.** Strictly, this is not RAG vector-retrieval leakage but a state-isolation incident in an LLM service; it's here because it proves that **the same class of boundary-layer bug** can cause cross-user data leakage in a production LLM service. On March 20, 2023, a bug in the Redis client library redis-py that OpenAI used caused a spike in request cancellations, giving connections a small probability of returning **someone else's data**: some users saw **other active users' conversation titles** in the sidebar; if two were active at once, the first message of a new conversation could be visible to another; the same bug also made payment-related information of about **1.2% of ChatGPT Plus users** visible to others in a roughly nine-hour window (name, email, payment address, last four digits and expiry of a credit card — **full card numbers were not exposed**). This is OpenAI's own postmortem (OpenAI, *March 20 ChatGPT outage*, 2023). What it confirms is not some advanced attack but the same class of mechanism risk: **in a production LLM service, a single bug in the "boundary layer" — cache / concurrency — is enough to bleed private data across users.** Isolation must be enforced at the data layer, not left to the app layer's "it shouldn't happen."
 
 ## Residual risk and trade-offs
 

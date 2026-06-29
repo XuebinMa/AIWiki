@@ -21,7 +21,7 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="Volume 2 · Memorization and extraction" technique="Memorization & training-data extraction" audience={['Privacy Engineer', 'ML Engineer', 'Security Engineer']} severity="High" maturity="Research" evidence="Research" />
 
-> In one sentence: "Train on private data and it just becomes statistics — you can't get it back out" is a dangerous illusion. To an outside attacker, if a piece of text appeared in training at all (even in a single document, as long as it's rare and distinctive enough), I **may reproduce it verbatim under the right prompt** — and the **bigger the model, the more often it was duplicated, and the more context you give, the easier it comes out**.
+> In one sentence: "Train on private data and it just becomes statistics — you can't get it back out" is a dangerous illusion. To an outside attacker, even if a piece of text appeared in training only once (even in a single document), as long as it's rare, distinctive, and fixed-format enough, **verbatim extraction has been observed in existing research settings** — and **measurements show: the larger the model, the more often it was duplicated, and the more context you give, the more discoverable memorization there is**.
 
 ## Mechanism: what happens on my side
 
@@ -69,14 +69,21 @@ A minimal set of actions you can follow (tailor by data sensitivity):
 2. DP on sensitive data: for datasets with PII / secrets, train with DP-SGD,
    record the privacy budget ε/δ and the accounting method; smaller ε = more
    private, lower utility — pick per use case, don't just label "DP added."
-3. Audit memorization before launch: inject canaries (fixed-format rare strings),
-   measure their exposure afterward; abnormally high exposure -> go back and
-   strengthen dedup / DP.
+3. Audit memorization before launch: inject canaries (synthetic, no real PII,
+   deletable and traceable fixed-format rare strings), measure their exposure
+   afterward; abnormally high exposure -> go back and strengthen dedup / DP.
+   Never use real sensitive data as a canary — that just injects PII into training.
 4. Inference-side backstop: scan/block PII / secrets in outputs, but as the last
    line, not the only line.
 ```
 
 Every quantitative parameter (ε, dedup threshold, exposure threshold) must carry **your own experimental conditions** when you deploy it — don't lift the papers' numbers directly; their model scale, data, and definitions may not match yours.
+
+**Minimal testable assertions** (turn the recipe above into a regression check):
+
+- How to test: after training, run an exposure measurement on injected canaries; make it an audit step / CI gate in the pipeline.
+- Pass: every canary's exposure ≤ a preset threshold, and clearly below baseline after dedup / DP.
+- Fail: a canary's exposure is abnormally high → it's at high risk of verbatim extraction; go back and strengthen dedup / DP, then re-test.
 
 ## A real case
 
@@ -90,7 +97,7 @@ Calling out each "false security" in turn:
 - **DP ≠ zero leakage.** DP-SGD's ε is not zero — it gives a "bounded single-sample influence" guarantee, not "never reproduces." And the tighter you set ε, the more utility you lose: an explicit trade-off to account for.
 - **Output filtering is cat-and-mouse.** Rules always lag new induction tricks (the divergence attack is the example); it backstops, it doesn't hold the floor.
 - **"We don't open training / don't fine-tune on user data" ≠ safe.** Once data has been through training, the memorization is already in the weights; deleting the source or flipping a switch won't make the learned strings vanish (this is also the hard part of machine unlearning and the right to be forgotten — see Volume 5).
-- **Risk scales with capability.** Bigger capacity means more memorization — scaling the model up for more power scales this privacy risk up with it.
+- **Risk often scales with capability.** In existing measurements, larger capacity means more discoverable memorization — scaling the model up for more power tends to scale this privacy risk up with it, so dedup / auditing / DP must scale too.
 
 ## Compliance mapping
 
@@ -107,7 +114,7 @@ Calling out each "false security" in turn:
 ## Version notes
 
 :::note Applicable versions
-Verbatim memorization and extractability are **mechanism-level phenomena of autoregressive language models** — common across vendors and versions, not one model's temperament. The attacks keep evolving over time: established on GPT-2 in 2021 (Carlini, USENIX), quantified in 2023 into log-linear relationships with scale / duplication / context (Carlini, ICLR), and demonstrated via divergence attack on production models like ChatGPT (Nasr). **Context windows and model sizes grow with each version, and memorization capacity grows with them** — bigger, more capable models make this risk heavier, not lighter. (Sources verified 2026-06.)
+Verbatim memorization and extractability are **mechanism-level phenomena of autoregressive language models** — common across vendors and versions, not one model's temperament. The attacks keep evolving over time: established on GPT-2 in 2021 (Carlini, USENIX), quantified in 2023 into log-linear relationships with scale / duplication / context (Carlini, ICLR), and demonstrated via divergence attack on production models like ChatGPT (Nasr). **In existing measurements, model capacity, duplication count, and context length all amplify discoverable memorization** — so a bigger model and longer context should not be treated as inherently lowering this risk; they call for stronger dedup, memorization auditing, and privacy controls (the exact behavior varies with the training pipeline and the dedup / DP / alignment strategy, and is not guaranteed monotonic across all setups). (Sources verified 2026-06.)
 :::
 
 ## Further reading and sources
