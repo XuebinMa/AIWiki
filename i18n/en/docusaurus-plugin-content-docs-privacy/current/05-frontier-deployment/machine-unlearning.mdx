@@ -1,0 +1,121 @@
+---
+title: "Verifiable deletion and machine unlearning: \"deleted the source record\" ≠ \"the model forgot\" — and proving it forgot is harder still"
+slug: machine-unlearning
+sidebar_label: Verifiable deletion and machine unlearning
+sidebar_position: 2
+audience: [Privacy Engineer, ML Engineer, Compliance Engineer]
+era: "Volume 5 · Frontier and deployment"
+technique: Machine unlearning & right to be forgotten
+attack_surface: Training data / model weights
+severity: Medium
+maturity: Experimental
+evidence: Research
+tags: [machine unlearning, right to be forgotten, verifiable deletion, exact unlearning, membership inference, Privacy Engineer, ML Engineer, Compliance Engineer]
+sources:
+  - { title: "Cao & Yang, Towards Making Systems Forget with Machine Unlearning (IEEE S&P 2015, pp. 463-480)", url: "https://dl.acm.org/doi/10.1109/SP.2015.35" }
+  - { title: "Bourtoule et al., Machine Unlearning / SISA (IEEE S&P 2021, pp. 141-159; arXiv 1912.03817)", url: "https://arxiv.org/abs/1912.03817" }
+  - { title: "Machine Unlearning: A Comprehensive Survey (2024; arXiv 2405.07406)", url: "https://arxiv.org/abs/2405.07406" }
+---
+
+import PrivacyMeta from '@site/src/components/PrivacyMeta';
+
+<PrivacyMeta era="Volume 5 · Frontier and deployment" technique="Machine unlearning & right to be forgotten" audience={['Privacy Engineer', 'ML Engineer', 'Compliance Engineer']} severity="Medium" maturity="Experimental" evidence="Research" />
+
+> In one sentence: a user exercises the right to be forgotten (GDPR Art. 17), you delete their record from the training set — but **the model may still remember** (see Volume 2 [Training-data extraction](../02-memorization-extraction/training-data-extraction.mdx): once memorization is in the weights, deleting the source doesn't make it vanish). Machine unlearning aims to make the model "behave as if it never saw that record." Two hard parts: ① how to **actually** forget (exact unlearning ≈ equivalent retraining, expensive; approximate unlearning is fast but unguaranteed); ② how to **prove** it forgot (verifiable deletion) — the piece engineering most lacks.
+
+## Mechanism: what happens on my side
+
+A record once influenced my parameters: its gradient update left an imprint on me during training (the very source of memorization, extraction, and membership inference). To "forget" it, I have to erase its influence on the parameters.
+
+- **Exact unlearning**: make the post-unlearning me, in distribution, **equal to "a me retrained from scratch having never used that record."** The gold standard is real retraining, but that's prohibitive for large models. Cao & Yang (2015, who coined machine unlearning) transform the learning algorithm into a **summation form** so deleting one sample updates only a few summations — far faster than retraining; Bourtoule et al. (**SISA**, 2021) **shard** training (Sharded / Isolated / Sliced / Aggregated) so unlearning retrains only **the shard containing that sample**, not the whole model.
+- **Approximate unlearning**: estimate-and-erase via gradient reversal, influence functions, etc. — fast, but with **no guarantee** of true equivalence to retraining.
+
+Red line: I don't write "I forgot it" — I can't introspect "did I truly forget." What's externally arguable is: **after unlearning, whether my behavior and distinguishability on that record return to the "never seen" level** (verified with metrics like membership inference, see Volume 1 [Membership inference](../01-foundations/membership-inference.mdx)).
+
+```mermaid
+flowchart TB
+    R["deletion request: forget sample x"] --> W["x once influenced my parameters (left an imprint)"]
+    W --> E{"how to unlearn?"}
+    E -->|exact: retrain the shard with x (SISA)| OK["in distribution ≈ never used x"]
+    E -->|approximate: estimate-and-erase| AP["fast, but no equivalence guarantee"]
+    OK --> V["verify: run MIA / canary exposure on x"]
+    AP --> V
+    V -->|back to 'non-member' baseline| Done["arguably unlearned"]
+    V -->|still high-confidence member| No["not really forgotten, go retrain"]
+```
+
+## Threat surface: why "deleted" is often false
+
+- **Output suppression ≠ true deletion**: making the model "refuse to output" something leaves it **still in** the weights — a different prompt or bypassed alignment can still extract it (same as training-data extraction).
+- **Approximate unlearning has no formal guarantee**: running an unlearning algorithm isn't mathematically equivalent to retraining; residual influence may still be measurable by an attack.
+- **Deleting one record ≠ deleting its influence**: similar / correlated samples may have "learned" the deleted record's information back; copies in downstream distilled models, caches, logs, and backups must be handled too.
+- **Verification is missing**: the most-lacking piece — most methods **can't produce evidence of "truly forgotten,"** only "we ran an unlearning step."
+
+## How the defense works
+
+Two legs: **exact unlearning gives the "equivalent retraining" guarantee** (SISA makes it affordable per shard), and **verification rests on adversarial audit**. The load-bearing one is the latter — **"verifiable" = using an attack to falsify "unlearned"**: after deletion, run membership inference on the target sample (Volume 1 [MIA](../01-foundations/membership-inference.mdx)) or check the exposure of an injected canary; if the attack can still confidently call it a member / it's still favored for reproduction, it **wasn't really forgotten**. Verifiable deletion upgrades "we deleted it" to "we deleted it, externally falsifiably."
+
+## Buildable recipe
+
+```text
+1. Pick a route:
+   - Small models / shards you can retrain: use exact unlearning (SISA-style
+     sharding, unlearning retrains only the affected shard).
+   - Large models: evaluate "source deletion + retrain trigger threshold + output
+     filtering" as a combination; don't pretend a point deletion = unlearning.
+2. Trace the deletion request across the whole chain: training set, related/derived
+   data, downstream distilled models, caches, logs, backups (cross-store
+   propagation, see data lifecycle).
+3. Always run unlearning verification after deletion: run MIA / check canary
+   exposure on the target sample — did it return to baseline?
+4. Keep deletion evidence: record "what was deleted + when + verification result"
+   as an auditable artifact (for the Art. 17 argument).
+```
+
+Every judgment (retrain trigger threshold, the verification FPR point, acceptable residual signal) carries **your model and threat model**; paper settings may not transfer.
+
+**Minimal testable assertions** (turn "unlearning" into a regression check — don't stop at "we ran an unlearning algorithm"):
+
+- How to test: after deletion, run membership inference (TPR at low FPR) / check injected-canary exposure on the target sample.
+- Pass: the target sample's membership signal / exposure falls back to the "non-member / not-injected" baseline, and is **indistinguishable** on that sample from a model retrained without it.
+- Fail: still a high-confidence member / exposure still high → not really forgotten; go retrain or switch to exact unlearning — don't settle for output suppression.
+
+## A real case / research progress
+
+(This entry's maturity is "Experimental": what follows is research progress and feasibility, not an endorsement that verifiable unlearning for LLMs is in production.)
+
+Machine unlearning was introduced by Cao & Yang (2015) — transform learning into a summation form so deleting a sample updates only a few summations, faster than retraining (IEEE S&P 2015). Bourtoule et al. (2021)'s **SISA** makes exact unlearning **affordable**: sharded training + cached intermediate state, so unlearning retrains only the shard with that sample, demonstrated across MNIST / CIFAR / ImageNet and various models (IEEE S&P 2021). But **verifiable unlearning at large-language-model scale remains an open problem** — approximate methods abound, strong guarantees are scarce, and evaluation metrics aren't standardized (see survey, 2024).
+
+## Residual risk and trade-offs
+
+Calling out each false security:
+
+- **Output suppression ≠ unlearning.** Refusing to output merely covers it; it's still in the weights and can be bypassed and extracted.
+- **Approximate unlearning has no guarantee.** Don't read "we ran an unlearning algorithm" as "proved forgotten" — residual influence may still be measurable.
+- **Deleting one record ≠ deleting its influence.** Without handling related data, downstream models, and cache / log / backup copies, it isn't fully deleted.
+- **Verification is hard, and only "at least this attack can't tell."** Passing MIA verification isn't absolute forgetting — just that the current attack can't detect it; a stronger attack might.
+- **Exact unlearning is still expensive for large models.** SISA makes shard retraining affordable, but full exact unlearning of a large model is still a real engineering trade-off.
+
+## Compliance mapping
+
+- **GDPR Art. 17 (right to be forgotten)**: the law requires "deleting personal data," but "delete the training record" is **not** "the model forgot" — there's a real gap between the technical deletion obligation and the cost of retraining / unlearning. Verifiable unlearning is the key to turning "we deleted it" into "**we can prove we deleted it**," and is the evidence for regulator inquiries.
+- **EU AI Act**: training-data transparency obligations make "whose data was used, and can its influence be removed" more explicit.
+
+(Compliance evolves with the statute version; this section is stamped 2026-06 — verify the latest enacted text before citing.)
+
+## How this differs from neighboring techniques
+
+- **Machine unlearning vs. DP fine-tuning (Volume 3)**: DP is **prevention up front** (bound single-sample influence during training, see [DP fine-tuning](../03-conversational-llms/dp-fine-tuning.mdx)); unlearning is **deletion after the fact** (trained already, now erase one record's influence). Both concern "a single sample," one before, one after; a DP-trained model already bounds single-sample influence, making unlearning easier to argue.
+- **Machine unlearning vs. membership inference (Volume 1)**: MIA is the **verification tool** for unlearning — after deletion, use it to falsify "forgotten." The relation is "attack ↔ using the attack to verify the defense" (see [MIA](../01-foundations/membership-inference.mdx)).
+
+## Version notes
+
+:::note Applicable versions
+Machine unlearning is a **model-agnostic** problem framing, but **methods and feasibility change fast with model scale**: exact unlearning (summation form, SISA) is fairly mature on discriminative / small-to-mid models; verifiable unlearning on LLMs is still mostly research / approximate methods, with strong guarantees and unified evaluation still in progress. This entry reflects the 2026-06 research state; deployment depends on your model, verification metric, and retraining cost. (Sources verified 2026-06.)
+:::
+
+## Further reading and sources
+
+- [Towards Making Systems Forget with Machine Unlearning (Cao & Yang, IEEE S&P 2015)](https://dl.acm.org/doi/10.1109/SP.2015.35) — coined machine unlearning: transform learning into a summation form so deletion updates only a few summations, faster than retraining.
+- [Machine Unlearning / SISA (Bourtoule et al., IEEE S&P 2021; arXiv 1912.03817)](https://arxiv.org/abs/1912.03817) — sharded training makes exact unlearning affordable: unlearning retrains only the shard containing that sample.
+- [Machine Unlearning: A Comprehensive Survey (2024; arXiv 2405.07406)](https://arxiv.org/abs/2405.07406) — a survey of exact vs. approximate unlearning, verification challenges, and open problems.

@@ -21,11 +21,11 @@
 
 ### 立项 + 评审阶段遗留待核（凭知识/二手提及，未二次核）
 
-- ⬜ **Apple PCC（Private Cloud Compute）**：机密推理生产实例，本会话未检索。核机制（TEE / 远程证明）、定位、发布时间。出处：Apple Security 官方。
+- ✅ **Apple PCC（Private Cloud Compute）**：已核（Apple Security Research 官方）——设备级远程证明 + 把生产软件镜像公开上**可验证透明日志**（设备只与「证明匹配公开发布」的节点通信）+ **无特权运行角色** + 部分源码开放安全研究。已作《机密推理》（卷五）的生产实例出处。
 - ⬜ **Carlini 等 · 抽取 / 量化记忆**：核确切标题 / 年份——《Extracting Training Data from Large Language Models》（USENIX Security 2021？）、《Quantifying Memorization Across Neural Language Models》（2022/2023？）。
 - ⬜ **PATE**：全称 Private Aggregation of Teacher Ensembles、出处（Papernot 等 2017？）、与 DP-SGD 区别。
 - ⬜ **机密推理开销（高优）**：我写「H100/H200 约 95–99% 原生」过乐观；评审 R1 给「penalty 约 4–8%」与「模型换入换出场景低 45–70%」。**这三个数都待一手核**，落条目必须带条件（workload / batch / seq len / 模型规模 / 是否含权重保护 / against provider 还是 co-tenant）。
-- ⬜ **Gboard DP 模型数**：我「15+」vs 评审 R1「二十多个」——以一手论文（Xu 等 2023）为准。
+- ✅ **Gboard DP 模型数**：已核（Xu 等 2023, ACL）——论文原文「**more than twenty**」=「二十多个」，评审 R1 对；且所有下一词预测神经语言模型现均带 DP、未来发布要求 DP。已用于《生产级 DP·FL 部署》（卷五）。
 - ⬜ **二手 → 一手升级**：HE 约 10⁴× 开销；竞品 `Awesome-*` 的 star 数 / 出版年。
 - ⬜ **评审 R1 引用的数据同样待核**：4–8% / 45–70% / 「二十多个」不因来自评审而免检——一视同仁查一手。
 
@@ -108,7 +108,7 @@
 | `evidence` 支持多证据类型 | ✅ | **已落（轻量）**：不扩 schema；`terminology.md` 加「主要 / 补充」约定，模板 + skill 同步；RAG 主标签 安全报告→研究支持（最强一类）、RAG + 推理服务在「延伸阅读」开头注「主要：X；补充：Y」。 |
 | 「真实案例/生产部署」小节按条目类型可改名 | ✅ | **已落**：模板 + skill 标明该小节标题可按 `maturity` 微调；四条对齐——训练抽取→「真实案例」、DP→「真实案例 / 工程可行性」、RAG→「真实案例：相邻事故」、推理服务→「厂商现状」（不再给试验级条目挂「生产部署」）。 |
 | 每条加「最小可测试断言」块 | ✅ | **已落**：并入「落地实现」小节末（怎么测 / 通过证明什么 / 失败看到什么），不新增第十节（防九节膨胀）；`entry-template` + `aiwiki-privacy-entry-author` skill + 四条全回填，后续条目沿用。 |
-| 抽 toolkit「Vendor Data Boundary Checklist」+ 正文链接 | 🟡 | 已在待办（见「结构/流程待办」M5）；推理服务条目定稿后从正文链过去 |
+| 抽 toolkit「Vendor Data Boundary Checklist」+ 正文链接 | ✅ | **已落**：`privacy/vendor-data-boundary-checklist.mdx`（中英），8 类可填清单 + 逐厂商记录表；《推理服务数据边界》正文「落地实现」段已双向链过去。 |
 
 ## 选题储备（按卷 × 技术板块，待逐条立项）
 
@@ -116,9 +116,9 @@
 
 - ✅ 卷一 · 隐私根基（**只讲最小承重地基**）：**已补完**——MIA（`membership-inference`）、TEE（`trusted-execution-environment`）、HE·MPC（`he-mpc`）三条已落；DP 最小地基并在卷三《DP 微调》（各条已回链）。HE 开销倍数 / 机密推理开销 / Apple PCC 仍挂「写作前必核」待一手核（条目内已 `:::caution`）。
 - ⬜ 卷二 · 记忆与抽取（**旗舰**）：逐字/量化记忆、抽取攻击、影响因素、去重/DP 预训练/记忆审计。
-- ⬜ 卷三 · 对话大模型：PII 回吐、上下文面隐私（系统提示词等）、DP 微调。
+- 🟡 卷三 · 对话大模型：**DP 微调**（`dp-fine-tuning`）✅、**上下文面隐私**（`context-surface-privacy`：系统提示词 / 会话上下文 / 工具结果提取，OWASP LLM07:2025 + Zhang·Carlini·Ippolito COLM 2024 + prompt stealing）✅；**PII 回吐** ⬜ 待立项。
 - ⬜ 卷四 · RAG 与 Agent：多租户检索泄露、跨会话记忆串味、工具外联/数据边界。
-- ⬜ 卷五 · 前沿落地（**拆三小节**）：① 私有计算与机密推理（TEE/GPU CC/HE/MPC）② 可验证删除与机器遗忘 ③ 生产级 DP·FL 部署（Gboard、Apple 本地 DP）。
+- ✅ 卷五 · 前沿落地（**拆三小节，已补完**）：① 私有计算与机密推理 `confidential-inference`（接卷一 TEE+HE·MPC，PCC/NVIDIA 生产实例）；② 可验证删除与机器遗忘 `machine-unlearning`（Cao&Yang 2015 / SISA 2021，MIA 作验证）；③ 生产级 DP·FL 部署 `dp-federated-learning`（Gboard DP-FTRL 二十多个模型 / Apple 本地 DP）。三条齐。
 - ⬜ 卷六 · 治理合规（**合规索引**）：GDPR Art.17、EU AI Act、NIST、OWASP LLM02 映射；并要求各技术条目带「合规映射」小段。
 - ⬜ 技术板块新增：13 数据生命周期与数据治理；14 隐私评测与审计。**13 vs 12 边界（评审 R2）**：数据生命周期 = 数据在哪流动 / 存储 / 复制 / 删除 / 备份（where）；治理与合规（板块 12）= 谁负责 / 法律映射 / 审计证据留存（who·law）。
 
@@ -130,9 +130,9 @@
 - ✅ **本地搜索多实例**：已验证 `@easyops-cn/docusaurus-search-local` 的 `docsRouteBasePath` 接受 `string[]`，设为 `['/', 'privacy']`，**两实例都入本地索引**，无需切 Algolia。
 - ⬜ **技术评审人**：密码学准确性（尤卷一/卷五）需独立评审。**ChatGPT 作内容独立评审人**（R1 已收）；Claude 对其意见可提异议（如 R1 的数字、板块数、首批样板），目标协作。后续评审继续落「评审分诊记录」。
 - ✅ **dogfooding-checklist**：`DOGFOODING.md`（repo 级精简）+ `CLAUDE.md` 一行指针；三道硬闸门进 `DOGFOODING.md` pre-PR 清单 + `STYLE-GUIDE.md`「LLM 隐私保护主题专属规范」（未堆 CLAUDE.md）。
-- ⬜ **企业/供应商数据边界 checklist**：toolkit 工件「**LLM Vendor Data Boundary Checklist**」+ 并入板块 11（推理服务期）。覆盖：是否用于训练 / retention / abuse monitoring / fine-tuning data / zero data retention / enterprise·team·consumer plan 差异 / subprocessors / region·residency / DPA·BAA / observability·tracing 二次泄露。（M5）
+- ✅ **企业/供应商数据边界 checklist**：toolkit 工件「**LLM Vendor Data Boundary Checklist**」已落（`privacy/vendor-data-boundary-checklist.mdx` 中英，slug `vendor-data-boundary-checklist`）。覆盖 8 类：训练使用 / retention / abuse monitoring·人工访问 / zero data retention（覆盖与否）/ subprocessors / region·residency / DPA·BAA·合规报告 / observability·tracing 二次泄露；含逐厂商记录表（答案 + 条款出处 + 核验日期）+ 季度复核。《推理服务数据边界》双向链。
 - ✅ **第一人称纪律对照表**：已写进 `STYLE-GUIDE.md`「第一人称红线（强规则）」的「可 / 不可第一人称对照表」。
-- ✅ **M1 最小化**：脚手架最小可渲染已落（第二实例 + 侧边栏 + 六卷 + i18n 镜像 + 模板 + 术语 + 导读 + 闸门扩面 + `PrivacyMeta` + `DocCard` 适配 + `entryMeta-privacy.json`）。**轴索引页（技术板块 / 威胁→缓解矩阵 / 案例库）等有内容后再做**（M5）。
+- ✅ **M1 最小化**：脚手架最小可渲染已落（第二实例 + 侧边栏 + 六卷 + i18n 镜像 + 模板 + 术语 + 导读 + 闸门扩面 + `PrivacyMeta` + `DocCard` 适配 + `entryMeta-privacy.json`）。**轴索引页**：`privacy/map.mdx`（隐私地图，中英，slug `map`）已落——**技术板块**分组（14 板块，已落条目挂主板块、未落标 _规划中_）+ **威胁→缓解矩阵**（按泄露面反查在管条目 + 残余风险）。案例库 / 更多导读轴有内容后再扩（M5）。
 - ✅ **`evidence` 多证据类型（R3）**：走**轻量**——不扩 schema。`terminology.md`「evidence」加「主要 / 补充」约定；`entry-template` + skill 同步；RAG 主标签改 研究支持（最强一类）、RAG + 推理服务在「延伸阅读」开头注「主要：X；补充：Y」。多字段数组方案**否决**（过度工程）。
 - ✅ **「最小可测试断言」模板块（R3）**：已并入「落地实现」小节末（不新增第十节）；`entry-template` + `aiwiki-privacy-entry-author` skill 均加该小块，四条样板（中英）全回填「怎么测 / 通过证明什么 / 失败看到什么」，后续条目统一带。
 - ✅ **「真实案例」小节标题柔性（R3）**：`entry-template` + skill 标明该小节标题可按 `maturity` 微调；四条已对齐——训练抽取「真实案例」/ DP「真实案例 / 工程可行性」/ RAG「真实案例：相邻事故」/ 推理服务「厂商现状」，不再给试验级条目挂「生产部署」。
@@ -143,7 +143,7 @@
 
 **本 PR 刻意不做（留后续 PR，遵「一 PR 一事」）**：
 
-- ⬜ **skill 派生**：`aiwiki-entry-author` 隐私版（九节 + 红线 + 隐私 frontmatter）、`aiwiki-research-refresh` 检索主题改隐私 + 去重基线指 `privacy/`——M2 开写样板条目前做。`aiwiki-translator` 可直接复用（术语已扩）。
+- ✅ **skill 派生**：`aiwiki-privacy-entry-author`（九节 + 红线 + 隐私 frontmatter）已落；`aiwiki-research-refresh-privacy`（去重基线指 `privacy/`、三道硬闸门、密码学 / ML 隐私一手来源标准、全仓 autocorrect、gen:meta 收口）已落 + `CLAUDE.md` 指针更新。`aiwiki-translator` 直接复用（术语已扩）。
 - ⬜ **M2 首批样板（3–5 条）**：横跨不同卷 / 板块，定调声音与结构，留用户过目（届时删掉对应卷的「本卷导言」占位或改写为真导言）。
 - 🟡 **卷索引页 URL（可选 polish）**：六卷 generated-index 现用 Docusaurus 默认中文派生 slug（如 `/privacy/category/-卷一--隐私根基`），与主题一行为一致；若要清洁 URL，给各 `_category_.json` 的 `link` 设显式英文 `slug`（注意别与卷内容目录路由 `/privacy/<dir>` 撞）。非阻塞。
 - 🟡 **contextual 搜索 zh 文案（可选 polish）**：`docsRouteBasePath` 设为数组后，本地搜索开启**按主题分面**（可只搜某一主题），顺带引入几个搜索 scope UI 串（`theme.SearchPage.searchContext.*` 等）；英文站已是英文，中文站沿用插件英文默认（与改动前的搜索框文案同状态）。要全中文化需建 `i18n/zh-Hans/code.json` 覆盖这几串。非阻塞。

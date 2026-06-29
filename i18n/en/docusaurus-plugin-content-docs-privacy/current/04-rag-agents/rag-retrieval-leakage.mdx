@@ -113,7 +113,7 @@ Calling out each false security:
 ## How this differs from neighboring techniques
 
 - **RAG retrieval leakage vs. training-data extraction**: here the private data lives in the **vector store / at retrieval time**, defended by configuration and isolation; in [training-data extraction](../02-memorization-extraction/training-data-extraction.mdx) it lives in the **weights / at training time**, defended by dedup / DP. Both are "private data leaking out," but they live in different layers of the system.
-- **RAG retrieval leakage vs. context-surface privacy**: context-surface privacy is about "things in my current context" — the system prompt, conversation context — being extracted (Volume 3); this entry is about the retrieval system **pulling in** private data it shouldn't, the opposite direction, living in the retrieval and storage layer.
+- **RAG retrieval leakage vs. context-surface privacy**: [context-surface privacy](../03-conversational-llms/context-surface-privacy.mdx) is about "things in my current context" — the system prompt, conversation context — being extracted (Volume 3); this entry is about the retrieval system **pulling in** private data it shouldn't, the opposite direction, living in the retrieval and storage layer.
 
 ## Version notes
 
