@@ -20,10 +20,20 @@
       "maturity": "研究",
       "technique": "推断类攻击"
     },
+    "property-inference": {
+      "severity": "中",
+      "maturity": "研究",
+      "technique": "推断类攻击"
+    },
     "trusted-execution-environment": {
       "severity": "中",
       "maturity": "生产",
       "technique": "隐私保护计算"
+    },
+    "privacy-poisoning": {
+      "severity": "高",
+      "maturity": "研究",
+      "technique": "记忆与训练数据抽取"
     },
     "quantifying-memorization": {
       "severity": "中",
@@ -65,6 +75,11 @@
       "maturity": "生产",
       "technique": "RAG 与 Agent 隐私"
     },
+    "embedding-inversion": {
+      "severity": "高",
+      "maturity": "研究",
+      "technique": "RAG 与 Agent 隐私"
+    },
     "rag-retrieval-leakage": {
       "severity": "高",
       "maturity": "试验",
@@ -85,6 +100,11 @@
       "maturity": "研究",
       "technique": "联邦学习与安全聚合"
     },
+    "inference-side-channels": {
+      "severity": "高",
+      "maturity": "研究",
+      "technique": "推理服务期隐私"
+    },
     "machine-unlearning": {
       "severity": "中",
       "maturity": "试验",
@@ -94,6 +114,11 @@
       "severity": "中",
       "maturity": "生产",
       "technique": "联邦学习与安全聚合"
+    },
+    "unlearning-verification": {
+      "severity": "中",
+      "maturity": "研究",
+      "technique": "机器遗忘与被遗忘权"
     },
     "data-lifecycle-deletion": {
       "severity": "中",
@@ -127,10 +152,20 @@
       "maturity": "Research",
       "technique": "Inference attacks (MIA / inversion / attribute)"
     },
+    "property-inference": {
+      "severity": "Medium",
+      "maturity": "Research",
+      "technique": "Inference attacks (MIA / inversion / attribute)"
+    },
     "trusted-execution-environment": {
       "severity": "Medium",
       "maturity": "Production",
       "technique": "Privacy-preserving computation"
+    },
+    "privacy-poisoning": {
+      "severity": "High",
+      "maturity": "Research",
+      "technique": "Memorization & training-data extraction"
     },
     "quantifying-memorization": {
       "severity": "Medium",
@@ -172,6 +207,11 @@
       "maturity": "Production",
       "technique": "RAG & agent privacy"
     },
+    "embedding-inversion": {
+      "severity": "High",
+      "maturity": "Research",
+      "technique": "RAG & agent privacy"
+    },
     "rag-retrieval-leakage": {
       "severity": "High",
       "maturity": "Experimental",
@@ -192,6 +232,11 @@
       "maturity": "Research",
       "technique": "Federated learning & secure aggregation"
     },
+    "inference-side-channels": {
+      "severity": "High",
+      "maturity": "Research",
+      "technique": "Inference-service privacy"
+    },
     "machine-unlearning": {
       "severity": "Medium",
       "maturity": "Experimental",
@@ -201,6 +246,11 @@
       "severity": "Medium",
       "maturity": "Production",
       "technique": "Federated learning & secure aggregation"
+    },
+    "unlearning-verification": {
+      "severity": "Medium",
+      "maturity": "Research",
+      "technique": "Machine unlearning & right to be forgotten"
     },
     "data-lifecycle-deletion": {
       "severity": "Medium",

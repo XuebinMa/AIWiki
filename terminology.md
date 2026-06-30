@@ -279,6 +279,11 @@ DP-SGD · PATE · FHE · HE · MPC · TEE · MIA · PII · GDPR · NIST · OWASP
 | 属性推断 | attribute inference | 由部分特征 + 模型 + 人群先验反推个体未公开属性 |
 | 训练数据去重 | training-data deduplication | 训练前删重复 / 近重复样本，降记忆与抽取 |
 | 近重复 | near-duplicate | 非完全相同但高度相似的样本 / 子串 |
+| 嵌入反演 | embedding inversion | 从文本嵌入向量反演回原文（词级乃至逐字短文本） |
+| 隐私定向投毒 | privacy-targeted poisoning | 掺少量投毒样本，放大对其他记录的隐私泄露 |
+| 分布推断 | property / distribution inference | 推断训练集的群体 / 统计属性（区别于个体的属性推断） |
+| 遗忘验证 | unlearning verification | 证明 / 审计「确已遗忘」；模型级不可验证、可伪造 |
+| 推理期侧信道 | inference-time side channel | 由响应时序 / 长度 / 缓存计时旁路泄露内容 |
 | 个人可识别信息 | PII (personally identifiable information) | |
 | 脱敏 | redaction / de-identification | |
 | 命名实体识别 | NER (named entity recognition) | 识别文本中姓名 / 邮箱 / 电话等实体，脱敏的基础 |
