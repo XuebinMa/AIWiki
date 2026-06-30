@@ -14,6 +14,9 @@ tags: [嵌入反演, 向量反演, 向量库, 匿名化, 推断类攻击, 隐私
 sources:
   - { title: "Song & Raghunathan, Information Leakage in Embedding Models (ACM CCS 2020)", url: "https://dl.acm.org/doi/10.1145/3372297.3417270" }
   - { title: "Morris, Kuleshov, Shmatikov, Rush, Text Embeddings Reveal (Almost) As Much As Text (EMNLP 2023, Outstanding Paper; vec2text)", url: "https://aclanthology.org/2023.emnlp-main.765/" }
+  - { title: "Pinecone Security Overview (encryption at rest AES-256, RBAC, API key roles, CMEK) — 补充：把嵌入当敏感数据的生产原语", url: "https://docs.pinecone.io/guides/production/security-overview" }
+  - { title: "Azure AI Search: Configure customer-managed keys (AES-256 at rest, CMK, vectorizers encryptable, RBAC recommended) — 补充", url: "https://learn.microsoft.com/en-us/azure/search/search-security-manage-encryption-keys" }
+  - { title: "EDPB Opinion 28/2024 on AI models and personal data (adopted 2024-12-17; anonymity = extraction by reasonable means is insignificant) — 补充：派生物是否匿名取决于可提取性", url: "https://www.edpb.europa.eu/system/files/2024-12/edpb_opinion_202428_ai-models_en.pdf" }
 ---
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
@@ -68,6 +71,8 @@ flowchart TB
 - **「当私有数据保护」保护的是**：通过同等的加密、访问控制、保留 / 删除策略，把「拿到向量」的门槛抬到和「拿到原文」一样高——攻击者拿不到向量，就无从反演。
 - **它不保护的是**：一旦向量已经离开边界（API 返回、库泄露、索引外包），加密 / ACL 就管不着了；此时只剩「让向量本身更难反演」这条**经验性**防线（对嵌入加扰动、降维、量化），而**加扰会同时损伤检索 / 下游效用**，且**降扰多少才挡得住反演没有普适保证**——必须对**你自己的**嵌入实测反演，而不是假设「降了维就安全」。
 
+**业界怎么做：把嵌入当敏感数据。** 上面的「当私有数据保护」不是只停留在原则——它正是各托管向量库把「保护存储的嵌入」落成的生产原语：**静态加密 + 访问控制**。Pinecone 文档写明对存储数据用 AES-256 静态加密、连接走 TLS 1.2，并在组织与项目两级提供 RBAC、可配置 API key 角色（控制面 / 数据面分离），企业档另有客户自管密钥（CMEK，经 AWS KMS）。Azure AI Search 默认用微软托管密钥做 AES-256 静态加密、可叠加客户自管密钥（CMK），可加密对象明确含索引与向量化器（vectorizer），并把 RBAC 列为优先于访问策略的推荐模型。Weaviate、Qdrant 同样把 RBAC（Qdrant 经 JWT 做到集合级粒度）列为生产环境的推荐授权方式。这些都印证同一条工程结论：**向量化不是匿名化，所以业界对嵌入施加的保护下限，等于对原文**——加密存、按权限取，别把原始向量裸交给不受信方。监管侧也朝同一方向：欧盟 EDPB 第 28/2024 号意见（2024-12-17 通过）判定，用个人数据训练的 AI 模型并非天然「匿名」，只有当「以一切合理可用手段」直接或经查询提取出个人数据的可能性微不足道时才算匿名——这正是「派生产物默认不算匿名，要看能否被反演 / 提取」的原则，而本条的 vec2text / Song & Raghunathan 恰好给出了一条对嵌入的可提取路径。（注：EDPB 该意见针对模型本身、非专指向量库；此处取其「派生物是否匿名取决于可提取性」的判据，而非把它当对嵌入向量的直接裁定。出处核验于 2026-06。）
+
 点破：**「我们只存了向量、没存原文」不是匿名化**。把它当匿名化、据此降低对向量库的加密 / 访问控制等级，就是这条的假安全——攻击者拿到的「匿名向量」可能被解回带姓名的原文。
 
 ## 落地实现（配方）
@@ -88,6 +93,8 @@ flowchart TB
 6. 红队反演审计:对你的向量库 / 嵌入接口实跑反演 (训练解码器 + 迭代再嵌入)，量化
    "在你的嵌入模型、文本长度、是否可查询同模型下能还原到什么程度"，纳入发布前 eval。
 ```
+
+第 1 步不是抽象口号：主流托管向量库已把它做成可勾选的产品能力——按厂商文档开启静态加密（Pinecone / Azure AI Search 默认 AES-256，需要更强控制时上 CMEK / CMK）、配 RBAC 与最小权限的 API key 角色（Pinecone 控制面 / 数据面分离；Qdrant 经 JWT 限到集合级；Weaviate / Azure 把 RBAC 列为生产推荐），别给向量库留「反正是匿名向量」的宽权限。第 2 步的外流面也包括嵌入 API 提供方怎么留数据：例如 OpenAI 平台文档说明 API 的输入 / 输出默认最多留 30 天用于滥用监控、之后删除，默认不拿去训练，合规客户可申请零数据保留（ZDR）——把原文发去算嵌入时，这条留存与训练策略同样要纳入「向量 / 原文是否离开边界」的评估。
 
 每个结论都绑定**你的嵌入模型、文本长度分布与攻击者是否能查询同模型**——论文里的 50–70% / 92% 是各自实验设置下的数字，**不能直接迁移**到你的系统，必须自测。
 
@@ -131,3 +138,11 @@ flowchart TB
 
 - [Information Leakage in Embedding Models（Song & Raghunathan，ACM CCS 2020）](https://dl.acm.org/doi/10.1145/3372297.3417270) —— 嵌入泄露奠基：形式化嵌入模型的信息泄露，在留出 BookCorpus 上从句嵌入恢复输入约 50–70% 的词（词集，无序）。本条「词级反演」依据。
 - [Text Embeddings Reveal (Almost) As Much As Text（Morris、Kuleshov、Shmatikov、Rush，EMNLP 2023，Outstanding Paper）](https://aclanthology.org/2023.emnlp-main.765/) —— vec2text 方法：迭代「纠正—再嵌入」逼近目标向量，对 GTR-base 嵌入把 32-token 文本逐字精确还原 92%。本条「逐字反演」依据。
+
+**业界实践（补充：把嵌入当敏感数据怎么落地）**——本条核心证据（嵌入可反演）是上述研究；以下为生产侧的操作性印证，说明「向量化不是匿名化，所以加密存、按权限取」在主流托管向量库已是默认能力，非头条证据：
+
+- [Pinecone 安全总览](https://docs.pinecone.io/guides/production/security-overview) —— 对存储数据 AES-256 静态加密、TLS 1.2 传输加密，组织 / 项目两级 RBAC + 可配置 API key 角色（控制面 / 数据面分离），企业档支持客户自管密钥（CMEK，经 AWS KMS）；SOC2 Type II / HIPAA / GDPR。把「嵌入按敏感数据保护」做成产品能力的一例。
+- [Azure AI Search：配置客户自管密钥](https://learn.microsoft.com/en-us/azure/search/search-security-manage-encryption-keys) —— 默认以微软托管密钥做 AES-256 静态加密，可叠加客户自管密钥（CMK）；可加密对象含索引与向量化器（vectorizer），并明确「RBAC 优先于访问策略」。
+- [Weaviate：配置 RBAC](https://docs.weaviate.io/deploy/configuration/configuring-rbac) 与 [Qdrant 安全指南](https://qdrant.tech/documentation/guides/security/) —— 两家均把 RBAC 列为生产环境推荐授权方式（Qdrant 经 JWT 做到集合级粒度，配合 API key 认证），佐证「向量库的访问控制对齐原文」是业界通行做法。
+- [EDPB 第 28/2024 号意见（AI 模型与个人数据，2024-12-17 通过）](https://www.edpb.europa.eu/system/files/2024-12/edpb_opinion_202428_ai-models_en.pdf) —— 监管侧的判据：用个人数据训练的 AI 模型并非天然匿名，仅当「以一切合理可用手段」直接或经查询提取出个人数据的可能性微不足道时才算匿名。本条取其「派生物是否匿名取决于可提取性」的原则（针对模型本身、非专指向量库）。
+- [OpenAI 平台数据控制](https://developers.openai.com/api/docs/guides/your-data) —— 嵌入 API 提供方的数据处理一例：API 输入 / 输出默认最多留 30 天用于滥用监控、之后删除，默认不用于训练，合规客户可申请零数据保留（ZDR）。评估「原文 / 向量是否离开边界」时一并看提供方留存策略。
