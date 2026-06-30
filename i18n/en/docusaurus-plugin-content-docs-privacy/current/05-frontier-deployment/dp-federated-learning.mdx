@@ -110,6 +110,16 @@ Calling out each false security:
 - **DP·FL (Volume 5, production deployment) vs. DP fine-tuning (Volume 3, training mechanism)**: Volume 3 covers DP-SGD's mechanism in **single-point fine-tuning** (clip + noise + accounting); this entry covers DP's landing at **federated + large-scale production** — DP-FTRL, secure aggregation, local DP, real deployments (Gboard / Apple). Same DP discipline, one at the mechanism layer, one at the production-deployment layer.
 - **DP·FL vs. confidential inference (this volume)**: DP·FL protects **training** (don't centralize data + don't leak updates); confidential inference protects **inference** (the cloud can't see the prompt). One governs "how the model learns," the other "how the model is used."
 
+## Framework differences (FL frameworks; stamped 2026-06, defer to each framework's current docs)
+
+FL + DP mechanisms are the same across frameworks, but **built-in support for secure aggregation / DP and the deployment shape** differ:
+
+- **TensorFlow Federated (TFF)**: research / simulation-oriented, with built-in secure-aggregation and DP-aggregation primitives, close to Google's production line.
+- **Flower**: framework-agnostic (works with PyTorch / TF / JAX), wiring DP / secure aggregation via strategy plugins, leaning flexible and cross-stack.
+- **NVFlare / FedML etc.**: enterprise / cross-institution-oriented; secure-aggregation and privacy components vary by release.
+
+The point: **don't assume "using an FL framework" automatically gives you secure aggregation + DP** — both are usually components you **explicitly enable and configure** (see this volume's [Secure aggregation](./secure-aggregation.mdx) and [Gradient leakage](./gradient-leakage.mdx)). When switching frameworks, verify whether they're on by default, which accountant is used, and the threshold assumptions of secure aggregation. (This subsection ages fast; defer to each framework's release docs.)
+
 ## Version notes
 
 :::note Applicable versions
