@@ -269,6 +269,13 @@
         "架构师"
       ]
     },
+    "fs-event-ordering": {
+      "severity": "中",
+      "roles": [
+        "工程师",
+        "架构师"
+      ]
+    },
     "magic-numbers-hardcoding": {
       "severity": "中",
       "roles": [
@@ -446,6 +453,13 @@
       ]
     },
     "review-sycophancy-automation-bias": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "测试工程师"
+      ]
+    },
+    "test-fixture-fabrication": {
       "severity": "高",
       "roles": [
         "工程师",
@@ -813,6 +827,13 @@
         "Architect"
       ]
     },
+    "fs-event-ordering": {
+      "severity": "Medium",
+      "roles": [
+        "Engineer",
+        "Architect"
+      ]
+    },
     "magic-numbers-hardcoding": {
       "severity": "Medium",
       "roles": [
@@ -990,6 +1011,13 @@
       ]
     },
     "review-sycophancy-automation-bias": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "QA Engineer"
+      ]
+    },
+    "test-fixture-fabrication": {
       "severity": "High",
       "roles": [
         "Engineer",

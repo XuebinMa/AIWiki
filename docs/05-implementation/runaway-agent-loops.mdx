@@ -8,11 +8,13 @@ phase: 编码实现
 severity: 高
 applies_to: "Coding Agent 通用"
 evidence: 研究支持
-tags: [AI 代理, 验证闭环, 不可逆操作, 计划模式, 工程师, 运维工程师]
+tags: [AI 代理, 验证闭环, 不可逆操作, 计划模式, 工程师, 运维工程师, Gemini CLI, Codex CLI]
 sources:
   - { title: "Manage costs effectively（Claude Code 官方）", url: "https://code.claude.com/docs/en/costs" }
   - { title: "Why Do Multi-Agent LLM Systems Fail?（arXiv 2503.13657）", url: "https://arxiv.org/abs/2503.13657" }
   - { title: "Agents of Chaos（arXiv 2602.20021）", url: "https://arxiv.org/abs/2602.20021" }
+  - { title: "Gemini CLI — Configuration（maxSessionTurns 默认 -1 无限；审批模式 / YOLO）", url: "https://google-gemini.github.io/gemini-cli/docs/get-started/configuration.html" }
+  - { title: "OpenAI Codex — Agent approvals & security（审批档位 + 沙箱）", url: "https://developers.openai.com/codex/agent-approvals-security" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -111,6 +113,19 @@ while not done:
 ```
 
 差别不在我「这次更克制」，在于你把「最多试几次、什么时候停、哪些动作要确认」这些我判断不可靠的事，提前用规则和上限定死了。
+
+## 工具差异
+
+> 截至 2026-06，机制层面；各工具的上限项与默认值变化很快，以各自当前文档为准。
+
+根因同一个——**我判断不可靠「该停了」**；但各工具给无人值守运行兜底的**主闸门形态不同**，别套同一套默认假设：
+
+- **Claude Code**：主闸门是**每会话回合硬上限**（`--max-turns`）+ 权限模式 + `/usage` 用量可见；上限要你显式设，headless `-p` 跑时默认不封顶。
+- **Gemini CLI**：有会话回合上限设置（`maxSessionTurns`），但**默认无限**（取 -1），社区也报过「不尊重 max session turns」的缺陷；叠加 `--yolo` 自动批准与沙箱——靠你主动设上限 + 沙箱兜爆炸半径。
+- **Codex CLI**：主闸门偏向**审批档位 + 沙箱**（suggest / auto-edit / full-auto），即「限制我被允许做什么」而非「限制我跑几轮」；on-request 模式默认在沙箱内、越界才问。
+- 与[过度授权](../00-setup-collaboration/over-permissioning.mdx)互补：那条管**权限给多宽**，本条管**循环跑多久 / 几轮**——两道闸门一起设，失控循环的爆炸半径才真被夹住。
+
+无论用哪个，原则不变：**别依赖默认值**，显式设迭代 / 回合 / 预算上限，并给有副作用的动作留确认。
 
 ## 版本说明
 
