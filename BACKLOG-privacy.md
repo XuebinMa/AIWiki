@@ -114,14 +114,37 @@
 
 > 卷（阅读主线）与技术板块（查询轴）见 PROPOSAL 第 6 节（板块经 R1 调整为 14，含去重边界）。下面只占位，逐条进流水线前再细化、去重、配 ≥2 个一手出处。
 
-- ✅ 卷一 · 隐私根基（**只讲最小承重地基**）：**已补完**——MIA（`membership-inference`）、TEE（`trusted-execution-environment`）、HE·MPC（`he-mpc`）三条已落；**模型抽取与窃取**（`model-extraction-stealing`：Tramèr USENIX'16 判别式根基 + Carlini ICML'24 生产 LLM 投影层窃取）后补为第四条**根基级攻击**（前 LLM / 判别式时代起源，恰配本卷定位，放大离线 MIA / 抽取）；DP 最小地基并在卷三《DP 微调》（各条已回链）。HE 开销倍数 / 机密推理开销 / Apple PCC 仍挂「写作前必核」待一手核（条目内已 `:::caution`）。
-- 🟡 卷二 · 记忆与抽取（**旗舰**）：**训练数据抽取**（`training-data-extraction`）✅、**量化记忆与记忆审计**（`quantifying-memorization`：Secret Sharer canary/exposure + Quantifying Memorization scaling，technique=隐私评测与审计，落板块 14）✅；去重 / DP 预训练专题可后续再加深。
+- ✅ 卷一 · 隐私根基（**只讲最小承重地基**）：**已补完**——MIA（`membership-inference`）、TEE（`trusted-execution-environment`）、HE·MPC（`he-mpc`）三条已落；**模型抽取与窃取**（`model-extraction-stealing`：Tramèr USENIX'16 判别式根基 + Carlini ICML'24 生产 LLM 投影层窃取）后补为第四条**根基级攻击**（前 LLM / 判别式时代起源，恰配本卷定位，放大离线 MIA / 抽取）；**模型反演与属性推断**（`model-inversion-attribute-inference`：Fredrikson CCS'15 人脸反演 + USENIX Sec'14 华法林属性推断）补为第五条（与 MIA 同属推断类攻击板块）；DP 最小地基并在卷三《DP 微调》（各条已回链）。卷一现 5 条。HE 开销倍数 / 机密推理开销 / Apple PCC 仍挂「写作前必核」待一手核（条目内已 `:::caution`）。
+- 🟡 卷二 · 记忆与抽取（**旗舰**）：**训练数据抽取**（`training-data-extraction`）✅、**量化记忆与记忆审计**（`quantifying-memorization`：Secret Sharer canary/exposure + Quantifying Memorization scaling，technique=隐私评测与审计，落板块 14）✅、**训练数据去重**（`training-data-deduplication`：Lee ACL'22 记忆降约 10× + Kandpal ICML'22 重复→生成超线性，technique=记忆与抽取）✅；卷二现 3 条齐。
 - ✅ 卷三 · 对话大模型（**已补完**）：**DP 微调**（`dp-fine-tuning`）、**上下文面隐私**（`context-surface-privacy`：OWASP LLM07:2025 + Zhang·Carlini·Ippolito COLM 2024 + prompt stealing）、**PII 回吐**（`pii-regurgitation`：Lukas S&P'23 脱敏减不根除 + ProPILE NeurIPS'23，technique=PII 检测与脱敏，落该板块）三条齐。
 - 🟡 卷四 · RAG 与 Agent：**多租户 RAG 检索泄露**（`rag-retrieval-leakage`）✅、**跨会话 / 跨租户记忆串味**（`cross-session-memory-bleed`：ChatGPT 2023-03 redis-py 竞态事故 + OWASP LLM02）✅、**Agent 工具外联数据外泄**（`agent-tool-exfiltration`：Greshake AISec'23 间接注入 + OWASP LLM01/02）✅；多 agent 协作数据边界可后续再加深。
 - ✅ 卷五 · 前沿落地（**三小节齐 + FL 线已加深**）：① 私有计算与机密推理 `confidential-inference`（接卷一 TEE+HE·MPC，PCC/NVIDIA 生产实例）；② 可验证删除与机器遗忘 `machine-unlearning`（Cao&Yang 2015 / SISA 2021，MIA 作验证）；③ 生产级 DP·FL 部署 `dp-federated-learning`（Gboard DP-FTRL 二十多个模型 / Apple 本地 DP）。**FL 线加深两条**：**梯度泄露** `gradient-leakage`（Zhu DLG NeurIPS'19 + Geiping Inverting Gradients NeurIPS'20，攻击：共享梯度可反演训练样本）+ **安全聚合** `secure-aggregation`（Bonawitz CCS'17 协议 + MLSys'19 Google 生产部署，防御：服务器只见聚合和）——与 DP·FL 形成「攻击 + 两道互补防御」的 FL 隐私簇。
 - ⬜ 卷六 · 治理合规（**合规索引**）：GDPR Art.17、EU AI Act、NIST、OWASP LLM02 映射；并要求各技术条目带「合规映射」小段。
 - ✅ 技术板块新增：13 数据生命周期与数据治理（`data-lifecycle-deletion`：删除请求跨存储传播，GDPR Art.17/19 + NIST Privacy Framework，卷六）✅；14 隐私评测与审计（`quantifying-memorization`，卷二）✅。**13 vs 12 边界（评审 R2）**：数据生命周期 = 数据在哪流动 / 存储 / 复制 / 删除 / 备份（where）；治理与合规（板块 12）= 谁负责 / 法律映射 / 审计证据留存（who·law）。
 - ✅ **14 技术板块全覆盖里程碑**：本波（PII 回吐 / 量化记忆审计 / 模型抽取窃取 / 数据生命周期）落地后，14 个技术板块**各有至少一条落地条目，或以「贯穿各条」方式覆盖**（治理与合规贯穿合规映射、隐私评测贯穿最小可测试断言且另有专题）。map.mdx 的 _规划中_ 标记已全部转实链。后续按**深度**补强，不为铺板块注水。
+
+### 研究刷新候选（aiwiki-research-refresh-privacy 跑出，已核一手源，待逐条立项确认）
+
+> 2026-06 由 research-refresh 流水线 fan-out 多个核源子代理产出，**均已核一手出处**（venue / year 交叉核实；arXiv 代理 403 时改用 dblp / 会议官网 / PMLR / PoPETs / OpenReview / NIST）。新增条目属需确认类——下表交用户挑选再进流水线。标 ⚠️ 者为 preprint / venue 待核，写前再核。
+
+| 候选 | 卷 / 板块 | 已核一手源（最强） | maturity |
+|---|---|---|---|
+| 文本嵌入反演 embedding inversion | 卷四 或卷一推断 | Song&Raghunathan CCS'20；Morris vec2text EMNLP'23（杰出论文，32-token 92% 精确还原） | 研究 |
+| 合成数据隐私与失效 | 卷六 / PII | Stadler USENIX'22（相似度评估严重低估风险）；GAN-Leaks CCS'20；PATE-GAN ICLR'19；NIST SP 800-226 | 研究/试验 |
+| 隐私定向投毒 Truth Serum | 卷二 | Tramèr 等 Truth Serum CCS'22（投毒 <0.1% 放大对他人记录泄露 1–2 个数量级） | 研究 |
+| 属性 / 分布推断 | 卷一 推断类攻击 | Ganju CCS'18；Suri&Evans PoPETs'22（n_leaked 形式化）；Ateniese IJSN'15 | 研究 |
+| 机器遗忘可验证性 / 审计 | 卷五 遗忘 | Thudi USENIX'22（模型级无法验证遗忘、可伪造证明）；TOFU COLM'24；MUSE ⚠️preprint | 研究 |
+| LLM 水印及其极限 | 卷六 / 新角度 | Kirchenbauer ICML'23（green/red list）；可靠性 ICLR'24（改写可去）；Copyright Traps ICML'24 | 研究 |
+| 推理期侧信道（token 长度 / prompt 缓存 / 投机解码 / 硬件缓存） | 卷五 / 新角度 | Weiss USENIX'24（token 长度→29% 逐字 / 55% 主题）；Gu ICML'25（跨用户 prompt 缓存计时）；Wei NDSS'25；Gao USENIX'25 | 研究 |
+| 拆分学习泄露 split learning | 卷五 FL 簇 | Pasquini CCS'21 FSHA（恶意服务器重建输入）；UnSplit WPES'22 | 研究 |
+| 联邦分析 federated analytics | 卷五 FL 簇 | Google FA 博客 + Secure Agg；Zhu AISTATS'20 DP heavy hitters；Bassily NeurIPS'17 | 生产 |
+| 微调即服务 FTaaS 隐私 | 卷六 | Qi 等 ICLR'24（10 样本 <$0.20 越狱微调 API；安全>隐私需注明）+ 三厂商数据保留官方文档 | 研究/生产 |
+| Agent PII 外泄基准 AgentDojo | 卷四 加深 | AgentDojo NeurIPS'24（97 任务×629 安全测试，含外泄注入任务） | 研究 |
+
+### 框架差异小节（按需补，打版本戳；判据：仅当差异源于工具机制、且短）
+
+- ✅ 已补：`dp-fine-tuning`（DP 库：Opacus / TF-Privacy / jax-privacy）、`dp-federated-learning`（FL 框架：TFF / Flower / NVFlare）。
+- ⬜ 候选：`secure-aggregation`（各实现门限 / 开销）、`data-lifecycle-deletion`（各向量库删除是否连带嵌入 + 索引）、`rag-retrieval-leakage`（各向量库多租户隔离默认）。**不逐条铺**。
 
 ## 结构 / 流程待办
 

@@ -18,8 +18,8 @@ description: 「LLM 隐私保护」主题的交叉索引——除了按卷（侧
 
 14 个技术板块是查询轴（边界见 PROPOSAL §6.2）。已落地的条目挂在其主板块下：
 
-- **推断类攻击（MIA / 反演 / 属性）**：[成员推断攻击](./01-foundations/membership-inference.mdx)
-- **记忆与训练数据抽取**：[训练数据抽取](./02-memorization-extraction/training-data-extraction.mdx)
+- **推断类攻击（MIA / 反演 / 属性）**：[成员推断攻击](./01-foundations/membership-inference.mdx) · [模型反演与属性推断](./01-foundations/model-inversion-attribute-inference.mdx)
+- **记忆与训练数据抽取**：[训练数据抽取](./02-memorization-extraction/training-data-extraction.mdx) · [训练数据去重](./02-memorization-extraction/training-data-deduplication.mdx)
 - **差分隐私**：[DP 微调](./03-conversational-llms/dp-fine-tuning.mdx)
 - **联邦学习与安全聚合**：[生产级 DP·FL 部署](./05-frontier-deployment/dp-federated-learning.mdx) · [梯度泄露](./05-frontier-deployment/gradient-leakage.mdx) · [安全聚合](./05-frontier-deployment/secure-aggregation.mdx)
 - **机器遗忘与被遗忘权**：[可验证删除与机器遗忘](./05-frontier-deployment/machine-unlearning.mdx)
@@ -39,7 +39,8 @@ description: 「LLM 隐私保护」主题的交叉索引——除了按卷（侧
 
 | 威胁（你担心什么） | 在管的条目 | 残余风险 / 没解决的 |
 |---|---|---|
-| 私有数据被模型**记住、逐字吐回** | [训练数据抽取](./02-memorization-extraction/training-data-extraction.mdx) | 去重 ≠ 消除、DP ≠ 零泄露、输出过滤是猫鼠游戏 |
+| 私有数据被模型**记住、逐字吐回** | [训练数据抽取](./02-memorization-extraction/training-data-extraction.mdx) · [训练数据去重](./02-memorization-extraction/training-data-deduplication.mdx) | 去重 ≠ 消除（罕见单次样本仍记）、DP ≠ 零泄露、输出过滤是猫鼠游戏 |
+| 靠置信度**重建训练样本的「样子」/ 推断敏感属性** | [模型反演与属性推断](./01-foundations/model-inversion-attribute-inference.mdx) | 反演给类别代表非逐字原图、属性推断含人群统计压不到零、置信度是燃料 |
 | 判定**某人是否在训练集**（成员身份本身敏感） | [成员推断](./01-foundations/membership-inference.mdx) · [DP 微调](./03-conversational-llms/dp-fine-tuning.mdx) | 平均准确率掩盖尾部、降过拟合无形式保证、ε 要看清 |
 | 行使**被遗忘权 / 删除**，但模型还记得 | [机器遗忘](./05-frontier-deployment/machine-unlearning.mdx) | 输出抑制 ≠ 真删、近似遗忘无保证、验证本身难 |
 | **向量库 / 检索**泄露：向量反演、跨租户串味 | [RAG 检索泄露](./04-rag-agents/rag-retrieval-leakage.mdx) | 向量化 ≠ 匿名、检索后过滤留窗口、缓存 / memory 边界 bug |

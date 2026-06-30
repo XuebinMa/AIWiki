@@ -15,6 +15,11 @@
       "maturity": "研究",
       "technique": "模型抽取与窃取"
     },
+    "model-inversion-attribute-inference": {
+      "severity": "高",
+      "maturity": "研究",
+      "technique": "推断类攻击"
+    },
     "trusted-execution-environment": {
       "severity": "中",
       "maturity": "生产",
@@ -24,6 +29,11 @@
       "severity": "中",
       "maturity": "研究",
       "technique": "隐私评测与审计"
+    },
+    "training-data-deduplication": {
+      "severity": "中",
+      "maturity": "生产",
+      "technique": "记忆与训练数据抽取"
     },
     "training-data-extraction": {
       "severity": "高",
@@ -112,6 +122,11 @@
       "maturity": "Research",
       "technique": "Model extraction & stealing"
     },
+    "model-inversion-attribute-inference": {
+      "severity": "High",
+      "maturity": "Research",
+      "technique": "Inference attacks (MIA / inversion / attribute)"
+    },
     "trusted-execution-environment": {
       "severity": "Medium",
       "maturity": "Production",
@@ -121,6 +136,11 @@
       "severity": "Medium",
       "maturity": "Research",
       "technique": "Privacy evaluation & auditing"
+    },
+    "training-data-deduplication": {
+      "severity": "Medium",
+      "maturity": "Production",
+      "technique": "Memorization & training-data extraction"
     },
     "training-data-extraction": {
       "severity": "High",
