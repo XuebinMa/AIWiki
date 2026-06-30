@@ -14,6 +14,7 @@ tags: [训练数据去重, 近重复, 记忆, 训练数据抽取, 成员推断, 
 sources:
   - { title: "Lee et al., Deduplicating Training Data Makes Language Models Better (ACL 2022. arXiv 2107.06499)", url: "https://aclanthology.org/2022.acl-long.577/" }
   - { title: "Kandpal et al., Deduplicating Training Data Mitigates Privacy Risks in Language Models (ICML 2022. PMLR v162)", url: "https://proceedings.mlr.press/v162/kandpal22a.html" }
+  - { title: "Penedo et al., The RefinedWeb Dataset for Falcon LLM（NeurIPS 2023 Datasets；arXiv 2306.01116）—— 生产级两道去重管线（Falcon）", url: "https://arxiv.org/abs/2306.01116" }
 ---
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
@@ -82,8 +83,9 @@ flowchart TB
 
 ## 真实案例 / 研究进展（工程可行性）
 
-（本条 maturity 标「生产」：去重是**标准的预训练数据准备实践**，下面给其隐私收益的实证。）
+（本条 maturity 标「生产」：去重是**标准的预训练数据准备实践**——主流生产级预训练数据管线都含去重；下面先给一例公开的生产管线，再给其隐私收益的实证。）
 
+- **生产级数据管线确实在去重（一例公开的）**：RefinedWeb（Penedo 等，TII，NeurIPS 2023；用于训练 Falcon-40B / 180B 的公开数据集）对 CommonCrawl 跑**两道严格去重**（MinHash 模糊去重 + 精确去重），从约 10 亿页清出约 2.8 TB 唯一文本，并报告严格去重稳定抬升下游性能。这把「去重是生产管线的标准步骤」从口头断言变成一条可核查的公开实践。
 - **去重让模型「更好」且更少逐字记忆**：Lee 等（ACL 2022）发现现有语言建模语料含大量近重复与长重复子串，在这些数据上训练的模型**超过 1% 的无提示输出逐字抄自训练数据**；去重后，模型**逐字吐出记忆文本的频率降到约 1/10**，并能用更少训练步达到同等或更好精度。
 - **去重显著缓解隐私风险**：Kandpal 等（ICML 2022）证明隐私攻击的成功**很大程度归因于** web 语料中的重复，并量出**生成概率与训练出现次数的超线性关系**——一条在训练数据里出现 10 次的序列，平均被生成的频率约为只出现 1 次的 **1000 倍**。这把「重复 = 隐私放大器」从直觉变成了可测的定量结论。
 

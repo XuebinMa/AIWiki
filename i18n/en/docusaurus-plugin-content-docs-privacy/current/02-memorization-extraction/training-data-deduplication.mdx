@@ -14,6 +14,7 @@ tags: [training-data deduplication, near-duplicate, memorization, training-data 
 sources:
   - { title: "Lee et al., Deduplicating Training Data Makes Language Models Better (ACL 2022; arXiv 2107.06499)", url: "https://aclanthology.org/2022.acl-long.577/" }
   - { title: "Kandpal et al., Deduplicating Training Data Mitigates Privacy Risks in Language Models (ICML 2022; PMLR v162)", url: "https://proceedings.mlr.press/v162/kandpal22a.html" }
+  - { title: "Penedo et al., The RefinedWeb Dataset for Falcon LLM (NeurIPS 2023 Datasets; arXiv 2306.01116) — a production-scale two-stage dedup pipeline (Falcon)", url: "https://arxiv.org/abs/2306.01116" }
 ---
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
@@ -87,7 +88,9 @@ Every number is tied to **your corpus and dedup threshold** — the paper's "dow
 
 ## Research status (engineering feasibility)
 
-(This entry's maturity is "Production": dedup is **standard pre-training data preparation**; below is the empirical evidence for its privacy gain.)
+(This entry's maturity is "Production": dedup is **standard pre-training data preparation** — mainstream production pretraining pipelines all include dedup; below is one public production pipeline, then the empirical evidence for its privacy gain.)
+
+- **Production data pipelines really do dedup (one public example)**: RefinedWeb (Penedo et al., TII, NeurIPS 2023; the public dataset used to train Falcon-40B / 180B) runs **two stages of stringent dedup** on CommonCrawl (MinHash fuzzy dedup + exact dedup), distilling ~1 billion pages down to ~2.8 TB of unique text, and reports that stringent dedup consistently lifts downstream performance. This turns "dedup is a standard production step" from an assertion into a checkable public practice.
 
 - **Dedup makes models "better" and memorize less verbatim**: Lee et al. (ACL 2022) found language-modeling corpora contain many near-duplicates and long repeated substrings, and models trained on them have **over 1% of unprompted output copied verbatim** from training data; after dedup, models **emit memorized text about 10× less frequently** and reach the same or better accuracy with fewer training steps.
 - **Dedup substantially mitigates privacy risk**: Kandpal et al. (ICML 2022) show privacy-attack success is **largely attributable to** duplication in web corpora, and measured the **superlinear relationship between generation probability and training count** — a sequence appearing 10 times in training data is generated on average about **1000×** more often than one appearing once. This turns "duplication = privacy amplifier" from intuition into a measurable quantitative result.

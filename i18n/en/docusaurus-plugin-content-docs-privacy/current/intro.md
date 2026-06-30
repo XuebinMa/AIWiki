@@ -11,8 +11,8 @@ description: "LLM Privacy — a part of the AiWiki encyclopedia that sits alongs
 
 It sits **alongside** the other part you may be reading, [AI Coding Pitfalls](/welcome) — not under it. That part covers the mistakes people most often make while using AI coding tools; this one covers where sensitive data leaks in an LLM system, and how to verify / reduce / prove / trace it in engineering terms. They share the same core — mechanism-first, first-person, checkable evidence, updated per version — but the domain, the unit, and the structure are all different.
 
-:::note Current status: M1 scaffold (under construction)
-This part has just had its skeleton built: the multi-instance site, the six-volume structure, the glossary, the template, and the quality gates are all in place, and the first sample entries are being written. **Most of what's in the volumes right now is a "volume intro" placeholder**; the real attack/defense entries land in batches (roadmap in [`PROPOSAL-privacy-book.md`](https://github.com/xuebinma/AIWiki/blob/main/PROPOSAL-privacy-book.md) and [`BACKLOG-privacy.md`](https://github.com/xuebinma/AIWiki/blob/main/BACKLOG-privacy.md)).
+:::note Current status: M1+ · sample content expanding (shifted from "breadth" to "depth + review + cases")
+The six-volume structure, glossary, template, and quality gates are all in place; **all 14 technique boards now have at least one shipped entry**, or are covered "running through every entry" (see the [privacy map](./map.mdx)). From here the focus is no longer adding new entries but **deepening existing ones, site-wide review (maturity / evidence discipline), and adding real cases and how companies actually do this in production** (roadmap in [`PROPOSAL-privacy-book.md`](https://github.com/xuebinma/AIWiki/blob/main/PROPOSAL-privacy-book.md) and [`BACKLOG-privacy.md`](https://github.com/xuebinma/AIWiki/blob/main/BACKLOG-privacy.md)).
 :::
 
 ## Who it's for
@@ -61,6 +61,6 @@ Two more ground rules: **every quantitative number carries its conditions** (the
 
 ## How to read
 
-The left sidebar is ordered by the six volumes — that's the recommended reading order. Each attack/defense entry uses the same nine-section structure: one-sentence summary → mechanism (what happens on my side) → threat surface → defense principle → buildable recipe → real case → residual risk and trade-offs → version notes → sources. You don't have to read front to back — find the relevant entry by volume or by technique area.
+The left sidebar is ordered by the six volumes — that's the recommended reading order. Each attack/defense entry uses the same nine-section structure: one-sentence summary → mechanism (what happens on my side) → threat surface → defense principle → buildable recipe → real case → residual risk and trade-offs → version notes → sources. You don't have to read front to back — find the relevant entry by volume or by technique area. **If you already know the leak surface you worry about** (training data memorized, RAG cross-tenant bleed, the provider retaining your data, gradient leakage…), the faster entry point is the [privacy map](./map.mdx)'s threat → mitigation matrix: look up by leak surface to find the entries that cover it, and see at a glance what they **don't** solve.
 
 Want to help write, or spotted a misattribution? Flag it on [GitHub](https://github.com/xuebinma/AIWiki/issues).
