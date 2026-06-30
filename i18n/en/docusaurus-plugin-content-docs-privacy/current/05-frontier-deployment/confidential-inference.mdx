@@ -12,8 +12,11 @@ maturity: Production
 evidence: Official docs
 tags: [confidential inference, confidential computing, remote attestation, verifiable transparency, TEE, Privacy Engineer, Security Engineer, ML Engineer]
 sources:
-  - { title: "Apple Security Research, Private Cloud Compute: A new frontier for AI privacy in the cloud (official: device-side remote attestation + verifiable transparency log + no privileged access)", url: "https://security.apple.com/blog/private-cloud-compute/" }
+  - { title: "Apple Security Research, Private Cloud Compute: A new frontier for AI privacy in the cloud (official: stateless computation + device-side remote attestation + verifiable transparency log + no privileged access)", url: "https://security.apple.com/blog/private-cloud-compute/" }
+  - { title: "Apple Security Research, Security research on Private Cloud Compute (official: open-sourced apple/security-pcc + Virtual Research Environment to independently verify transparency-log consistency)", url: "https://security.apple.com/blog/pcc-security-research/" }
   - { title: "NVIDIA, Confidential Computing on H100 GPUs for Secure and Trustworthy AI (official: GPU TEE, remote attestation, encrypted CPU-GPU transfer)", url: "https://developer.nvidia.com/blog/confidential-computing-on-h100-gpus-for-secure-and-trustworthy-ai/" }
+  - { title: "Microsoft Learn, Azure confidential computing product overview (official: AMD SEV-SNP / Intel TDX confidential VMs + NCCads_H100_v5 confidential GPUs + vTPM guest attestation / MAA)", url: "https://learn.microsoft.com/en-us/azure/confidential-computing/overview-azure-products" }
+  - { title: "Google Cloud, Confidential VM remote attestation overview (official: SEV / SEV-SNP / TDX + vTPM boot attestation + Google Cloud Attestation token, relying party checks policy)", url: "https://docs.cloud.google.com/confidential-computing/confidential-vm/docs/attestation-overview" }
   - { title: "Confidential Computing Consortium, A Technical Analysis of Confidential Computing (v1.3, 2022)", url: "https://confidentialcomputing.io/wp-content/uploads/sites/10/2023/03/CCC-A-Technical-Analysis-of-Confidential-Computing-v1.3_unlocked.pdf" }
 ---
 
@@ -85,12 +88,24 @@ Every choice carries **your threat model and load**: the engineering effort of a
 - Pass: when the attestation is invalid, the measurement isn't in the public transparency log, or the cert chain fails, the client **always refuses to send the prompt**; it sends only when it matches a signed release in the log.
 - Fail: the client doesn't verify attestation / doesn't check the transparency log (only TLS) → that's not really confidential inference; make verification a gate before sending.
 
-## A real case / current vendor state
+## A real case / deployment
 
-Confidential inference has **production deployments**:
+### How the industry does it: real confidential-inference deployments + attestation practice
 
-- **Apple Private Cloud Compute (PCC)**: built for Apple Intelligence's cloud requests — device-side remote attestation, **publishing production software images to a verifiable transparency log**, **no privileged runtime roles** (even Apple's own operations can't privileged-access user data), and partial source for key components opened for security research (Apple Security Research, *Private Cloud Compute*). It exemplifies "let the user's device do the verification automatically."
-- **NVIDIA H100 / H200 confidential computing**: a GPU TEE where standard PyTorch / TensorFlow / ONNX models run in the enclave **unmodified**, with the client adding an attestation-verification step (NVIDIA official).
+First look at "how each vendor actually runs confidential inference in production, and what exactly the client verifies," then return to the mechanism taxonomy. Every documented production / shipping deployment today takes the **TEE route**; they differ in "who fetches the attestation, and to whom it's publicly checkable" — but the **common thread** is that the vendor ships not "trust me" but a **remote attestation you (or your device / relying party) can independently verify**. Skip that verification and you're sending plaintext to a black box that merely claims to be confidential (echoing the red line).
+
+| Deployment | What runs | The step the client / relying party must verify (mechanism named) |
+|---|---|---|
+| **Apple Private Cloud Compute (PCC)** | Built for Apple Intelligence's cloud requests: **stateless computation** (requests processed only in memory, never written to disk, no logging), **no privileged runtime access**, production software images published to a **transparency log** | The device fetches the node's **cryptographic attestation**, compares the software measurement against a signed release in the **public transparency log**, and wraps its request key to the node **only on a match**; Apple also released `apple/security-pcc` source (including CloudAttestation, which builds / validates the attestation, and Thimble for the device-side `privatecloudcomputed`) plus a **Virtual Research Environment (VRE)** so researchers can independently verify transparency-log consistency (Apple Security Research) |
+| **NVIDIA Hopper H100 confidential computing** | A **GPU TEE**: standard PyTorch / TensorFlow / ONNX models run in the enclave largely unmodified; the GPU pairs with a CPU TEE (Intel TDX / AMD SEV-SNP / Arm CCA), with the CPU↔GPU link encrypted | Verify the GPU's **remote attestation**: each H100 has a private key burned in at production, and at boot the GPU measures and signs its firmware measurement; verifiable offline or via the **NVIDIA Remote Attestation Service (NRAS)**, after which a session key is established with the GPU (NVIDIA official) |
+| **Azure confidential computing** | **Confidential VMs** (AMD SEV-SNP, e.g. DCasv5 / ECasv5; Intel TDX, e.g. DCesv6 / ECesv6) + **confidential GPUs** (the NCCads_H100_v5 series, pairing an H100 GPU TEE) | Use **vTPM-based guest attestation**: SEV-SNP generates a hardware report at boot (signed by the chip's VCEK certificate), submitted to **Microsoft Azure Attestation (MAA)** to validate the chain, then checked against your policy (Microsoft Learn official docs) |
+| **Google Cloud confidential computing** | **Confidential VM** (AMD SEV / SEV-SNP, Intel TDX); Confidential Space runs attestable workloads on top | Fetch the instance vTPM's attestation quote, send it to **Google Cloud Attestation** for verification, which returns an attestation token (an OIDC token under Confidential Space); the **relying party checks that token against its own policy** before granting access (Google Cloud official docs) |
+
+Put the four side by side and this entry's red line gets concrete: **the vendor saying "confidential" ≠ you verified the attestation** — PCC builds verification into the device and open-sources its code plus a VRE so you can check "which code actually ran"; NVIDIA / Azure / GCP expose the attestation as a verifiable report / token, but **fetching the attestation, comparing the measurement / validating the signature chain, checking against policy** is a step **your client or relying party must actively perform** — the cloud doesn't do it for you.
+
+### Route taxonomy: TEE vs. cryptographic (HE / MPC)
+
+Everything in the table above is the **TEE route** (production-ready today). The other is the **cryptographic route** (HE / MPC, zero hardware trust), still constrained by overhead at large-scale LLM inference and today seen mostly in narrow scenarios / small models / partial stages (mechanism and trade-offs in Volume 1 [HE·MPC](../01-foundations/he-mpc.mdx)). The fundamental difference is the **root of trust**: the TEE route puts trust in the chip vendor + remote attestation; the cryptographic route trusts no execution environment but pays a compute cost.
 
 :::caution To be verified
 The **large-scale private-LLM-inference overhead** of the cryptographic route (HE / MPC) has no single first-source benchmark; this entry states no bald multiplier — to be verified against a first source (recorded in `BACKLOG-privacy.md`).
@@ -121,13 +136,16 @@ Calling out each false security:
 ## Version notes
 
 :::note Applicable versions
-The **architecture** of confidential inference (TEE + remote attestation + verifiable transparency) is relatively stable, but the **specific products and hardware** evolve fast: PCC, NVIDIA confidential computing, and various clouds' confidential VMs / GPUs all iterate, and the cryptographic route's feasibility shifts with hardware acceleration. This entry reflects the 2026-06 product landscape (Apple PCC, NVIDIA H100/H200 confidential computing); specific capabilities, overhead, and threat models are whatever the vendor's current docs and your own measurements say. (Sources verified 2026-06.)
+The **architecture** of confidential inference (TEE + remote attestation + verifiable transparency) is relatively stable, but the **specific products and hardware** evolve fast: PCC, NVIDIA confidential computing, and Azure / Google Cloud confidential VMs / GPUs all iterate (machine-type codenames, attestation services, and regions change anytime), and the cryptographic route's feasibility shifts with hardware acceleration. This entry reflects the 2026-06 product landscape (Apple PCC, NVIDIA Hopper H100, Azure SEV-SNP / TDX confidential VMs and NCCads_H100_v5 confidential GPUs, Google Cloud Confidential VM); specific capabilities, overhead, and threat models are whatever the vendor's current docs and your own measurements say. (Sources verified 2026-06.)
 :::
 
 ## Further reading and sources
 
-Mixed evidence — **primary: official docs** (Apple, NVIDIA); **supplementary: standard** (CCC) + mechanism in Volume 1's two foundations.
+Mixed evidence — **primary: official docs** (Apple, NVIDIA, Azure, Google Cloud — real deployments + attestation practice); **supplementary: standard** (CCC) + mechanism in Volume 1's two foundations.
 
-- [Private Cloud Compute: A new frontier for AI privacy in the cloud (Apple Security Research)](https://security.apple.com/blog/private-cloud-compute/) — official: device-side remote attestation + verifiable transparency log + no privileged access + partial open source for audit.
-- [Confidential Computing on H100 GPUs (NVIDIA official)](https://developer.nvidia.com/blog/confidential-computing-on-h100-gpus-for-secure-and-trustworthy-ai/) — official: a GPU TEE where standard models run in the enclave unmodified + client attestation.
+- [Private Cloud Compute: A new frontier for AI privacy in the cloud (Apple Security Research)](https://security.apple.com/blog/private-cloud-compute/) — official: stateless computation + device-side remote attestation + verifiable transparency log + no privileged access.
+- [Security research on Private Cloud Compute (Apple Security Research)](https://security.apple.com/blog/pcc-security-research/) — official: open-sourced `apple/security-pcc` (including CloudAttestation and the device-side Thimble) + a Virtual Research Environment (VRE) for researchers to independently verify transparency-log consistency.
+- [Confidential Computing on H100 GPUs (NVIDIA official)](https://developer.nvidia.com/blog/confidential-computing-on-h100-gpus-for-secure-and-trustworthy-ai/) — official: a GPU TEE where standard models run in the enclave unmodified + client verifies remote attestation (NRAS).
+- [Azure confidential computing product overview (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/confidential-computing/overview-azure-products) — official: AMD SEV-SNP / Intel TDX confidential VMs + NCCads_H100_v5 confidential GPUs; vTPM guest attestation validated via Microsoft Azure Attestation.
+- [Confidential VM remote attestation overview (Google Cloud)](https://docs.cloud.google.com/confidential-computing/confidential-vm/docs/attestation-overview) — official: SEV / SEV-SNP / TDX + vTPM boot attestation; the relying party checks a Google Cloud Attestation token against its own policy.
 - [A Technical Analysis of Confidential Computing (CCC, v1.3)](https://confidentialcomputing.io/wp-content/uploads/sites/10/2023/03/CCC-A-Technical-Analysis-of-Confidential-Computing-v1.3_unlocked.pdf) — standard: the TEE / attestation / trust-model framework for confidential computing.
