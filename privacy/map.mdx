@@ -21,17 +21,17 @@ description: 「LLM 隐私保护」主题的交叉索引——除了按卷（侧
 - **推断类攻击（MIA / 反演 / 属性）**：[成员推断攻击](./01-foundations/membership-inference.mdx) · [模型反演与属性推断](./01-foundations/model-inversion-attribute-inference.mdx) · [属性 / 分布推断](./01-foundations/property-inference.mdx)
 - **记忆与训练数据抽取**：[训练数据抽取](./02-memorization-extraction/training-data-extraction.mdx) · [训练数据去重](./02-memorization-extraction/training-data-deduplication.mdx) · [隐私定向投毒](./02-memorization-extraction/privacy-poisoning.mdx)
 - **差分隐私**：[DP 微调](./03-conversational-llms/dp-fine-tuning.mdx)
-- **联邦学习与安全聚合**：[生产级 DP·FL 部署](./05-frontier-deployment/dp-federated-learning.mdx) · [梯度泄露](./05-frontier-deployment/gradient-leakage.mdx) · [安全聚合](./05-frontier-deployment/secure-aggregation.mdx)
+- **联邦学习与安全聚合**：[生产级 DP·FL 部署](./05-frontier-deployment/dp-federated-learning.mdx) · [梯度泄露](./05-frontier-deployment/gradient-leakage.mdx) · [安全聚合](./05-frontier-deployment/secure-aggregation.mdx) · [拆分学习泄露](./05-frontier-deployment/split-learning-leakage.mdx) · [联邦分析](./05-frontier-deployment/federated-analytics.mdx)
 - **机器遗忘与被遗忘权**：[可验证删除与机器遗忘](./05-frontier-deployment/machine-unlearning.mdx) · [遗忘可验证性](./05-frontier-deployment/unlearning-verification.mdx)
 - **隐私保护计算（HE / MPC / TEE）**：[可信执行环境](./01-foundations/trusted-execution-environment.mdx) · [同态加密 / 安全多方计算](./01-foundations/he-mpc.mdx) · [机密推理](./05-frontier-deployment/confidential-inference.mdx)
 - **RAG 与 Agent 隐私**：[多租户 RAG 检索泄露](./04-rag-agents/rag-retrieval-leakage.mdx) · [跨会话记忆串味](./04-rag-agents/cross-session-memory-bleed.mdx) · [Agent 工具外联外泄](./04-rag-agents/agent-tool-exfiltration.mdx) · [嵌入反演](./04-rag-agents/embedding-inversion.mdx)
-- **推理服务期隐私**：[推理服务数据边界](./06-governance-compliance/inference-service-data-boundary.mdx) · [推理期侧信道](./05-frontier-deployment/inference-side-channels.mdx)
+- **推理服务期隐私**：[推理服务数据边界](./06-governance-compliance/inference-service-data-boundary.mdx) · [推理期侧信道](./05-frontier-deployment/inference-side-channels.mdx) · [微调即服务隐私](./06-governance-compliance/ftaas-privacy.mdx)
 - **上下文面隐私**：[上下文面隐私](./03-conversational-llms/context-surface-privacy.mdx)（系统提示词 / 会话上下文 / 工具结果泄露）
-- **PII 检测与脱敏**：[PII 回吐](./03-conversational-llms/pii-regurgitation.mdx)（训练语料 PII 在对话里复现、脱敏的限度）
+- **PII 检测与脱敏**：[PII 回吐](./03-conversational-llms/pii-regurgitation.mdx)（训练语料 PII 在对话里复现、脱敏的限度）· [合成数据隐私](./06-governance-compliance/synthetic-data-privacy.mdx)
 - **模型抽取与窃取**：[模型抽取与窃取](./01-foundations/model-extraction-stealing.mdx)（查询 API 复刻功能 / 套出部分参数）
-- **治理与合规**：贯穿各条「合规映射」小段；索引见卷六
+- **治理与合规**：[LLM 水印与溯源](./06-governance-compliance/llm-watermarking.mdx)（内容溯源 / 「被训了吗」及其改写极限）；并贯穿各条「合规映射」小段，索引见卷六
 - **数据生命周期与数据治理**：[数据生命周期与删除传播](./06-governance-compliance/data-lifecycle-deletion.mdx)（删除请求跨存储传播）
-- **隐私评测与审计**：[量化记忆与审计](./02-memorization-extraction/quantifying-memorization.mdx)（探针 / 暴露度量化记忆）；亦贯穿各条「最小可测试断言」小块
+- **隐私评测与审计**：[量化记忆与审计](./02-memorization-extraction/quantifying-memorization.mdx)（探针 / 暴露度量化记忆）· [Agent 隐私评测（AgentDojo）](./04-rag-agents/agent-privacy-benchmark.mdx)；亦贯穿各条「最小可测试断言」小块
 
 ## 威胁 → 缓解矩阵
 
@@ -57,6 +57,12 @@ description: 「LLM 隐私保护」主题的交叉索引——除了按卷（侧
 | 不偷某条、而是套出**训练集的群体构成**（多少比例女性…） | [属性 / 分布推断](./01-foundations/property-inference.mdx) | 压不到零（统计现实）、DP 靶心是个体不覆盖分布、白盒信号最强 |
 | 往训练集**掺毒放大对他人的隐私泄露** | [隐私定向投毒](./02-memorization-extraction/privacy-poisoning.mdx) | 数据完整性 = 隐私问题、不可信数据源是放大器、去重 / DP 可削 |
 | 加密了，但**响应时序 / 长度 / 缓存**泄露你聊了什么 | [推理期侧信道](./05-frontier-deployment/inference-side-channels.mdx) | 边界要算到部署 / 网络 / 缓存层、填充 / 隔离缓存可缓、攻防在动 |
+| 把模型拆开、**原始数据留本地**，以为就不泄露 | [拆分学习泄露](./05-frontier-deployment/split-learning-leakage.mdx) | 中间激活可反演回输入、恶意服务器能主动劫持特征空间、留本地 ≠ 私有 |
+| 只共享**聚合统计 / 最频繁项**（而非原始数据），以为聚合即安全 | [联邦分析](./05-frontier-deployment/federated-analytics.mdx) | 聚合 ≠ 匿名（heavy hitters 仍要叠 DP）、多轮查询累积泄露、ε 要逐查询记账 |
+| 把**微调数据**交给托管「微调即服务」，怕被留存 / 抽出 | [微调即服务隐私](./06-governance-compliance/ftaas-privacy.mdx) | 「不训练基础模型」≠「不留你的调优数据」、条款按厂商 / 端点而异、能否抽出微调数据这一角度证据尚薄（存疑） |
+| 用**合成数据**替代真实数据发布 / 训练，以为就匿名 | [合成数据隐私](./06-governance-compliance/synthetic-data-privacy.mdx) | 无 DP 的合成不构成匿名、相似度评估假阴性、离群记录仍可成员推断、DP 有效用代价 |
+| 想给生成内容**溯源** / 查「我的数据**被训了吗**」 | [LLM 水印与溯源](./06-governance-compliance/llm-watermarking.mdx) | 改写 / 翻译可抹除输出水印、低熵短文难标、陷阱法需足够长 × 重复够多才检得出 |
+| 想在发布前**量出 Agent 被注入后的外泄风险** | [Agent 隐私评测（AgentDojo）](./04-rag-agents/agent-privacy-benchmark.mdx) | 基准是代理非穷尽、过基准 ≠ 真安全、注入鲁棒防御未解、新攻击持续出现 |
 
 :::tip 怎么用这张图
 先按「威胁」定位你当下最担心的泄露面，进对应条目读**机制 + 落地配方 + 最小可测试断言**；再顺着条目末尾的「与相邻技术的区别」横向跳，把整条防线连起来。每条都点破了对应的**假安全**——别只看「用了什么」，要看「它没解决什么」。
