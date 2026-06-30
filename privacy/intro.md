@@ -11,8 +11,8 @@ description: LLM 隐私保护 —— AiWiki 百科下与「AI 编码误区」并
 
 它和你正在读的另一主题[「AI 编码误区」](/welcome)**并列**，不是从属。那个主题讲「用 AI 编码工具时人最容易犯的错」；这个主题讲「LLM 系统里的敏感数据会在哪里泄露、工程上怎么验证 / 降低 / 证明 / 追踪」。两者共用同一内核——机制优先、第一人称、证据可核查、随版本更新——但领域、单元、结构都换了一套。
 
-:::note 当前状态：M1 脚手架（建设中）
-这个主题刚搭好骨架：多实例站点、六卷结构、术语、模板、闸门都已就位，正在往里填第一批样板条目。**目录里现在多为「本卷导言」占位**，真正的攻防条目会分批进来（路线见 [`PROPOSAL-privacy-book.md`](https://github.com/xuebinma/AIWiki/blob/main/PROPOSAL-privacy-book.md)、[`BACKLOG-privacy.md`](https://github.com/xuebinma/AIWiki/blob/main/BACKLOG-privacy.md)）。
+:::note 当前状态：M1+ · 内容样板扩展中（已从「铺面」转向「加深 + 复核 + 补案例」）
+六卷结构、术语、模板、质量闸门均已就位；**14 个技术板块已初步覆盖**——各有至少一条落地条目，或以「贯穿各条」方式覆盖（见[隐私地图](./map.mdx)）。后续重点不再是铺新条目，而是**加深既有条目、全站复核（成熟度 / 证据纪律）、补真实案例与各公司工程实践**（路线见 [`PROPOSAL-privacy-book.md`](https://github.com/xuebinma/AIWiki/blob/main/PROPOSAL-privacy-book.md)、[`BACKLOG-privacy.md`](https://github.com/xuebinma/AIWiki/blob/main/BACKLOG-privacy.md)）。
 :::
 
 ## 写给谁
@@ -61,6 +61,6 @@ description: LLM 隐私保护 —— AiWiki 百科下与「AI 编码误区」并
 
 ## 怎么读
 
-左侧侧边栏按六卷排列，是推荐的阅读顺序。每条攻防条目会用同一种九节结构呈现：一句话摘要 → 机制（我这边发生了什么）→ 威胁面 → 防护原理 → 落地实现（配方）→ 真实案例 → 残余风险与权衡 → 版本说明 → 出处。你不必从头读到尾——按卷或按技术板块找到对应条目即可。
+左侧侧边栏按六卷排列，是推荐的阅读顺序。每条攻防条目会用同一种九节结构呈现：一句话摘要 → 机制（我这边发生了什么）→ 威胁面 → 防护原理 → 落地实现（配方）→ 真实案例 → 残余风险与权衡 → 版本说明 → 出处。你不必从头读到尾——按卷或按技术板块找到对应条目即可。**如果你已经知道自己担心的泄露面**（训练数据被记住、RAG 跨租户串味、服务方留存、梯度泄露……），更快的入口是[隐私地图](./map.mdx)的「威胁 → 缓解」矩阵：按泄露面反查在管的条目，并一眼看到「它还没解决什么」。
 
 想一起写、或发现引用不当，欢迎在 [GitHub](https://github.com/xuebinma/AIWiki/issues) 指出。
