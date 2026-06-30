@@ -116,6 +116,16 @@ Calling out each false security:
 - **DP fine-tuning vs. training-data deduplication**: dedup lowers memorization but gives **no formal guarantee** (rare single samples can still be extracted — see [Training-data extraction](../02-memorization-extraction/training-data-extraction.mdx)); DP gives a **formal bound** but at a utility cost. They often stack: dedup to lower the baseline, DP for the formal guarantee.
 - **DP vs. machine unlearning**: DP is **prevention up front** (bound single-sample influence during training); unlearning is **deletion after the fact** (already trained, now try to erase one record's influence). Both concern "a single sample," but one is before, one is after (unlearning is Volume 5).
 
+## Framework differences (DP libraries; stamped 2026-06, defer to each library's current docs)
+
+The DP-SGD skeleton is the same across libraries, but the **engineering and default accounting** differ — check when porting:
+
+- **Opacus (PyTorch)**: per-sample gradients via hooks / functorch, built-in RDP-style accounting; supports ghost clipping to save memory.
+- **TensorFlow Privacy**: DP optimizers + several accountants; integrates with Keras training loops.
+- **JAX side (e.g. jax-privacy)**: per-sample gradients come naturally via `vmap`, often cheaper on memory at large batch.
+
+The differences are mainly in **how per-sample gradients are computed, which accountant is used, and whether ghost clipping is supported** — these affect memory / speed and whether your reported (ε, δ) can be independently recomputed, **not the formal DP definition**. When switching libraries, recompute ε under one convention; don't assume cross-library numbers are directly comparable. (This subsection ages fast; defer to each library's release docs.)
+
 ## Version notes
 
 :::note Applicable versions
