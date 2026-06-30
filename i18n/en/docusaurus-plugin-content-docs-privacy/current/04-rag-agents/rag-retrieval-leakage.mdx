@@ -9,9 +9,15 @@ technique: RAG & agent privacy
 attack_surface: Retrieval store / vector store
 severity: High
 maturity: Experimental
-evidence: Research
+evidence: Official docs
 tags: [RAG, multi-tenant, vector store, embedding inversion, cross-session memory, Privacy Engineer, Security Engineer, ML Engineer]
 sources:
+  - { title: "Pinecone Docs, Implement multitenancy (official docs: tenant isolation by namespace; metadata filtering is shared and not isolation)", url: "https://docs.pinecone.io/guides/index-data/implement-multitenancy" }
+  - { title: "Microsoft Learn, Security filters for trimming results in Azure AI Search (official docs: query-time OData security filter / security trimming)", url: "https://learn.microsoft.com/en-us/azure/search/search-security-trimming-for-azure-search" }
+  - { title: "Weaviate Docs, Multi-tenancy operations (official docs: native multi-tenancy with a dedicated shard per tenant)", url: "https://docs.weaviate.io/weaviate/manage-collections/multi-tenancy" }
+  - { title: "Qdrant Docs, Multitenancy (official docs: payload-based partitioning, group_id with is_tenant)", url: "https://qdrant.tech/documentation/manage-data/multitenancy/" }
+  - { title: "AWS, Access control for vector stores using metadata filtering with Amazon Bedrock Knowledge Bases (official blog: metadata filtering for retrieval-time access control)", url: "https://aws.amazon.com/blogs/machine-learning/access-control-for-vector-stores-using-metadata-filtering-with-knowledge-bases-for-amazon-bedrock/" }
+  - { title: "PostgreSQL Docs, Row Security Policies (official docs: Row-Level Security, enforced in the database, not bypassable by app code)", url: "https://www.postgresql.org/docs/current/ddl-rowsecurity.html" }
   - { title: "Morris et al., Text Embeddings Reveal (Almost) As Much As Text (EMNLP 2023; arXiv 2310.06816)", url: "https://arxiv.org/abs/2310.06816" }
   - { title: "OpenAI, March 20 ChatGPT outage (official incident postmortem: a redis-py bug exposed cross-user data)", url: "https://openai.com/index/march-20-chatgpt-outage/" }
   - { title: "OWASP Top 10 for LLM Applications, LLM02:2025 Sensitive Information Disclosure", url: "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/" }
@@ -19,7 +25,7 @@ sources:
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
-<PrivacyMeta era="Volume 4 · RAG and agents" technique="RAG & agent privacy" audience={['Privacy Engineer', 'Security Engineer', 'ML Engineer']} severity="High" maturity="Experimental" evidence="Research" />
+<PrivacyMeta era="Volume 4 · RAG and agents" technique="RAG & agent privacy" audience={['Privacy Engineer', 'Security Engineer', 'ML Engineer']} severity="High" maturity="Experimental" evidence="Official docs" />
 
 > In one sentence: in multi-tenant RAG, two intuitions both fail — "vectorized means anonymized" and "filtered by user means isolated." In some studied embedding settings a vector **can be inverted back to approximate original text** (including PII), so don't treat it as anonymization; retrieval ranks by **similarity**, not permission, so if the ACL runs after retrieval instead of before it, the most relevant private chunk may come from **another tenant**; and a single boundary bug in a shared cache / long-term memory can carry one user's private context into another's session.
 
@@ -61,6 +67,17 @@ Core: **do isolation at the data layer, before retrieval; treat embeddings as se
 - **Minimize private data entering memory**: tool / retrieved results do **not** enter long-term memory by default; residency needs an explicit, scoped grant.
 
 ## Buildable recipe
+
+**How it's actually done in production: the isolation mechanism each vector DB / retrieval service gives you.** The recipe below isn't invented from scratch — the mainstream vector DBs and retrieval services each ship an isolation primitive for exactly this. Look at the mechanism each one provides first (learn the mechanism name; specific APIs go stale), then map the recipe onto it:
+
+- **Pinecone** — tenant isolation by **namespace**: one namespace per tenant, each stored separately; its docs explicitly cast metadata filtering as the *shared, cross-tenant query* path and **not** an isolation mechanism (Pinecone Docs, *Implement multitenancy*).
+- **Azure AI Search** — **security filters / security trimming**: an **OData filter applied at query time** (e.g. `search.in` over a filterable `group_ids` field). The docs state plainly that this *simulates* document-level authorization for cases that "can't use the built-in ACL" — i.e. **post-retrieval trimming, not the service enforcing native ACLs** (Microsoft Learn, *Security filters for trimming results*).
+- **Weaviate** — **native multi-tenancy**: a dedicated **shard per tenant**; one tenant's data isn't visible to another and deletes don't affect others (Weaviate Docs, *Multi-tenancy operations*).
+- **Qdrant** — **payload-based partitioning**: one collection partitioned by `group_id`, with a payload index marked `is_tenant=true`; v1.16 adds tiered multi-tenancy (small tenants share a shard, large ones get promoted to their own) (Qdrant Docs, *Multitenancy*).
+- **AWS Bedrock Knowledge Bases** — **metadata filtering** for access control: attach metadata to documents and filter visible documents at retrieval time by user role / permission (AWS, *Access control for vector stores using metadata filtering*).
+- **pgvector / Postgres** — **Row-Level Security (RLS)**: write tenant isolation as a database policy (every SQL statement filtered by a session variable like `app.tenant_id`), so isolation is **enforced in the database** and app code can't bypass it; with `FORCE ROW LEVEL SECURITY` not even the table owner can (PostgreSQL Docs, *Row Security Policies*).
+
+The common thread to read off this list: **isolation is the *system's* job (pre-filter / in-database policy / dedicated shard), not the *model's*.** Note that Azure's security trimming and the "filter by metadata after retrieval" family are **query-time trimming** — misconfigure or skip it and you've left the window where "out-of-scope chunks enter candidates first," which is exactly what steps 1 and 4 below close. The recipe just turns these primitives into testable engineering steps:
 
 ```text
 1. Index-layer isolation: a separate collection/namespace per tenant, or force a
@@ -123,7 +140,18 @@ Embedding invertibility is a **property of embedding representations**, not limi
 
 ## Further reading and sources
 
-Mixed evidence — **primary: Research** (embedding inversion); **supplementary: official incident** (OpenAI outage), **framework** (OWASP).
+Mixed evidence — **primary: Official docs** (each vector DB / retrieval service's multi-tenancy isolation mechanism — this entry's strongest claim, "isolation is the system's job," is now vendor-documented); **supplementary: Research** (mechanism backing for embedding inversion), **official incident** (OpenAI outage), **framework** (OWASP).
+
+Isolation mechanism per vector DB / retrieval service (official docs; verified 2026-06):
+
+- [Pinecone Docs — Implement multitenancy](https://docs.pinecone.io/guides/index-data/implement-multitenancy) — tenant isolation by namespace (each stored separately); metadata filtering is the shared, cross-tenant path, not isolation.
+- [Microsoft Learn — Security filters for trimming results in Azure AI Search](https://learn.microsoft.com/en-us/azure/search/search-security-trimming-for-azure-search) — query-time OData security filter (`search.in`) that *simulates* document-level authorization for cases that can't use native ACLs.
+- [Weaviate Docs — Multi-tenancy operations](https://docs.weaviate.io/weaviate/manage-collections/multi-tenancy) — native multi-tenancy with a dedicated shard per tenant; one tenant's data isn't visible to another.
+- [Qdrant Docs — Multitenancy](https://qdrant.tech/documentation/manage-data/multitenancy/) — payload-based partitioning within one collection (`group_id` marked `is_tenant`); tiered multi-tenancy from v1.16.
+- [AWS — Access control for vector stores using metadata filtering with Amazon Bedrock Knowledge Bases](https://aws.amazon.com/blogs/machine-learning/access-control-for-vector-stores-using-metadata-filtering-with-knowledge-bases-for-amazon-bedrock/) — metadata filtering for retrieval-time access control.
+- [PostgreSQL Docs — Row Security Policies](https://www.postgresql.org/docs/current/ddl-rowsecurity.html) — Row-Level Security filters every SQL statement by a session variable; enforced in the database, not bypassable by app code.
+
+Mechanism backing and an adjacent incident:
 
 - [Text Embeddings Reveal (Almost) As Much As Text (Morris et al., EMNLP 2023; arXiv 2310.06816)](https://arxiv.org/abs/2310.06816) — Research: vec2text inverts text embeddings back to approximate originals and recovers real names from clinical-note embeddings.
 - [March 20 ChatGPT outage (OpenAI official postmortem, 2023)](https://openai.com/index/march-20-chatgpt-outage/) — a redis-py bug made cross-user conversation titles and some payment info visible.
