@@ -294,6 +294,11 @@ DP-SGD · PATE · FHE · HE · MPC · TEE · MIA · PII · GDPR · NIST · OWASP
 | 假安全 | false security | 以为安全其实没有（本主题的头号靶子） |
 | 残余风险 | residual risk | 防护后仍存在的泄露可能 |
 | 威胁模型 | threat model | 防谁、防到什么程度的假设集 |
+| 间接提示注入 | indirect prompt injection | 把指令藏进模型会读取的内容里，远程操纵其行为 |
+| 数据外泄 | data exfiltration | 私有数据经外联通道（工具 / 渲染 / API）被送出 |
+| 跨会话串味 | cross-session bleed | 共享记忆 / 缓存未按用户隔离，A 的数据出现在 B 的会话 |
+| 梯度泄露 | gradient leakage / gradient inversion | 从共享梯度反演出训练样本 |
+| 安全聚合 | secure aggregation | 用 MPC 让服务器只得更新之和、看不到单个更新 |
 
 ## 枚举值映射（隐私 frontmatter 与 `<PrivacyMeta>`）
 
