@@ -308,6 +308,13 @@ DP-SGD · PATE · FHE · HE · MPC · TEE · MIA · PII · GDPR · NIST · OWASP
 | 跨会话串味 | cross-session bleed | 共享记忆 / 缓存未按用户隔离，A 的数据出现在 B 的会话 |
 | 梯度泄露 | gradient leakage / gradient inversion | 从共享梯度反演出训练样本 |
 | 安全聚合 | secure aggregation | 用 MPC 让服务器只得更新之和、看不到单个更新 |
+| 拆分学习 | split learning | 把模型按层切成客户端 / 服务器两段、只传中间激活；激活可被反演回输入 |
+| 联邦分析 | federated analytics | 只在设备本地算统计 / 最频繁项、不集中原始数据；聚合 ≠ 匿名，仍需 DP |
+| 最频繁项 | heavy hitters | 联邦 / 本地 DP 下要发现的高频项，须叠 DP 才有界 |
+| LLM 水印 | LLM watermarking | 生成时嵌入可检测信号（如 green/red list）；改写 / 翻译可削弱 |
+| 数据溯源 | data provenance | 判「内容是否 AI 生成」「我的数据是否被训练」；含版权陷阱 / 成员推断法 |
+| 微调即服务 | fine-tuning-as-a-service (FTaaS) | 厂商托管微调 API；微调数据去向 / 保留与对齐侵蚀是其隐私面 |
+| Agent 隐私评测 | agent privacy evaluation | 用 AgentDojo 等基准把「Agent 注入后外泄」做成可复现、可打分 |
 
 ## 枚举值映射（隐私 frontmatter 与 `<PrivacyMeta>`）
 
