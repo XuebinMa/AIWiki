@@ -8,11 +8,13 @@ phase: Implementation
 severity: High
 applies_to: "All coding agents"
 evidence: Research
-tags: [AI agent, verification loop, irreversible action, plan mode, Engineer, DevOps Engineer]
+tags: [AI agent, verification loop, irreversible action, plan mode, Engineer, DevOps Engineer, Gemini CLI, Codex CLI]
 sources:
   - { title: "Manage costs effectively (Claude Code official)", url: "https://code.claude.com/docs/en/costs" }
   - { title: "Why Do Multi-Agent LLM Systems Fail? (arXiv 2503.13657)", url: "https://arxiv.org/abs/2503.13657" }
   - { title: "Agents of Chaos (arXiv 2602.20021)", url: "https://arxiv.org/abs/2602.20021" }
+  - { title: "Gemini CLI — Configuration (maxSessionTurns defaults to -1 / unlimited; approval modes / YOLO)", url: "https://google-gemini.github.io/gemini-cli/docs/get-started/configuration.html" }
+  - { title: "OpenAI Codex — Agent approvals & security (approval tiers + sandbox)", url: "https://developers.openai.com/codex/agent-approvals-security" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -112,6 +114,19 @@ You: (Usage is normal, no image got resent a hundred times, and the external end
 ```
 
 The difference isn't that I'm "more restrained this time." It's that you fixed, up front and with rules and caps, the things I judge unreliably: how many times to try, when to stop, and which actions need confirmation.
+
+## Tool divergence
+
+> As of 2026-06, at the mechanism level; each tool's caps and defaults change fast — go by each tool's current docs.
+
+Same root cause — **I judge "time to stop" unreliably** — but the **shape of the primary backstop** each tool gives an unattended run differs; don't carry one set of default assumptions across all of them:
+
+- **Claude Code**: the primary gate is a **hard per-session turn cap** (`--max-turns`) plus permission modes and `/usage` visibility; you set the cap explicitly — a headless `-p` run isn't capped by default.
+- **Gemini CLI**: there's a session-turn-limit setting (`maxSessionTurns`), but it **defaults to unlimited** (set to -1), and the community has reported "not respecting max session turns" bugs; combined with `--yolo` auto-approval and a sandbox — you lean on setting the cap yourself plus the sandbox to bound the blast radius.
+- **Codex CLI**: the primary gate leans on **approval tiers + sandbox** (suggest / auto-edit / full-auto), i.e. "limit what I'm allowed to do" rather than "limit how many rounds I run"; on-request mode stays in the sandbox by default and asks only to step outside it.
+- This complements [over-permissioning](../00-setup-collaboration/over-permissioning.mdx): that entry governs **how wide the permissions are**, this one governs **how long / how many rounds the loop runs** — set both gates and a runaway loop's blast radius is actually contained.
+
+Whichever you use, the principle holds: **don't rely on defaults** — set explicit iteration / turn / budget caps, and keep confirmation on actions with side effects.
 
 ## Version notes
 

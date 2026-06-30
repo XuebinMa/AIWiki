@@ -8,10 +8,12 @@ phase: 编码实现
 severity: 高
 applies_to: "Coding Agent 通用"
 evidence: 官方文档
-tags: [文件状态, 整文件重写, 最小 diff, 版本控制, 工程师]
+tags: [文件状态, 整文件重写, 最小 diff, 版本控制, 工程师, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
   - { title: "Claude Code Best Practices（Anthropic 官方）", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "Git Book — 2.5 Undoing Things（git 撤销与找回）", url: "https://git-scm.com/book/en/v2/Git-Basics-Undoing-Things" }
+  - { title: "Gemini CLI — File System Tools（replace：old_string + 上下文匹配、模型自我纠正）", url: "https://google-gemini.github.io/gemini-cli/docs/tools/file-system.html" }
+  - { title: "OpenAI — Apply Patch tool（apply_patch：上下文锚定补丁）", url: "https://developers.openai.com/api/docs/guides/tools-apply-patch" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -88,6 +90,19 @@ flowchart TD
 我：（Read 当前文件 → 看到那两条校验 → 只改超时那一行）
 你：（diff 只有一行，校验原样保留）
 ```
+
+## 工具差异
+
+> 截至 2026-06，机制层面；各工具实现与默认值变化很快，按需自行复核。
+
+根因同一个——**我拿一份过期副本去覆盖磁盘上的新版本**；但各工具把「改动锚定到文件现状」的机制不同，决定了它是**静默盖掉**还是**先撞墙**：
+
+- **Claude Code**：编辑前必须先在本会话里读过该文件，且若文件自上次读取后被改过，编辑会直接失败——把「先读再写」做成工具层硬约束（最容易盖掉的反而是整文件 `Write`，它不依赖既有内容）。检查点 / `/rewind` 只追踪我的改动、不追踪外部进程，兜底仍靠 git。
+- **Gemini CLI**：`replace` 按 `old_string` + 前后数行上下文精确匹配定位；文件漂移则匹配失败，或触发它基于模型的自我纠正去重猜目标段——锚是「我记得的片段」，不是对磁盘的强制重读。
+- **Codex CLI**：`apply_patch` 按上下文行锚定；上下文与现状不符则补丁打不上——但已知存在「报成功却没改」的静默失败，反而更隐蔽。
+- **Cursor / GitHub Copilot**（IDE 形态）：编辑落在编辑器**当前打开的缓冲区**上，文件现状即编辑器状态；风险转移到「我跨轮 / 跨会话记忆里的版本，与你编辑器里的实时内容不一致」。
+
+解药不变：让我**动手前重读现状、只做最小 diff**，并把改动 commit 了当兜底——别赌某个工具的锚定机制一定会替你撞响警报。
 
 ## 版本说明
 

@@ -8,10 +8,12 @@ phase: Implementation
 severity: High
 applies_to: "All coding agents"
 evidence: Official docs
-tags: [file state, full-file rewrite, minimal diff, version control, engineer]
+tags: [file state, full-file rewrite, minimal diff, version control, engineer, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
   - { title: "Claude Code Best Practices (Anthropic official)", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "Git Book — 2.5 Undoing Things", url: "https://git-scm.com/book/en/v2/Git-Basics-Undoing-Things" }
+  - { title: "Gemini CLI — File System Tools (replace: old_string + context match, model self-correction)", url: "https://google-gemini.github.io/gemini-cli/docs/tools/file-system.html" }
+  - { title: "OpenAI — Apply Patch tool (apply_patch: context-anchored patches)", url: "https://developers.openai.com/api/docs/guides/tools-apply-patch" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -88,6 +90,19 @@ You: First read config.ts's current content — I just hand-edited it.
 Me: (Read the current file → see the two validations → change only the timeout line)
 You: (diff is one line; validations preserved as-is)
 ```
+
+## Tool divergence
+
+> As of 2026-06, at the mechanism level; each tool's implementation and defaults change fast — re-check as needed.
+
+Same root cause — **I overwrite the newer version on disk with a stale copy** — but tools anchor "the edit to the file's current state" differently, which decides whether it **silently clobbers** or **hits a wall first**:
+
+- **Claude Code**: I must have read the file in this session before editing, and if it changed since I last read it, the edit fails outright — "read before write" is enforced at the tool layer (the easiest thing to clobber is actually a whole-file `Write`, which doesn't depend on existing content). Checkpoints / `/rewind` only track my edits, not external processes; git is still the safety net.
+- **Gemini CLI**: `replace` locates the target by `old_string` plus a few lines of surrounding context; if the file drifted the match fails, or it triggers a model-based self-correction to re-guess the span — the anchor is "the snippet I remember," not a forced re-read of disk.
+- **Codex CLI**: `apply_patch` anchors on context lines; if context doesn't match the current file the patch won't apply — but it has a known "reports success yet changed nothing" silent failure, sneakier still.
+- **Cursor / GitHub Copilot** (IDE form): edits land on the editor's **currently open buffer**, so the file's current state IS the editor state; the risk shifts to "the version in my cross-turn / cross-session memory disagreeing with the live content in your editor."
+
+The cure doesn't change: have me **re-read the current state before acting and make a minimal diff**, and commit your changes as the safety net — don't bet that some tool's anchoring will sound the alarm for you.
 
 ## Version notes
 
