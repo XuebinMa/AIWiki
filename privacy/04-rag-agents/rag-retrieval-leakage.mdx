@@ -9,9 +9,15 @@ technique: RAG 与 Agent 隐私
 attack_surface: 检索库 / 向量库
 severity: 高
 maturity: 试验
-evidence: 研究支持
+evidence: 官方文档
 tags: [RAG, 多租户, 向量库, 嵌入反演, 跨会话记忆, 隐私工程师, 安全工程师, ML 工程师]
 sources:
+  - { title: "Pinecone Docs, Implement multitenancy（官方文档：按 namespace 做租户隔离，metadata 过滤为共享、不构成隔离）", url: "https://docs.pinecone.io/guides/index-data/implement-multitenancy" }
+  - { title: "Microsoft Learn, Security filters for trimming results in Azure AI Search（官方文档：查询期 OData security filter / security trimming）", url: "https://learn.microsoft.com/en-us/azure/search/search-security-trimming-for-azure-search" }
+  - { title: "Weaviate Docs, Multi-tenancy operations（官方文档：每租户独立 shard 的原生多租户）", url: "https://docs.weaviate.io/weaviate/manage-collections/multi-tenancy" }
+  - { title: "Qdrant Docs, Multitenancy（官方文档：payload 分区多租户，group_id 设 is_tenant）", url: "https://qdrant.tech/documentation/manage-data/multitenancy/" }
+  - { title: "AWS, Access control for vector stores using metadata filtering with Amazon Bedrock Knowledge Bases（官方博客：用 metadata 过滤做检索期访问控制）", url: "https://aws.amazon.com/blogs/machine-learning/access-control-for-vector-stores-using-metadata-filtering-with-knowledge-bases-for-amazon-bedrock/" }
+  - { title: "PostgreSQL Docs, Row Security Policies（官方文档：行级安全 RLS，库内强制、应用层绕不过）", url: "https://www.postgresql.org/docs/current/ddl-rowsecurity.html" }
   - { title: "Morris et al., Text Embeddings Reveal (Almost) As Much As Text (EMNLP 2023；arXiv 2310.06816)", url: "https://arxiv.org/abs/2310.06816" }
   - { title: "OpenAI, March 20 ChatGPT outage（官方事故复盘：redis-py 缺陷致跨用户数据可见）", url: "https://openai.com/index/march-20-chatgpt-outage/" }
   - { title: "OWASP Top 10 for LLM Applications, LLM02:2025 Sensitive Information Disclosure", url: "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/" }
@@ -19,7 +25,7 @@ sources:
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
-<PrivacyMeta era="卷四 · RAG 与 Agent" technique="RAG 与 Agent 隐私" audience={['隐私工程师', '安全工程师', 'ML 工程师']} severity="高" maturity="试验" evidence="研究支持" />
+<PrivacyMeta era="卷四 · RAG 与 Agent" technique="RAG 与 Agent 隐私" audience={['隐私工程师', '安全工程师', 'ML 工程师']} severity="高" maturity="试验" evidence="官方文档" />
 
 > 一句话摘要：在多租户 RAG 里，两个直觉都靠不住——「向量化了就匿名了」和「按用户过滤了就隔离了」。在已研究的 embedding 设置下，向量**可被反演回近似原文**（含 PII），所以别把它当匿名化结果；检索是按**相似度**排序、不是按权限，ACL 若配在检索之后而非之前，最相关的那块私有 chunk 可能来自**别的租户**；而共享缓存 / 长期 memory 的一个边界 bug，就能把一个用户的私有上下文带进另一个会话。
 
@@ -61,6 +67,17 @@ flowchart TB
 - **最小化进入 memory 的私有数据**：tool / 检索结果默认**不**进长期 memory，需要驻留的显式授权 + 打范围。
 
 ## 落地实现（配方）
+
+**业界怎么做：各向量库 / 检索服务的隔离机制（线上实际怎么隔离）。** 下面这道配方不是凭空发明——主流向量库 / 检索服务都给了对应的隔离原语，先看各家提供的机制（认准机制名，具体 API 会过时），再把配方映射上去：
+
+- **Pinecone**——按 **namespace** 做租户隔离：每租户一个 namespace、各自独立存储；其官方文档把 metadata 过滤明确归为「共享、跨租户查询」用途，**不当作隔离手段**（Pinecone Docs，*Implement multitenancy*）。
+- **Azure AI Search**——**security filter / security trimming**：在 `group_ids` 这类可过滤字段上、用 `search.in` 的 **OData 过滤在查询期裁剪**结果；官方文档明说这是「模拟」文档级授权、用于「无法用原生 ACL」的场景——**即检索后过滤，不是服务原生强制 ACL**（Microsoft Learn，*Security filters for trimming results*）。
+- **Weaviate**——**原生多租户**：每租户一个独立 **shard**，租户间数据互不可见、删除互不影响（Weaviate Docs，*Multi-tenancy operations*）。
+- **Qdrant**——**payload 分区**：单 collection 内按 `group_id` 分区、给该字段建 `is_tenant=true` 的 payload 索引；v1.16 起还有「分层多租户」（小租户共享 shard、大租户提升到独立 shard）（Qdrant Docs，*Multitenancy*）。
+- **AWS Bedrock Knowledge Bases**——**metadata 过滤**做访问控制：给文档配套 metadata，检索期按用户角色 / 权限过滤可见文档（AWS，*Access control for vector stores using metadata filtering*）。
+- **pgvector / Postgres**——**行级安全（RLS）**：把租户隔离写成数据库策略（按 `app.tenant_id` 这类会话变量过滤每条 SQL），隔离落在**库内强制**、应用层绕不过；配 `FORCE ROW LEVEL SECURITY` 连表 owner 也不能绕（PostgreSQL Docs，*Row Security Policies*）。
+
+读这张清单要抓的一条共性：**隔离是「系统」的活（pre-filter / 库内策略 / 独立 shard），不是「模型」的活**。其中 Azure 的 security trimming 与「按 metadata 检索后过滤」这一类，本质是**查询期裁剪**——配错或漏配就留了「越权块先进候选」的窗口，正是下面配方第 1、4 步要堵的。下面的配方就是把这些原语落成可测的工程动作：
 
 ```text
 1. 索引层隔离：每租户独立 collection/namespace，或检索查询强制 pre-filter
@@ -117,7 +134,18 @@ embedding 可反演是**嵌入表示的性质**，不限某一家向量库或模
 
 ## 延伸阅读与出处
 
-证据为混合——**主要：研究支持**（embedding 反演）；**补充：官方事故复盘**（OpenAI outage）、**框架**（OWASP）。
+证据为混合——**主要：官方文档**（各向量库 / 检索服务的多租户隔离机制，本条最强论断「隔离是系统的活」即由厂商文档背书）；**补充：研究支持**（embedding 反演的机制背书）、**官方事故复盘**（OpenAI outage）、**框架**（OWASP）。
+
+各向量库 / 检索服务的隔离机制（官方文档；核验于 2026-06）：
+
+- [Pinecone Docs — Implement multitenancy](https://docs.pinecone.io/guides/index-data/implement-multitenancy) —— 按 namespace 做租户隔离（各自独立存储）；metadata 过滤为共享、跨租户用途，不构成隔离。
+- [Microsoft Learn — Security filters for trimming results in Azure AI Search](https://learn.microsoft.com/en-us/azure/search/search-security-trimming-for-azure-search) —— 查询期 OData security filter（`search.in`），「模拟」文档级授权、用于无法用原生 ACL 的场景。
+- [Weaviate Docs — Multi-tenancy operations](https://docs.weaviate.io/weaviate/manage-collections/multi-tenancy) —— 每租户独立 shard 的原生多租户，租户间数据互不可见。
+- [Qdrant Docs — Multitenancy](https://qdrant.tech/documentation/manage-data/multitenancy/) —— 单 collection 内 payload 分区（`group_id` 设 `is_tenant`）；v1.16 起支持分层多租户。
+- [AWS — Access control for vector stores using metadata filtering with Amazon Bedrock Knowledge Bases](https://aws.amazon.com/blogs/machine-learning/access-control-for-vector-stores-using-metadata-filtering-with-knowledge-bases-for-amazon-bedrock/) —— 用 metadata 过滤做检索期访问控制。
+- [PostgreSQL Docs — Row Security Policies](https://www.postgresql.org/docs/current/ddl-rowsecurity.html) —— 行级安全（RLS）按会话变量过滤每条 SQL，库内强制、应用层绕不过。
+
+机制背书与相邻事故：
 
 - [Text Embeddings Reveal (Almost) As Much As Text（Morris 等，EMNLP 2023；arXiv 2310.06816）](https://arxiv.org/abs/2310.06816) —— 研究：vec2text 把文本 embedding 反演回近似原文，并从临床记录嵌入还原出真实姓名。
 - [March 20 ChatGPT outage（OpenAI 官方事故复盘，2023）](https://openai.com/index/march-20-chatgpt-outage/) —— redis-py 缺陷致跨用户对话标题与部分支付信息可见。

@@ -12,8 +12,11 @@ maturity: 生产
 evidence: 官方文档
 tags: [机密推理, 机密计算, 远程证明, 可验证透明, TEE, 隐私工程师, 安全工程师, ML 工程师]
 sources:
-  - { title: "Apple Security Research, Private Cloud Compute: A new frontier for AI privacy in the cloud（官方：设备级远程证明 + 可验证透明日志 + 无特权访问）", url: "https://security.apple.com/blog/private-cloud-compute/" }
+  - { title: "Apple Security Research, Private Cloud Compute: A new frontier for AI privacy in the cloud（官方：无状态计算 + 设备级远程证明 + 可验证透明日志 + 无特权访问）", url: "https://security.apple.com/blog/private-cloud-compute/" }
+  - { title: "Apple Security Research, Security research on Private Cloud Compute（官方：开源 apple/security-pcc + 虚拟研究环境 VRE，供独立核验透明日志一致性）", url: "https://security.apple.com/blog/pcc-security-research/" }
   - { title: "NVIDIA, Confidential Computing on H100 GPUs for Secure and Trustworthy AI（官方：GPU TEE、远程证明、CPU-GPU 加密）", url: "https://developer.nvidia.com/blog/confidential-computing-on-h100-gpus-for-secure-and-trustworthy-ai/" }
+  - { title: "Microsoft Learn, Azure confidential computing product overview（官方：AMD SEV-SNP / Intel TDX 机密 VM + NCCads_H100_v5 机密 GPU + vTPM guest attestation / MAA）", url: "https://learn.microsoft.com/en-us/azure/confidential-computing/overview-azure-products" }
+  - { title: "Google Cloud, Confidential VM remote attestation overview（官方：SEV / SEV-SNP / TDX + vTPM 启动证明 + Google Cloud Attestation token，relying party 比对策略）", url: "https://docs.cloud.google.com/confidential-computing/confidential-vm/docs/attestation-overview" }
   - { title: "Confidential Computing Consortium, A Technical Analysis of Confidential Computing (v1.3, 2022)", url: "https://confidentialcomputing.io/wp-content/uploads/sites/10/2023/03/CCC-A-Technical-Analysis-of-Confidential-Computing-v1.3_unlocked.pdf" }
 ---
 
@@ -79,12 +82,24 @@ flowchart TB
 - 通过：证明无效、measurement 不在公开透明日志中、或证书链失败时，客户端**一律拒绝发送 prompt**；只有匹配「日志中已签发布」才发。
 - 失败：客户端不验证明 / 不比透明日志（只建了 TLS）→ 等于没用机密推理，把验证设成发送前置闸门。
 
-## 真实案例 / 厂商现状
+## 真实案例 / 落地实现
 
-机密推理已有**生产部署**：
+### 业界怎么做：真实机密推理部署 + 证明实践
 
-- **Apple Private Cloud Compute（PCC）**：为 Apple Intelligence 的云端请求设计——设备级远程证明、把生产软件镜像公开上**可验证透明日志**、**无特权运行角色**（连 Apple 自身的运维也不能特权访问用户数据），并开放部分关键组件源码供安全研究（Apple Security Research, *Private Cloud Compute*）。它是「把验证交给用户设备自动做」的范例。
-- **NVIDIA H100 / H200 机密计算**：GPU TEE，标准 PyTorch / TensorFlow / ONNX 模型**不改**即可在飞地里跑，客户端加一步证明验证（NVIDIA 官方）。
+先看「各家线上实际怎么跑机密推理、客户端到底验什么」，再回到机制分类。今天有据可查的生产 / 在售部署都走 **TEE 路线**，差别在「谁来取证明、对谁公开可核」——但**共同点**是：厂商交付的不是「信我」，而是一份**可被你（或你的设备 / relying party）独立核验的远程证明**。漏掉这步验证，等于把明文发给一个自称机密的黑盒（呼应红线）。
+
+| 部署 | 跑的是什么 | 客户端 / relying party 必须验的那一步（机制名） |
+|---|---|---|
+| **Apple Private Cloud Compute（PCC）** | 为 Apple Intelligence 云端请求设计：**无状态计算**（请求只在内存里处理、不落盘、不留日志）、**无特权运行访问**、生产软件镜像公开上**透明日志** | 设备取节点的**密码学证明**，把软件 measurement 比对**公开透明日志**里的已签发布，**匹配才**把请求密钥包给该节点；Apple 另发 `apple/security-pcc` 源码（含负责构造 / 校验证明的 CloudAttestation、设备侧 `privatecloudcomputed` 的 Thimble）与**虚拟研究环境（VRE）**，供研究者独立核验透明日志一致性（Apple Security Research） |
+| **NVIDIA Hopper H100 机密计算** | **GPU TEE**：标准 PyTorch / TensorFlow / ONNX 模型基本不改即可在飞地里跑；GPU 与 CPU TEE（Intel TDX / AMD SEV-SNP / Arm CCA）配合，CPU↔GPU 链路加密 | 验 GPU 的**远程证明**：每颗 H100 出厂烧入私钥，GPU 启动时度量并签名固件 measurement；可离线验，或经 **NVIDIA 远程证明服务（NRAS）**验，通过后才与 GPU 建会话密钥（NVIDIA 官方） |
+| **Azure 机密计算** | **机密 VM**（AMD SEV-SNP，如 DCasv5 / ECasv5；Intel TDX，如 DCesv6 / ECesv6）+ **机密 GPU**（NCCads_H100_v5 系列，搭 H100 GPU TEE） | 走 **vTPM 的 guest attestation**：SEV-SNP 启动生成硬件报告（由芯片 VCEK 证书签名），交 **Microsoft Azure Attestation（MAA）**验证链，再比对你的策略（Microsoft Learn 官方文档） |
+| **Google Cloud 机密计算** | **Confidential VM**（AMD SEV / SEV-SNP、Intel TDX）；Confidential Space 在其上跑可证明工作负载 | 取实例 vTPM 的 attestation quote，送 **Google Cloud Attestation** 验证后返回 attestation token（Confidential Space 下为 OIDC token），**relying party 拿 token 比对自家策略**才放行（Google Cloud 官方文档） |
+
+把这四家放一起，本条的红线就具体了：**厂商说「机密」≠ 你验证了远程证明**——PCC 把验证做进设备、还开源 + VRE 让你能核「跑的到底是哪份代码」；NVIDIA / Azure / GCP 则把证明暴露成可验的报告 / token，但**取证明、比 measurement / 验签名链、对策略**这步**得你的客户端或 relying party 主动做**，云不替你做。
+
+### 路线分类：TEE vs 密码学（HE / MPC）
+
+上表全是 **TEE 路线**（今天生产可用）。另一条是**密码学路线**（HE / MPC，零硬件信任），但在大规模 LLM 推理上仍受开销所限，今天多见于窄场景 / 小模型 / 部分环节（机制与取舍见卷一 [HE·MPC](../01-foundations/he-mpc.mdx)）。两条路线的根本差异在**信任根**：TEE 把信任压在芯片厂商 + 远程证明上，密码学路线不信任执行环境、却付出算力代价。
 
 :::caution 待核验
 密码学路线（HE / MPC）的**大规模私有 LLM 推理开销**尚无统一的一手基准，本条不裸写倍数；具体待一手核（已记入 `BACKLOG-privacy.md`「写作前必核」）。
@@ -115,13 +130,16 @@ flowchart TB
 ## 版本说明
 
 :::note 适用版本
-机密推理的**架构思路**（TEE + 远程证明 + 可验证透明）相对稳定，但**具体产品与硬件**演进很快：PCC、NVIDIA 机密计算、各云厂商的机密 VM / GPU 都在迭代，密码学路线的可行性也随硬件加速变化。本条按 2026-06 的产品现状表述（Apple PCC、NVIDIA H100/H200 机密计算）；具体能力、开销与威胁模型以厂商当下文档和你的实测为准。（出处核验于 2026-06。）
+机密推理的**架构思路**（TEE + 远程证明 + 可验证透明）相对稳定，但**具体产品与硬件**演进很快：PCC、NVIDIA 机密计算、Azure / Google Cloud 的机密 VM / GPU 都在迭代（机型代号、证明服务、可用区随时变），密码学路线的可行性也随硬件加速变化。本条按 2026-06 的产品现状表述（Apple PCC、NVIDIA Hopper H100、Azure SEV-SNP / TDX 机密 VM 与 NCCads_H100_v5 机密 GPU、Google Cloud Confidential VM）；具体能力、开销与威胁模型以厂商当下文档和你的实测为准。（出处核验于 2026-06。）
 :::
 
 ## 延伸阅读与出处
 
-证据为混合——**主要：官方文档**（Apple、NVIDIA）；**补充：标准**（CCC）+ 机制见卷一两条地基。
+证据为混合——**主要：官方文档**（Apple、NVIDIA、Azure、Google Cloud 的真实部署 + 证明实践）；**补充：标准**（CCC）+ 机制见卷一两条地基。
 
-- [Private Cloud Compute: A new frontier for AI privacy in the cloud（Apple Security Research）](https://security.apple.com/blog/private-cloud-compute/) —— 官方：设备级远程证明 + 可验证透明日志 + 无特权访问 + 部分源码可审。
-- [Confidential Computing on H100 GPUs（NVIDIA 官方）](https://developer.nvidia.com/blog/confidential-computing-on-h100-gpus-for-secure-and-trustworthy-ai/) —— 官方：GPU TEE，标准模型不改即可在飞地里跑 + 客户端证明。
+- [Private Cloud Compute: A new frontier for AI privacy in the cloud（Apple Security Research）](https://security.apple.com/blog/private-cloud-compute/) —— 官方：无状态计算 + 设备级远程证明 + 可验证透明日志 + 无特权访问。
+- [Security research on Private Cloud Compute（Apple Security Research）](https://security.apple.com/blog/pcc-security-research/) —— 官方：开源 `apple/security-pcc`（含 CloudAttestation、设备侧 Thimble）+ 虚拟研究环境（VRE），供研究者独立核验透明日志一致性。
+- [Confidential Computing on H100 GPUs（NVIDIA 官方）](https://developer.nvidia.com/blog/confidential-computing-on-h100-gpus-for-secure-and-trustworthy-ai/) —— 官方：GPU TEE，标准模型不改即可在飞地里跑 + 客户端验远程证明（NRAS）。
+- [Azure confidential computing product overview（Microsoft Learn）](https://learn.microsoft.com/en-us/azure/confidential-computing/overview-azure-products) —— 官方：AMD SEV-SNP / Intel TDX 机密 VM + NCCads_H100_v5 机密 GPU；vTPM guest attestation 经 Microsoft Azure Attestation 验证。
+- [Confidential VM remote attestation overview（Google Cloud）](https://docs.cloud.google.com/confidential-computing/confidential-vm/docs/attestation-overview) —— 官方：SEV / SEV-SNP / TDX + vTPM 启动证明；relying party 拿 Google Cloud Attestation token 比对自家策略。
 - [A Technical Analysis of Confidential Computing（CCC，v1.3）](https://confidentialcomputing.io/wp-content/uploads/sites/10/2023/03/CCC-A-Technical-Analysis-of-Confidential-Computing-v1.3_unlocked.pdf) —— 标准：机密计算的 TEE / 证明 / 信任模型框架。

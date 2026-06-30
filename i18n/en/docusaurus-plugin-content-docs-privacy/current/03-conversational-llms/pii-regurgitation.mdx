@@ -9,19 +9,25 @@ technique: PII detection, redaction & synthetic data
 attack_surface: PII in the training corpus / model output
 severity: High
 maturity: Research
-evidence: Research
+evidence: Official docs
 tags: [PII, PII regurgitation, scrubbing, de-identification, named entity recognition, membership inference, Privacy Engineer, ML Engineer, Compliance Engineer]
 sources:
+  - { title: "Microsoft Presidio FAQ — \"no guarantee that Presidio will find all sensitive information\" (official docs)", url: "https://microsoft.github.io/presidio/faq/" }
+  - { title: "Microsoft Presidio — Supported entities (NER + rules + checksum detection methods, official docs)", url: "https://microsoft.github.io/presidio/supported_entities/" }
+  - { title: "Google Cloud Sensitive Data Protection — InfoTypes and infoType detectors (official docs)", url: "https://docs.cloud.google.com/sensitive-data-protection/docs/concepts-infotypes" }
+  - { title: "Google Cloud Sensitive Data Protection — De-identification transformation reference (masking / tokenization / format-preserving encryption, official docs)", url: "https://docs.cloud.google.com/sensitive-data-protection/docs/transformations-reference" }
+  - { title: "Amazon Comprehend Detect PII — AWS AI Service Card (precision/recall trade-off + human review for high-risk, official docs)", url: "https://docs.aws.amazon.com/ai/responsible-ai/comprehend-detectpii/overview.html" }
+  - { title: "Amazon Comprehend — Detecting PII entities (entity types and method, official docs)", url: "https://docs.aws.amazon.com/comprehend/latest/dg/how-pii.html" }
+  - { title: "Azure AI Language — PII detection transparency note (false negatives can cause PII leakage + human review recommended, official docs)", url: "https://learn.microsoft.com/en-us/azure/ai-foundry/responsible-ai/language-service/transparency-note-personally-identifiable-information" }
   - { title: "Lukas et al., Analyzing Leakage of Personally Identifiable Information in Language Models (IEEE S&P 2023; arXiv 2302.00539)", url: "https://arxiv.org/abs/2302.00539" }
   - { title: "Kim et al., ProPILE: Probing Privacy Leakage in Large Language Models (NeurIPS 2023; arXiv 2307.01881)", url: "https://arxiv.org/abs/2307.01881" }
-  - { title: "Microsoft Presidio — PII detection & de-identification (open-source tool docs)", url: "https://microsoft.github.io/presidio/" }
 ---
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
-<PrivacyMeta era="Volume 3 · Conversational LLMs" technique="PII detection, redaction & synthetic data" audience={['Privacy Engineer', 'ML Engineer', 'Compliance Engineer']} severity="High" maturity="Research" evidence="Research" />
+<PrivacyMeta era="Volume 3 · Conversational LLMs" technique="PII detection, redaction & synthetic data" audience={['Privacy Engineer', 'ML Engineer', 'Compliance Engineer']} severity="High" maturity="Research" evidence="Official docs" />
 
-> In one sentence: feed a corpus containing personal data into training, and I may reproduce it **in ordinary conversation** — not necessarily via a carefully crafted attack. Scrubbing the corpus with named-entity recognition (NER) before training (deleting / replacing names, emails, phone numbers) **substantially lowers** regurgitation, but in practice it **reduces, doesn't eliminate**: NER misses entities, and PII can be **reconstructed across fields** (Lukas et al., IEEE S&P 2023). Conclusion first: treat PII regurgitation as "**reduce + audit + accept it can't be fully eliminated**," and don't read "we ran scrubbing" as "no PII" — that's the most common false security here.
+> In one sentence: feed a corpus containing personal data into training, and I may reproduce it **in ordinary conversation** — not necessarily via a carefully crafted attack. In production, scrubbing is usually done with mature tooling (Microsoft Presidio / Google Cloud Sensitive Data Protection / AWS Comprehend + Macie / Azure AI Language PII) doing named-entity recognition (NER) + pattern detection, which **substantially lowers** regurgitation; but **all of these vendors' own docs state that detection is not guaranteed to find everything** — NER misses entities, and PII can be **reconstructed across fields** (mechanism evidence: Lukas et al., IEEE S&P 2023). Conclusion first: treat PII regurgitation as "**reduce + audit + accept it can't be fully eliminated**," and don't read "we ran scrubbing" as "no PII" — that's the most common false security here.
 
 ## Mechanism: what happens on my side
 
@@ -66,9 +72,11 @@ For a **formal guarantee**, you have to add **differential privacy** (bound any 
 ```text
 1. Data minimization first: don't feed PII you don't need into training — what never
    went in can't be regurgitated. This is the strongest single move.
-2. Scrub before training: a mature PII-detection library (e.g. Microsoft Presidio) +
-   domain rules for NER de-identification, but treat it as "reduce," not "eliminate";
-   record the miss rate / which entity types are covered — don't assume 100%.
+2. Scrub before training: use a mature PII tool (self-hosted Microsoft Presidio, or
+   managed Google Cloud Sensitive Data Protection / AWS Comprehend + Macie / Azure AI
+   Language PII) + domain rules for NER de-identification, but treat it as "reduce,"
+   not "eliminate"; record the miss rate / which entity types are covered — don't
+   assume 100% (every vendor's own docs say detection isn't guaranteed to be complete).
 3. Add DP for high-sensitivity sets: for a genuinely sensitive fine-tuning set, use
    DP-SGD to bound single-sample influence (report ε clearly, see DP fine-tuning).
 4. Output-side backstop: ship a PII output filter for depth, but document it as a
@@ -86,11 +94,24 @@ Every step has to land on **your PII definition and jurisdiction** — "what cou
 - Pass: the three regurgitation rates **drop substantially** after scrubbing; residual hits have an **audit record** (which entity types / formats still leak); high-sensitivity sets additionally carry a DP (ε, δ) accounting.
 - Fail: plaintext PII is **completed verbatim** by the probe, or inference accuracy is near the no-scrub baseline, with no audit → you can't claim "scrubbed / no PII."
 
-## Research status (engineering feasibility)
+## Real-world deployment / research status (engineering feasibility)
+
+### What the industry actually uses: production PII detection / scrubbing tools (read this layer first)
+
+In production, teams don't hand-roll PII scrubbing for corpora / outputs — they reach for one of these mature tools. The **mechanisms are broadly the same** — named-entity recognition (NER) + regex/dictionary + checksums, plus extensible custom recognizers; what differs is managed vs. self-hosted, the entity types covered, and the accompanying de-identification transforms. The key point: **every vendor's own documentation states that detection is not guaranteed to catch everything** — which is the vendor-level proof of this entry's "ran scrubbing = no PII" false security.
+
+- **Microsoft Presidio** (open-source, self-hosted): a hybrid design — spaCy NER + regex + rules + checksums + custom recognizers for detection, with an Anonymizer applying replace / mask / redact operators. The official FAQ says plainly: **"there is no guarantee that Presidio will find all sensitive information,"** and recommends that "additional systems and protections should be employed." Use it as a "reduce" tool, not a boundary.
+- **Google Cloud Sensitive Data Protection** (formerly Cloud DLP): 200+ built-in infoType detectors (dictionary / regex / contextual rules, plus custom), with de-identification transforms covering redaction / masking / bucketing / date-shift / tokenization / format-preserving encryption. The docs state that built-in infoTypes **"are not a perfectly accurate detection method and can't guarantee compliance,"** that "you must decide what data is sensitive," and that you should test your configuration.
+- **AWS: Amazon Comprehend Detect PII + Amazon Macie**: Comprehend uses an ML model to detect PII entities (~22 universal + 14 country-specific, English / Spanish); Macie uses managed data identifiers to scan PII in S3. AWS's **AI Service Card** states that performance varies by dataset and that you tune the confidence threshold (**high threshold favors precision, low favors recall** — the two trade off), requires that high-risk use cases **"incorporate human review,"** and recommends periodic retesting to catch drift.
+- **Azure AI Language — PII detection**: a managed detection + redaction service. Its official **transparency note** spells it out: **"both false positive and false negative errors can occur,"** and **"false negatives could lead to personal information leakage,"** so it recommends **human review** in redaction workflows and stresses that context affects detection quality.
+
+To close the loop: these are all **recall-bounded NER / pattern / ML detectors** — they **lower** regurgitation, they don't **zero it out**; and **de-identification ≠ de-association** (remove explicit identifiers and a combination of quasi-identifiers can still reconstruct a person). The research below explains the **mechanism** behind "why it reduces rather than eliminates."
+
+### Why it reduces, doesn't eliminate: empirical evidence at the mechanism level (research backing)
 
 (This entry's maturity is "Research": what follows is **empirical research** evidence, not an endorsement that "some PII scrubbing can eliminate regurgitation.")
 
-- **Scrubbing reduces, doesn't eliminate + a three-way attack taxonomy**: Lukas et al. (Microsoft Research, IEEE S&P 2023) systematically analyze PII leakage in LMs, propose the **extraction / reconstruction / inference** taxonomy with quantified metrics, and show empirically that **scrubbing lowers but does not prevent** PII leakage — it's fundamentally an imperfect "minimize disclosure vs. preserve utility" trade-off. This is a direct refutation of the "ran scrubbing = no PII" false security.
+- **Scrubbing reduces, doesn't eliminate + a three-way attack taxonomy**: Lukas et al. (Microsoft Research, IEEE S&P 2023) systematically analyze PII leakage in LMs, propose the **extraction / reconstruction / inference** taxonomy with quantified metrics, and show empirically that **scrubbing lowers but does not prevent** PII leakage — it's fundamentally an imperfect "minimize disclosure vs. preserve utility" trade-off. This explains, at the mechanism level, why every tool above will only claim "reduce" and never "zero out."
 - **Let the data subject test it**: Kim et al.'s **ProPILE** (NeurIPS 2023) provides a **probing tool** letting a PII subject use **their own information** to build prompts and assess how likely an LLM service is to emit their PII; providers can self-audit with stronger internal probes. It turns "how bad is regurgitation, really" from a subjective worry into a **measurable audit action** — this entry's "minimal testable assertions" are designed from it.
 
 ## Residual risk and trade-offs
@@ -119,11 +140,16 @@ Breaking the false security item by item:
 ## Version notes
 
 :::note Applicable versions
-"PII in the training corpus gets reproduced by the model in generation, and scrubbing reduces rather than eliminates it" is a **model-independent, paradigm-level** conclusion (the root cause is that an LM learns token co-occurrences and doesn't distinguish whether something is PII), common across vendors. The specific regurgitation rate and how much a given scrubber covers vary with model scale, corpus, and scrubbing pipeline; Lukas et al.'s experiments are tied to their setup (GPT-2-scale + Flair NER) and **don't transfer directly** to your model — you must re-measure with your own probes. Stamped 2026-06. (Sources verified 2026-06.)
+"PII in the training corpus gets reproduced by the model in generation, and scrubbing reduces rather than eliminates it" is a **model-independent, paradigm-level** conclusion (the root cause is that an LM learns token co-occurrences and doesn't distinguish whether something is PII), common across vendors. The specific regurgitation rate and how much a given scrubber covers vary with model scale, corpus, and scrubbing pipeline; Lukas et al.'s experiments are tied to their setup (GPT-2-scale + Flair NER) and **don't transfer directly** to your model — you must re-measure with your own probes. The capabilities, entity coverage, and wording of Presidio / Google Sensitive Data Protection / AWS Comprehend + Macie / Azure PII shift with product iterations (vendors often rename / change quotas) — check each vendor's official docs for the latest terms before citing. Stamped 2026-06. (All sources verified 2026-06.)
 :::
 
 ## Further reading and sources
 
-- [Analyzing Leakage of Personally Identifiable Information in Language Models (Lukas et al., IEEE S&P 2023; arXiv 2302.00539)](https://arxiv.org/abs/2302.00539) — PII leakage taxonomy (extraction / reconstruction / inference) + quantified metrics + the empirical "scrubbing reduces, doesn't eliminate." This entry's primary source.
+**Primary: official docs for production PII tooling (each vendor states detection isn't guaranteed to be complete); supplementary: empirical research (the mechanism for "why it reduces rather than eliminates").**
+
+- [Microsoft Presidio — FAQ](https://microsoft.github.io/presidio/faq/) and [Supported entities](https://microsoft.github.io/presidio/supported_entities/) — an open-source, self-hosted NER + rules + checksum scrubbing library; the FAQ states "no guarantee that Presidio will find all sensitive information." Usable in recipe step 2; audit its coverage and misses per this entry.
+- [Google Cloud Sensitive Data Protection — InfoTypes and detectors](https://docs.cloud.google.com/sensitive-data-protection/docs/concepts-infotypes) and [De-identification transformation reference](https://docs.cloud.google.com/sensitive-data-protection/docs/transformations-reference) — 200+ built-in infoTypes + masking / tokenization / format-preserving encryption; the docs state built-in detectors "are not a perfectly accurate detection method and can't guarantee compliance."
+- [Amazon Comprehend Detect PII — AWS AI Service Card](https://docs.aws.amazon.com/ai/responsible-ai/comprehend-detectpii/overview.html) and [Detecting PII entities](https://docs.aws.amazon.com/comprehend/latest/dg/how-pii.html) — ML entity detection; the docs state precision/recall trade off via the threshold, high-risk use cases need human review, and you should retest periodically for drift.
+- [Azure AI Language — PII detection transparency note](https://learn.microsoft.com/en-us/azure/ai-foundry/responsible-ai/language-service/transparency-note-personally-identifiable-information) — the docs state "false negatives could lead to personal information leakage" and recommend human review.
+- [Analyzing Leakage of Personally Identifiable Information in Language Models (Lukas et al., IEEE S&P 2023; arXiv 2302.00539)](https://arxiv.org/abs/2302.00539) — PII leakage taxonomy (extraction / reconstruction / inference) + quantified metrics + the empirical "scrubbing reduces, doesn't eliminate." Mechanism backing: explains why every tool above claims only "reduce."
 - [ProPILE: Probing Privacy Leakage in Large Language Models (Kim et al., NeurIPS 2023; arXiv 2307.01881)](https://arxiv.org/abs/2307.01881) — lets a data subject / provider probe PII regurgitation, the methodological basis for this entry's "minimal testable assertions."
-- [Microsoft Presidio (PII detection & de-identification, open-source tool docs)](https://microsoft.github.io/presidio/) — a mature NER + rules scrubbing library usable in recipe step 2; use it as a "reduce" tool and audit its coverage and misses per this entry.
