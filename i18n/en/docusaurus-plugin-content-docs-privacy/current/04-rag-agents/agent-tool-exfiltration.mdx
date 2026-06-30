@@ -9,18 +9,24 @@ technique: RAG & agent privacy
 attack_surface: Agent tool calls / outbound channels
 severity: High
 maturity: Research
-evidence: Research
+evidence: Security advisory
 tags: [agent security, indirect prompt injection, data exfiltration, tool use, outbound, least privilege, Security Engineer, Privacy Engineer]
 sources:
+  - { title: "Aim Labs, Breaking down 'EchoLeak', the First Zero-Click AI Vulnerability Enabling Data Exfiltration from Microsoft 365 Copilot (CVE-2025-32711)", url: "https://www.aim.security/post/breaking-down-echoleak-the-first-zero-click-ai-vulnerability-enabling-data-exfiltration-from-m365-copilot" }
+  - { title: "MSRC, CVE-2025-32711 — M365 Copilot Information Disclosure Vulnerability (server-side fix)", url: "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-32711" }
+  - { title: "Legit Security (Omer Mayraz), CamoLeak: Critical GitHub Copilot Vulnerability Leaks Private Source Code (CVE-2025-59145)", url: "https://www.legitsecurity.com/blog/camoleak-critical-github-copilot-vulnerability-leaks-private-source-code" }
+  - { title: "PromptArmor, Data Exfiltration from Slack AI via indirect prompt injection (2024)", url: "https://promptarmor.substack.com/p/data-exfiltration-from-slack-ai-via" }
+  - { title: "Johann Rehberger (Embrace The Red), Hacking Google Bard — From Prompt Injection to Data Exfiltration (2023)", url: "https://embracethered.com/blog/posts/2023/google-bard-data-exfiltration/" }
+  - { title: "Embrace The Red, OpenAI ChatGPT data-exfiltration mitigations (url_safe / Safe URL)", url: "https://embracethered.com/blog/posts/2023/openai-data-exfiltration-first-mitigations-implemented/" }
   - { title: "Greshake et al., Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection (ACM AISec 2023; arXiv 2302.12173)", url: "https://arxiv.org/abs/2302.12173" }
   - { title: "OWASP Top 10 for LLM Applications 2025 — LLM01:2025 Prompt Injection + LLM02:2025 Sensitive Information Disclosure", url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf" }
 ---
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
-<PrivacyMeta era="Volume 4 · RAG and agents" technique="RAG & agent privacy" audience={['Security Engineer', 'Privacy Engineer']} severity="High" maturity="Research" evidence="Research" />
+<PrivacyMeta era="Volume 4 · RAG and agents" technique="RAG & agent privacy" audience={['Security Engineer', 'Privacy Engineer']} severity="High" maturity="Research" evidence="Security advisory" />
 
-> In one sentence: when I'm wired to **tools** (read web / read files / make HTTP / send email / query a DB) and I also read **untrusted content**, an attacker only has to **hide an instruction in content I'll read** (indirect prompt injection) to drive me to **send my private context out through a tool call**. Greshake et al. (ACM AISec 2023) showed this can **remotely compromise real-world LLM-integrated applications**. Conclusion first: the privacy boundary can't stop at "the model won't leak on its own" — once I can **act** (have tools) and **read untrusted content**, private data has an exfiltration channel. Cut it at the **architecture** level: least-privilege tools, controlled egress, and treat everything I read as untrusted.
+> In one sentence: when I'm wired to **tools** (read web / read files / make HTTP / send email / query a DB) and I also read **untrusted content**, an attacker only has to **hide an instruction in content I'll read** (indirect prompt injection) to drive me to **send my private context out through a tool call**. This isn't hypothetical — Microsoft 365 Copilot (EchoLeak, CVE-2025-32711), GitHub Copilot Chat (CamoLeak, CVE-2025-59145), Slack AI, Google Bard, and ChatGPT were all broken by the same class of attack, and each vendor then put the fix at the **render / egress layer** (CSP, image-domain allowlist, disabling auto-fetch of images, URL filtering). Conclusion first: the privacy boundary can't stop at "the model won't leak on its own" — once I can **act** (have tools / can render external links) and **read untrusted content**, private data has an exfiltration channel. Cut it at the **architecture** level: least-privilege tools, controlled egress, and treat everything I read as untrusted.
 
 ## Mechanism: what happens on my side
 
@@ -46,7 +52,7 @@ flowchart TB
 - **HTTP / network request tools**: splice data into a URL / request body and send.
 - **Send email / message**: send the context to an attacker-chosen address.
 - **Write to an attacker-readable location**: shared docs, issues, external storage.
-- **Markdown / image URL rendering**: encode private data into an image URL, and the client auto-loading it exfiltrates (a classic technique).
+- **Markdown / image URL rendering**: encode private data into an image URL, and the client auto-loading it exfiltrates — EchoLeak, CamoLeak, Bard, and ChatGPT all rode this channel (see "Real-world cases"), the most-demonstrated path.
 - **Calling a third-party API**: carry data out under the guise of "normal functionality."
 
 **Injection sources** (untrusted content hiding instructions): retrieved documents, fetched web pages, tool returns, user-uploaded files, email bodies… anything I'll **read but shouldn't trust** is an injection entry point.
@@ -92,11 +98,23 @@ Every step is tied to **your tool inventory and sensitive-data surface** — wit
 - Pass: **zero exfiltration** under injection — egress is blocked by allowlist / human confirmation; tools are least-privilege; untrusted content can't directly trigger outbound.
 - Fail: injection leads to exfiltration, arbitrary URLs / recipients are reachable, or there's no egress control at all → don't give this agent outbound tools; harden the egress layer first.
 
-## Research status (engineering feasibility)
+## Real-world cases / research status (engineering feasibility)
 
-(This entry's maturity is "Research": the attack is well-demonstrated, the **robust defense is still an open problem**; below is attack feasibility + framework framing.)
+(This entry's maturity is "Research": injection-driven exfiltration has happened on several real products and each vendor has shipped a patch, but the **robust defense is still an open problem** — patches close known channels, not the root cause. Below: first the publicly documented incidents and how vendors fixed them, then the mechanism backing.)
 
-- **Remotely compromising real LLM-integrated apps**: Greshake et al. (ACM AISec 2023) systematically introduced **indirect prompt injection** — injecting instructions into **data the model will retrieve / read** to remotely manipulate LLM-integrated applications, demonstrating **data theft** among other harms. It shows that "as long as the model reads external content and can act," private-data exfiltration is a real threat, not theory.
+**Real incidents / how vendors fixed them** (one class of mechanism, broken serially across mainstream products; each vendor's fix lands exactly on the render / egress layer this entry's "How the defense works" calls out):
+
+- **Microsoft 365 Copilot — EchoLeak (CVE-2025-32711, CVSS 9.3)**: a **zero-click** exfil disclosed by Aim Labs in June 2025 — the attacker only sends an email carrying a hidden injection; Copilot's RAG pulls it into context, follows it, and encodes internal data into an outbound link. The chain serially bypassed Microsoft's XPIA (cross-prompt injection) classifier, link redaction, and CSP, egressing via a Teams proxy that CSP allowed. Microsoft fixed it **server-side** (MSRC logged it as an information-disclosure vulnerability; no in-the-wild exploitation reported). It proves: **classifier- / system-prompt-level injection defenses get routed around; the real gate must sit at the egress and render layer.**
+- **GitHub Copilot Chat — CamoLeak (CVE-2025-59145, CVSS 9.6)**: disclosed by Legit Security (Omer Mayraz) in October 2025 — an injection hidden in GitHub's "invisible" markdown comments inside a PR drives Copilot to encode private-repo source / secrets **character by character** into a string of pre-generated Camo image-proxy URLs (one valid signed URL per character, each returning a 1×1 pixel); because it rides GitHub's own trusted proxy it bypasses CSP and ordinary egress controls. GitHub's fix: **disable image rendering in Copilot Chat and block the Camo proxy for chat-rendered content** (2025-08-14).
+- **Slack AI (PromptArmor, August 2024)**: with only the ability to post in **any public channel**, an attacker plants an injection; when a user with private-channel access asks / summarizes via Slack AI, the model follows it and encodes **private-channel** content into a clickable link to exfiltrate. Slack then **shipped a patch** (said it had no evidence of unauthorized access to customer data).
+- **Google Bard (Johann Rehberger / rez0 / Greshake, November 2023)**: less than a day after Bard Extensions launched, researchers demonstrated injection via untrusted Extension data encoding the user's **chat history** into an image URL; to bypass CSP it routed data through Google Apps Script into an attacker-readable Google Doc. Google **confirmed a fix** within a month (per the disclosure, CSP was left unchanged; instead filtering was added against inserting data into URLs).
+- **ChatGPT markdown-image exfil and OpenAI's mitigations**: the classic trick is to make the model encode private data into a markdown image URL the client auto-loads. From December 2023 OpenAI added **`url_safe`** (check a URL before showing it, drop it if deemed unsafe) and later deployed **Safe URL**. Rehberger (Embrace The Red) documents that the mitigation **reduces but doesn't eliminate** — bypasses like "one distinct URL per character" are still called out as viable in the paper. It shows instruction-level / single-point filtering **lowers risk, not an absolute boundary**.
+
+**The fix vendors converged on across cases** (the same handful of items in this entry's recipe): **CSP / image-domain allowlists, URL / link allowlists, disabling or sandboxing auto-fetch of external resources for markdown, and human confirmation for outbound actions**. The shared lesson on the flip side: **both "add a system prompt telling the model not to exfil" and "put an injection classifier in front" have been empirically routed around** — instructions and data share a channel, so the hard boundary must sit at the render / egress layer the model can't reach.
+
+**Mechanism backing**:
+
+- **Indirect prompt injection (the mechanism source)**: Greshake et al. (ACM AISec 2023) systematically introduced **indirect prompt injection** — injecting instructions into **data the model will retrieve / read** to remotely manipulate LLM-integrated applications, demonstrating **data theft** among other harms. The string of product incidents above is exactly this mechanism cashing out repeatedly in production.
 - **Framework framing**: OWASP **LLM01:2025 Prompt Injection** has topped the Top 10 for two editions running, with the root cause being "instructions and data on one channel, the model can't tell them apart"; **LLM02:2025 Sensitive Information Disclosure** explicitly lists "prompt-based exfiltration of customer records" as a harm. Together they are exactly this entry's attack chain.
 - (This book's "AI-coding pitfalls" theme has concrete exfil cases and mechanisms for **coding agents**; this entry covers the general exfiltration mechanism from the **privacy angle** and doesn't repeat the tool-specific details.)
 
@@ -104,8 +122,9 @@ Every step is tied to **your tool inventory and sensitive-data surface** — wit
 
 Breaking the false security item by item:
 
-- **Instruction-based defenses are unreliable.** Instructions and data share a channel; "tell the model to ignore injections" is often routed around; hard constraints go at the tool / egress layer.
-- **Allowlist / human confirmation add friction and can be routed around.** Open redirects, abuse of trusted domains, and confirmation fatigue all leave gaps — they lower risk, not give an absolute boundary.
+- **Instruction-based and classifier-based defenses are both unreliable.** Instructions and data share a channel, so "tell the model to ignore injections" is often routed around — and even a dedicated injection classifier gets bypassed: EchoLeak demonstrably routed around Microsoft's XPIA injection classifier. Hard constraints go at the tool / egress layer.
+- **Allowlist / human confirmation add friction and can be routed around.** Open redirects, abuse of trusted domains, and confirmation fatigue all leave gaps — CamoLeak egressed precisely through GitHub's own trusted Camo image proxy, bypassing CSP. They lower risk, not give an absolute boundary.
+- **Egress / URL filtering lowers risk, it doesn't eliminate.** OpenAI's `url_safe` / Safe URL block most exfil URLs, but Rehberger documents that bypasses like "one distinct URL per character" are still called out as viable — treat single-point filtering as one layer of defense-in-depth, not the finish line.
 - **Multiple tools compound the risk.** One tool "reads private data," another "sends it out"; each looks harmless alone, the combination is an exfil channel.
 - **Robust defense is unsolved.** Prompt injection still has no "one-shot cure"; treat it as defense-in-depth + continuous red-teaming, not a one-time config.
 
@@ -123,7 +142,17 @@ Breaking the false security item by item:
 
 ## Further reading and sources
 
-> Primary: Research (the indirect-injection demonstration); Supplementary: Security advisory (OWASP LLM01/LLM02).
+> Primary: Security advisory (injection-driven exfil on real products + vendor fixes); Supplementary: Research (the indirect-injection mechanism) and framework (OWASP LLM01/LLM02).
 
-- [Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection (Greshake et al., ACM AISec 2023; arXiv 2302.12173)](https://arxiv.org/abs/2302.12173) — indirect prompt injection: inject instructions into data that will be read to remotely manipulate LLM-integrated apps, including data theft. This entry's primary source.
+Real incidents / vendor fixes (this entry's headline evidence):
+
+- [Aim Labs: Breaking down EchoLeak — the first zero-click AI exfil from Microsoft 365 Copilot (CVE-2025-32711)](https://www.aim.security/post/breaking-down-echoleak-the-first-zero-click-ai-vulnerability-enabling-data-exfiltration-from-m365-copilot) and [MSRC CVE-2025-32711 (server-side fix)](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-32711) — zero-click email injection exfiltrating via RAG, serially bypassing the XPIA classifier / link redaction / CSP; Microsoft fixed server-side.
+- [Legit Security: CamoLeak — GitHub Copilot Chat leaks private source code (CVE-2025-59145)](https://www.legitsecurity.com/blog/camoleak-critical-github-copilot-vulnerability-leaks-private-source-code) — character-by-character exfil through GitHub's own Camo image proxy, bypassing CSP; GitHub's fix disables image rendering in Copilot Chat.
+- [PromptArmor: Slack AI data exfiltration from private channels via indirect prompt injection (2024)](https://promptarmor.substack.com/p/data-exfiltration-from-slack-ai-via) — injection planted in a public channel encodes private-channel content into a clickable link to exfiltrate; Slack patched it.
+- [Johann Rehberger: Hacking Google Bard — From Prompt Injection to Data Exfiltration (2023)](https://embracethered.com/blog/posts/2023/google-bard-data-exfiltration/) — injection via Extensions encodes chat history into an image URL, bypassing CSP via Apps Script; Google fixed within a month.
+- [Embrace The Red: OpenAI's mitigations for ChatGPT data exfiltration (url_safe / Safe URL)](https://embracethered.com/blog/posts/2023/openai-data-exfiltration-first-mitigations-implemented/) — markdown image-URL exfil and OpenAI's URL filtering; the mitigation lowers risk, bypasses remain.
+
+Mechanism and framework (backing):
+
+- [Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection (Greshake et al., ACM AISec 2023; arXiv 2302.12173)](https://arxiv.org/abs/2302.12173) — indirect prompt injection: inject instructions into data that will be read to remotely manipulate LLM-integrated apps, including data theft. This entry's mechanism source, explaining why the incidents above happen.
 - [OWASP Top 10 for LLM Applications 2025 — LLM01 Prompt Injection + LLM02 Sensitive Information Disclosure](https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf) — injection is #1 (instructions and data on one channel), sensitive-information disclosure includes prompt-based exfiltration; together they form this entry's attack chain.
