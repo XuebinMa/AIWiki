@@ -65,6 +65,11 @@
       "maturity": "研究",
       "technique": "PII 检测与脱敏"
     },
+    "reasoning-trace-leakage": {
+      "severity": "高",
+      "maturity": "研究",
+      "technique": "上下文面隐私"
+    },
     "vlm-geolocation-inference": {
       "severity": "高",
       "maturity": "生产",
@@ -80,6 +85,11 @@
       "maturity": "研究",
       "technique": "RAG 与 Agent 隐私"
     },
+    "computer-use-screen-capture-privacy": {
+      "severity": "高",
+      "maturity": "生产",
+      "technique": "RAG 与 Agent 隐私"
+    },
     "cross-session-memory-bleed": {
       "severity": "高",
       "maturity": "生产",
@@ -93,6 +103,11 @@
     "mcp-data-flow-privacy": {
       "severity": "中",
       "maturity": "生产",
+      "technique": "RAG 与 Agent 隐私"
+    },
+    "multi-agent-internal-leakage": {
+      "severity": "中",
+      "maturity": "研究",
       "technique": "RAG 与 Agent 隐私"
     },
     "rag-retrieval-leakage": {
@@ -124,6 +139,11 @@
       "severity": "高",
       "maturity": "研究",
       "technique": "推理服务期隐私"
+    },
+    "lora-adapter-leakage": {
+      "severity": "中",
+      "maturity": "研究",
+      "technique": "推断类攻击"
     },
     "machine-unlearning": {
       "severity": "中",
@@ -247,6 +267,11 @@
       "maturity": "Research",
       "technique": "PII detection, redaction & synthetic data"
     },
+    "reasoning-trace-leakage": {
+      "severity": "High",
+      "maturity": "Research",
+      "technique": "Context-surface privacy"
+    },
     "vlm-geolocation-inference": {
       "severity": "High",
       "maturity": "Production",
@@ -262,6 +287,11 @@
       "maturity": "Research",
       "technique": "RAG & agent privacy"
     },
+    "computer-use-screen-capture-privacy": {
+      "severity": "High",
+      "maturity": "Production",
+      "technique": "RAG & agent privacy"
+    },
     "cross-session-memory-bleed": {
       "severity": "High",
       "maturity": "Production",
@@ -275,6 +305,11 @@
     "mcp-data-flow-privacy": {
       "severity": "Medium",
       "maturity": "Production",
+      "technique": "RAG & agent privacy"
+    },
+    "multi-agent-internal-leakage": {
+      "severity": "Medium",
+      "maturity": "Research",
       "technique": "RAG & agent privacy"
     },
     "rag-retrieval-leakage": {
@@ -306,6 +341,11 @@
       "severity": "High",
       "maturity": "Research",
       "technique": "Inference-service privacy"
+    },
+    "lora-adapter-leakage": {
+      "severity": "Medium",
+      "maturity": "Research",
+      "technique": "Inference Attacks"
     },
     "machine-unlearning": {
       "severity": "Medium",
