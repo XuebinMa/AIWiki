@@ -159,6 +159,43 @@
 | 微调即服务 FTaaS 隐私 | 卷六 | Qi 等 ICLR'24（10 样本 <$0.20 越狱微调 API；安全>隐私需注明）+ 三厂商数据保留官方文档 | 研究/生产 |
 | Agent PII 外泄基准 AgentDojo | 卷四 加深 | AgentDojo NeurIPS'24（97 任务×629 安全测试，含外泄注入任务） | 研究 |
 
+#### 2026-07 轮 · 前沿新攻防面扫描（业界实践优先；4 簇 fan-out，已核一手源）
+
+> 承用户「业界实践 > 学术」指示，本轮侧重 2025–2026 前沿新面 + 各家线上真实做法 / 事故。四个前沿簇（多模态 / 推理、私有提示与 DP、Agent / 协议层、供应链与审计）并行核源，去重基线 = 现有 `privacy/` 32 条。**Tier A 四条（全 maturity=生产、全厂商 / 政府 / 事件一手源）本波写作中 → 草稿 PR 待用户过目**；其余入储备，下轮或按需立项。标 ⚠️ 为 preprint / 待核，写前再核。已当场复核的顶会源：Leaky Thoughts EMNLP 2025 主会 ✅、Mission: Impossible PoPETs 2025-0137 ✅、RWKU NeurIPS 2024 D&B ✅、MAGPIE 系 NeurIPS 2025 **Workshop（ResponsibleFM）非主会** ⚠️。
+
+**Tier A（业界实践最强，本波写作中）**
+
+| 候选 | 卷 / 板块 | 已核一手源（最强） | maturity |
+|---|---|---|---|
+| 持久记忆的隐私与留存 `persistent-agent-memory-privacy` | 卷六 / 数据生命周期与数据治理 | OpenAI Memory FAQ + Anthropic memory-tool 官方文档；OpenAI 回应 NYT 数据令（法律令冻结删除）| 生产 |
+| 多模态地理定位推断 `vlm-geolocation-inference` | 卷三 / 推断类攻击 | Mission: Impossible PoPETs 2025-0137（绝对精度仍有限，须保留条件）；部署模型反向定位现象 ⚠️部分二手 | 生产 |
+| MCP 数据流与最小采集 `mcp-data-flow-privacy` | 卷四 / RAG 与 Agent 隐私 | MCP 安全规范 2025-06（同意 + 最小采集原文）；NSA/CISA MCP CSI；CoSAI/OASIS WS4 | 生产 |
+| 端侧推理隐私 `on-device-inference-privacy` | 卷五 / 隐私保护计算 | Apple Intelligence + PCC 官方；Google Gemini Nano / Android AICore 官方 | 生产 |
+
+**Tier B（强选题，研究档或混合背书，下一波候选）**
+
+| 候选 | 卷 / 板块 | 已核一手源（最强） | maturity |
+|---|---|---|---|
+| 推理链（思维）泄露 `reasoning-trace-leakage` | 卷三 / 上下文面 | Leaky Thoughts EMNLP 2025（主会，思考越多漏越多）；Trend Micro DeepSeek-R1 | 研究 |
+| 多智能体内部信道泄露 `multi-agent-internal-leakage` | 卷四 / RAG 与 Agent | AgentLeak ⚠️（内漏比外漏多 2.6×、输出审计漏 46%）；MAGPIE NeurIPS'25 Workshop ⚠️；ConVerse ⚠️ | 研究 |
+| Computer-use 屏幕捕获隐私 `computer-use-screen-capture-privacy` | 卷四 / RAG 与 Agent | Anthropic computer-use 文档；OpenAI Operator system card | 生产 |
+| LoRA / 适配器泄露微调数据 `lora-adapter-leakage` | 卷三 或卷五 | LoRA-Leak ⚠️（delta + 公开底座 = MIA 放大器）；SPIE | 研究/试验 |
+
+**Tier C（偏学术 / 需严格划界，储备）**
+
+| 候选 | 卷 / 板块 | 已核一手源（最强） | maturity |
+|---|---|---|---|
+| DP 审计 / 一次训练审计 ε `dp-privacy-auditing` | 卷三 或卷五 / 隐私评测与审计 | Steinke NeurIPS'23 杰出论文「Privacy Auditing with One Training Run」；ICLR'25 后续 | 研究/试验 |
+| 遗忘基准与标准化评测 `unlearning-benchmarks` | 卷五 / 隐私评测与审计 | RWKU NeurIPS'24 D&B；MUSE ⚠️preprint（须与 `machine-unlearning` / `unlearning-verification` 严格划界）| 研究 |
+| DP 上下文学习 / 私有提示 `dp-in-context-learning` | 卷三 / 差分隐私 | Wu ICLR'24（DP-ICL，Microsoft Research）| 试验 |
+| 多模态训练图像抽取 `multimodal-training-image-extraction` | 卷二 / 记忆与抽取 | Carlini USENIX'23（扩散模型逐字抽取）；VLM-MIA NeurIPS'24 | 研究 |
+
+**并入 / 搁置（不单独成条）**
+
+- `kv-cache-prompt-reconstruction`（PromptPeek NDSS'25）→ 并进 `inference-side-channels`（同属推理期侧信道，非独立面）。
+- `a2a-protocol-privacy`（arXiv 2505.12490 单篇预印）→ 并进 `multi-agent-internal-leakage` 或按需立项；单源太薄，暂不单列。
+- `compression-privacy`（量化 / 蒸馏对记忆泄露的影响）→ **搁置**：现有证据多指向压缩**降低**泄露，不合「误区 / 假安全」形；有反向一手证据再立。
+
 ### 框架差异小节（按需补，打版本戳；判据：仅当差异源于工具机制、且短）
 
 - ✅ 已补：`dp-fine-tuning`（DP 库：Opacus / TF-Privacy / jax-privacy）、`dp-federated-learning`（FL 框架：TFF / Flower / NVFlare）。
