@@ -18,20 +18,20 @@ description: 「LLM 隐私保护」主题的交叉索引——除了按卷（侧
 
 14 个技术板块是查询轴（边界见 PROPOSAL §6.2）。已落地的条目挂在其主板块下：
 
-- **推断类攻击（MIA / 反演 / 属性）**：[成员推断攻击](./01-foundations/membership-inference.mdx) · [模型反演与属性推断](./01-foundations/model-inversion-attribute-inference.mdx) · [属性 / 分布推断](./01-foundations/property-inference.mdx)
-- **记忆与训练数据抽取**：[训练数据抽取](./02-memorization-extraction/training-data-extraction.mdx) · [训练数据去重](./02-memorization-extraction/training-data-deduplication.mdx) · [隐私定向投毒](./02-memorization-extraction/privacy-poisoning.mdx)
-- **差分隐私**：[DP 微调](./03-conversational-llms/dp-fine-tuning.mdx)
+- **推断类攻击（MIA / 反演 / 属性）**：[成员推断攻击](./01-foundations/membership-inference.mdx) · [模型反演与属性推断](./01-foundations/model-inversion-attribute-inference.mdx) · [属性 / 分布推断](./01-foundations/property-inference.mdx) · [多模态地理定位推断](./03-conversational-llms/vlm-geolocation-inference.mdx) · [LoRA 适配器泄露](./05-frontier-deployment/lora-adapter-leakage.mdx)
+- **记忆与训练数据抽取**：[训练数据抽取](./02-memorization-extraction/training-data-extraction.mdx) · [训练数据去重](./02-memorization-extraction/training-data-deduplication.mdx) · [隐私定向投毒](./02-memorization-extraction/privacy-poisoning.mdx) · [多模态训练图像抽取](./02-memorization-extraction/multimodal-training-image-extraction.mdx)
+- **差分隐私**：[DP 微调](./03-conversational-llms/dp-fine-tuning.mdx) · [DP 上下文学习](./03-conversational-llms/dp-in-context-learning.mdx)
 - **联邦学习与安全聚合**：[生产级 DP·FL 部署](./05-frontier-deployment/dp-federated-learning.mdx) · [梯度泄露](./05-frontier-deployment/gradient-leakage.mdx) · [安全聚合](./05-frontier-deployment/secure-aggregation.mdx) · [拆分学习泄露](./05-frontier-deployment/split-learning-leakage.mdx) · [联邦分析](./05-frontier-deployment/federated-analytics.mdx)
 - **机器遗忘与被遗忘权**：[可验证删除与机器遗忘](./05-frontier-deployment/machine-unlearning.mdx) · [遗忘可验证性](./05-frontier-deployment/unlearning-verification.mdx)
-- **隐私保护计算（HE / MPC / TEE）**：[可信执行环境](./01-foundations/trusted-execution-environment.mdx) · [同态加密 / 安全多方计算](./01-foundations/he-mpc.mdx) · [机密推理](./05-frontier-deployment/confidential-inference.mdx)
-- **RAG 与 Agent 隐私**：[多租户 RAG 检索泄露](./04-rag-agents/rag-retrieval-leakage.mdx) · [跨会话记忆串味](./04-rag-agents/cross-session-memory-bleed.mdx) · [Agent 工具外联外泄](./04-rag-agents/agent-tool-exfiltration.mdx) · [嵌入反演](./04-rag-agents/embedding-inversion.mdx)
+- **隐私保护计算（HE / MPC / TEE）**：[可信执行环境](./01-foundations/trusted-execution-environment.mdx) · [同态加密 / 安全多方计算](./01-foundations/he-mpc.mdx) · [机密推理](./05-frontier-deployment/confidential-inference.mdx) · [端侧推理隐私](./05-frontier-deployment/on-device-inference-privacy.mdx)
+- **RAG 与 Agent 隐私**：[多租户 RAG 检索泄露](./04-rag-agents/rag-retrieval-leakage.mdx) · [跨会话记忆串味](./04-rag-agents/cross-session-memory-bleed.mdx) · [Agent 工具外联外泄](./04-rag-agents/agent-tool-exfiltration.mdx) · [嵌入反演](./04-rag-agents/embedding-inversion.mdx) · [MCP 数据流与最小采集](./04-rag-agents/mcp-data-flow-privacy.mdx) · [多智能体内部信道泄露](./04-rag-agents/multi-agent-internal-leakage.mdx) · [Computer-use 屏幕捕获隐私](./04-rag-agents/computer-use-screen-capture-privacy.mdx)
 - **推理服务期隐私**：[推理服务数据边界](./06-governance-compliance/inference-service-data-boundary.mdx) · [推理期侧信道](./05-frontier-deployment/inference-side-channels.mdx) · [微调即服务隐私](./06-governance-compliance/ftaas-privacy.mdx)
-- **上下文面隐私**：[上下文面隐私](./03-conversational-llms/context-surface-privacy.mdx)（系统提示词 / 会话上下文 / 工具结果泄露）
+- **上下文面隐私**：[上下文面隐私](./03-conversational-llms/context-surface-privacy.mdx)（系统提示词 / 会话上下文 / 工具结果泄露）· [推理链泄露](./03-conversational-llms/reasoning-trace-leakage.mdx)（推理链 / 思维轨迹带出敏感数据）
 - **PII 检测与脱敏**：[PII 回吐](./03-conversational-llms/pii-regurgitation.mdx)（训练语料 PII 在对话里复现、脱敏的限度）· [合成数据隐私](./06-governance-compliance/synthetic-data-privacy.mdx)
 - **模型抽取与窃取**：[模型抽取与窃取](./01-foundations/model-extraction-stealing.mdx)（查询 API 复刻功能 / 套出部分参数）
 - **治理与合规**：[LLM 水印与溯源](./06-governance-compliance/llm-watermarking.mdx)（内容溯源 / 「被训了吗」及其改写极限）；并贯穿各条「合规映射」小段，索引见卷六
-- **数据生命周期与数据治理**：[数据生命周期与删除传播](./06-governance-compliance/data-lifecycle-deletion.mdx)（删除请求跨存储传播）
-- **隐私评测与审计**：[量化记忆与审计](./02-memorization-extraction/quantifying-memorization.mdx)（探针 / 暴露度量化记忆）· [Agent 隐私评测（AgentDojo）](./04-rag-agents/agent-privacy-benchmark.mdx)；亦贯穿各条「最小可测试断言」小块
+- **数据生命周期与数据治理**：[数据生命周期与删除传播](./06-governance-compliance/data-lifecycle-deletion.mdx)（删除请求跨存储传播）· [持久记忆的隐私与留存](./06-governance-compliance/persistent-agent-memory-privacy.mdx)（产品记忆按设计留存 / 可删边界）
+- **隐私评测与审计**：[量化记忆与审计](./02-memorization-extraction/quantifying-memorization.mdx)（探针 / 暴露度量化记忆）· [DP 审计](./02-memorization-extraction/dp-privacy-auditing.mdx)（经验下界声称的 ε）· [遗忘基准与评测](./05-frontier-deployment/unlearning-benchmarks.mdx)（遗忘干净了吗）· [Agent 隐私评测（AgentDojo）](./04-rag-agents/agent-privacy-benchmark.mdx)；亦贯穿各条「最小可测试断言」小块
 
 ## 威胁 → 缓解矩阵
 
@@ -40,16 +40,28 @@ description: 「LLM 隐私保护」主题的交叉索引——除了按卷（侧
 | 威胁（你担心什么） | 在管的条目 | 残余风险 / 没解决的 |
 |---|---|---|
 | 私有数据被模型**记住、逐字吐回** | [训练数据抽取](./02-memorization-extraction/training-data-extraction.mdx) · [训练数据去重](./02-memorization-extraction/training-data-deduplication.mdx) | 去重 ≠ 消除（罕见单次样本仍记）、DP ≠ 零泄露、输出过滤是猫鼠游戏 |
+| 生成 / 视觉模型**吐回训练图**（人脸 / 医学 / 版权，近似复制） | [多模态训练图像抽取](./02-memorization-extraction/multimodal-training-image-extraction.mdx) | 主要由高重复图驱动、去重减不根除、near-copy 也侵权 / 泄隐私、相似度过滤是猫鼠 |
 | 靠置信度**重建训练样本的「样子」/ 推断敏感属性** | [模型反演与属性推断](./01-foundations/model-inversion-attribute-inference.mdx) | 反演给类别代表非逐字原图、属性推断含人群统计压不到零、置信度是燃料 |
+| 一张普通照片被多模态模型**反推出拍摄地点**（doxxing） | [多模态地理定位推断](./03-conversational-llms/vlm-geolocation-inference.mdx) | 剥 EXIF ≠ 匿名（线索在画面内容里）、街区级绝对精度仍有限但在爬升、对欠发达地区的偏差是运气非保护 |
 | 判定**某人是否在训练集**（成员身份本身敏感） | [成员推断](./01-foundations/membership-inference.mdx) · [DP 微调](./03-conversational-llms/dp-fine-tuning.mdx) | 平均准确率掩盖尾部、降过拟合无形式保证、ε 要看清 |
+| 发布 **LoRA / 适配器 delta**，以为「底座公开、delta 小」数据就藏得住 | [LoRA 适配器泄露](./05-frontier-deployment/lora-adapter-leakage.mdx) | 公开底座是免费参照、delta 浓缩微调指纹（0.775 AUC ⚠️ 预印本）、合并 ≠ 抹除、参数高效 ≠ 隐私 |
+| 打开了 DP，但**声称的 ε 未必成立**（实现 / 会计 bug 悄悄掏空保证） | [DP 审计](./02-memorization-extraction/dp-privacy-auditing.mdx) | 审计只给下界不给上界、松下界 ≠ 实现对、黑盒常松于白盒、每版要用够强攻击重审 |
 | 行使**被遗忘权 / 删除**，但模型还记得 / **怎么证明删了** | [机器遗忘](./05-frontier-deployment/machine-unlearning.mdx) · [遗忘可验证性](./05-frontier-deployment/unlearning-verification.mdx) | 输出抑制 ≠ 真删、模型级遗忘无法验证且可伪造证明、MIA 没检出 ≠ 真忘 |
+| 跑了遗忘算法，但**不知忘得干不干净 / 怎么打分** | [遗忘基准与评测](./05-frontier-deployment/unlearning-benchmarks.mdx) | 过基准 ≠ 真忘、多数方法过不了效用 × 泄露联合关、覆盖外是盲区、指标可被 gaming（⚠️ MUSE 预印本）|
 | **向量库 / 检索**泄露：向量反演、跨租户串味 | [RAG 检索泄露](./04-rag-agents/rag-retrieval-leakage.mdx) · [嵌入反演](./04-rag-agents/embedding-inversion.mdx) | 向量化 ≠ 匿名（嵌入可反演回原文乃至逐字）、检索后过滤留窗口、缓存 / memory 边界 bug |
 | 多用户共享**记忆 / 缓存 / 会话**，A 的数据串给 B | [跨会话记忆串味](./04-rag-agents/cross-session-memory-bleed.mdx) | 隔离靠系统非模型、竞态难穷尽测、持久 memory 放大窗口、第三方缓存审计不到底 |
+| 产品**记忆功能**按设计跨会话留了什么、我删得掉吗 | [持久记忆的隐私与留存](./06-governance-compliance/persistent-agent-memory-privacy.mdx) | 关开关 ≠ 已存的被删、删除要逐处扇出、法律保全令可冻结删除、后端副本审计不到底 |
 | Agent 被注入后经**工具把私有上下文外发** | [Agent 工具外联外泄](./04-rag-agents/agent-tool-exfiltration.mdx) | 指令式防御不可靠、allowlist / 人确认可被绕、多工具组合放大、注入鲁棒防御未解 |
+| 接上 **MCP server** 后我的哪些上下文被交出去、谁过度采集 | [MCP 数据流与最小采集](./04-rag-agents/mcp-data-flow-privacy.mdx) | 「只连官方 server 就安全」错、同意非一次性、最小采集管不到交出去之后、凭据集中放大爆炸半径 |
+| 多个 agent 协作时私有数据沿**内部信道**（agent 间消息 / 共享记忆）流动 | [多智能体内部信道泄露](./04-rag-agents/multi-agent-internal-leakage.mdx) | 只审对外输出漏掉大半、越强模型可能越漏、内部信道也要脱敏（数字均 ⚠️ 预印本 / workshop）|
+| computer-use agent **截屏**把整屏（含无关 / 敏感 / 他人数据）看进模型 | [Computer-use 屏幕捕获隐私](./04-rag-agents/computer-use-screen-capture-privacy.mdx) | 截的是整屏非任务块、清场 / 隔离 VM / 人接管才是边界、投屏泄露第三方、注入面另算 |
 | **云厂商 / 同租户看到** prompt 或权重 | [机密推理](./05-frontier-deployment/confidential-inference.mdx) · [TEE](./01-foundations/trusted-execution-environment.mdx) · [HE·MPC](./01-foundations/he-mpc.mdx) | 不验证明 = 没用、信任根仍是芯片厂商 + 侧信道、密码学路线太贵 |
+| 以为**端侧推理**（prompt 不出设备）就零外传 | [端侧推理隐私](./05-frontier-deployment/on-device-inference-privacy.mdx) | 「端侧」≠ 零外传、回落云那部分要走机密推理验证、信任边界只是转移到本机、端侧模型能力代价 |
 | 服务方**留存 / 训练 / 转手**你发出的数据 | [推理服务数据边界](./06-governance-compliance/inference-service-data-boundary.mdx) | 「不训练」≠「不保留」、条款按端点 / 功能而异、法律令可推翻删除 |
 | **设备数据被集中**、或**共享梯度 / 更新泄露训练数据** | [生产级 DP·FL](./05-frontier-deployment/dp-federated-learning.mdx) · [梯度泄露](./05-frontier-deployment/gradient-leakage.mdx) · [安全聚合](./05-frontier-deployment/secure-aggregation.mdx) | FL ≠ 私有（梯度可反演）、安全聚合防单点不防聚合和 / 串通、DP 有 ε 代价、经验手段非形式保证 |
 | 系统提示词 / 会话上下文 / 工具结果被套出 | [上下文面隐私](./03-conversational-llms/context-surface-privacy.mdx) | 指令式「别复述」≠ 隔离、提取检测是猫鼠游戏、边界须落在后端鉴权 / 密钥管理 / 按权限检索 |
+| 推理模型的**推理链 / 思维**里带出敏感数据（思考越多、漏越多） | [推理链泄露](./03-conversational-llms/reasoning-trace-leakage.mdx) | 「思考是内部的所以安全」错、答案端脱敏 ≠ 思考端、加算力反而漏更多、占位符指令服从率不到 1% |
+| 把**真实记录当 few-shot 示例**塞进 prompt，被抽取 / 对示例集成员推断 | [DP 上下文学习](./03-conversational-llms/dp-in-context-learning.mdx) | DP-ICL 只保护示例不保护 query、ε 不为零、聚合外旁路照漏、效用代价 |
 | 私有 **PII** 被模型在对话里**复现** | [PII 回吐](./03-conversational-llms/pii-regurgitation.mdx) | 脱敏减不根除（NER 漏检）、去标识 ≠ 去关联、输出过滤是猫鼠 |
 | **模型本身**被查询复刻 / 部分参数被套出 | [模型抽取与窃取](./01-foundations/model-extraction-stealing.mdx) | 防护是抬成本非消除、窃取放大离线 MIA / 抽取、限输出损可用性 |
 | 删了主库，**副本仍残留**在备份 / 日志 / 向量库 / 派生模型 | [数据生命周期与删除传播](./06-governance-compliance/data-lifecycle-deletion.mdx) | 传播只覆盖已知副本、备份过期窗口内仍在、派生模型那份要机器遗忘 |

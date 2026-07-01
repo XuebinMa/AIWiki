@@ -236,7 +236,7 @@ Claude Code · Cursor · GitHub Copilot · Codex CLI · Gemini CLI · CLAUDE.md 
 
 ## 专有名词（不翻译，原样保留）
 
-DP-SGD · PATE · FHE · HE · MPC · TEE · MIA · PII · GDPR · NIST · OWASP · RAG · Opacus · canary · exposure · ε · δ · ρ-zCDP · RDP · PRV · DP-FTRL · Gboard
+DP-SGD · PATE · FHE · HE · MPC · MCP · TEE · MIA · PII · GDPR · NIST · OWASP · RAG · LoRA · Opacus · canary · exposure · ε · δ · ρ-zCDP · RDP · PRV · DP-FTRL · Gboard · PCC · AICore · AUC
 
 ## 隐私术语对照
 
@@ -315,6 +315,22 @@ DP-SGD · PATE · FHE · HE · MPC · TEE · MIA · PII · GDPR · NIST · OWASP
 | 数据溯源 | data provenance | 判「内容是否 AI 生成」「我的数据是否被训练」；含版权陷阱 / 成员推断法 |
 | 微调即服务 | fine-tuning-as-a-service (FTaaS) | 厂商托管微调 API；微调数据去向 / 保留与对齐侵蚀是其隐私面 |
 | Agent 隐私评测 | agent privacy evaluation | 用 AgentDojo 等基准把「Agent 注入后外泄」做成可复现、可打分 |
+| 持久记忆 | persistent memory | 产品级跨会话记忆功能（saved memories / 引用聊天历史）；留存与可删边界在产品与后端，非隔离 bug |
+| 端侧推理 | on-device inference | 模型在用户设备本地跑、prompt 不出设备的隐私姿态；不覆盖回落云 / 遥测 / 本机被攻陷 |
+| 多模态地理定位推断 | VLM geolocation inference | 视觉语言模型从图像画面内容（非 EXIF / GPS）推断拍摄地点；推理期的属性推断 |
+| MCP 数据流 | MCP data flow | Model Context Protocol 下 host↔server 的上下文切片传递；最小采集 / 同意 / 凭据集中是其隐私面 |
+| 最小采集 | least-collection / data minimization | 只把任务所必需的上下文字段交给 server；对应 GDPR 数据最小化原则 |
+| 凭据集中 | credential concentration | 多个 MCP server 的凭据汇聚成单一高价值目标，放大被攻破的爆炸半径 |
+| 推理链泄露 | reasoning-trace leakage | 推理模型的思维轨迹（reasoning trace）携带敏感数据，被展示 / 日志 / 下游读取时成为泄露面；思考越多漏越多 |
+| 多智能体内部信道泄露 | multi-agent internal-channel leakage | 敏感数据沿 agent 间消息 / 共享记忆 / 工具参数流动，比对外输出更易被 output-only 审计漏掉 |
+| 屏幕捕获过采 | screen-capture over-collection | computer-use / GUI agent 反复截屏，把整屏（含无关 / 敏感 / 他人内容）一并送进模型 |
+| 适配器泄露 | adapter / LoRA leakage | 发布的 LoRA delta + 公开底座作参照，放大对微调集的成员推断 / 抽取 |
+| 参照式成员推断 | reference-based MIA | 用公开预训练模型当参照，扣掉一般难度、抬高微调集成员的可区分信号 |
+| DP 审计 | DP auditing | 往训练插独立探针、用成员猜测反推经验 ε 下界，验「声称的 ε」是否被实现 / 会计掏空；只给下界不给上界 |
+| 经验 ε 下界 | empirical ε lower bound | 审计逼出的「实际交付隐私不强于此」的数；贴近声称 ε = 紧，远低 = 实现可疑或审计太弱 |
+| DP 上下文学习 | DP in-context learning (DP-ICL) | 给 prompt 里的私有 few-shot 示例上 DP（子集划分 + 带噪聚合 / DP 合成示例），框住单条示例对输出的影响；不改权重、只保护示例不保护 query |
+| 遗忘基准 | unlearning benchmark | 把「遗忘干净了吗」做成多维可比分数（遗忘质量 × 保留效用 × 攻击下泄露），如 RWKU / MUSE / TOFU；过基准 ≠ 真忘 |
+| 多模态训练图像抽取 | multimodal training-image extraction | 扩散 / 视觉模型近似复现训练图（人脸 / 医学 / 版权），主要由高重复图驱动；文本记忆的图像版 |
 
 ## 枚举值映射（隐私 frontmatter 与 `<PrivacyMeta>`）
 

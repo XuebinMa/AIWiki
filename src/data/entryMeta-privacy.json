@@ -30,6 +30,16 @@
       "maturity": "生产",
       "technique": "隐私保护计算"
     },
+    "dp-privacy-auditing": {
+      "severity": "中",
+      "maturity": "研究",
+      "technique": "隐私评测与审计"
+    },
+    "multimodal-training-image-extraction": {
+      "severity": "中",
+      "maturity": "研究",
+      "technique": "记忆与训练数据抽取"
+    },
     "privacy-poisoning": {
       "severity": "高",
       "maturity": "研究",
@@ -60,10 +70,25 @@
       "maturity": "试验",
       "technique": "差分隐私"
     },
+    "dp-in-context-learning": {
+      "severity": "中",
+      "maturity": "试验",
+      "technique": "差分隐私"
+    },
     "pii-regurgitation": {
       "severity": "高",
       "maturity": "研究",
       "technique": "PII 检测与脱敏"
+    },
+    "reasoning-trace-leakage": {
+      "severity": "高",
+      "maturity": "研究",
+      "technique": "上下文面隐私"
+    },
+    "vlm-geolocation-inference": {
+      "severity": "高",
+      "maturity": "生产",
+      "technique": "推断类攻击"
     },
     "agent-privacy-benchmark": {
       "severity": "中",
@@ -75,6 +100,11 @@
       "maturity": "研究",
       "technique": "RAG 与 Agent 隐私"
     },
+    "computer-use-screen-capture-privacy": {
+      "severity": "高",
+      "maturity": "生产",
+      "technique": "RAG 与 Agent 隐私"
+    },
     "cross-session-memory-bleed": {
       "severity": "高",
       "maturity": "生产",
@@ -82,6 +112,16 @@
     },
     "embedding-inversion": {
       "severity": "高",
+      "maturity": "研究",
+      "technique": "RAG 与 Agent 隐私"
+    },
+    "mcp-data-flow-privacy": {
+      "severity": "中",
+      "maturity": "生产",
+      "technique": "RAG 与 Agent 隐私"
+    },
+    "multi-agent-internal-leakage": {
+      "severity": "中",
       "maturity": "研究",
       "technique": "RAG 与 Agent 隐私"
     },
@@ -115,10 +155,20 @@
       "maturity": "研究",
       "technique": "推理服务期隐私"
     },
+    "lora-adapter-leakage": {
+      "severity": "中",
+      "maturity": "研究",
+      "technique": "推断类攻击"
+    },
     "machine-unlearning": {
       "severity": "中",
       "maturity": "试验",
       "technique": "机器遗忘与被遗忘权"
+    },
+    "on-device-inference-privacy": {
+      "severity": "中",
+      "maturity": "生产",
+      "technique": "隐私保护计算"
     },
     "secure-aggregation": {
       "severity": "中",
@@ -129,6 +179,11 @@
       "severity": "高",
       "maturity": "研究",
       "technique": "联邦学习与安全聚合"
+    },
+    "unlearning-benchmarks": {
+      "severity": "中",
+      "maturity": "研究",
+      "technique": "隐私评测与审计"
     },
     "unlearning-verification": {
       "severity": "中",
@@ -154,6 +209,11 @@
       "severity": "中",
       "maturity": "研究",
       "technique": "治理与合规"
+    },
+    "persistent-agent-memory-privacy": {
+      "severity": "中",
+      "maturity": "生产",
+      "technique": "数据生命周期与数据治理"
     },
     "synthetic-data-privacy": {
       "severity": "中",
@@ -192,6 +252,16 @@
       "maturity": "Production",
       "technique": "Privacy-preserving computation"
     },
+    "dp-privacy-auditing": {
+      "severity": "Medium",
+      "maturity": "Research",
+      "technique": "Privacy evaluation & auditing"
+    },
+    "multimodal-training-image-extraction": {
+      "severity": "Medium",
+      "maturity": "Research",
+      "technique": "Memorization & training-data extraction"
+    },
     "privacy-poisoning": {
       "severity": "High",
       "maturity": "Research",
@@ -222,10 +292,25 @@
       "maturity": "Experimental",
       "technique": "Differential privacy"
     },
+    "dp-in-context-learning": {
+      "severity": "Medium",
+      "maturity": "Experimental",
+      "technique": "Differential privacy"
+    },
     "pii-regurgitation": {
       "severity": "High",
       "maturity": "Research",
       "technique": "PII detection, redaction & synthetic data"
+    },
+    "reasoning-trace-leakage": {
+      "severity": "High",
+      "maturity": "Research",
+      "technique": "Context-surface privacy"
+    },
+    "vlm-geolocation-inference": {
+      "severity": "High",
+      "maturity": "Production",
+      "technique": "Inference attacks (MIA / inversion / attribute)"
     },
     "agent-privacy-benchmark": {
       "severity": "Medium",
@@ -237,6 +322,11 @@
       "maturity": "Research",
       "technique": "RAG & agent privacy"
     },
+    "computer-use-screen-capture-privacy": {
+      "severity": "High",
+      "maturity": "Production",
+      "technique": "RAG & agent privacy"
+    },
     "cross-session-memory-bleed": {
       "severity": "High",
       "maturity": "Production",
@@ -244,6 +334,16 @@
     },
     "embedding-inversion": {
       "severity": "High",
+      "maturity": "Research",
+      "technique": "RAG & agent privacy"
+    },
+    "mcp-data-flow-privacy": {
+      "severity": "Medium",
+      "maturity": "Production",
+      "technique": "RAG & agent privacy"
+    },
+    "multi-agent-internal-leakage": {
+      "severity": "Medium",
       "maturity": "Research",
       "technique": "RAG & agent privacy"
     },
@@ -277,10 +377,20 @@
       "maturity": "Research",
       "technique": "Inference-service privacy"
     },
+    "lora-adapter-leakage": {
+      "severity": "Medium",
+      "maturity": "Research",
+      "technique": "Inference Attacks"
+    },
     "machine-unlearning": {
       "severity": "Medium",
       "maturity": "Experimental",
       "technique": "Machine unlearning & right to be forgotten"
+    },
+    "on-device-inference-privacy": {
+      "severity": "Medium",
+      "maturity": "Production",
+      "technique": "Privacy-preserving computation"
     },
     "secure-aggregation": {
       "severity": "Medium",
@@ -291,6 +401,11 @@
       "severity": "High",
       "maturity": "Research",
       "technique": "Federated learning & secure aggregation"
+    },
+    "unlearning-benchmarks": {
+      "severity": "Medium",
+      "maturity": "Research",
+      "technique": "Privacy evaluation & auditing"
     },
     "unlearning-verification": {
       "severity": "Medium",
@@ -316,6 +431,11 @@
       "severity": "Medium",
       "maturity": "Research",
       "technique": "Governance & compliance"
+    },
+    "persistent-agent-memory-privacy": {
+      "severity": "Medium",
+      "maturity": "Production",
+      "technique": "Data lifecycle & data governance"
     },
     "synthetic-data-privacy": {
       "severity": "Medium",
