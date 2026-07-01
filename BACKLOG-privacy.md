@@ -192,9 +192,9 @@
 
 **并入 / 搁置（不单独成条）**
 
-- `kv-cache-prompt-reconstruction`（PromptPeek NDSS'25）→ 并进 `inference-side-channels`（同属推理期侧信道，非独立面）。
-- `a2a-protocol-privacy`（arXiv 2505.12490 单篇预印）→ 并进 `multi-agent-internal-leakage` 或按需立项；单源太薄，暂不单列。
-- `compression-privacy`（量化 / 蒸馏对记忆泄露的影响）→ **搁置**：现有证据多指向压缩**降低**泄露，不合「误区 / 假安全」形；有反向一手证据再立。
+- ✅ `kv-cache-prompt-reconstruction`（PromptPeek，NDSS 2025）→ **已并入 `inference-side-channels`**（缓存侧信道从「探测复用」升级到「逐 token 重建正文」：SGLang radix-tree KV-cache，已知模板约 99% / 无背景约 95%，绑定其设置）。已核 NDSS 2025，非独立面。
+- ✅ `a2a-protocol-privacy`（arXiv 2505.12490 ⚠️单篇预印）→ **已并入 `multi-agent-internal-leakage` 延伸阅读**（协议层相邻缺口：A2A 令牌生命周期 / 过宽 scope / 缺同意流 + consent orchestration + 短时效 scoped token）。单源太薄，作方向性佐证、不单列成条。
+- ⏸️ `compression-privacy`（量化 / 蒸馏对记忆泄露的影响）→ **搁置确认（本轮不立条）**：现有证据多指向压缩**降低**泄露，不合「误区 / 假安全」形；有反向一手证据（压缩**放大**泄露）再议。
 
 ### 框架差异小节（按需补，打版本戳；判据：仅当差异源于工具机制、且短）
 
