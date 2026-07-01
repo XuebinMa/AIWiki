@@ -236,7 +236,7 @@ Claude Code · Cursor · GitHub Copilot · Codex CLI · Gemini CLI · CLAUDE.md 
 
 ## 专有名词（不翻译，原样保留）
 
-DP-SGD · PATE · FHE · HE · MPC · TEE · MIA · PII · GDPR · NIST · OWASP · RAG · Opacus · canary · exposure · ε · δ · ρ-zCDP · RDP · PRV · DP-FTRL · Gboard
+DP-SGD · PATE · FHE · HE · MPC · MCP · TEE · MIA · PII · GDPR · NIST · OWASP · RAG · Opacus · canary · exposure · ε · δ · ρ-zCDP · RDP · PRV · DP-FTRL · Gboard · PCC · AICore
 
 ## 隐私术语对照
 
@@ -315,6 +315,12 @@ DP-SGD · PATE · FHE · HE · MPC · TEE · MIA · PII · GDPR · NIST · OWASP
 | 数据溯源 | data provenance | 判「内容是否 AI 生成」「我的数据是否被训练」；含版权陷阱 / 成员推断法 |
 | 微调即服务 | fine-tuning-as-a-service (FTaaS) | 厂商托管微调 API；微调数据去向 / 保留与对齐侵蚀是其隐私面 |
 | Agent 隐私评测 | agent privacy evaluation | 用 AgentDojo 等基准把「Agent 注入后外泄」做成可复现、可打分 |
+| 持久记忆 | persistent memory | 产品级跨会话记忆功能（saved memories / 引用聊天历史）；留存与可删边界在产品与后端，非隔离 bug |
+| 端侧推理 | on-device inference | 模型在用户设备本地跑、prompt 不出设备的隐私姿态；不覆盖回落云 / 遥测 / 本机被攻陷 |
+| 多模态地理定位推断 | VLM geolocation inference | 视觉语言模型从图像画面内容（非 EXIF / GPS）推断拍摄地点；推理期的属性推断 |
+| MCP 数据流 | MCP data flow | Model Context Protocol 下 host↔server 的上下文切片传递；最小采集 / 同意 / 凭据集中是其隐私面 |
+| 最小采集 | least-collection / data minimization | 只把任务所必需的上下文字段交给 server；对应 GDPR 数据最小化原则 |
+| 凭据集中 | credential concentration | 多个 MCP server 的凭据汇聚成单一高价值目标，放大被攻破的爆炸半径 |
 
 ## 枚举值映射（隐私 frontmatter 与 `<PrivacyMeta>`）
 

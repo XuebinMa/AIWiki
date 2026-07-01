@@ -1,0 +1,140 @@
+---
+title: "On-device inference as a privacy posture: the prompt really doesn't leave the device — but here's what \"on-device\" doesn't cover"
+slug: on-device-inference-privacy
+sidebar_label: On-device inference
+sidebar_position: 10
+audience: [Privacy Engineer, Security Engineer, ML Engineer]
+era: "Volume 5 · Frontier and deployment"
+technique: Privacy-preserving computation
+attack_surface: On-device / cloud inference routing boundary
+severity: Medium
+maturity: Production
+evidence: Official docs
+tags: [on-device inference, on-device, confidential inference, inference routing, Gemini Nano, Apple Intelligence, Privacy Engineer, Security Engineer, ML Engineer]
+sources:
+  - { title: "Apple Machine Learning Research, Introducing Apple's On-Device and Server Foundation Models (official: ~3B-parameter on-device model + a larger server model via Private Cloud Compute; a request is first analyzed for on-device handling and only falls back to PCC when more compute is needed)", url: "https://machinelearning.apple.com/research/introducing-apple-foundation-models" }
+  - { title: "Apple Machine Learning Research, Introducing the Third Generation of Apple's Foundation Models (official: AFM 3 Core on-device 3B / AFM 3 Cloud via PCC; a five-model family spanning on-device to server)", url: "https://machinelearning.apple.com/research/introducing-third-generation-of-apple-foundation-models" }
+  - { title: "Apple Security Research, Private Cloud Compute: A new frontier for AI privacy in the cloud (official: the verifiable boundary for the cloud-fallback portion — cited here only as the PCC boundary; mechanism lives in the confidential-inference entry)", url: "https://security.apple.com/blog/private-cloud-compute/" }
+  - { title: "Android Developers, Gemini Nano (official: AICore runs inference on-device, prompts execute locally without server calls, AICore has no direct internet access, model downloads route through Private Compute Services)", url: "https://developer.android.com/ai/gemini-nano" }
+  - { title: "Android Developers Blog, An introduction to privacy and safety for Gemini Nano (official: AICore isolates each request and stores no input/output; restricted package binding; model downloads/updates route through the Private Compute Services companion APK)", url: "https://android-developers.googleblog.com/2024/10/introduction-to-privacy-and-safety-gemini-nano.html" }
+---
+
+import PrivacyMeta from '@site/src/components/PrivacyMeta';
+
+<PrivacyMeta era="Volume 5 · Frontier and deployment" technique="Privacy-preserving computation" audience={['Privacy Engineer', 'Security Engineer', 'ML Engineer']} severity="Medium" maturity="Production" evidence="Official docs" />
+
+> In one sentence: run the model on your own device and the prompt never has to leave it — and this route actually **ships** today (Apple Intelligence's ~3B-parameter on-device model and Google's Gemini Nano running on-device via Android AICore are both deployed). It's the **complement** to [confidential inference](./confidential-inference.mdx)'s "the cloud can't see it": on-device means "the device doesn't send it out." But "on-device" is a word that's easy to over-read — the real boundary isn't "the vendor says on-device," it's **which requests still fall back to the cloud, how much capability you trade away because the on-device model is smaller, and the telemetry / diagnostics / model-download channels**. Bottom line first: "on-device" ≠ "nothing leaves the device." What's verifiable is that a given request completes on the local device and its prompt didn't leave the device *for that path*; but **which requests run on-device versus fall back to the cloud is a deployment fact to check, not a model promise**. For the fall-back-to-cloud portion, you go back to confidential inference to verify it.
+
+## Mechanism: what happens on my side
+
+When I run as an **on-device model** on your device, what happens on my side is: your prompt is processed by a **local inference runtime**, produces a result, and this path **doesn't need to send the prompt to a server**. Vendors have built this as "on-device first, fall back to cloud when needed":
+
+- **Apple Intelligence**: Apple states "many of the models that power it run entirely on device"; on-device is a **~3-billion-parameter** language model, alongside a **larger server-based model running on Private Cloud Compute (PCC)**. Routing is **on-device-first** — "when a user makes a request, Apple Intelligence analyzes whether it can be processed on device. If it needs greater computational capacity, it can draw on Private Cloud Compute, which will send only the data that is relevant to the task" (Apple Machine Learning Research).
+- **Gemini Nano (Android AICore)**: Google states "on-device generative AI executes prompts locally, eliminating server calls" and works "without needing a network connection or sending data to the cloud"; the **AICore** system service that hosts it "is built to isolate each request and doesn't store any record of the input data or the resulting outputs after processing them" (Android Developers).
+
+Let me be clear about the red line: I **don't write** "I promise to keep your data local" / "I won't send it out" — these are promises I can't reliably self-verify. What's externally checkable and recomputable is only: **on the on-device path, inference completes on the local device and the prompt didn't leave the device for that path**; whereas "did this particular request run on-device or fall back to the cloud" is a **fact to check against the deployment** (did an outbound network call happen during inference, to where, carrying what) — not something I can guarantee for you. Below, the subject may be "I," but every predicate is something others can measure from the device's network behavior.
+
+```mermaid
+flowchart TB
+    U["Your request / prompt"] --> R{"Routing decision<br/>can it run on-device"}
+    R -->|Yes| L["On-device model (local runtime)<br/>prompt does not leave the device"]
+    R -->|Needs more compute| C["Fall back to cloud<br/>(e.g. Apple PCC, sends only relevant data)"]
+    L --> O1["Result stays on the device"]
+    C -.->|verify this segment via confidential inference| V["Cloud-side verifiable transparency<br/>see confidential-inference"]
+    M["Telemetry / diagnostics / crash logs"] -. side channel independent of the inference data plane .-> Net["Other channels that may egress"]
+    D["Model download / update"] -. via a managed proxy (e.g. Private Compute Services) .-> Net
+```
+
+## Threat surface: what on-device defends and doesn't
+
+The on-device route **does defend against**: handing your prompt to a remote service to read — inference completes on the local device, so on this path the prompt need not leave, and the cloud operator / service **can't see the plaintext on this path**. But it **doesn't defend** against the following — pointed out one by one:
+
+- **Doesn't defend ① a compromised device.** On-device puts the plaintext on **your own device**. A malicious app, jailbreak / root, forensic extraction, or malware that takes over the device exposes the local plaintext — the threat moves from "remote service" to "device security." On-device isn't protecting this data; it just **moves the trust boundary**.
+- **Doesn't defend ② the portion that falls back to the cloud.** On-device-first doesn't mean fully on-device: requests that need more compute **fall back to the cloud** (Apple is explicit that it "draws on PCC when greater capacity is needed"). That portion **leaves the device**, and its privacy has to be carried by the cloud route — see [confidential inference](./confidential-inference.mdx) (the cloud verifiably can't see it, *if* you or your device actually verified the remote attestation). The "on-device" label **doesn't cover** the requests that fall back to the cloud.
+- **Doesn't defend ③ telemetry / diagnostics / model-download channels.** Beyond the inference data plane there are other egress channels: crash logs, usage stats, A/B metrics, and **the model download / update** itself. On Android, AICore "does not have direct internet access. All internet requests, including model downloads, are routed through the open-source Private Compute Services companion APK" — which is precisely evidence that a **managed egress channel exists**, not that "nothing leaves the device." Even without the prompt body, these channels can carry metadata.
+- **Doesn't defend ④ the on-device model is smaller = a capability cost (a real trade-off, not free privacy).** On-device models are "significantly smaller and less generalized than their cloud-based equivalents," and Gemini Nano "works best for tasks where the requests can be clearly specified rather than open-ended use cases such as chatbots" — Google states plainly it's "less powerful than cloud counterparts." So "staying on-device" often means either **sacrificing capability** or **triggering a cloud fallback** — pushing the request back into the previous threat surface.
+
+> Spell out the attacker / leak path: on-device adversaries are mainly whoever can **reach the local device** (local malware, forensics, jailbreak) and whoever can **observe the egress channels** (who sees the fall-back-to-cloud requests, telemetry, download traffic). On-device closes the "remote service reads the plaintext" path, but not these two.
+
+## How the defense works
+
+What makes this route work: move inference into an **execution environment you control (the local device)**, so the prompt need not enter the remote service's trust boundary — "the service can't see the plaintext on this path" follows from the **deployment shape**, not from a promise. Its load-bearing part is turning **"which requests run on-device versus fall back to the cloud" from a vague impression into a checkable deployment fact**:
+
+- **The on-device segment**: what's checkable is "did an outbound network call happen for this request." For a request that truly completes on the device, the fact that its prompt didn't leave the device is **observable from the device's network behavior** (see the minimal testable assertion in the recipe), rather than something you can only trust.
+- **The fall-back-to-cloud segment**: once a request leaves the device, protection is **no longer provided by "on-device"** and must connect to the cloud route — the **remote attestation + verifiable transparency** of [confidential inference](./confidential-inference.mdx) (e.g. PCC publishes software images to a transparency log and the device sends only after verifying a match). The two routes **meet here**: on-device owns "don't send it out"; confidential inference owns "for what is sent out, the cloud still can't see it, and it's verifiable."
+
+Draw the boundary: on-device **protects "the path that didn't leave the device"**; it does **not** protect the portion that leaves, does not protect against a compromised device, and does not protect the side channels outside inference. Treating "we installed on-device, so nothing leaves" as true is exactly this entry's headline false security.
+
+## Buildable recipe
+
+Back to a neutral engineering register. The goal isn't "trust on-device," it's to **turn "what's on-device, what falls back to the cloud, and what else is egressing" into checkable, regression-able facts**:
+
+```text
+1. Nail down the routing boundary (establish the facts, don't guess):
+   - Check vendor docs / APIs: which requests run on-device, which fall back to the cloud.
+     E.g. Apple Intelligence is on-device-first and calls PCC only when compute is short;
+     Gemini Nano runs on-device via AICore, and capability-limited tasks shouldn't be
+     handed to it in the first place.
+   - Make the fallback triggers explicit: request complexity / input length / data type /
+     device compute — record them as a table, don't treat it as a black box.
+2. Verify the on-device path really doesn't egress:
+   - On a controlled device, observe the network side (packet capture / outbound-connection
+     monitoring) for a request that "should be on-device," and assert no prompt payload was
+     sent to a server during inference. Distinguish the inference data plane from the
+     telemetry / download channels.
+3. Audit the fall-back-to-cloud trigger and destination (this segment hooks into
+   confidential inference):
+   - Record which requests triggered a fallback, to which endpoint, carrying what (Apple
+     says it "sends only the data relevant to the task" — verify the scope). For the
+     cloud segment, verify remote attestation / verifiable transparency per
+     confidential-inference.
+4. Inventory the egress channels outside inference:
+   - Telemetry / diagnostics / crash logs / usage stats, plus model download / update
+     (e.g. AICore via Private Compute Services). For each, ask: does it carry
+     prompt-derived metadata? Can it be disabled / minimized?
+5. Write down the threat model: are you defending against "a remote service reads the
+   plaintext" (on-device helps) or "the device is compromised / forensically imaged"
+   (on-device doesn't solve this — device security does)? Don't conflate the two.
+```
+
+Every step binds to your own deployment: unless you've nailed down **which requests really run on-device, where the fallback threshold sits, and what the egress channels are**, "on-device, therefore private" is just a slogan.
+
+**Minimal testable assertion** (fold "on-device" into a regression check; don't stop at "we used an on-device model"):
+
+- How to test: ① on-device path — for a batch of requests that "should be on-device," monitor network egress on a controlled device and assert **no prompt payload is sent to a server during inference**; ② fallback audit — construct requests that "should trigger a cloud fallback" and assert they are **faithfully logged** (trigger condition, target endpoint, data scope sent), with the cloud segment's attestation verified per confidential inference; ③ side-channel inventory — enumerate the telemetry / diagnostics / model-download channels and assert they **don't smuggle the prompt body** and their destinations are explainable.
+- Pass: on-device requests egress no prompt during inference; every fallback request is logged and its cloud segment's attestation verifies; side channels carry no prompt body — the "on-device" label is truthful and its boundary is checkable.
+- Fail: a request that "should be on-device" sent the prompt out (or silently fell back to the cloud without being logged), or telemetry smuggled prompt-derived content → don't claim "on-device, therefore nothing leaves"; go back to the routing / egress layer and find which path leaked.
+
+## Vendor status
+
+(This entry is `maturity=Production`: Apple Intelligence and Gemini Nano are both **shipped** on-device inference deployments. Below is vendor status and how they draw the "on-device vs cloud" line — not an endorsement that any product "leaks absolutely nothing.")
+
+- **Apple Intelligence (on-device ~3B model + PCC fallback)**: Apple states "many of the models run entirely on device"; on-device is a **~3-billion-parameter** language model, with a larger server-based model running on **Private Cloud Compute**. The June 2026 third generation of Apple Foundation Models (AFM 3) continues this architecture — the on-device **AFM 3 Core** is a **3-billion-parameter** dense model, alongside an on-device **AFM 3 Core Advanced**, with the server-side **AFM 3 Cloud** running via PCC (a five-model family spanning on-device to server). Routing is "analyze whether it can run on-device; fall back to PCC only when more compute is needed, sending only the data relevant to the task." **The fall-back-to-cloud portion's privacy is carried by PCC, whose verifiable mechanism lives in [confidential inference](./confidential-inference.mdx)** — this entry points to PCC only as the "on-device fallback boundary," not repeating its attestation detail.
+- **Gemini Nano / Android AICore (on-device execution)**: Google states "on-device generative AI executes prompts locally, eliminating server calls" and "without sending data to the cloud"; **AICore** "isolates each request and stores no input / output after processing," and "**has no direct internet access** — all internet requests, including model downloads, route through the open-source **Private Compute Services** companion APK," with a **restricted** set of packages it may bind to (changing the allowlist requires a full Android OTA). On capability, Google is explicit that on-device models are "significantly smaller and less generalized than cloud equivalents," and Nano "works best for tasks that can be clearly specified rather than open-ended use cases such as chatbots" — i.e. **on-device is a capped-capability choice, not free privacy**.
+- **Sibling contrast**: Volume 5 already has [confidential inference](./confidential-inference.mdx) covering the **cloud** route (TEE + remote attestation + verifiable transparency, "the cloud can't see it"), complementary to this entry's **on-device** route ("the device doesn't send it out"): one owns "for what is sent out, the cloud still can't see it," the other owns "it isn't sent out at all." The fall-back-to-cloud requests are exactly the hand-off from the latter to the former.
+
+## Residual risk and trade-offs
+
+Naming the false security one by one:
+
+- **"On-device" ≠ "nothing leaves the device."** On-device covers only "the path that didn't leave the device"; fall-back-to-cloud requests, telemetry / diagnostics, and model downloads can all egress. Equating "we installed an on-device model" with "nothing leaves at all" is this entry's biggest false security.
+- **The fall-back-to-cloud portion is out of on-device's reach and must be verified via confidential inference.** Requests that need more compute leave the device; that segment's privacy isn't provided by "on-device" and must be verified per [confidential inference](./confidential-inference.mdx) (remote attestation / verifiable transparency). Don't let the phrase "on-device-first" paper over the requests that fell back.
+- **The trust boundary is moved, not removed.** On-device swaps "trust the remote service" for "trust device security" — local malware, jailbreak / root, forensic extraction expose the local plaintext. On-device offers no protection against an adversary who can **reach the device**.
+- **The on-device capability cost is a real trade-off.** A smaller on-device model is less capable than the cloud; "staying on-device" often means either sacrificing capability or triggering a cloud fallback. That's an engineering trade-off, not a free lunch — force a complex task onto on-device and it often gets silently routed back to the cloud.
+- **The vendor's on-device / cloud line is its implementation and it changes.** Which requests run on-device, the fallback threshold, and the scope of data sent to the cloud are all current vendor implementation and can shift by version; treating one version's line as permanent will trip you up on the next update. Go by your own **measurement of egress behavior**.
+
+## Version notes
+
+:::note Applicable versions
+"On-device inference means the prompt need not leave the device, but 'on-device' doesn't cover fall-back-to-cloud / telemetry / model download, and doesn't defend a compromised device" is a **deployment-time fact** independent of any specific vendor. But **vendors' concrete implementations and the on-device / cloud line evolve quickly**: Apple Intelligence's on-device model size, the PCC fallback trigger and the scope of data sent to the cloud, and Gemini Nano / AICore's on-device capability and egress channels are all iterating (model codenames, routing policy, supported devices change over time). This entry reflects vendor status as of 2026-07 (Apple Intelligence on-device ~3B + PCC, the June 2026 third-generation AFM family; Gemini Nano via Android AICore + Private Compute Services); go by current vendor docs and your own measurements for exact capability, line, and egress behavior. (Sources verified 2026-07.)
+:::
+
+## Further reading and sources
+
+> Primarily: official docs (Apple's and Google's real on-device deployments + on-device / cloud line); the verifiable mechanism for the fall-back-to-cloud segment lives in Volume 5's [confidential inference](./confidential-inference.mdx).
+
+- [Introducing Apple's On-Device and Server Foundation Models (Apple Machine Learning Research)](https://machinelearning.apple.com/research/introducing-apple-foundation-models) — official: a ~3B-parameter on-device model + a larger server-based model via PCC; a request is first analyzed for on-device handling and only falls back to PCC when more compute is needed, sending only relevant data. Supports this entry's "on-device-first + cloud fallback" routing fact.
+- [Introducing the Third Generation of Apple's Foundation Models (Apple Machine Learning Research)](https://machinelearning.apple.com/research/introducing-third-generation-of-apple-foundation-models) — official: AFM 3 Core (on-device 3B dense) / AFM 3 Core Advanced / AFM 3 Cloud (via PCC); a five-model family spanning on-device to server (June 2026 third generation). Supports on-device model size and generational status.
+- [Private Cloud Compute: A new frontier for AI privacy in the cloud (Apple Security Research)](https://security.apple.com/blog/private-cloud-compute/) — official: the verifiable boundary for the fall-back-to-cloud portion. Cited here only as the **fallback boundary**; its attestation / transparency-log mechanism lives in [confidential inference](./confidential-inference.mdx).
+- [Gemini Nano (Android Developers)](https://developer.android.com/ai/gemini-nano) — official: AICore runs inference on-device, prompts execute locally without server calls, AICore has no direct internet access, model downloads route through Private Compute Services; also states the on-device model is smaller and suited to clearly specified tasks. Supports "the device doesn't send it out" and the on-device capability cost.
+- [An introduction to privacy and safety for Gemini Nano (Android Developers Blog)](https://android-developers.googleblog.com/2024/10/introduction-to-privacy-and-safety-gemini-nano.html) — official: AICore isolates each request and stores no input / output; restricted package binding (changing the allowlist requires a full OTA); model downloads / updates route through the Private Compute Services companion APK. Supports "a managed egress channel exists, rather than zero egress."
