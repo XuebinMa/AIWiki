@@ -123,8 +123,8 @@
 | 证据字段多标签（primary/supporting） | P1 | 🟡 **轻量版早已落**（R3：terminology「主要/补充」约定 + 延伸阅读开头标注）；frontmatter 机读多标签**仍待**——评审重提，作可选增强（机密推理是混合证据典型）。须可机械派生、不靠打分（接 evidenceLevel） |
 | 目录页卡片摘要过长 | P1 | ⬜ 待做：卡片只留短标题 / 一句话风险 / 风险等级 / 成熟度 / 证据 / 板块，长摘要留正文。先查 DocCard 取 description 还是摘要 |
 | 威胁矩阵拆二级页面 | P1 | ⬜ 待做：留总表 + 拆「训练期 / 推理期 / RAG·Agent / 治理 / 评测」二级索引 |
-| 隐私案例库入口 | P2 | ⬜ 待做（接「工程实践优先」）：OpenAI Redis 串味 / ChatGPT 抽取 / Gboard DP·FL / Apple PCC / AgentDojo / 侧信道等集成案例库，反链条目（仿 `docs/cases`） |
-| 最小隐私基线页面 | P2 | ⬜ 待做：团队可直接采用的最小基线清单（去重 / PII 扫描 / RAG 前置 ACL / 租户隔离 / DP 报 ε·δ / 厂商边界季度复核 / Agent 最小权限 / 上线前记忆审计·RAG 探针·AgentDojo eval），仿 `docs/threat-model` 顶部基线 |
+| 隐私案例库入口 | P2 | ✅ **已落（2026-07）**：`privacy/incidents.mdx`（真实事故与实证索引，中英，slug `incidents`，侧栏 pos 8）——两层：**A 真实生产事故**（EchoLeak / CamoLeak / ChatGPT 串味 / NYT 保全令 / o3 反向定位⚠️）+ **B 里程碑演示**（Nasr 抽取 / Carlini 扩散图 / Morris 嵌入反演 / PromptPeek KV-cache / Fredrikson 反演），每条反链条目 + 一手源；两层分列即一条纪律（别把「已证明可行」当「生产已泄露」） |
+| 最小隐私基线页面 | P2 | ✅ **已落（2026-07）**：`privacy/baseline.mdx`（10 条速用基线，中英，slug `baseline`，侧栏 pos 7）——数据分级 + 边界 / 厂商「不训练」非整条边界 / RAG 前置 ACL·向量非匿名 / 租户隔离 + 并发压测 / Agent 出站收口渲染层 / MCP 最小采集 + 审子处理方 / 去重 + DP 审 ε / 删除跨副本扇出可验证 / 发布前记忆量化 + 注入 eval / 推理链·截屏当输出面脱敏；每条点破一个假安全、仿 `docs/threat-model` 顶部基线 |
 
 ## 选题储备（按卷 × 技术板块，待逐条立项）
 
@@ -212,7 +212,7 @@
 - ✅ **dogfooding-checklist**：`DOGFOODING.md`（repo 级精简）+ `CLAUDE.md` 一行指针；三道硬闸门进 `DOGFOODING.md` pre-PR 清单 + `STYLE-GUIDE.md`「LLM 隐私保护主题专属规范」（未堆 CLAUDE.md）。
 - ✅ **企业/供应商数据边界 checklist**：toolkit 工件「**LLM Vendor Data Boundary Checklist**」已落（`privacy/vendor-data-boundary-checklist.mdx` 中英，slug `vendor-data-boundary-checklist`）。覆盖 8 类：训练使用 / retention / abuse monitoring·人工访问 / zero data retention（覆盖与否）/ subprocessors / region·residency / DPA·BAA·合规报告 / observability·tracing 二次泄露；含逐厂商记录表（答案 + 条款出处 + 核验日期）+ 季度复核。《推理服务数据边界》双向链。
 - ✅ **第一人称纪律对照表**：已写进 `STYLE-GUIDE.md`「第一人称红线（强规则）」的「可 / 不可第一人称对照表」。
-- ✅ **M1 最小化**：脚手架最小可渲染已落（第二实例 + 侧边栏 + 六卷 + i18n 镜像 + 模板 + 术语 + 导读 + 闸门扩面 + `PrivacyMeta` + `DocCard` 适配 + `entryMeta-privacy.json`）。**轴索引页**：`privacy/map.mdx`（隐私地图，中英，slug `map`）已落——**技术板块**分组（14 板块，已落条目挂主板块、未落标 _规划中_）+ **威胁→缓解矩阵**（按泄露面反查在管条目 + 残余风险）。案例库 / 更多导读轴有内容后再扩（M5）。
+- ✅ **M1 最小化**：脚手架最小可渲染已落（第二实例 + 侧边栏 + 六卷 + i18n 镜像 + 模板 + 术语 + 导读 + 闸门扩面 + `PrivacyMeta` + `DocCard` 适配 + `entryMeta-privacy.json`）。**轴索引页**：`privacy/map.mdx`（隐私地图，中英，slug `map`）已落——**技术板块**分组（14 板块，已落条目挂主板块、未落标 _规划中_）+ **威胁→缓解矩阵**（按泄露面反查在管条目 + 残余风险）。**案例库（`incidents.mdx`）+ 最小基线（`baseline.mdx`）两条导读轴已落（2026-07，中英，侧栏 pos 8/7，见上 P2 表）**；机制索引 / 必读 N 等更多导读轴待内容更厚再扩。
 - ✅ **`evidence` 多证据类型（R3）**：走**轻量**——不扩 schema。`terminology.md`「evidence」加「主要 / 补充」约定；`entry-template` + skill 同步；RAG 主标签改 研究支持（最强一类）、RAG + 推理服务在「延伸阅读」开头注「主要：X；补充：Y」。多字段数组方案**否决**（过度工程）。
 - ✅ **「最小可测试断言」模板块（R3）**：已并入「落地实现」小节末（不新增第十节）；`entry-template` + `aiwiki-privacy-entry-author` skill 均加该小块，四条样板（中英）全回填「怎么测 / 通过证明什么 / 失败看到什么」，后续条目统一带。
 - ✅ **「真实案例」小节标题柔性（R3）**：`entry-template` + skill 标明该小节标题可按 `maturity` 微调；四条已对齐——训练抽取「真实案例」/ DP「真实案例 / 工程可行性」/ RAG「真实案例：相邻事故」/ 推理服务「厂商现状」，不再给试验级条目挂「生产部署」。

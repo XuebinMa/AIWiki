@@ -1,0 +1,47 @@
+---
+title: 最小隐私基线（速用清单）
+slug: baseline
+sidebar_label: 最小隐私基线
+sidebar_position: 7
+description: 上线一个用到 LLM 的功能前，先照这 10 条把隐私底线立起来——工具中立、每条链到展开版。它是下限不是上限，配合「隐私地图」按威胁反查、「事故索引」看现实代价一起用。
+---
+
+# 最小隐私基线（速用清单）
+
+侧边栏按**卷**读是主线，[隐私地图](./map.mdx) 让你按威胁反查。但如果你手上正要上线一个用到 LLM 的功能，只想要一份**马上能立起来的清单**，先照下面这 10 条走——它把散在各卷的防线压成一条**最小可执行基线**：工具中立、每条点破一个**假安全**、每条都链到展开版。
+
+:::caution 这是下限，不是上限
+达标只代表你没漏掉最基本的护栏，**不代表安全**。具体到你的数据敏感度与爆炸半径，还要往上加（按威胁维度补齐见 [隐私地图](./map.mdx)）。本主题一以贯之的立场是「别把『用了什么』当『解决了什么』」——这些基线也一样，是起点不是终点。
+:::
+
+## 十条基线
+
+1. **先定「数据分级 + 边界」，再接任何外部 LLM。** 哪些数据绝不出边界、绝不进外部推理，先成文写下来——没有分级，「这条要不要发给模型」每次都靠临场拍脑袋，迟早出错。见[推理服务数据边界](./06-governance-compliance/inference-service-data-boundary.mdx)。
+
+2. **别把厂商一句「不训练」当整条边界。** 按端点 / 功能填一份厂商数据边界清单（用于训练吗？保留几天？ZDR 覆盖哪些？子处理方有谁？），打日期、按季度复核——「不训练」不等于「不保留」，条款按端点而异、还可能被法律令推翻。见[厂商数据边界清单（工件）](./vendor-data-boundary-checklist.mdx)。
+
+3. **RAG / 向量库按调用者权限过滤，别把「向量化」当匿名。** 检索按调用者的访问控制过滤、存储层按租户隔离；记住 embedding 可被反演回近似原文与 PII——存了一堆向量，等于存了一份可还原的敏感数据。见[RAG 检索泄露](./04-rag-agents/rag-retrieval-leakage.mdx)、[嵌入反演](./04-rag-agents/embedding-inversion.mdx)。
+
+4. **记忆 / 缓存 / 会话按用户隔离，并按「不串」压测并发。** 多租户共享存储 + 竞态 + 缺归属校验，是教科书级串味的配方（ChatGPT 2023-03 事故正是如此）；按用户分区 + TTL，压测「每条消息只对正确用户可见」，别跑通一次就放心。见[跨会话记忆串味](./04-rag-agents/cross-session-memory-bleed.mdx)。
+
+5. **Agent 出站收口在工具 / 渲染层，别靠「叫模型别外发」。** 出站走 allowlist、关闭或转义 markdown 图片 URL 这类自动加载的渲染面——EchoLeak、CamoLeak 都走「把私有数据编码进图片 URL、客户端一加载就外泄」，而指令式防御连专门拦注入的分类器都被绕过。硬约束要加在工具与出站层。见[Agent 工具外联外泄](./04-rag-agents/agent-tool-exfiltration.mdx)。
+
+6. **接 MCP / 第三方 server 走最小采集，并审子处理方。** 「只连官方 server 就安全」是错的；同意不是一次性，数据交出去之后「最小采集」也管不到——列清哪些上下文会被交出、谁在采、把凭据集中放在一处又放大了多大爆炸半径。见[MCP 数据流与最小采集](./04-rag-agents/mcp-data-flow-privacy.mdx)。
+
+7. **训练 / 微调前先去重；开了 DP 就把 ε 当真去审。** 去重打掉的是「重复」这个记忆放大器，DP 给的是「单样本影响有界」而非零泄露；开了 DP 别只信声称的 ε——用够强的攻击审出经验下界，实现 / 会计的 bug 会悄悄掏空保证。见[训练数据去重](./02-memorization-extraction/training-data-deduplication.mdx)、[DP 微调](./03-conversational-llms/dp-fine-tuning.mdx)、[DP 审计](./02-memorization-extraction/dp-privacy-auditing.mdx)。
+
+8. **删除要跨副本扇出、且能验证，别把「关开关」当「已删」。** 主库删掉，不等于备份 / 日志 / 向量库 / 派生模型里那几份也删了；模型「记住」的那份要机器遗忘且可验证。关掉记忆开关通常只是「以后不再记」，已经存下的照旧在。见[数据生命周期与删除传播](./06-governance-compliance/data-lifecycle-deletion.mdx)、[可验证删除与机器遗忘](./05-frontier-deployment/machine-unlearning.mdx)。
+
+9. **发布前量一次「记住了多少」、跑一遍隐私 eval。** 用 canary 探针量记忆暴露度、用 Agent 注入外泄基准量「被注入后会漏什么」——过基准不等于真安全，但不量就是盲发。把它纳入发布前 eval 与回归。见[量化记忆与审计](./02-memorization-extraction/quantifying-memorization.mdx)、[Agent 隐私评测](./04-rag-agents/agent-privacy-benchmark.mdx)。
+
+10. **推理链、computer-use 截屏都是输出面，一样要脱敏。** 「思考是内部的所以安全」是错的——思考越多、带出的敏感数据越多；截屏截的是整屏（含无关的、他人的数据），不是任务那一块。把思维轨迹与屏幕捕获当会外泄的输出面来对待。见[推理链泄露](./03-conversational-llms/reasoning-trace-leakage.mdx)、[Computer-use 屏幕捕获隐私](./04-rag-agents/computer-use-screen-capture-privacy.mdx)。
+
+:::tip 怎么用这 10 条
+按顺序过一遍，每条问自己「我这套现在过不过得了」。过不了的，点进去读**机制 + 落地配方 + 最小可测试断言**；过得了的，也别当终点——它挡的是最基本的坑。
+:::
+
+## 达标之后往哪走
+
+- 按你**最担心的泄露面**反查还差什么：[隐私地图 · 威胁 → 缓解矩阵](./map.mdx)——每条都写了「在管的条目」和「没解决的残余风险」。
+- 想看这些机制在现实里**真翻过什么车**：[真实事故与实证索引](./incidents.mdx)——从 EchoLeak 到跨用户串味，每个都踩中上面某条基线。
+- 要**可勾选、可存档**的落地工件：[厂商数据边界清单](./vendor-data-boundary-checklist.mdx)（按厂商填、打日期、季度复核）。
