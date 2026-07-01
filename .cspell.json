@@ -341,6 +341,15 @@
     "bypassable",
     "codenames",
     "pgvector",
-    "privatecloudcomputed"
+    "privatecloudcomputed",
+    "CMEK",
+    "EDPB",
+    "MSRC",
+    "Mayraz",
+    "Rehberger",
+    "XPIA",
+    "encryptable",
+    "vectorizer",
+    "vectorizers"
   ]
 }

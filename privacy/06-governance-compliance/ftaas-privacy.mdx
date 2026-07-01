@@ -9,18 +9,19 @@ technique: 推理服务期隐私
 attack_surface: 微调数据 / 厂商微调 API
 severity: 中
 maturity: 研究
-evidence: 研究支持
+evidence: 官方文档
 tags: [微调即服务, 微调数据, 对齐侵蚀, 数据保留, 厂商边界, 隐私工程师, 合规工程师, ML 工程师]
 sources:
-  - { title: "Qi et al., Fine-tuning Aligned Language Models Compromises Safety, Even When Users Do Not Intend To! (ICLR 2024)", url: "https://openreview.net/forum?id=hTEGyKf0dZ" }
+  - { title: "OpenAI, Supervised fine-tuning guide（官方：微调训练数据做输入审核、产出模型做输出审核 eval、命中 usage policy 即阻断微调作业 / 部署，且不计费）", url: "https://platform.openai.com/docs/guides/supervised-fine-tuning" }
   - { title: "OpenAI, Fine-tuning guide（官方：微调数据保留至客户删除、微调模型仅供你私用、不外服务·不用于训练他人模型）", url: "https://platform.openai.com/docs/guides/fine-tuning" }
-  - { title: "Anthropic, API and data retention（官方：商用 / API 输入输出默认不用于训练、ZDR）", url: "https://platform.claude.com/docs/en/manage-claude/api-and-data-retention" }
+  - { title: "Anthropic, API and data retention（官方：商用 / API 输入输出默认不用于训练；2025-09-14 起标准日志保留由 30 天降至 7 天、可经 DPA opt-in 30 天、ZDR）", url: "https://platform.claude.com/docs/en/manage-claude/api-and-data-retention" }
   - { title: "Google Cloud, Vertex AI / Gemini data governance（官方：未经许可不用你的数据训练基础模型）", url: "https://cloud.google.com/vertex-ai/generative-ai/docs/data-governance" }
+  - { title: "Qi et al., Fine-tuning Aligned Language Models Compromises Safety, Even When Users Do Not Intend To! (ICLR 2024)（机制背书：微调侵蚀对齐）", url: "https://openreview.net/forum?id=hTEGyKf0dZ" }
 ---
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
-<PrivacyMeta era="卷六 · 治理与合规" technique="推理服务期隐私" audience={['隐私工程师', '合规工程师', 'ML 工程师']} severity="中" maturity="研究" evidence="研究支持" />
+<PrivacyMeta era="卷六 · 治理与合规" technique="推理服务期隐私" audience={['隐私工程师', '合规工程师', 'ML 工程师']} severity="中" maturity="研究" evidence="官方文档" />
 
 > 一句话摘要：在厂商 API 上微调（fine-tuning-as-a-service），有两个面要分开看。**面①——你的微调数据在厂商侧的去向**：它被保留多久、会不会被用于训练或人工审查、产出的微调模型是否只供你私用，这些都不是一个数，要**按各厂商当下条款逐项核**（多数厂商官方文档称：微调输入输出默认不用于训练、微调模型仅供你私用——但仍要核你这个档、这个端点、这个区域的具体条款，且条款会变）。**面②——微调本身会侵蚀对齐**：Qi 等（ICLR 2024）用 OpenAI 微调 API、**仅约 10 条对抗样本、花费小于 $0.20** 就越掉了 GPT-3.5 Turbo 的护栏；更要紧的是，**即便只用良性数据（Alpaca / Dolly）微调，也会无意中拉低安全对齐**。结论先行：**把数据交给厂商微调 API，既要核数据边界，也要假设微调会削弱对齐——包括模型原本会做的隐私拒答**。（注意：Qi 等主要是**安全对齐被侵蚀**的结果，**不是**直接的数据泄露 / PII 抽取结果——本条据此说「微调会连隐私拒答一起削弱」，**不**夸大成「微调能把训练数据抽出来」。）
 
@@ -107,11 +108,19 @@ C. 对齐侵蚀回归（这是本条独有、不可省的一步）：
 - 通过：微调后对隐私 / 有害探针的拒绝率**未显著低于**基线（在你设定的可接受回退范围内）；微调数据已最小化 / 去标识；数据边界核查表无空格、无过期格、与合同一致。
 - 失败：微调后隐私 / 安全拒绝率明显下降（哪怕用的是良性数据），或核查表某格无出处 / 与合同不符 → 判为「对齐已退步 / 边界未核」，补对齐或缩小微调范围后重测，落地决策前别放行。
 
-## 真实案例 / 研究进展（工程可行性）
+## 真实案例 / 厂商现状（工程可行性）
 
-（本条 maturity 标「研究」：对齐侵蚀来自 Qi 等的研究级演示；数据边界一侧引厂商官方文档作现状。下面区分「研究结果」与「厂商现状」两类证据。）
+先看**业界在生产里实际怎么跑微调即服务**——厂商的数据边界条款、以及他们实际怎么在线上把关微调；再用 Qi 等的研究垫机制（为什么必须把关、把关也兜不住对齐侵蚀）。
 
-**研究结果——微调侵蚀对齐（Qi 等，ICLR 2024）**：
+**业界怎么做①——厂商在线上怎么把关微调（OpenAI 官方，打戳 2026-06）**：把微调 API 开放给用户，厂商并非放任不管，而是**在两端各放一道自动审核**——这正是「业界实际怎么做」的一手样本：
+
+- **输入端：审训练数据。** OpenAI 官方文档（*Supervised fine-tuning*）称：GPT-4 微调带一套**输入数据集审核**，扫描训练样本里的有害内容，**命中即阻断该微调作业**；GPT-4o / GPT-4o mini 微调在输入审核之外**再加输出审核**——训练完成后用一套 **eval** 检查产出模型的输出是否违反其 usage policy，命中则**阻断该作业 / 不予部署**。每个有害类别设有**通过阈值**，失败样本超阈即拦；你可在微调作业的 moderation checks 区、或查作业事件里 `moderation_checks` 类型的事件，看到是哪些类别没过。
+- **失败不计费、且持续监控。** 若微调作业因训练数据有害而失败、或产出模型因输出有害而无法部署，**该训练运行不计费**；上线后 OpenAI 还**持续对微调模型跑自动安全 eval 并监控用量**，确保仍守 usage policy。
+- **但这道闸门兜不住对齐侵蚀（重要）。** 输入审核**只拦明显有害的样本**，OpenAI 自己也承认它**对数据投毒并非完全有效**——少量投毒点会滑在阻断阈值之下。更要紧的是：它拦的是「有害训练内容」，**根本不针对**「良性微调把安全 / 隐私对齐顺带磨掉」这条链路（链路②）。**所以「厂商已审过我的微调数据」≠「微调后对齐没退步」**——下面 Qi 等正是这条机制垫。
+
+**业界怎么做②——厂商的数据边界条款**：除了上线把关，厂商对「微调数据训练使用 / 保留 / 微调模型归属」各有书面条款——见本节末 `:::caution` 表（OpenAI / Anthropic / Google 逐格核、打戳 2026-06、落地前核当下条款）。
+
+**机制垫——微调侵蚀对齐（Qi 等，ICLR 2024；研究背书，非头条）**：上面厂商那道审核之所以拦不住对齐退步，机制层面 Qi 等已说清——
 
 - **主动越狱（成本极低）**：用 OpenAI 的微调 API，**仅约 10 条对抗设计的样本、花费小于 $0.20**，即可越掉 GPT-3.5 Turbo 的安全护栏，使其更广泛地响应有害指令。门槛之低，正是「把微调 API 开放给用户」这一服务形态的固有风险。
 - **无意侵蚀（更普遍）**：即便只用**良性**数据集（如 Alpaca、Dolly）做正常微调，也会在 GPT-3.5 Turbo 与 Llama-2-7b-Chat 上**无意中拉低**安全对齐——这意味着风险**不要求**任何恶意，正常业务微调本身就可能引入对齐退步。
@@ -125,13 +134,13 @@ C. 对齐侵蚀回归（这是本条独有、不可省的一步）：
 | 厂商 | 微调数据是否用于训练厂商模型 | 微调数据 / 模型保留 | 微调模型归属 |
 |---|---|---|---|
 | OpenAI | 官方文档：默认否（API 业务数据不用于训练，除非显式 opt-in） | 微调训练数据按其数据控制条款处理、保留至你删除；**保留期 / 滥用日志按端点而异** | 官方表述：你的微调模型**仅供你私用**，不外服务、不用于训练其他客户或 OpenAI 的模型 |
-| Anthropic | 官方：商用 / API 输入输出默认不用于训练（未经明确许可不训练） | 按其 *API and data retention*：商用条款默认不保留对话内容，需存储的功能取最短 TTL；**特定模型要求 30 天保留** | 商用条款下产出归你；具体微调 / 定制可用性与条款以其当下产品文档为准 |
+| Anthropic | 官方：商用 / API 输入输出默认不用于训练（未经明确许可不训练） | 按其 *API and data retention*：**2025-09-14 起标准 API 日志保留由 30 天降至 7 天**，需更长可经 DPA opt-in 30 天；**特定模型仍要求 30 天保留**；ZDR 下仅留滥用筛查所需（含 User Safety 分类结果） | 商用条款下产出归你；具体微调 / 定制可用性与条款以其当下产品文档为准 |
 | Google（Vertex AI / Gemini） | 官方数据治理：**未经你许可，不拿你的数据训练基础模型**；调优数据用于产出你的调优模型 | 按 Vertex 数据治理与你的项目配置；保留 / 区域随配置与产品档而变 | 调优产出的模型供你在你的项目内使用 |
 
 - **逐格核，别拿一格套全平台。** 同一厂商不同微调端点 / 模型 / 产品档，保留与归属可天差地别；把「某一格」当整条边界，正是本条要破的假安全（同《推理服务数据边界》）。
 - **「不用于训练」只覆盖数据边界这一侧。** 即便厂商完全守住「不拿你的微调数据训练」，也**丝毫不妨碍**你自己的微调把对齐磨掉——两条链路相互独立。
 
-（本表打戳 2026-06：OpenAI 行据其 *Fine-tuning guide* 与数据控制页；Anthropic 行据其 *API and data retention* 页；Google 行据其 *Vertex AI / Gemini data governance* 页。落地前务必核当下官方文档与合同。）
+（本表打戳 2026-06：OpenAI 行据其 *Fine-tuning guide* / *Supervised fine-tuning* 与数据控制页；Anthropic 行据其 *API and data retention* 页；Google 行据其 *Vertex AI / Gemini data governance* 页。落地前务必核当下官方文档与合同。）
 :::
 
 两类证据合起来说明同一件事：**微调即服务有两条独立的隐私链路——厂商侧的数据边界（可逐格核、会变、受法律影响），以及你这侧的对齐侵蚀（连隐私拒答一起，且良性数据亦然）——必须分别防、分别测。**
@@ -169,10 +178,11 @@ C. 对齐侵蚀回归（这是本条独有、不可省的一步）：
 
 ## 延伸阅读与出处
 
-证据为混合——**主要：研究支持**（Qi 等 ICLR'24，对齐侵蚀）；**补充：官方文档**（OpenAI / Anthropic / Google 微调与数据治理页，数据边界一侧）。
+证据为混合——**主要：官方文档**（OpenAI / Anthropic / Google 微调与数据治理页：厂商在线上怎么把关微调 + 数据边界条款）；**补充：研究支持**（Qi 等 ICLR'24，对齐侵蚀——作机制背书，解释「为何把关也兜不住」）。
 
-- [Fine-tuning Aligned Language Models Compromises Safety, Even When Users Do Not Intend To!（Qi 等，ICLR 2024）](https://openreview.net/forum?id=hTEGyKf0dZ) —— 本条主源（**安全对齐侵蚀**，非数据泄露）。OpenAI 微调 API 上约 10 条对抗样本、花费小于 $0.20 越掉 GPT-3.5 Turbo 护栏；良性数据（Alpaca / Dolly）也无意拉低 GPT-3.5 Turbo 与 Llama-2-7b-Chat 的安全。
+- [OpenAI, Supervised fine-tuning guide（官方）](https://platform.openai.com/docs/guides/supervised-fine-tuning) —— 官方文档（本条业界实践主源）：GPT-4 微调对**训练数据做输入审核**、命中有害即阻断作业；GPT-4o / GPT-4o mini **再加输出审核 eval**、产出模型违反 usage policy 即阻断 / 不予部署（按类别阈值，查 `moderation_checks` 事件）；失败不计费、上线后持续跑安全 eval。注：OpenAI 自承输入审核**对数据投毒并非完全有效**。
 - [OpenAI, Fine-tuning guide（官方）](https://platform.openai.com/docs/guides/fine-tuning) —— 官方文档：微调数据保留至你删除、产出的微调模型仅供你私用（不外服务、不用于训练他人模型）。
-- [Anthropic, API and data retention（官方）](https://platform.claude.com/docs/en/manage-claude/api-and-data-retention) —— 官方文档：商用 / API 输入输出默认不用于训练、日志保留期、ZDR。
+- [Anthropic, API and data retention（官方）](https://platform.claude.com/docs/en/manage-claude/api-and-data-retention) —— 官方文档：商用 / API 输入输出默认不用于训练；2025-09-14 起标准日志保留由 30 天降至 7 天（可经 DPA opt-in 30 天）、特定模型仍要求 30 天、ZDR。
 - [Google Cloud, Vertex AI / Gemini data governance（官方）](https://cloud.google.com/vertex-ai/generative-ai/docs/data-governance) —— 官方文档：未经许可不拿你的数据训练基础模型；调优数据用于产出你的调优模型。
+- [Fine-tuning Aligned Language Models Compromises Safety, Even When Users Do Not Intend To!（Qi 等，ICLR 2024）](https://openreview.net/forum?id=hTEGyKf0dZ) —— 机制背书（**安全对齐侵蚀**，非数据泄露）：OpenAI 微调 API 上约 10 条对抗样本、花费小于 $0.20 越掉 GPT-3.5 Turbo 护栏；良性数据（Alpaca / Dolly）也无意拉低 GPT-3.5 Turbo 与 Llama-2-7b-Chat 的安全。用来解释「为何厂商那道审核也兜不住对齐退步」，不外推为「微调数据抽取」。
 - 相邻：[隐私定向投毒](../02-memorization-extraction/privacy-poisoning.mdx) —— 「能否抽出微调数据」这一存疑角度所锚定的机制（投毒放大对**其他**记录的抽取，CCS 2022）；用作机制参照，非「微调 API 直接抽取」实证。
