@@ -1,0 +1,47 @@
+---
+title: "Minimum privacy baseline (quick-start checklist)"
+slug: baseline
+sidebar_label: Minimum privacy baseline
+sidebar_position: 7
+description: Before you ship an LLM-backed feature, stand up your privacy floor with these 10 items — tool-neutral, each linking to the full entry. It's a floor not a ceiling; use it with the Privacy map (reverse-lookup by threat) and the Incident index (real-world cost).
+---
+
+# Minimum privacy baseline (quick-start checklist)
+
+The sidebar's **volumes** are the main reading line; the [Privacy map](./map.mdx) lets you reverse-look-up by threat. But if you're about to ship an LLM-backed feature and just want a checklist you can **stand up right now**, start with these 10 — they compress the defenses scattered across the volumes into one **minimum executable baseline**: tool-neutral, each breaking one **false-security belief**, each linking to the full version.
+
+:::caution This is a floor, not a ceiling
+Meeting it only means you haven't missed the most basic guardrails — it does **not** mean you're safe. Your data sensitivity and blast radius will demand more on top (fill in by threat dimension via the [Privacy map](./map.mdx)). This theme's consistent stance is "don't mistake *what you used* for *what you solved*" — these baselines are the same: a start, not an end.
+:::
+
+## Ten baseline items
+
+1. **Define "data classification + boundary" before wiring up any external LLM.** Write down, up front, which data must never leave the boundary or enter external inference — without a classification, "should this go to the model?" gets decided ad hoc every time, and eventually gets it wrong. See [Inference-service data boundary](./06-governance-compliance/inference-service-data-boundary.mdx).
+
+2. **Don't treat a vendor's "we don't train on it" as the whole boundary.** Fill a vendor data-boundary checklist per endpoint / feature (trained on? retained how many days? what does ZDR cover? which subprocessors?), date-stamp it, review quarterly — "don't train" ≠ "don't retain," terms vary by endpoint, and a legal order can override them. See [Vendor data-boundary checklist (artifact)](./vendor-data-boundary-checklist.mdx).
+
+3. **Filter RAG / vector stores by the caller's permissions; don't treat "vectorized" as anonymized.** Filter retrieval by the caller's access control and isolate storage by tenant; remember embeddings can be inverted back to near-original text and PII — a pile of stored vectors is a recoverable copy of sensitive data. See [RAG retrieval leakage](./04-rag-agents/rag-retrieval-leakage.mdx), [Embedding inversion](./04-rag-agents/embedding-inversion.mdx).
+
+4. **Isolate memory / cache / sessions per user, and load-test concurrency for "no bleed."** Multi-tenant shared storage + races + missing ownership checks is the recipe for textbook cross-tenant bleed (the ChatGPT 2023-03 incident was exactly this); partition per user + TTL, and stress-test "each message is visible only to the correct user" — don't relax after it passes once. See [Cross-session memory bleed](./04-rag-agents/cross-session-memory-bleed.mdx).
+
+5. **Close off agent egress at the tool / rendering layer, not by "telling the model not to send."** Put egress behind an allowlist, and disable or escape auto-loading rendering surfaces like markdown image URLs — EchoLeak and CamoLeak both went through "encode private data into an image URL, exfiltrated the moment the client loads it," and instruction-style defenses got bypassed even by classifiers built to catch injection. Hard constraints belong at the tool and egress layer. See [Agent tool exfiltration](./04-rag-agents/agent-tool-exfiltration.mdx).
+
+6. **Connect MCP / third-party servers under data minimization, and audit subprocessors.** "It's safe if I only connect official servers" is wrong; consent isn't one-time, and "minimal collection" can't govern data once it's handed off — enumerate which context gets handed out, who collects it, and how much blast radius you created by centralizing credentials in one place. See [MCP data flow & minimization](./04-rag-agents/mcp-data-flow-privacy.mdx).
+
+7. **Deduplicate before training / fine-tuning; if you turn on DP, audit the ε for real.** Dedup removes "repetition," the memorization amplifier; DP gives "bounded single-sample influence," not zero leakage; and once DP is on, don't just trust the claimed ε — audit an empirical lower bound with a strong enough attack, since implementation / accounting bugs quietly hollow out the guarantee. See [Training-data deduplication](./02-memorization-extraction/training-data-deduplication.mdx), [DP fine-tuning](./03-conversational-llms/dp-fine-tuning.mdx), [DP auditing](./02-memorization-extraction/dp-privacy-auditing.mdx).
+
+8. **Fan deletion out across copies, and make it verifiable; don't treat "toggled off" as "deleted."** Deleting from the primary store doesn't delete the copies in backups / logs / vector stores / derived models; the copy the model "memorized" needs machine unlearning, verifiably so. Turning off a memory switch usually just means "won't record going forward" — what's already stored stays. See [Data lifecycle & deletion propagation](./06-governance-compliance/data-lifecycle-deletion.mdx), [Verifiable deletion & machine unlearning](./05-frontier-deployment/machine-unlearning.mdx).
+
+9. **Measure "how much did it memorize" and run a privacy eval before release.** Use canary probes to measure memorization exposure and an agent injection-exfiltration benchmark to measure "what leaks once injected" — passing a benchmark isn't real safety, but not measuring is shipping blind. Fold it into pre-release eval and regression. See [Quantifying memorization & auditing](./02-memorization-extraction/quantifying-memorization.mdx), [Agent privacy benchmark](./04-rag-agents/agent-privacy-benchmark.mdx).
+
+10. **Reasoning traces and computer-use screenshots are output surfaces too — redact them the same.** "Thinking is internal so it's safe" is wrong — the more it thinks, the more sensitive data it carries out; a screenshot captures the *whole screen* (including unrelated, other people's data), not just the task at hand. Treat the thought trace and screen capture as output surfaces that can leak. See [Reasoning-trace leakage](./03-conversational-llms/reasoning-trace-leakage.mdx), [Computer-use screen-capture privacy](./04-rag-agents/computer-use-screen-capture-privacy.mdx).
+
+:::tip How to use these 10
+Go through them in order and ask, for each, "does my setup pass this right now?" For the ones it doesn't, click in and read the **mechanism + implementation recipe + minimal testable assertion**; for the ones it does, still don't treat it as the finish line — it only blocks the most basic pitfalls.
+:::
+
+## Where to go after you meet it
+
+- Reverse-look-up what you're still missing **by the leak surface you most worry about**: [Privacy map · Threat → mitigation matrix](./map.mdx) — each row lists "the entries covering it" and "the residual risk it doesn't solve."
+- See these mechanisms **actually crash in the real world**: [Real incidents & landmark demonstrations](./incidents.mdx) — from EchoLeak to cross-user bleed, each trips one of the baselines above.
+- Get a **checkable, archivable** artifact for rollout: [Vendor data-boundary checklist](./vendor-data-boundary-checklist.mdx) (fill per vendor, date-stamp, review quarterly).

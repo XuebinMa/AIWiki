@@ -1,0 +1,50 @@
+---
+title: 真实事故与里程碑演示（索引）
+slug: incidents
+sidebar_label: 真实事故与实证
+sidebar_position: 8
+description: 把散在各条目里的具体、公开、可核查的隐私事件聚成一张索引——分两层：真实生产事故（真的发生了）与里程碑攻击演示（已被证明可行）。每条链到展开条目 + 一手出处。
+---
+
+# 真实事故与里程碑演示（索引）
+
+各条目讲的机制不是假想。这页把散在其中的**具体、公开、可核查**的事件聚成一张索引，分**两层**：
+
+- **A · 真实生产事故**——真的发生在用户 / 系统上、有厂商复盘或司法记录。
+- **B · 里程碑攻击演示**——同行评审或公开可复算的攻击，证明「这类泄露真能做成」、塑造了本主题的威胁模型，但**不是「事故」**。
+
+**把两者分开列，本身就是一条隐私纪律**：别把「实验室已证明可行」说成「生产已泄露」虚张，也别因为某事「还没上头条」就当它不会发生。每条给一行事实 + 踩中的泄露面 + 展开条目 + 一手出处。
+
+:::note 关于数字
+下面的绝对数字（命中率、受影响比例、窗口时长）都**绑定各自事件 / 实验设置**，仅作教科书案例，不代表普遍概率，别直接搬到你的端点。出处均打戳 2026-06，引用前回一手核当下版本。
+:::
+
+## A · 真实生产事故
+
+- **EchoLeak（CVE-2025-32711 · Microsoft 365 Copilot · 2025）** —— 一封构造过的邮件把注入指令送进 Copilot 的 RAG 上下文，**零点击**就把用户私有数据经外链外泄；攻击连环绕过了 Microsoft 的 XPIA 注入分类器、链接移除与 CSP，最后由 Microsoft 服务端修复。**踩中**：不可信内容 → Agent 工具 / 渲染面外泄。**展开**：[Agent 工具外联外泄](./04-rag-agents/agent-tool-exfiltration.mdx) · **一手**：[Aim Labs 复盘](https://www.aim.security/post/breaking-down-echoleak-the-first-zero-click-ai-vulnerability-enabling-data-exfiltration-from-m365-copilot)、[MSRC CVE-2025-32711](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-32711)。
+
+- **CamoLeak（CVE-2025-59145 · GitHub Copilot Chat · 2025）** —— 注入指令借 GitHub 自家被信任的 **Camo 图片代理**，把私有源码逐字符编码进图片请求外泄、绕过 CSP；GitHub 的修法是在 Copilot Chat 里直接关掉图片渲染。**踩中**：被信任域 + 渲染面外泄。**展开**：[Agent 工具外联外泄](./04-rag-agents/agent-tool-exfiltration.mdx) · **一手**：[Legit Security 复盘](https://www.legitsecurity.com/blog/camoleak-critical-github-copilot-vulnerability-leaks-private-source-code)。
+
+- **ChatGPT 跨用户数据串味（OpenAI · 2023-03）** —— 一次服务端改动让 redis-py 在 Asyncio 下每个连接有**小概率返回错数据**：约 **1.2%** 的活跃 Plus 用户在约 **9 小时**窗口内，姓名 / 邮箱 / 账单地址 / 信用卡后四位被另一活跃用户看到，另有他人对话标题 / 首条消息可见。修复是加冗余校验、确保返回数据匹配请求者。**踩中**：共享缓存 + 并发竞态 + 缺归属校验 → 跨租户串味。**展开**：[跨会话记忆串味](./04-rag-agents/cross-session-memory-bleed.mdx) · **一手**：[OpenAI 官方复盘](https://openai.com/index/march-20-chatgpt-outage/)。
+
+- **NYT v. OpenAI 数据保全令（2025-05 起）** —— 诉讼中，纽约南区法院一度下令 OpenAI **保全并隔离「所有本应删除的输出日志数据」**，覆盖消费 ChatGPT 与 API；该义务约在 2025-09 下旬结束、随后被终止，OpenAI 恢复标准做法（官方称已删对话通常约 30 天内从系统删除）。它坐实：你以为「已删 / 到期即删」的数据，**可被外部法律令冻结**。**踩中**：删除 / 留存被法律推翻。**展开**：[推理服务数据边界](./06-governance-compliance/inference-service-data-boundary.mdx)、[持久记忆的隐私与留存](./06-governance-compliance/persistent-agent-memory-privacy.mdx)。（时间线综合 OpenAI 官方声明与公开司法报道，引用前核当下裁定。）
+
+- **⚠️ o3 / o4-mini 照片反向定位热潮（2025-04）** —— 新模型发布后，用户发现前沿多模态模型很擅长从一张普通照片反推城市、地标乃至餐厅酒吧，一时病毒式流行；报道明说它「不用元数据、不用 GPS，就是看图」，把 doxxing 门槛压低。**⚠️ 诚实标注**：属新闻报道（**二手来源**），同一报道也点出并非稳定精准（旧 GPT-4o 有时更准）——本书据此只**定性**说「能力已部署且被广泛使用」，不引厂商级精确定位准确率。**踩中**：推理期从图像内容推断敏感属性（地点）。**展开**：[多模态地理定位推断](./03-conversational-llms/vlm-geolocation-inference.mdx) · **一手**：[TechCrunch 报道（二手）](https://techcrunch.com/2025/04/17/the-latest-viral-chatgpt-trend-is-doing-reverse-location-search-from-photos/)。
+
+## B · 里程碑攻击演示 / 实证
+
+下面这些不是「事故」，而是同行评审或公开可复算的攻击演示——它们证明「这类泄露真能做成」。绝对数字均绑定各自实验设置。
+
+- **文本训练数据抽取搬上生产模型（Nasr 等 · 2023）** —— 用一个让模型「不断重复某个词」的提示，诱使 ChatGPT 这类已对齐的生产模型**发散**、成段吐出训练数据（含真实 PII），把可提取数据产出率拉高约 **150×**。它把「训练数据抽取」从「实验室对 GPT-2」推到「线上闭源大模型也成立」。**证明**：对齐与聊天封装挡不住已进权重的记忆被抽出。**展开**：[训练数据抽取](./02-memorization-extraction/training-data-extraction.mdx) · **一手**：[Nasr 等，Scalable Extraction，arXiv 2311.17035](https://arxiv.org/abs/2311.17035)。
+
+- **扩散模型吐回训练图（Carlini 等 · USENIX Security 2023）** —— generate-and-filter 管线从 Stable Diffusion 这类广泛使用的开源文生图模型里抽出训练图（严格判据约 **94** 张、放宽约 **109** 张近似复制），内容横跨真实人物照片到商标 logo，并指出扩散模型比 GAN 更不私密。**证明**：「生成模型只画新图、不吐原图」是错的。**展开**：[多模态训练图像抽取](./02-memorization-extraction/multimodal-training-image-extraction.mdx) · **一手**：[Carlini 等，Extracting Training Data from Diffusion Models（USENIX Security 2023）](https://www.usenix.org/conference/usenixsecurity23/presentation/carlini)。
+
+- **嵌入反演回近似原文（Morris 等 · EMNLP 2023, Outstanding Paper）** —— vec2text 用「纠正—再嵌入」迭代逼近目标向量，把 32-token 文本从 GTR-base 嵌入**逐字精确还原约 92%**，并从临床记录嵌入还原出真实姓名。**证明**：「向量化 = 匿名化」是错的，存了向量等于存了一份可还原的敏感数据。**展开**：[嵌入反演](./04-rag-agents/embedding-inversion.mdx) · **一手**：[Morris 等，Text Embeddings Reveal (Almost) As Much As Text（EMNLP 2023）](https://aclanthology.org/2023.emnlp-main.765/)。
+
+- **KV-cache 侧信道重建他人 prompt（PromptPeek · NDSS 2025）** —— 在 SGLang 这类多租户推理框架（radix-tree KV-cache + 最长前缀匹配）上，用缓存命中 / 未命中的时序**逐 token 还原**别的用户的 prompt：已知模板时最高约 **99%**、无背景约 **95%**（⚠️ 数字绑定其受测框架与设置，不可外推）。它把 prompt 缓存侧信道从「探测复用」推到「重建正文」。**证明**：加密不挡时序 / 缓存侧信道，边界要算到部署层。**展开**：[推理期侧信道](./05-frontier-deployment/inference-side-channels.mdx) · **一手**：[I Know What You Asked（PromptPeek，NDSS 2025）](https://www.ndss-symposium.org/ndss-paper/i-know-what-you-asked-prompt-leakage-via-kv-cache-sharing-in-multi-tenant-llm-serving/)。
+
+- **从模型反推敏感基因型（Fredrikson 等 · USENIX Security 2014）** —— 从一个个性化华法林剂量模型加上部分人口学信息，反推出患者的敏感基因型。这是模型反演 / 属性推断最早的端到端真实案例研究之一。**证明**：模型的输出 / 置信度本身能被用来反推训练相关的敏感属性。**展开**：[模型反演与属性推断](./01-foundations/model-inversion-attribute-inference.mdx) · **一手**：[Fredrikson 等，Privacy in Pharmacogenetics（USENIX Security 2014）](https://www.usenix.org/conference/usenixsecurity14/technical-sessions/presentation/fredrikson_matthew)。
+
+:::tip 怎么用这张索引
+先在对应条目里读懂**机制 + 怎么防**，再回这里把它当「犯罪现场照片」看——现实里翻车的样子和代价，比任何告诫都更能说明「为什么这条基线不能省」（对照 [最小隐私基线](./baseline.mdx)）。两个提醒：**生产事故**里没上榜的厂商不等于没风险，只是没被公开复盘；**实证演示**里的绝对数字都绑定各自实验设置，别直接搬到你的端点。
+:::
