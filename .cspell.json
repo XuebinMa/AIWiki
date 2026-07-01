@@ -402,6 +402,17 @@
     "leakability",
     "regressable",
     "regressible",
-    "scoreable"
+    "scoreable",
+    "CVPR",
+    "Jagielski",
+    "Oprea",
+    "Ullman",
+    "Steinke",
+    "RWKU",
+    "Rényi",
+    "Somepalli",
+    "denoise",
+    "memorizations",
+    "miswritten"
   ]
 }
