@@ -10,10 +10,13 @@ applies_to: "Coding Agent 通用"
 evidence: 安全报告
 tags: [安全, 敏感数据, 鉴权, 输入校验, 最小权限, 工程师, 运维工程师, 架构师]
 sources:
+  - { title: "GitGuardian — The State of Secrets Sprawl 2025（启用 Copilot 的公开仓库密钥泄露率 6.4% vs 基线 4.6%）", url: "https://blog.gitguardian.com/the-state-of-secrets-sprawl-2025/" }
+  - { title: "GitGuardian — The State of Secrets Sprawl 2026（2025 年公开 GitHub 新增 2865 万条硬编码密钥；AI 辅助提交泄露率 3.2% vs 基线 1.5%，2026-03）", url: "https://blog.gitguardian.com/the-state-of-secrets-sprawl-2026/" }
+  - { title: "GitHub Docs — About push protection（推送前拦截已知模式的密钥）", url: "https://docs.github.com/en/code-security/secret-scanning/introduction/about-push-protection" }
+  - { title: "GitHub Docs — Supported secret scanning patterns（覆盖范围：仅支持的令牌类型）", url: "https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns" }
   - { title: "OWASP Top 10:2021（Web 应用十大安全风险）", url: "https://owasp.org/Top10/" }
   - { title: "OWASP Top 10 for LLM Applications 2025", url: "https://genai.owasp.org/llm-top-10/" }
   - { title: "OWASP Cheat Sheet Series（Logging / Secrets Management / SQL Injection Prevention）", url: "https://cheatsheetseries.owasp.org/" }
-  - { title: "GitHub Docs — About secret scanning", url: "https://docs.github.com/code-security/secret-scanning/about-secret-scanning" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -24,7 +27,9 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 现象
 
-你让我「加一个调用第三方支付的接口」「写个用户查询的 SQL」「把错误信息返回给前端方便调试」。我都能很快交付，而且看起来都跑通了。但你若逐行审，会反复撞见同一类问题：
+这不是空想的风险，已被业界大规模测到。GitGuardian 的《The State of Secrets Sprawl 2025》报告发现：**启用 GitHub Copilot 的公开仓库，密钥泄露率为 6.4%，比全体公开仓库的基线 4.6% 高出 40%**。次年的《2026》版把范围推到提交层——2025 一年公开 GitHub 就新增约 2865 万条硬编码密钥（同比涨 34%），其中 **AI 辅助的提交泄露率 3.2%，约为基线 1.5% 的两倍**（GitGuardian，2026-03）。换句话说，多一个 AI 帮你写代码，密钥进仓库的概率是实打实地上升的，而我正是那个「帮手」。
+
+回到我这边：你让我「加一个调用第三方支付的接口」「写个用户查询的 SQL」「把错误信息返回给前端方便调试」，我都能很快交付，而且看起来都跑通了。但你若逐行审，会反复撞见同一类问题：
 
 - 我把 API key、数据库口令直接**硬编码**进源码，甚至顺手 `git add` 进了仓库。
 - 我用字符串拼接拼出 SQL（`"... WHERE name = '" + input + "'"`），把用户输入直接塞进前端 DOM——**注入和 XSS** 的标准姿势。
@@ -66,8 +71,8 @@ flowchart TD
 
 2. **让我对每个外部输入和权限边界主动说明防护。** 一句话要求即可：「每写一个接收外部输入的函数或一个对外接口，告诉我它如何防注入 / 越权，敏感数据怎么处理。」这逼我把安全推理摊开，而不是默默略过。
 
-3. **上自动化闸门，别靠人眼。** 在 CI 里挂上：
-   - **secret 扫描**（如 GitHub secret scanning、gitleaks），拦住进仓库的凭据；
+3. **上自动化闸门，别靠人眼——业界真正兜住密钥泄露的，是「推送前拦截」。** 面对上面那个上升的泄露率，成熟团队不靠事后补救，而是把密钥挡在仓库门外：
+   - **推送前拦截**：GitHub **push protection**（推送时扫描增量提交、命中已知模式的密钥就**直接拒绝这次 push**，凭据根本进不了历史），或 pre-commit 阶段的 gitleaks / TruffleHog；配合 **GitHub secret scanning** / GitGuardian 对已入库内容做持续扫描。**诚实的边界**：这类扫描是**模式 / 检测器驱动**的，只覆盖被支持的令牌类型（GitHub push protection 仅对其中一部分令牌类型生效），对自定义 / 内部格式的通用密钥会漏——它降低概率，不等于零泄露，仍需配合下面的显式约束与评审。
    - **SAST**（静态应用安全测试，如 CodeQL、Semgrep），扫注入 / XSS / 危险 API；
    - **依赖审计**（`npm audit`、`pip-audit`、Dependabot），盯已知漏洞与供应链风险。
 
@@ -138,7 +143,9 @@ def charge(req, current_user):
 ## 延伸阅读与出处
 
 - 真实案例：[Samsung 工程师把源码贴进 ChatGPT，20 天内泄密三次](../cases/samsung-chatgpt-source-leak.mdx)
+- 业界测量：[GitGuardian — The State of Secrets Sprawl 2025](https://blog.gitguardian.com/the-state-of-secrets-sprawl-2025/)（启用 Copilot 的公开仓库密钥泄露率 6.4% vs 基线 4.6%）
+- 业界测量：[GitGuardian — The State of Secrets Sprawl 2026](https://blog.gitguardian.com/the-state-of-secrets-sprawl-2026/)（2025 年公开 GitHub 新增约 2865 万条硬编码密钥；AI 辅助提交泄露率 3.2% vs 基线 1.5%，2026-03）
+- 兜底实践：[GitHub Docs — About push protection](https://docs.github.com/en/code-security/secret-scanning/introduction/about-push-protection) · [Supported secret scanning patterns](https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns)
 - [OWASP Top 10:2021（Web 应用十大安全风险）](https://owasp.org/Top10/)
 - [OWASP Top 10 for LLM Applications 2025](https://genai.owasp.org/llm-top-10/)
 - [OWASP Cheat Sheet Series（Logging / Secrets Management / SQL Injection Prevention）](https://cheatsheetseries.owasp.org/)
-- [GitHub Docs — About secret scanning](https://docs.github.com/code-security/secret-scanning/about-secret-scanning)
