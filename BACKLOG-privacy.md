@@ -161,7 +161,7 @@
 
 #### 2026-07 轮 · 前沿新攻防面扫描（业界实践优先；4 簇 fan-out，已核一手源）
 
-> 承用户「业界实践 > 学术」指示，本轮侧重 2025–2026 前沿新面 + 各家线上真实做法 / 事故。四个前沿簇（多模态 / 推理、私有提示与 DP、Agent / 协议层、供应链与审计）并行核源，去重基线 = 现有 `privacy/` 32 条。**Tier A 四条（全 maturity=生产、全厂商 / 政府 / 事件一手源）本波写作中 → 草稿 PR 待用户过目**；其余入储备，下轮或按需立项。标 ⚠️ 为 preprint / 待核，写前再核。已当场复核的顶会源：Leaky Thoughts EMNLP 2025 主会 ✅、Mission: Impossible PoPETs 2025-0137 ✅、RWKU NeurIPS 2024 D&B ✅、MAGPIE 系 NeurIPS 2025 **Workshop（ResponsibleFM）非主会** ⚠️。
+> 承用户「业界实践 > 学术」指示，本轮侧重 2025–2026 前沿新面 + 各家线上真实做法 / 事故。四个前沿簇（多模态 / 推理、私有提示与 DP、Agent / 协议层、供应链与审计）并行核源，去重基线 = 现有 `privacy/` 32 条。**✅ 本轮结束：Tier A + B + C 全 12 条已落地 PR #72（隐私 32 → 44，中英镜像齐、六道闸门全过）**——分三波（Wave 4/5/6）子代理起草 + 主控质量过（含 AgentLeak 数字区间化、Apple AFM 3 年份订正、多处红线散文化等独立复核改正）。仅剩 3 条并入 / 搁置（见文末「并入 / 搁置」）。标 ⚠️ 为 preprint / 待核，写前再核。已当场复核的顶会源：Leaky Thoughts EMNLP 2025 主会 ✅、Mission: Impossible PoPETs 2025-0137 ✅、RWKU NeurIPS 2024 D&B ✅、MAGPIE 系 NeurIPS 2025 **Workshop（ResponsibleFM）非主会** ⚠️。
 
 **Tier A（业界实践最强，本波写作中）**
 
