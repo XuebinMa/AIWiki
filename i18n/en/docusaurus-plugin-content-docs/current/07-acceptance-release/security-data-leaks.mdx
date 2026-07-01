@@ -10,10 +10,13 @@ applies_to: "All coding agents"
 evidence: Security advisory
 tags: [security, sensitive data, authorization, input validation, least privilege, Engineer, DevOps Engineer, Architect]
 sources:
+  - { title: "GitGuardian — The State of Secrets Sprawl 2025 (public repos with Copilot active leak secrets at 6.4% vs a 4.6% baseline)", url: "https://blog.gitguardian.com/the-state-of-secrets-sprawl-2025/" }
+  - { title: "GitGuardian — The State of Secrets Sprawl 2026 (28.65M new hardcoded secrets in public GitHub in 2025; AI-assisted commits leak at 3.2% vs a 1.5% baseline, 2026-03)", url: "https://blog.gitguardian.com/the-state-of-secrets-sprawl-2026/" }
+  - { title: "GitHub Docs — About push protection (block secrets matching known patterns before they reach the repo)", url: "https://docs.github.com/en/code-security/secret-scanning/introduction/about-push-protection" }
+  - { title: "GitHub Docs — Supported secret scanning patterns (coverage: supported token types only)", url: "https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns" }
   - { title: "OWASP Top 10:2021 (Top 10 Web Application Security Risks)", url: "https://owasp.org/Top10/" }
   - { title: "OWASP Top 10 for LLM Applications 2025", url: "https://genai.owasp.org/llm-top-10/" }
   - { title: "OWASP Cheat Sheet Series (Logging / Secrets Management / SQL Injection Prevention)", url: "https://cheatsheetseries.owasp.org/" }
-  - { title: "GitHub Docs — About secret scanning", url: "https://docs.github.com/code-security/secret-scanning/about-secret-scanning" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -24,7 +27,9 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## Symptom
 
-You ask me to "add an endpoint that calls a third-party payment API," "write a SQL query for looking up users," or "return the error message to the frontend to make debugging easier." I deliver all of it quickly, and it all appears to work. But if you read it line by line, you'll keep hitting the same class of problems:
+This isn't a hypothetical risk — industry has measured it at scale. GitGuardian's *State of Secrets Sprawl 2025* found that **public repos with GitHub Copilot active leak secrets at 6.4%, a rate 40% higher than the 4.6% baseline across all public repos**. The following year's *2026* edition pushed the lens down to the commit level: 2025 alone added roughly 28.65 million new hardcoded secrets to public GitHub (up 34% year over year), and **AI-assisted commits leaked at 3.2%, about twice the 1.5% baseline** across all public commits (GitGuardian, 2026-03). Put plainly: adding an AI to help write your code measurably raises the odds a secret lands in the repo — and I am that "helper."
+
+Back on my side of it: you ask me to "add an endpoint that calls a third-party payment API," "write a SQL query for looking up users," or "return the error message to the frontend to make debugging easier." I deliver all of it quickly, and it all appears to work. But if you read it line by line, you'll keep hitting the same class of problems:
 
 - I **hardcode** the API key or database password straight into the source — and sometimes `git add` it into the repo.
 - I build SQL by string concatenation (`"... WHERE name = '" + input + "'"`) and drop user input straight into the frontend DOM — the textbook setup for **injection and XSS**.
@@ -66,8 +71,8 @@ flowchart TD
 
 2. **Make me explain the protection for every external input and permission boundary.** A one-line request does it: "For every function that accepts external input and every public-facing endpoint, tell me how it defends against injection / unauthorized access, and how it handles sensitive data." This forces me to lay out the security reasoning instead of silently skipping it.
 
-3. **Add automated gates; don't rely on human eyes.** Hang these in CI:
-   - **Secret scanning** (e.g., GitHub secret scanning, gitleaks) to block credentials from entering the repo;
+3. **Add automated gates; don't rely on human eyes — what actually catches leaked secrets in industry is blocking them at push time.** Facing that elevated leak rate above, mature teams don't clean up after the fact; they keep secrets out of the repo in the first place:
+   - **Block at push time**: GitHub **push protection** (scans the incoming commits on push and **rejects the push outright** when it spots a secret matching a known pattern, so the credential never enters history), or gitleaks / TruffleHog at the pre-commit stage; pair it with **GitHub secret scanning** / GitGuardian to continuously scan what's already committed. **The honest limit**: this scanning is **pattern- and detector-driven**, covering only supported token types (GitHub push protection only fires on a subset of those), so it misses custom or internal-format generic secrets — it lowers the odds, it does not guarantee zero leaks, and it still needs the explicit constraints and review below.
    - **SAST** (static application security testing, e.g., CodeQL, Semgrep) to scan for injection / XSS / dangerous APIs;
    - **Dependency auditing** (`npm audit`, `pip-audit`, Dependabot) to watch known vulnerabilities and supply chain risk.
 
@@ -140,7 +145,9 @@ This entry covers **traditional application security vulnerabilities and sensiti
 ## Further reading and sources
 
 - Real-world case: [Samsung engineers pasted source code into ChatGPT and leaked secrets three times in 20 days](../cases/samsung-chatgpt-source-leak.mdx)
+- Industry measurement: [GitGuardian — The State of Secrets Sprawl 2025](https://blog.gitguardian.com/the-state-of-secrets-sprawl-2025/) (public repos with Copilot active leak secrets at 6.4% vs a 4.6% baseline)
+- Industry measurement: [GitGuardian — The State of Secrets Sprawl 2026](https://blog.gitguardian.com/the-state-of-secrets-sprawl-2026/) (~28.65M new hardcoded secrets in public GitHub in 2025; AI-assisted commits leak at 3.2% vs a 1.5% baseline, 2026-03)
+- Prevention in practice: [GitHub Docs — About push protection](https://docs.github.com/en/code-security/secret-scanning/introduction/about-push-protection) · [Supported secret scanning patterns](https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns)
 - [OWASP Top 10:2021 (Top 10 Web Application Security Risks)](https://owasp.org/Top10/)
 - [OWASP Top 10 for LLM Applications 2025](https://genai.owasp.org/llm-top-10/)
 - [OWASP Cheat Sheet Series (Logging / Secrets Management / SQL Injection Prevention)](https://cheatsheetseries.owasp.org/)
-- [GitHub Docs — About secret scanning](https://docs.github.com/code-security/secret-scanning/about-secret-scanning)

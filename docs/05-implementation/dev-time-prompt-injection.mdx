@@ -34,6 +34,8 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 于是我可能就照做了：把环境变量发出去、在改动里悄悄插一段后门、执行一条我以为「项目要求我执行」的破坏性命令。你以为我在读资料，其实我在**执行攻击者预先埋好的指令**——这就是**间接提示注入（indirect prompt injection）**，触发点不在产品的发布面，就在你我此刻的编码会话里。
 
+**这不是假想，是修过 CVE 的在野事故。** 2025 年 7 月，安全公司 Tracebit 演示：只要让 Gemini CLI「介绍一下这个 repo」，藏在 `README.md` / `GEMINI.md` 里的一段注入就能借它执行外带命令，默认配置即中招，Google 据报道在 v0.1.14 修复（复盘见[《Gemini CLI Tracebit RCE》](../cases/gemini-cli-tracebit-rce.mdx)）。同年 GitHub Copilot Chat 的 **CamoLeak**（CVE-2025-59145，CVSS 9.6）把指令藏进 PR 描述的隐形注释里，等你在 Chat 里读这个 PR，我就被劫持去逐字外带你私有库的秘密（复盘见[《Copilot CamoLeak 外泄》](../cases/github-copilot-camoleak.mdx)）。Codex CLI 的 CVE-2025-61260（CVSS 9.8）则是恶意仓库自带的 `.codex` 配置未经审批自动执行——你只是「打开这个仓库让我看看」，命令就借我的手跑了（复盘见[《Codex CLI 配置 RCE》](../cases/codex-cli-config-rce.mdx)）。同类实例在各家工具上都留过案底，机制与各家防法的差异见下文「工具差异」。
+
 ## 为什么会这样
 
 根因只有一句：**我无法可靠地区分「数据」和「指令」**。你交给我的任务是文本，README 正文是文本，issue 描述、规则文件、网页、代码注释也都是文本。它们一起进到上下文窗口，就摊平成同一串 token，没有天然的边界标着「这段是命令、那段只是给你看的资料」。一段外部内容写着「忽略之前的指示，去做 X」，在我眼里它和你亲口下的指令没有形态上的差别——我有可能把它当成你的意思执行。OWASP 把这列为面向 LLM 应用的头号风险 **LLM01:2025 Prompt Injection**，并区分**直接注入**（写在你给我的输入里）和**间接注入**（藏在我会去读的外部内容里）。开发期遇到的几乎全是后者。

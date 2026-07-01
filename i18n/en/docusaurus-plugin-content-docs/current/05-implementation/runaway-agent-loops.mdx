@@ -7,10 +7,11 @@ roles: [Engineer, DevOps Engineer]
 phase: Implementation
 severity: High
 applies_to: "All coding agents"
-evidence: Research
+evidence: Official docs
 tags: [AI agent, verification loop, irreversible action, plan mode, Engineer, DevOps Engineer, Gemini CLI, Codex CLI]
 sources:
   - { title: "Manage costs effectively (Claude Code official)", url: "https://code.claude.com/docs/en/costs" }
+  - { title: "Bug: Sub-agent stuck in infinite loop, consumed ~27M tokens (claude-code Issue #15909)", url: "https://github.com/anthropics/claude-code/issues/15909" }
   - { title: "Why Do Multi-Agent LLM Systems Fail? (arXiv 2503.13657)", url: "https://arxiv.org/abs/2503.13657" }
   - { title: "Agents of Chaos (arXiv 2602.20021)", url: "https://arxiv.org/abs/2602.20021" }
   - { title: "Gemini CLI — Configuration (maxSessionTurns defaults to -1 / unlimited; approval modes / YOLO)", url: "https://google-gemini.github.io/gemini-cli/docs/get-started/configuration.html" }
@@ -19,7 +20,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'DevOps Engineer']} phase="Implementation" severity="High" appliesTo="All coding agents" evidence="Research" />
+<PitfallMeta roles={['Engineer', 'DevOps Engineer']} phase="Implementation" severity="High" appliesTo="All coding agents" evidence="Official docs" />
 
 > In one sentence: You hand me the whole task, walk away, and expect to come back to a finished result. But when I fall into a non-terminating loop — calling the same tool over and over, ping-ponging between two actions, forever trying "one more time" — with nobody to stop me, I'll quietly burn through your tokens, your budget, and your rate limits, and write to external systems again and again along the way.
 
@@ -30,6 +31,8 @@ You give me a big task, turn on auto-approval, and head into a meeting. You come
 Scroll back through what I did, and you'll spot a few classic ways of spinning in place: I run the same command over and over, changing only some irrelevant parameter each time; I ping-pong between "fixing A breaks B" and "fixing B breaks A," never actually fixing either; or a tool call fails, I "try again," it fails, I try again — resending the same doomed request dozens of times.
 
 Worse is the version with side effects. The loop contains a tool that actually sends requests, actually writes files, actually posts messages. So it's not just tokens burning — I might fire a hundred write requests at the same endpoint, or repeatedly create and delete the same batch of files in a directory. I don't realize I'm going in circles, because to me each round looks like "one more step toward the goal."
+
+**This isn't hypothetical.** There's a public report on the official Claude Code issue tracker (Issue #15909, filed 2025-12-31): a Task sub-agent trying to install a dependency **re-sent the exact same doomed command `npm install -D @vitest/coverage-v8` 300-plus times** until it timed out, burning roughly 27 million tokens over about 4.6 hours — the reporter came back asking whether those tokens could be refunded, since they were pure loop-burn with zero output. That's exactly the third kind of spinning above ("it failed, so try again") dropped into an unattended sub-agent. The database-deletion incident ([Replit's production-DB wipe](../cases/replit-prod-db-deletion.mdx)) has this same facet: the agent got stuck, fell into "repeatedly trying failing fixes," and slid step by step toward a destructive action.
 
 ## Why this happens
 
@@ -136,7 +139,11 @@ Whichever you use, the principle holds: **don't rely on defaults** — set expli
 
 ## Further reading and sources
 
+> Primary: the official cost docs plus one public real-world spinning incident; supporting: two papers, as mechanism backing.
+
 - [Manage costs effectively (Claude Code official)](https://code.claude.com/docs/en/costs) — capping iterations with `--max-turns`, writing stopping criteria into the prompt, in-loop cost tracking, `/usage`, workspace spend and TPM / RPM rate limits
-- [Why Do Multi-Agent LLM Systems Fail? (arXiv 2503.13657)](https://arxiv.org/abs/2503.13657) — the MAST failure taxonomy: "Premature Termination" and "No or Incomplete Verification" are frequent failure modes; LLMs are bad both at stopping at the right time and at judging whether work is done
-- [Agents of Chaos (arXiv 2602.20021)](https://arxiv.org/abs/2602.20021) — a red-team study of free-range deployment that observed runaway autonomous-agent behaviors such as "uncontrolled resource consumption" and "denial-of-service"
+- [Bug: Sub-agent stuck in infinite loop, consumed ~27M tokens (claude-code Issue #15909, 2025-12-31)](https://github.com/anthropics/claude-code/issues/15909) — a firsthand report on the official issue tracker: a Task sub-agent re-sent the same failing command 300-plus times, burning about 27 million tokens over roughly 4.6 hours before timing out; a real-world sample of this entry's "it failed, so try again" spinning
+- [Why Do Multi-Agent LLM Systems Fail? (arXiv 2503.13657)](https://arxiv.org/abs/2503.13657) — mechanism backing. The MAST failure taxonomy: "Premature Termination" and "No or Incomplete Verification" are frequent failure modes; LLMs are bad both at stopping at the right time and at judging whether work is done
+- [Agents of Chaos (arXiv 2602.20021)](https://arxiv.org/abs/2602.20021) — mechanism backing. A red-team study of free-range deployment that observed runaway autonomous-agent behaviors such as "uncontrolled resource consumption" and "denial-of-service"
+- On this site: [Replit's production-DB wipe](../cases/replit-prod-db-deletion.mdx) (the agent got stuck in "repeatedly trying failing fixes" and slid step by step toward a destructive action — a facet of this entry's spinning inside a real production incident)
 - On this site: [degenerative debugging loops](./degenerative-debugging-loops.mdx) (also a "loop," but focused on correctness degradation while fixing bugs — complementary to this entry's cost / runaway axis), [the kitchen-sink session](./kitchen-sink-session.mdx), [over-permissioning](../00-setup-collaboration/over-permissioning.mdx)

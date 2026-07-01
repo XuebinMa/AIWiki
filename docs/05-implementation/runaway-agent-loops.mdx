@@ -7,10 +7,11 @@ roles: [工程师, 运维工程师]
 phase: 编码实现
 severity: 高
 applies_to: "Coding Agent 通用"
-evidence: 研究支持
+evidence: 官方文档
 tags: [AI 代理, 验证闭环, 不可逆操作, 计划模式, 工程师, 运维工程师, Gemini CLI, Codex CLI]
 sources:
   - { title: "Manage costs effectively（Claude Code 官方）", url: "https://code.claude.com/docs/en/costs" }
+  - { title: "Bug: Sub-agent stuck in infinite loop, consumed ~27M tokens（claude-code Issue #15909）", url: "https://github.com/anthropics/claude-code/issues/15909" }
   - { title: "Why Do Multi-Agent LLM Systems Fail?（arXiv 2503.13657）", url: "https://arxiv.org/abs/2503.13657" }
   - { title: "Agents of Chaos（arXiv 2602.20021）", url: "https://arxiv.org/abs/2602.20021" }
   - { title: "Gemini CLI — Configuration（maxSessionTurns 默认 -1 无限；审批模式 / YOLO）", url: "https://google-gemini.github.io/gemini-cli/docs/get-started/configuration.html" }
@@ -19,7 +20,7 @@ sources:
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '运维工程师']} phase="编码实现" severity="高" appliesTo="Coding Agent 通用" evidence="研究支持" />
+<PitfallMeta roles={['工程师', '运维工程师']} phase="编码实现" severity="高" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
 > 一句话摘要：你把任务整个丢给我、转身去忙别的，指望回来就收成果。但当我陷进非终止的循环——反复调同一个工具、在两个动作间来回横跳、永远「再试一次」——没人喊停，我就会安静地把你的 token、预算和速率配额一路烧穿，顺带对外部系统反复写。
 
@@ -30,6 +31,8 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 翻一下我这段时间干了什么，你会看到几种典型的打转：我反复跑同一个命令、每次只换一个无关紧要的参数；我在「改 A 导致 B 坏」和「改 B 导致 A 坏」之间来回横跳，谁也没真正修好；或者一个工具调用失败了，我「再试一次」，又失败，再试，把同一个注定失败的请求重发了几十遍。
 
 更糟的是带副作用的那种：我循环里夹着一个会真发请求、真写文件、真发消息的工具。于是不只是 token 在烧——我可能给同一个接口连发上百次写请求，或者在一个目录里反复创建/删除同一批文件。我没意识到自己在原地转，因为对我来说，每一轮看起来都像是「朝目标又推进了一步」。
+
+**这不是假想。** Claude Code 官方 issue 追踪器上有一条公开报告（Issue #15909，2025-12-31 提交）：一个 Task 子代理为了装依赖，把同一条注定失败的命令 `npm install -D @vitest/coverage-v8` **原样重发了 300 多次**，直到超时才停，一口气烧掉约 2700 万 token、约 4.6 小时——报告者事后来问能不能退这些 token，因为它们纯粹是 agent 打转烧的、毫无产出。这正是上面第三种打转（「失败就再试一次」）放到无人值守子代理里的样子。删库那次事故（[Replit 删生产库](../cases/replit-prod-db-deletion.mdx)）的一个侧面也是这个：agent 卡住后陷进「反复尝试失败的修法」，才一步步滑向破坏性操作。
 
 ## 为什么会这样
 
@@ -135,7 +138,11 @@ while not done:
 
 ## 延伸阅读与出处
 
+> 主要：官方成本文档 + 一条公开的真实打转事故；补充：两篇论文做机制背书。
+
 - [Manage costs effectively（Claude Code 官方）](https://code.claude.com/docs/en/costs) —— `--max-turns` 封顶、把停止条件写进提示、循环内成本追踪、`/usage`、工作区开销与 TPM / RPM 速率上限
-- [Why Do Multi-Agent LLM Systems Fail?（arXiv 2503.13657）](https://arxiv.org/abs/2503.13657) —— MAST 失败分类：「过早终止」与「缺失 / 不完整验证」是高频失败模式，LLM 既不擅长在对的时候停、也不擅长判断是否完成
-- [Agents of Chaos（arXiv 2602.20021）](https://arxiv.org/abs/2602.20021) —— 放养式部署的红队研究，观测到「不受控的资源消耗」「拒绝服务式」等自主代理失控行为
+- [Bug: Sub-agent stuck in infinite loop, consumed ~27M tokens（claude-code Issue #15909，2025-12-31）](https://github.com/anthropics/claude-code/issues/15909) —— 官方 issue 追踪器上的一手报告：Task 子代理把同一条失败命令重发 300 多次、烧约 2700 万 token / 约 4.6 小时后才超时；本条「失败就再试一次」打转的现实样本
+- [Why Do Multi-Agent LLM Systems Fail?（arXiv 2503.13657）](https://arxiv.org/abs/2503.13657) —— 机制背书。MAST 失败分类：「过早终止」与「缺失 / 不完整验证」是高频失败模式，LLM 既不擅长在对的时候停、也不擅长判断是否完成
+- [Agents of Chaos（arXiv 2602.20021）](https://arxiv.org/abs/2602.20021) —— 机制背书。放养式部署的红队研究，观测到「不受控的资源消耗」「拒绝服务式」等自主代理失控行为
+- 同站延伸案例：[Replit 删生产库](../cases/replit-prod-db-deletion.mdx)（agent 卡住后陷进「反复尝试失败的修法」、一步步滑向破坏性操作，是本条打转在生产事故里的一个侧面）
 - 同站延伸：[退化式调试循环](./degenerative-debugging-loops.mdx)（同为「循环」，但聚焦修 bug 时的正确性退化，与本条的成本 / 失控维度互补）、[厨房水槽式会话](./kitchen-sink-session.mdx)、[过度授权](../00-setup-collaboration/over-permissioning.mdx)
