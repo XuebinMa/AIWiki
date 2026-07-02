@@ -1,0 +1,39 @@
+---
+title: "The essential 12"
+slug: core-12
+sidebar_position: 0.5
+sidebar_label: The essential 12
+description: If you only read 12 entries, read these — the high-priority picks from all 44, ranked by "engineers hit it earliest + the false security costs the most."
+---
+
+# The essential 12
+
+All [44 entries](./map.mdx) too many, and no idea where to start? Read these 12 first.
+
+**How they were picked** (stated up front, so this doesn't become a subjective list): take the `severity: high` entries first, then rough-rank along two axes — **engineers building LLM features hit it earliest**, and **its false security costs the most** (once data crosses the boundary, it doesn't come back). Three entries are severity "medium" but belong to the governance and formal-defense basics you'll get wrong in your very first project if you skip them (data boundary, machine unlearning, DP) — they made the cut too. Finish these 12 and you've dodged the most common, most expensive privacy false-security beliefs.
+
+To understand **why** these leaks happen, go to the [Mechanism index](./mechanisms.mdx); before shipping, walk the [Minimum privacy baseline](./baseline.mdx); for the real-world cost, read [Real incidents & landmark demonstrations](./incidents.mdx).
+
+## Handed out / into the weights — it doesn't come back
+
+- ["They don't train on it" is one cell of the data boundary — verify the terms item by item, date-stamp them, and they still change.](./06-governance-compliance/inference-service-data-boundary.mdx)
+- [Private data fed into my training can be pulled back out verbatim by an outside attacker — alignment and the chat wrapper won't stop it.](./02-memorization-extraction/training-data-extraction.mdx)
+- [Personal information in the training corpus resurfaces in my conversations — scrubbing reduces it, never eliminates it.](./03-conversational-llms/pii-regurgitation.mdx)
+- [Deleting the source data doesn't mean I forgot it — and "proving it's truly forgotten" is harder than forgetting.](./05-frontier-deployment/machine-unlearning.mdx)
+
+## You assumed anonymized / isolated — it isn't
+
+- [Turning text into vectors is not anonymization — vectors reconstruct back to the original text, even verbatim.](./04-rag-agents/embedding-inversion.mdx)
+- [If retrieval isn't filtered by the caller's permissions, your knowledge base is everyone's knowledge base.](./04-rag-agents/rag-retrieval-leakage.mdx)
+- [Shared memory / caches without per-user isolation will serve one person's data to another — a real incident already happened.](./04-rag-agents/cross-session-memory-bleed.mdx)
+- [Deciding "is this record in the training set" is the root of most privacy attacks — membership itself is sensitive.](./01-foundations/membership-inference.mdx)
+
+## The new plaintext surfaces of the agent & reasoning era
+
+- [A single instruction hidden in content can drive me to send private context out through a tool — zero-click exfiltration has hit mainstream products.](./04-rag-agents/agent-tool-exfiltration.mdx)
+- [System prompts / conversation context / tool results are not secrets — they can be coaxed out.](./03-conversational-llms/context-surface-privacy.mdx)
+- [My "thinking" isn't private — the more I reason, the more leaks.](./03-conversational-llms/reasoning-trace-leakage.mdx)
+
+## Formal guarantees, used correctly
+
+- [DP gives "bounded single-sample influence" — ε isn't zero, and treating it as "zero leakage" is just another false security.](./03-conversational-llms/dp-fine-tuning.mdx)

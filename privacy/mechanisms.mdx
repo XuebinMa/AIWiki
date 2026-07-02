@@ -1,0 +1,121 @@
+---
+title: 泄露机制索引：为什么会漏
+slug: mechanisms
+sidebar_label: 机制索引
+sidebar_position: 9
+description: 按泄露根因浏览全部 44 条——与「隐私地图」的技术板块轴互补：板块答「用什么技术」，这页答「为什么会漏」。理解机制，缓解就不再是要背的清单，而是能自己推导的常识。
+---
+
+# 泄露机制索引：为什么会漏
+
+[隐私地图](./map.mdx)按**技术板块**（用什么技术）和**威胁矩阵**（担心什么泄露面）查；这页给第三条查询轴：按**泄露根因**（为什么会漏）。
+
+把 44 条按根因归拢，你会看到看似不相干的攻击其实同根：训练数据抽取与 PII 回吐是同一个「记忆进了权重」；梯度反演与嵌入反演是同一个「派生物仍是数据」。理解了根因，对应的缓解就不再是要背的清单，而是能自己推导的常识——这也是为什么每条的「残余风险」几乎都能从根因直接读出来。
+
+每条**只挂在它的主因机制下**（不少条目是多机制叠加，这里只取最主要的一个）。八个机制按数据的旅程大致排列：进训练 → 被推断 → 成派生物 → 进上下文 → 过基础设施 → 经 agent 之手 → 落在谁手里 → 受什么条款支配。
+
+## 1 · 记忆进了权重
+
+进过训练的数据会在参数里留下可恢复的痕迹——重复越多、模型越大，痕迹越深；已有公开演示能把它逐字（文本）或近似复制（图像）地抽回来。这份「记忆」不随源数据删除而消失，事后想移除（机器遗忘）既昂贵又难验证。
+
+> 正向镜像：训练前去重 + 数据最小化把痕迹压浅；发布前用探针量化「记住了多少」；把「删除」当成「遗忘 + 可验证」的工程闭环，而不是一句承诺。
+
+- [训练数据抽取](./02-memorization-extraction/training-data-extraction.mdx)
+- [多模态训练图像抽取](./02-memorization-extraction/multimodal-training-image-extraction.mdx)
+- [PII 回吐](./03-conversational-llms/pii-regurgitation.mdx)
+- [训练数据去重](./02-memorization-extraction/training-data-deduplication.mdx)
+- [隐私定向投毒](./02-memorization-extraction/privacy-poisoning.mdx)
+- [量化记忆与审计](./02-memorization-extraction/quantifying-memorization.mdx)
+- [可验证删除与机器遗忘](./05-frontier-deployment/machine-unlearning.mdx)
+- [遗忘可验证性](./05-frontier-deployment/unlearning-verification.mdx)
+- [遗忘基准与评测](./05-frontier-deployment/unlearning-benchmarks.mdx)
+
+## 2 · 输出与能力即推断面
+
+模型的输出、置信度乃至通用能力本身，携带着超出你意图给出的信息：对训练集能做成员 / 属性 / 反演推断、能把模型功能整个复刻走；对新输入也能推断出你没写的敏感属性（比如从照片推地点）。差分隐私是对这一根因最主要的形式化回应——但 ε 不为零，且声称的 ε 要审计才作数。
+
+> 正向镜像：用 DP 把「单样本影响」形式化限住、并用够强的攻击审出经验下界；限制置信度与输出粒度的暴露；对可推断敏感属性的能力加产品策略护栏。
+
+- [成员推断攻击](./01-foundations/membership-inference.mdx)
+- [模型反演与属性推断](./01-foundations/model-inversion-attribute-inference.mdx)
+- [属性 / 分布推断](./01-foundations/property-inference.mdx)
+- [多模态地理定位推断](./03-conversational-llms/vlm-geolocation-inference.mdx)
+- [模型抽取与窃取](./01-foundations/model-extraction-stealing.mdx)
+- [LoRA 适配器泄露](./05-frontier-deployment/lora-adapter-leakage.mdx)
+- [DP 微调](./03-conversational-llms/dp-fine-tuning.mdx)
+- [DP 审计](./02-memorization-extraction/dp-privacy-auditing.mdx)
+
+## 3 · 派生物仍是数据
+
+从原始数据加工出来的东西——梯度、中间激活、嵌入向量、聚合统计、合成样本——都还携带原数据的可还原信号。「不是原文」不等于「不泄露」：梯度能反演回训练样本、向量能还原回文本、聚合统计与合成数据不叠 DP 也构不成匿名。
+
+> 正向镜像：把每个派生物当原始数据管——梯度走安全聚合 + DP，向量库按敏感数据做访问控制，聚合与合成想要保证就叠形式化 DP 并算清效用账。
+
+- [梯度泄露](./05-frontier-deployment/gradient-leakage.mdx)
+- [拆分学习泄露](./05-frontier-deployment/split-learning-leakage.mdx)
+- [安全聚合](./05-frontier-deployment/secure-aggregation.mdx)
+- [生产级 DP·FL 部署](./05-frontier-deployment/dp-federated-learning.mdx)
+- [联邦分析](./05-frontier-deployment/federated-analytics.mdx)
+- [嵌入反演](./04-rag-agents/embedding-inversion.mdx)
+- [合成数据隐私](./06-governance-compliance/synthetic-data-privacy.mdx)
+
+## 4 · 上下文与输出通道是明文面
+
+放进上下文窗口的东西（系统提示词、会话历史、工具结果、few-shot 示例）对模型是明文，能被终端用户套出来；而输出不只「答案」一条通道——推理链把中间思考带出去，computer-use 截屏把整个屏幕看进来。「内部的 / 临时的」不等于「私密的」。
+
+> 正向镜像：别把秘密放进上下文，边界落在后端鉴权与按权限检索，而不是「叫模型别说」；把思维轨迹与屏幕捕获当会外泄的输出面，一样脱敏。
+
+- [上下文面隐私](./03-conversational-llms/context-surface-privacy.mdx)
+- [推理链泄露](./03-conversational-llms/reasoning-trace-leakage.mdx)
+- [DP 上下文学习](./03-conversational-llms/dp-in-context-learning.mdx)
+- [Computer-use 屏幕捕获隐私](./04-rag-agents/computer-use-screen-capture-privacy.mdx)
+
+## 5 · 共享基础设施串数据
+
+多租户共享的存储与缓存（检索库、会话记忆、KV-cache）一旦隔离失效——缺归属校验、并发竞态、跨租户复用——一个人的数据就会串给另一个人；即使不破隔离，共享层的时序 / 长度侧信道也能泄露内容。隔离靠系统，不靠模型。
+
+> 正向镜像：按用户 / 租户分区 + 归属校验 + 按「不串」压测并发；缓存要么按租户隔离、要么接受填充与随机化的性能代价。
+
+- [多租户 RAG 检索泄露](./04-rag-agents/rag-retrieval-leakage.mdx)
+- [跨会话记忆串味](./04-rag-agents/cross-session-memory-bleed.mdx)
+- [推理期侧信道](./05-frontier-deployment/inference-side-channels.mdx)
+
+## 6 · Agent 把数据搬出边界
+
+Agent 能读外部内容、调工具、连第三方服务——不可信内容里的注入指令能驱使它把私有上下文经工具外发；多 agent 协作时私有数据沿内部信道流动、比对外输出漏得更多；每接一个 MCP server 都在扩大「谁能拿到我的上下文」。搬运是主动的、成规模的，这是它比被动泄露更重的原因。
+
+> 正向镜像：出站收口在工具 / 渲染层而非指令层；接入面走最小采集并审子处理方；内部信道一样脱敏；发布前跑注入外泄基准。
+
+- [Agent 工具外联外泄](./04-rag-agents/agent-tool-exfiltration.mdx)
+- [MCP 数据流与最小采集](./04-rag-agents/mcp-data-flow-privacy.mdx)
+- [多智能体内部信道泄露](./04-rag-agents/multi-agent-internal-leakage.mdx)
+- [Agent 隐私评测（AgentDojo）](./04-rag-agents/agent-privacy-benchmark.mdx)
+
+## 7 · 明文暴露给基础设施方
+
+只要推理在别人的机器上跑，prompt 与权重在「使用中」这一刻对基础设施方（云厂商、平台、乃至同宿主的其他租户）默认可见。TEE / 机密推理把这一刻围进硬件飞地、HE·MPC 用密码学绕开明文、端侧把计算搬回你的设备——但每条路线都只是**转移**信任边界（芯片厂商、实现正确性、本机安全），不是消除它。
+
+> 正向镜像：选定路线后把「验证」做实——TEE 要验远程证明，端侧要核清「哪些仍回云」；把信任根（芯片商 / OS / 厂商）写进威胁模型，而不是当它不存在。
+
+- [可信执行环境](./01-foundations/trusted-execution-environment.mdx)
+- [同态加密 / 安全多方计算](./01-foundations/he-mpc.mdx)
+- [机密推理](./05-frontier-deployment/confidential-inference.mdx)
+- [端侧推理隐私](./05-frontier-deployment/on-device-inference-privacy.mdx)
+
+## 8 · 数据去向由条款与法律支配
+
+数据交给服务方之后，它被训练、留存、审查、转手、还是删除，由**条款与法律**而非技术决定——条款按端点 / 功能细分且频繁变动，法律保全令能冻结「到期即删」。「他们说不训练」只是其中一格；产品记忆按设计留存；删除要跨副本扇出才算数；「被训了吗」的溯源手段也有被改写抹掉的极限。
+
+> 正向镜像：逐项核条款、打日期、按季度复核（用[厂商数据边界清单](./vendor-data-boundary-checklist.mdx)）；把法律保全当威胁模型的一部分；删除做成跨副本、可审计的闭环。
+
+- [推理服务数据边界](./06-governance-compliance/inference-service-data-boundary.mdx)
+- [微调即服务隐私](./06-governance-compliance/ftaas-privacy.mdx)
+- [持久记忆的隐私与留存](./06-governance-compliance/persistent-agent-memory-privacy.mdx)
+- [数据生命周期与删除传播](./06-governance-compliance/data-lifecycle-deletion.mdx)
+- [LLM 水印与溯源](./06-governance-compliance/llm-watermarking.mdx)
+
+---
+
+:::tip 怎么用这张索引
+遇到一个新的泄露担忧，先问「它属于哪个根因」——多数「新」攻击是老根因换了模态或场景（图像抽取之于文本抽取、KV-cache 重建之于时序探测）。定位到桶，读桶里的条目，缓解思路就有了；再回[隐私地图](./map.mdx)的威胁矩阵核对「残余风险」，别把缓解当消除。
+:::
