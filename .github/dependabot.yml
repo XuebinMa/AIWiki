@@ -1,0 +1,13 @@
+# 依赖保鲜回路（2026-07 评审：npm 与 actions 两生态此前均无自动更新/告警机制）。
+# 盯两类：GitHub Actions 的版本引用、npm 依赖（含 Docusaurus 构建链的安全修复）。
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
