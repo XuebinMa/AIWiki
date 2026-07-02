@@ -8,7 +8,7 @@ phase: 编码实现
 severity: 中
 applies_to: "Claude Code 全版本"
 evidence: 官方文档
-tags: [上下文管理, 上下文压缩, 会话, 工程师]
+tags: [上下文管理, 上下文压缩, 会话, 工程师, Gemini CLI, Codex CLI, Cursor]
 sources:
   - { title: "Explore the context window — What survives compaction（Anthropic 官方）", url: "https://code.claude.com/docs/en/context-window" }
   - { title: "Manage costs effectively — Manage context proactively（Anthropic 官方）", url: "https://code.claude.com/docs/en/costs" }
@@ -91,6 +91,19 @@ flowchart TD
 我：（压完）已落盘 service 层抽取；待办：抽 repository 层。继续？
 你：继续。   ← 进度在 commit 和摘要里，接得上
 ```
+
+## 工具差异
+
+> 截至 2026-07，机制层面；触发阈值与默认值随版本变化很快，以各自当前文档为准。
+
+根因同一个——**压缩必有损，时机决定损失什么**；但各工具把「什么时候压、压成什么」做成了不同机制，别把一家的手感带到另一家：
+
+- **Claude Code**：手动 `/compact`（可附「保留什么」的聚焦指令）+ 接近上限自动压缩，`/context` 可视化当前占用——手动时机可控性最高，风险在「自动档替你选时机」。
+- **Gemini CLI**：`/compress` 把整段历史**替换**成一份摘要，另有按「占上限比例」配置的自动压缩阈值；想在压缩后存活的事实要先进 `/memory`，摘要替换本身不可逆。
+- **Codex CLI**：`/compact` 摘要回收 token；其压缩走服务端 compaction——摘要以**加密不可读**的形态携带前文状态，你无法像读普通摘要那样检查「丢了什么」。
+- **Cursor**：接近上限**自动**摘要 + `/summarize` 手动触发；大文件另走独立的按需压缩呈现——「对话摘要」与「文件压缩」是两条并行机制，别混为一谈。
+
+无论用哪家，原则不变：**压缩前把关键事实落到会话之外**（memory / 文件 / commit），把压缩当「有损检查点」而不是「无感延长上下文」。
 
 ## 版本说明
 

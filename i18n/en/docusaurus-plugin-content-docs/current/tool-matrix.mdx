@@ -10,7 +10,7 @@ sidebar_position: 9
 Most pitfalls in this book are **paradigm-level** — they come from the shared machinery of a large model plus tool-calling, long context, and auto-execution, so **you hit them in any tool**. By default, then, every entry applies across AI coding tools. This page indexes only the **two kinds of exception**: where the same root cause needs a **different guardrail in a different tool** (written up in an entry's "Tool differences" section), and where a pitfall comes from a **mechanism unique to one tool** (its own entry / a case).
 
 :::note Coverage depth (read it honestly)
-**Claude Code has the deepest coverage** and is the book's default reference (it applies to nearly every entry, so the matrix gives it no column of its own). **Gemini CLI, Codex CLI, Cursor, and GitHub Copilot** are the filled-in second batch, and the table below is each one's first set of tool differences — **Codex / Gemini (open-source, complete docs) are the most solid**; **Cursor / Copilot (proprietary, multi-mode, fast-changing) lean on security disclosures + official docs and are thinner**. The matrix lists **mechanism names only**, not exact commands, and it **goes stale fast** — when you act, defer to your version's official docs. As of 2026-06.
+**Claude Code has the deepest coverage** and is the book's default reference (it applies to nearly every entry, so the matrix gives it no column of its own). **Gemini CLI, Codex CLI, Cursor, and GitHub Copilot** are the filled-in second batch, and the table below is each one's first set of tool differences — **Codex / Gemini (open-source, complete docs) are the most solid**; **Cursor / Copilot (proprietary, multi-mode, fast-changing) lean on security disclosures + official docs and are thinner**. The matrix lists **mechanism names only**, not exact commands, and it **goes stale fast** — when you act, defer to your version's official docs. As of 2026-07.
 :::
 
 ## Coverage at a glance
@@ -29,8 +29,15 @@ Rows = pitfalls that have a "Tool differences" section (click in for each tool's
 | [CI permission blindspot](./07-acceptance-release/cicd-permission-blindspot.mdx) | ✓ | ✓ | ✓ | ✓ |
 | [Overwriting without checking file state](./05-implementation/ignoring-file-state-overwrite.mdx) | ✓ | ✓ | ✓ | ✓ |
 | [Runaway autonomous loops](./05-implementation/runaway-agent-loops.mdx) | ✓ | ✓ | – | – |
+| [Mistimed /compact](./05-implementation/compact-timing.mdx) | ✓ | ✓ | ✓ | – |
+| [Poor git hygiene](./05-implementation/git-hygiene.mdx) | ✓ | ✓ | ✓ | – |
+| [Hallucinated APIs / version drift](./05-implementation/hallucinated-api-version-drift.mdx) | ✓ | – | ✓ | ✓ |
+| [Gaming the tests](./06-testing/gaming-tests.mdx) | – | ✓ | ✓ | ✓ |
+| [Reviewing my own code favors me](./06-testing/ai-reviews-own-code.mdx) | – | – | ✓ | ✓ |
 
-> Column shorthands: Gemini = Gemini CLI, Codex = Codex CLI, Copilot = GitHub Copilot. The `Skipping plan mode` row is `–` for Codex: Codex has no dedicated "plan mode," only a read-only preset that approximates one, so the evidence is too thin to list.
+> Column shorthands: Gemini = Gemini CLI, Codex = Codex CLI, Copilot = GitHub Copilot. The `Skipping plan mode` row is `–` for Codex: Codex has no dedicated "plan mode," only a read-only preset that approximates one, so the evidence is too thin to list. The `Gaming the tests` row is `–` for Gemini: no equivalent deterministic-hook mechanism verified for Gemini CLI. The `Reviewing my own code` row is `–` for Gemini: the Gemini-family independent reviewer is **Gemini Code Assist** (a GitHub app), not Gemini CLI — the column axis tracks tools, and we don't mix products (the entry names it explicitly).
+>
+> Two more entries carry a **tool-generic** differences section (mechanism families, no per-vendor rows, so no ✓ columns): [Context-starved review](./06-testing/context-starved-review.mdx), [Soft permissions without an OS-level sandbox](./00-setup-collaboration/sandbox-filesystem-isolation.mdx).
 
 ## Per tool (mechanisms + unique entries)
 

@@ -10,7 +10,7 @@ sidebar_position: 9
 本书绝大多数误区是**范式级**的——它们来自大模型 + 工具调用 + 长上下文 + 自动执行这套共同机制，**换哪个工具都会踩**，所以默认每条都适用于各家 AI 编码工具。这页只索引**两类例外**：同一根因在不同工具里**防法不同**（写在条目的「工具差异」小节里），以及某个坑是**某工具独有机制**带来的（单独成条 / 进案例库）。
 
 :::note 覆盖深度（请如实看待）
-**Claude Code 覆盖最深**，是全书的默认参照（几乎每条都适用，故矩阵里不单设它一列）。**Gemini CLI、Codex CLI、Cursor、GitHub Copilot** 是已铺的第二批，下表是它们各自的首批工具差异——**Codex / Gemini（开源、官方文档全）最实**；**Cursor / Copilot（闭源、多形态、版本快变）以安全披露 + 官方文档为主，深度更薄**。矩阵只写**机制名**、不写具体命令，且**很快过时**——真要动手，以你所用版本的官方文档为准。截至 2026-06。
+**Claude Code 覆盖最深**，是全书的默认参照（几乎每条都适用，故矩阵里不单设它一列）。**Gemini CLI、Codex CLI、Cursor、GitHub Copilot** 是已铺的第二批，下表是它们各自的首批工具差异——**Codex / Gemini（开源、官方文档全）最实**；**Cursor / Copilot（闭源、多形态、版本快变）以安全披露 + 官方文档为主，深度更薄**。矩阵只写**机制名**、不写具体命令，且**很快过时**——真要动手，以你所用版本的官方文档为准。截至 2026-07。
 :::
 
 ## 覆盖一览
@@ -29,8 +29,15 @@ sidebar_position: 9
 | [CI 权限盲区](./07-acceptance-release/cicd-permission-blindspot.mdx) | ✓ | ✓ | ✓ | ✓ |
 | [不看文件现状致覆盖](./05-implementation/ignoring-file-state-overwrite.mdx) | ✓ | ✓ | ✓ | ✓ |
 | [自主循环失控烧 token](./05-implementation/runaway-agent-loops.mdx) | ✓ | ✓ | – | – |
+| [/compact 时机误判](./05-implementation/compact-timing.mdx) | ✓ | ✓ | ✓ | – |
+| [Git 卫生差](./05-implementation/git-hygiene.mdx) | ✓ | ✓ | ✓ | – |
+| [幻觉 API / 版本漂移](./05-implementation/hallucinated-api-version-drift.mdx) | ✓ | – | ✓ | ✓ |
+| [改测试而非改代码](./06-testing/gaming-tests.mdx) | – | ✓ | ✓ | ✓ |
+| [审自己写的代码会偏爱自己](./06-testing/ai-reviews-own-code.mdx) | – | – | ✓ | ✓ |
 
-> 列名缩写：Gemini = Gemini CLI，Codex = Codex CLI，Copilot = GitHub Copilot。`跳过 plan mode` 一行 Codex 为 `–`：Codex 没有独立的「计划模式」，只能用只读预设近似，证据偏弱故未单列。
+> 列名缩写：Gemini = Gemini CLI，Codex = Codex CLI，Copilot = GitHub Copilot。`跳过 plan mode` 一行 Codex 为 `–`：Codex 没有独立的「计划模式」，只能用只读预设近似，证据偏弱故未单列。`改测试而非改代码` 一行 Gemini 为 `–`：未核到 Gemini CLI 的同型确定性钩子机制。`审自己写的代码` 一行 Gemini 为 `–`：Gemini 系的独立审查者是 **Gemini Code Assist**（GitHub app），不是 Gemini CLI——列轴按工具记，不混产品（该条正文有点名说明）。
+>
+> 另有两条带**泛工具**差异小节（讲机制谱系、不逐家点名，故不占 ✓ 列）：[只看 diff 的上下文饥饿审查](./06-testing/context-starved-review.mdx)、[只靠软权限、缺 OS 级沙箱](./00-setup-collaboration/sandbox-filesystem-isolation.mdx)。
 
 ## 各工具一节（机制 + 独有条目）
 

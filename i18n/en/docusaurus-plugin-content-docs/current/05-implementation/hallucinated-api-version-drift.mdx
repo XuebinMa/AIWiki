@@ -8,7 +8,7 @@ phase: Implementation
 severity: High
 applies_to: "All coding agents"
 evidence: Official docs
-tags: [hallucination, version drift, retrieval, doc source, API, Engineer, Architect]
+tags: [hallucination, version drift, retrieval, doc source, API, Engineer, Architect, Gemini CLI, Cursor, GitHub Copilot]
 sources:
   - { title: "Context7 (upstash/context7, versioned-docs MCP source whose stated purpose is to avoid hallucinated APIs and outdated code)", url: "https://github.com/upstash/context7" }
   - { title: "Connect Claude Code to tools via MCP (official, bringing external data sources into context)", url: "https://code.claude.com/docs/en/mcp" }
@@ -96,6 +96,19 @@ Me: (confirms from the doc source that 3.x is new somelib.Pool(...), writes to t
 ```
 
 The difference isn't that I understand the library better—it's that I now hold a fact that matches your version, plus a gate that can disprove me on the spot, so I don't have to gamble on what "looks right."
+
+## Tool differences
+
+> As of 2026-07, mechanism level; grounding capabilities and default availability change fast across versions / plan tiers — defer to each tool's current docs.
+
+Same root cause — **my memory has a cutoff; fast-moving libraries must be grounded in current docs** — but each tool builds "grounding" as a different mechanism:
+
+- **Claude Code**: built-in on-demand web tools (WebFetch / WebSearch); availability depends on environment and permission configuration.
+- **Gemini CLI**: built-in Google Search grounding and web-fetch tools; retrieved results go straight into context.
+- **Cursor**: `@Docs` works "**index first, reference later**" — pre-indexed docs for common libraries, plus custom URLs you can crawl into the index; well suited to pinning the **specific version** of docs your team actually uses.
+- **GitHub Copilot (VS Code)**: the built-in `#fetch` tool pulls a given web page into context (asks for confirmation before accessing external URLs).
+
+Different mechanisms, one usage rule: **explicitly feed version-pinned official docs into context** — "it can reach the web" doesn't mean "it will go look."
 
 ## Version notes
 

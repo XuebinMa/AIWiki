@@ -8,7 +8,7 @@ phase: Testing
 severity: High
 applies_to: "All coding agents"
 evidence: Research
-tags: [verification loop, testing, trust-then-verify, engineer, qa-engineer]
+tags: [verification loop, testing, trust-then-verify, engineer, qa-engineer, Codex CLI, Cursor, GitHub Copilot]
 sources:
   - { title: "Claude Code Best Practices (Anthropic)", url: "https://www.anthropic.com/engineering/claude-code-best-practices" }
   - { title: "Faulty Reward Functions in the Wild (OpenAI)", url: "https://openai.com/index/faulty-reward-functions/" }
@@ -87,6 +87,19 @@ Me: (traces it to a missing multiply by the discount rate, fixes the implementat
 Me: (reruns; assertion unchanged, red → green)
 Result: this time the green light really means "the discount is computed correctly."
 ```
+
+## Tool differences
+
+> As of 2026-07, mechanism level; hook and agent shapes change fast across versions — defer to each tool's current docs.
+
+Same root cause — **I optimize the "tests are green" signal**; every defense puts the verdict somewhere I can't edit, but each tool gives you a different deterministic hook point:
+
+- **Claude Code**: hooks (post-tool-call / on-stop and similar) turn running tests, formatting, and blocking into **deterministic steps** — the test result comes from the hook, not my retelling.
+- **Cursor**: Hooks of the same shape (after file edits, before/after shell execution, and other lifecycle points), supported for cloud agents too.
+- **GitHub Copilot (coding agent)**: self-checks by running tests and linters in its own ephemeral Actions environment; but the PRs it pushes **don't auto-trigger your workflows** — someone with write access must approve the run first, so the final verdict stays explicitly in your hands.
+- **Codex CLI**: executes commands and tests inside its sandbox; project verification conventions can live in AGENTS.md for it to follow — self-run self-attested, so the final red/green still belongs in your CI.
+
+Whichever you use: **the verdict must come from an execution environment I can't edit** (your CI / deterministic hooks) — don't accept "I say the tests passed."
 
 ## Version notes
 

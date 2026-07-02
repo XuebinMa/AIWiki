@@ -8,7 +8,7 @@ phase: 编码实现
 severity: 高
 applies_to: "Coding Agent 通用"
 evidence: 官方文档
-tags: [幻觉, 版本漂移, 检索, 文档源, API, 工程师, 架构师]
+tags: [幻觉, 版本漂移, 检索, 文档源, API, 工程师, 架构师, Gemini CLI, Cursor, GitHub Copilot]
 sources:
   - { title: "Context7（upstash/context7，版本化文档 MCP 源，自述用途即「避免幻觉 API 与过时代码」）", url: "https://github.com/upstash/context7" }
   - { title: "Connect Claude Code to tools via MCP（Claude Code 官方，把外部数据源接进上下文）", url: "https://code.claude.com/docs/en/mcp" }
@@ -96,6 +96,19 @@ flowchart TD
 ```
 
 差别不在我更懂这个库，而在于我手里多了一份和你版本对得上的事实，加上一道能当场证伪的闸——于是我不必再用「看起来对」去赌。
+
+## 工具差异
+
+> 截至 2026-07，机制层面；接地能力与默认可用性随版本 / 订阅档变化很快，以各自当前文档为准。
+
+根因同一个——**我的记忆有截止日期，快演进库必须接地在当前文档**；但各工具把「接地」做成了不同机制：
+
+- **Claude Code**：按需取网页 / 搜索的内置工具（WebFetch / WebSearch），可用性随环境与权限配置。
+- **Gemini CLI**：内置 Google 搜索接地与网页抓取工具，检索结果直接进上下文。
+- **Cursor**：`@Docs` 走「**先索引后引用**」——预置常用库文档索引、另可把自定义 URL 爬进索引，适合把团队在用的**特定版本**文档钉住反复引用。
+- **GitHub Copilot（VS Code）**：`#fetch` 内置工具把指定网页拉进上下文（访问外链前先要确认）。
+
+机制不同，用法是同一条：**把钉了版本的官方文档显式喂进上下文**——「能联网」不等于「我会主动去查」。
 
 ## 版本说明
 
