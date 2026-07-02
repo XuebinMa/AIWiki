@@ -1,26 +1,10 @@
 name: Lint Docs
 
 # 散文质量闸门：给「写作」也建一个「信任但要验证」的闭环。
+# 不做 paths 过滤：全量跑也就 3–4 分钟，且「散文质量」将设为 required check——
+# 带过滤时只动过滤外文件的 PR 检查不触发、required 状态永远 pending、PR 无法合并。
 on:
   pull_request:
-    paths:
-      - 'docs/**'
-      - 'privacy/**'
-      - 'i18n/**'
-      - '**/*.md'
-      - '**/*.mdx'
-      - '.vale.ini'
-      - 'styles/**'
-      - '.cspell.json'
-      - '.autocorrectrc'
-      - 'sidebars.js'
-      - 'sidebars-privacy.js'
-      - 'docusaurus.config.js'
-      - 'scripts/**'
-      - 'src/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - '.github/workflows/**'
   push:
     branches: [main]
 
