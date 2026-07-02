@@ -8,7 +8,7 @@ phase: Setup & Collaboration
 severity: High
 applies_to: "All coding agents"
 evidence: Security advisory
-tags: [network isolation, egress control, SSRF, data exfiltration, lethal trifecta, security, DevOps Engineer, Architect]
+tags: [network isolation, egress control, SSRF, data exfiltration, lethal trifecta, security, DevOps Engineer, Architect, Gemini CLI, Codex CLI]
 sources:
   - { title: "The lethal trifecta (Simon Willison)", url: "https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/" }
   - { title: "OWASP LLM02:2025 Sensitive Information Disclosure", url: "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/" }
@@ -87,6 +87,19 @@ The test: an exception holds only when **the value or reachability of exfiltrati
 - [Giving MCP too much / too sensitive access](./mcp-over-access.mdx): that one touches on "external communication widens the injection surface," but its focus is the MCP authorization surface; this one explains **network egress control** in full on its own—it's the shared "way out" used by MCP and every tool, and should be plugged uniformly at the network layer with an allowlist.
 - [Sandbox / filesystem isolation](./sandbox-filesystem-isolation.mdx): that one governs "which files I can read / change" (the **entry** for data and the local blast radius); this one governs "where I can send" (the **exit** for data). They are two sides of the sandbox, and you can't have one without the other.
 - [Shipping vulnerabilities / leaking sensitive data by default](../07-acceptance-release/security-data-leaks.mdx): that one is me **unintentionally** writing code that leaks data; this one plugs the network channel by which a **hijacked** agent actively exfiltrates—one is a code defect, the other is an attack exit.
+
+## Tool differences
+
+> As of 2026-07, mechanism level; egress mechanisms and defaults change fast across versions — defer to each tool's current docs.
+
+Same root cause — **leave the exit open and private data has a way out** — but each tool builds "where I'm allowed to send" differently:
+
+- **Claude Code**: sandboxed network traffic goes through a **local proxy outside the sandbox**, admitted by a domain allowlist (wildcards supported); new domains can prompt interactively or be denied outright by managed policy, and you can swap in your own proxy. The docs say plainly it decides by **hostname** and doesn't inspect TLS — stronger guarantees require your own TLS-terminating proxy.
+- **Codex CLI**: the default sandbox means **network off by default** — egress control starts from zero trust, and connectivity is an explicit opt-in; the tightest default of the four.
+- **Gemini CLI**: every sandbox backend supports forcing traffic through a **custom proxy** (the proxied Seatbelt tiers / a container proxy command) — which domains pass is up to your proxy logic: the mechanism is complete, the policy is yours to write.
+- **Cursor / GitHub Copilot (local IDE agents)**: as of 2026-07, no equivalent native egress-narrowing mechanism verified — egress control falls to your environment layer (container network policy / an egress proxy).
+
+Whichever you use, two constants: **the unit of egress control is "a domain list + who enforces it,"** and hostname-based admission ≠ content inspection — pair it with a [data boundary policy](./data-boundary-policy.mdx) to actually stop exfiltration.
 
 ## Version notes
 

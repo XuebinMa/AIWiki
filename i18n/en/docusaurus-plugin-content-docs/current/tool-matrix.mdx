@@ -34,10 +34,14 @@ Rows = pitfalls that have a "Tool differences" section (click in for each tool's
 | [Hallucinated APIs / version drift](./05-implementation/hallucinated-api-version-drift.mdx) | ✓ | – | ✓ | ✓ |
 | [Gaming the tests](./06-testing/gaming-tests.mdx) | – | ✓ | ✓ | ✓ |
 | [Reviewing my own code favors me](./06-testing/ai-reviews-own-code.mdx) | – | – | ✓ | ✓ |
+| [Uncontrolled network egress](./00-setup-collaboration/network-egress-control.mdx) | ✓ | ✓ | – | – |
+| [Soft permissions without an OS-level sandbox](./00-setup-collaboration/sandbox-filesystem-isolation.mdx) | ✓ | ✓ | – | ✓ |
+| [Subagents without boundaries](./00-setup-collaboration/subagent-no-boundaries.mdx) | – | – | ✓ | – |
 
 > Column shorthands: Gemini = Gemini CLI, Codex = Codex CLI, Copilot = GitHub Copilot. The `Skipping plan mode` row is `–` for Codex: Codex has no dedicated "plan mode," only a read-only preset that approximates one, so the evidence is too thin to list. The `Gaming the tests` row is `–` for Gemini: no equivalent deterministic-hook mechanism verified for Gemini CLI. The `Reviewing my own code` row is `–` for Gemini: the Gemini-family independent reviewer is **Gemini Code Assist** (a GitHub app), not Gemini CLI — the column axis tracks tools, and we don't mix products (the entry names it explicitly).
+> The `Uncontrolled network egress` row is `–` for Cursor / Copilot: no native egress-narrowing mechanism verified for the local IDE agent shapes (egress control falls to your environment layer). The `Subagents without boundaries` row is `✓` only for Cursor: no equivalent native subagent mechanism verified for Gemini / Codex as of 2026-07, and none for Copilot.
 >
-> Two more entries carry a **tool-generic** differences section (mechanism families, no per-vendor rows, so no ✓ columns): [Context-starved review](./06-testing/context-starved-review.mdx), [Soft permissions without an OS-level sandbox](./00-setup-collaboration/sandbox-filesystem-isolation.mdx).
+> One more entry carries a **tool-generic** differences section (mechanism families, no per-vendor rows, so no ✓ columns): [Context-starved review](./06-testing/context-starved-review.mdx).
 
 ## Per tool (mechanisms + unique entries)
 
