@@ -22,13 +22,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: autocorrect（中英文混排空格 / 标点）
         uses: huacnlee/autocorrect-action@v2.13.3
 
       - name: Vale（套话 / AI 腔）
-        uses: errata-ai/vale-action@v2.1.1
+        uses: errata-ai/vale-action@2.1.2
         with:
           version: 3.9.1 # 钉住 vale 版本防规则漂移；升级手动改（Cliches.yml 只用 existence，跨版本稳定）
           fail_on_error: true
@@ -37,7 +37,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 配置 Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
