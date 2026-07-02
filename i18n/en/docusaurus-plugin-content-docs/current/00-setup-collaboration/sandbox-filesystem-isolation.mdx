@@ -8,7 +8,7 @@ phase: Setup & Collaboration
 severity: High
 applies_to: "All coding agents"
 evidence: Official docs
-tags: [sandbox, isolation, container, least privilege, defense in depth, security, DevOps Engineer, Architect, Engineer]
+tags: [sandbox, isolation, container, least privilege, defense in depth, security, DevOps Engineer, Architect, Engineer, Gemini CLI, Codex CLI, GitHub Copilot]
 sources:
   - { title: "Configure the sandboxed Bash tool (Claude Code official docs)", url: "https://code.claude.com/docs/en/sandboxing" }
   - { title: "Making Claude Code more secure and autonomous with sandboxing (Anthropic Engineering)", url: "https://www.anthropic.com/engineering/claude-code-sandboxing" }
@@ -51,9 +51,16 @@ What actually backstops this is **kernel-level isolation**: fencing the filesyst
 
 ## Tool differences
 
-> As of 2026-06, at the mechanism level; isolation capabilities change fast across versions, re-check as needed.
+> As of 2026-07, mechanism level; isolation capabilities and defaults change fast across versions — defer to each tool's current docs.
 
-How much isolation tools provide "by default" varies widely: some ship an OS-level sandbox built in (e.g. Claude Code uses bubblewrap for filesystem isolation and a socat proxy for network isolation on Linux/WSL2), while others rely mainly on soft permissions / confirmation prompts and leave hard isolation for you to wrap with a container yourself. The root cause is the same — **soft permissions can't stop a compromised agent** — but the defense differs by tool: for the ones with a built-in sandbox, confirm it's actually on and that both the filesystem and network layers are enabled; for the ones with only soft permissions, wrap them in hard isolation with a container / VM yourself before letting go.
+Same root cause — **soft permissions can't stop a compromised agent** — but tools fork visibly on "how much OS-level isolation ships built in, and whether it's on by default":
+
+- **Claude Code**: built-in OS-level sandbox (bubblewrap for filesystem isolation on Linux/WSL2, Seatbelt on macOS; network isolation via a proxy) — filesystem and network come **as a pair**, confirm both are on.
+- **Codex CLI**: an OS sandbox that's **on by default** (macOS Seatbelt / Linux Landlock + seccomp), writes confined to the workspace and network off by default — "safe defaults" is its signature; note the Windows sandbox is still experimental and may silently fall back to wider permissions if initialization fails.
+- **Gemini CLI**: multiple sandbox backends — containers (docker / podman) or macOS Seatbelt profiles in several tiers; **off by default**, must be enabled explicitly.
+- **GitHub Copilot (VS Code agent)**: an OS-level agent sandbox in **preview** since 2026-06 — before that, the IDE agent shape leaned on approvals and soft permissions.
+
+For the ones with a built-in sandbox, confirm it's actually on and that both the filesystem and network layers are enabled; for the ones with only soft permissions (or a preview you haven't enabled), wrap them in hard isolation with a container / VM yourself before letting go.
 
 ## Example
 

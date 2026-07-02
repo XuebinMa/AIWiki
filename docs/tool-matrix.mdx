@@ -34,10 +34,14 @@ sidebar_position: 9
 | [幻觉 API / 版本漂移](./05-implementation/hallucinated-api-version-drift.mdx) | ✓ | – | ✓ | ✓ |
 | [改测试而非改代码](./06-testing/gaming-tests.mdx) | – | ✓ | ✓ | ✓ |
 | [审自己写的代码会偏爱自己](./06-testing/ai-reviews-own-code.mdx) | – | – | ✓ | ✓ |
+| [网络出口失控](./00-setup-collaboration/network-egress-control.mdx) | ✓ | ✓ | – | – |
+| [只靠软权限、缺 OS 级沙箱](./00-setup-collaboration/sandbox-filesystem-isolation.mdx) | ✓ | ✓ | – | ✓ |
+| [子代理协作无边界](./00-setup-collaboration/subagent-no-boundaries.mdx) | – | – | ✓ | – |
 
 > 列名缩写：Gemini = Gemini CLI，Codex = Codex CLI，Copilot = GitHub Copilot。`跳过 plan mode` 一行 Codex 为 `–`：Codex 没有独立的「计划模式」，只能用只读预设近似，证据偏弱故未单列。`改测试而非改代码` 一行 Gemini 为 `–`：未核到 Gemini CLI 的同型确定性钩子机制。`审自己写的代码` 一行 Gemini 为 `–`：Gemini 系的独立审查者是 **Gemini Code Assist**（GitHub app），不是 Gemini CLI——列轴按工具记，不混产品（该条正文有点名说明）。
+> `网络出口失控` 一行 Cursor / Copilot 为 `–`：未核到本地 IDE agent 形态的原生出口收口机制（出口控制落在环境层）。`子代理协作无边界` 一行仅 Cursor 为 `✓`：Gemini / Codex 截至 2026-07 未核到同型原生子代理机制、Copilot 亦无。
 >
-> 另有两条带**泛工具**差异小节（讲机制谱系、不逐家点名，故不占 ✓ 列）：[只看 diff 的上下文饥饿审查](./06-testing/context-starved-review.mdx)、[只靠软权限、缺 OS 级沙箱](./00-setup-collaboration/sandbox-filesystem-isolation.mdx)。
+> 另有一条带**泛工具**差异小节（讲机制谱系、不逐家点名，故不占 ✓ 列）：[只看 diff 的上下文饥饿审查](./06-testing/context-starved-review.mdx)。
 
 ## 各工具一节（机制 + 独有条目）
 

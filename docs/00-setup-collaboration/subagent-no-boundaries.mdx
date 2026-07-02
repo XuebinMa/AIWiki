@@ -8,7 +8,7 @@ phase: 准备与协作
 severity: 高
 applies_to: "Coding Agent 通用"
 evidence: 官方文档
-tags: [子代理, 多代理协作, 职责边界, 共享契约, 架构师, 工程师]
+tags: [子代理, 多代理协作, 职责边界, 共享契约, 架构师, 工程师, Cursor]
 sources:
   - { title: "Create custom subagents（Claude Code 官方）", url: "https://code.claude.com/docs/en/sub-agents" }
   - { title: "Best practices for Claude Code（Claude Code 官方）", url: "https://code.claude.com/docs/en/best-practices" }
@@ -117,6 +117,18 @@ flowchart TB
 - **天然不相交的产出。** 各自生成一个独立文件、互不 import、不碰任何共享定义（比如三个互相独立的脚本）——边界已由任务切分钉死，再写一份契约是重复劳动。
 
 反过来，只要它们要落到同一批文件、或要互相消费对方的接口 / 数据格式，例外立刻失效——回到「先定契约与文件范围再并行」。判据一句话：**先问「它们的产出会不会碰同一个文件、或要不要对齐同一个接口」——会，就先定契约；结构上互不相干，才可以裸并行。**
+
+## 工具差异
+
+> 截至 2026-07，机制层面；子代理形态变化很快，以各自当前文档为准。
+
+根因同一个——**并行子代理不给边界就会互相踩**；但「有没有原生子代理机制」本身就是当前最大的工具分叉：
+
+- **Claude Code**：原生 subagents——单条消息可并行派发多个、可后台运行、可自定义代理类型；边界要你在任务分工里显式给（每个子代理只动自己的文件集、先定共享契约）。
+- **Cursor**：subagents 同型机制——多个 Task 并行、前台 / 后台两种运行态、内置 explore / bash / browser 三类；hooks 有 subagent 起止挂点可做审计与约束。
+- **Gemini CLI / Codex CLI**：截至 2026-07 未核到同型的原生多子代理机制——要多代理协作得自己在进程 / 工作区层编排，「边界」问题因此整个落在你的编排层。
+
+有原生 subagents 的工具，把本条的问题从「要不要并行」变成「怎么划边界」——**结论不变：先定文件范围与共享契约，再放并行**；没有原生机制的，你的编排脚本就是那道边界，别让两个进程写同一批文件。
 
 ## 版本说明
 

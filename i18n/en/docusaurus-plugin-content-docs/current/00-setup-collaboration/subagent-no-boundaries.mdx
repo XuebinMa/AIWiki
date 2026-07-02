@@ -8,7 +8,7 @@ phase: Setup & Collaboration
 severity: High
 applies_to: "All coding agents"
 evidence: Official docs
-tags: [subagent, multi-agent collaboration, responsibility boundaries, shared contract, architect, engineer]
+tags: [subagent, multi-agent collaboration, responsibility boundaries, shared contract, architect, engineer, Cursor]
 sources:
   - { title: "Create custom subagents (Claude Code official)", url: "https://code.claude.com/docs/en/sub-agents" }
   - { title: "Best practices for Claude Code (Claude Code official)", url: "https://code.claude.com/docs/en/best-practices" }
@@ -117,6 +117,18 @@ What you must define first is the *contract*, not the *ceremony*. When the task'
 - **Structurally disjoint output.** Each generates a standalone file, imports nothing from the others, touches no shared definition (three independent scripts, say) — boundaries are already pinned by how the task is split, and writing a contract would be duplicated work.
 
 Conversely, the moment they land in the same files, or have to consume each other's interfaces or data formats, the exception is off — back to "define the contract and file scopes before going parallel." The test, in one line: **ask "will their outputs touch the same file, or need to align on the same interface?" — if yes, define the contract first; only when they're structurally unrelated can you go parallel bare.**
+
+## Tool differences
+
+> As of 2026-07, mechanism level; subagent shapes change fast — defer to each tool's current docs.
+
+Same root cause — **parallel subagents without boundaries trample each other** — but "does the tool even have native subagents" is itself the biggest fork right now:
+
+- **Claude Code**: native subagents — dispatch several in parallel from one message, run them in the background, define custom agent types; the boundaries are yours to state in the task split (each subagent touches only its own file set, shared contracts defined first).
+- **Cursor**: subagents of the same shape — multiple parallel Task calls, foreground / background modes, three built-ins (explore / bash / browser); hooks expose subagent start / stop points for auditing and constraints.
+- **Gemini CLI / Codex CLI**: as of 2026-07, no equivalent native multi-subagent mechanism verified — multi-agent work means orchestrating processes / workspaces yourself, so the whole "boundaries" problem lands on your orchestration layer.
+
+Tools with native subagents turn this entry's question from "whether to parallelize" into "how to draw the boundaries" — **the conclusion stands: define file scopes and shared contracts before going parallel**; without a native mechanism, your orchestration script *is* the boundary — never let two processes write the same files.
 
 ## Version notes
 

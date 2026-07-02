@@ -8,7 +8,7 @@ phase: 准备与协作
 severity: 高
 applies_to: "Coding Agent 通用"
 evidence: 安全报告
-tags: [网络隔离, 出口控制, SSRF, 数据外泄, 致命三件套, 安全, 运维工程师, 架构师]
+tags: [网络隔离, 出口控制, SSRF, 数据外泄, 致命三件套, 安全, 运维工程师, 架构师, Gemini CLI, Codex CLI]
 sources:
   - { title: "The lethal trifecta（Simon Willison）", url: "https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/" }
   - { title: "OWASP LLM02:2025 Sensitive Information Disclosure", url: "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/" }
@@ -87,6 +87,19 @@ Simon Willison 把这类风险概括成「致命三件套」：**私有数据访
 - [给 MCP 过多 / 过敏感的访问](./mcp-over-access.mdx)：那条点到「对外通信扩大了注入面」，但重心在 MCP 授权面；本条把**网络出口控制**单独讲透——它是 MCP 与所有工具共用的那条「出去的路」，该在网络层用 allowlist 统一堵。
 - [沙箱 / 文件系统隔离](./sandbox-filesystem-isolation.mdx)：那条管「我能读 / 改哪些文件」（数据的**入口**与本地爆炸半径）；本条管「我能往哪儿发」（数据的**出口**）。两者是沙箱的两面，缺一不可。
 - [默认埋漏洞 / 泄露敏感数据](../07-acceptance-release/security-data-leaks.mdx)：那条是我**无意**写出泄露数据的代码；本条堵的是**被劫持后主动外传**的那条网络通道——一个是代码缺陷，一个是攻击出口。
+
+## 工具差异
+
+> 截至 2026-07，机制层面；出口机制与默认值随版本变化很快，以各自当前文档为准。
+
+根因同一个——**出口不收口，私有数据就有路可走**；但各工具把「往哪儿能发」做成了不同机制：
+
+- **Claude Code**：沙箱网络走**沙箱外的本地代理**，按域名 allowlist（支持通配）放行，新域名可交互确认、也可按管理策略直接拒；代理可换成你自己的。官方明说它按**主机名**判、不检查 TLS 内容——要更强保证需自建 TLS 终结代理。
+- **Codex CLI**：默认沙箱即**默认断网**——出口控制从零信任起步，联网要显式开启，这一档是四家里最紧的默认。
+- **Gemini CLI**：沙箱各后端都支持强制走**自定义代理**（Seatbelt 的 proxied 档 / 容器代理命令），放行哪些域由你的代理逻辑决定——机制给全了，策略你写。
+- **Cursor / GitHub Copilot（IDE 本地 agent）**：截至 2026-07 未核到同型的原生出口收口机制——出口控制落在你的环境层（容器网络策略 / 出口代理）。
+
+无论哪家，两条不变：**出口控制的单位是「域名清单 + 谁来执行」**；按主机名放行 ≠ 内容审查——防外泄还要配合[数据边界策略](./data-boundary-policy.mdx)一起收。
 
 ## 版本说明
 
