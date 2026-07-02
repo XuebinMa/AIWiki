@@ -44,7 +44,7 @@ jobs:
         uses: huacnlee/autocorrect-action@v2.13.3
 
       - name: Vale（套话 / AI 腔）
-        uses: errata-ai/vale-action@v2.1.1
+        uses: errata-ai/vale-action@2.1.2
         with:
           version: 3.9.1 # 钉住 vale 版本防规则漂移；升级手动改（Cliches.yml 只用 existence，跨版本稳定）
           fail_on_error: true
