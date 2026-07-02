@@ -1,0 +1,121 @@
+---
+title: "Leak-mechanism index: why it leaks"
+slug: mechanisms
+sidebar_label: Mechanism index
+sidebar_position: 9
+description: "Browse all 44 entries by leak root cause — complementary to the Privacy map's technique-board axis: boards answer \"which technique,\" this page answers \"why it leaks.\" Understand the mechanism and mitigations stop being a checklist to memorize and become common sense you can derive."
+---
+
+# Leak-mechanism index: why it leaks
+
+The [Privacy map](./map.mdx) lets you query by **technique board** (which technique) and by **threat matrix** (which leak surface worries you); this page adds a third query axis: by **leak root cause** (why it leaks).
+
+Grouping the 44 entries by root cause, you'll see that seemingly unrelated attacks share roots: training-data extraction and PII regurgitation are the same "memorization entered the weights"; gradient inversion and embedding inversion are the same "derived artifacts are still data." Once you understand the root cause, the mitigations stop being a checklist to memorize and become common sense you can derive — which is also why each entry's "residual risk" can mostly be read straight off its root cause.
+
+Each entry hangs **only under its primary mechanism** (many entries stack several mechanisms; we take the dominant one). The eight mechanisms roughly follow the data's journey: into training → inferred back out → into derived artifacts → into context → across infrastructure → through agents' hands → into whose custody → under whose terms.
+
+## 1 · Memorization entered the weights
+
+Data that passed through training leaves recoverable traces in the parameters — the more repetition and the bigger the model, the deeper the trace; public demonstrations have pulled it back out verbatim (text) or as near-copies (images). This "memory" doesn't vanish when the source data is deleted, and removing it after the fact (machine unlearning) is both expensive and hard to verify.
+
+> Positive mirror: deduplicate + minimize data before training to shallow the traces; quantify "how much was memorized" with probes before release; treat "deletion" as an engineering loop of "unlearn + verify," not a promise.
+
+- [Training-data extraction](./02-memorization-extraction/training-data-extraction.mdx)
+- [Multimodal training-image extraction](./02-memorization-extraction/multimodal-training-image-extraction.mdx)
+- [PII regurgitation](./03-conversational-llms/pii-regurgitation.mdx)
+- [Training-data deduplication](./02-memorization-extraction/training-data-deduplication.mdx)
+- [Privacy-targeted poisoning](./02-memorization-extraction/privacy-poisoning.mdx)
+- [Quantifying memorization & auditing](./02-memorization-extraction/quantifying-memorization.mdx)
+- [Verifiable deletion & machine unlearning](./05-frontier-deployment/machine-unlearning.mdx)
+- [Unlearning verification](./05-frontier-deployment/unlearning-verification.mdx)
+- [Unlearning benchmarks & evaluation](./05-frontier-deployment/unlearning-benchmarks.mdx)
+
+## 2 · Outputs and capabilities are an inference surface
+
+A model's outputs, confidences, even its general capabilities carry more information than you intended to give out: against the training set they enable membership / attribute / inversion inference and wholesale functionality cloning; against new inputs they can infer sensitive attributes you never wrote down (like location from a photo). Differential privacy is the main formal answer to this root cause — but ε isn't zero, and a claimed ε only counts once audited.
+
+> Positive mirror: formally bound "single-sample influence" with DP and audit an empirical lower bound with strong attacks; limit exposure of confidences and output granularity; put product-policy guardrails on capabilities that infer sensitive attributes.
+
+- [Membership inference](./01-foundations/membership-inference.mdx)
+- [Model inversion & attribute inference](./01-foundations/model-inversion-attribute-inference.mdx)
+- [Property / distribution inference](./01-foundations/property-inference.mdx)
+- [VLM geolocation inference](./03-conversational-llms/vlm-geolocation-inference.mdx)
+- [Model extraction & stealing](./01-foundations/model-extraction-stealing.mdx)
+- [LoRA adapter leakage](./05-frontier-deployment/lora-adapter-leakage.mdx)
+- [DP fine-tuning](./03-conversational-llms/dp-fine-tuning.mdx)
+- [DP auditing](./02-memorization-extraction/dp-privacy-auditing.mdx)
+
+## 3 · Derived artifacts are still data
+
+Things processed out of raw data — gradients, intermediate activations, embedding vectors, aggregate statistics, synthetic samples — still carry recoverable signal from the original. "Not the original text" doesn't mean "doesn't leak": gradients invert back to training samples, vectors reconstruct back to text, and aggregates or synthetic data without DP layered on don't constitute anonymization.
+
+> Positive mirror: manage every derived artifact like the raw data — gradients go through secure aggregation + DP, vector stores get sensitive-data access control, and aggregates or synthetic data that want a guarantee get formal DP with the utility cost accounted for.
+
+- [Gradient leakage](./05-frontier-deployment/gradient-leakage.mdx)
+- [Split-learning leakage](./05-frontier-deployment/split-learning-leakage.mdx)
+- [Secure aggregation](./05-frontier-deployment/secure-aggregation.mdx)
+- [Production-grade DP·FL](./05-frontier-deployment/dp-federated-learning.mdx)
+- [Federated analytics](./05-frontier-deployment/federated-analytics.mdx)
+- [Embedding inversion](./04-rag-agents/embedding-inversion.mdx)
+- [Synthetic-data privacy](./06-governance-compliance/synthetic-data-privacy.mdx)
+
+## 4 · Context and output channels are plaintext surfaces
+
+Whatever goes into the context window (system prompt, conversation history, tool results, few-shot examples) is plaintext to the model and can be coaxed out by end users; and output isn't just the "answer" channel — reasoning traces carry the intermediate thinking out, and computer-use screenshots pull the whole screen in. "Internal / ephemeral" doesn't mean "private."
+
+> Positive mirror: don't put secrets in context — the boundary belongs in backend auth and permission-scoped retrieval, not "tell the model not to say it"; treat thought traces and screen captures as leak-capable output surfaces and redact them the same.
+
+- [Context-surface privacy](./03-conversational-llms/context-surface-privacy.mdx)
+- [Reasoning-trace leakage](./03-conversational-llms/reasoning-trace-leakage.mdx)
+- [DP in-context learning](./03-conversational-llms/dp-in-context-learning.mdx)
+- [Computer-use screen-capture privacy](./04-rag-agents/computer-use-screen-capture-privacy.mdx)
+
+## 5 · Shared infrastructure bleeds data across tenants
+
+Once multi-tenant shared storage and caches (retrieval stores, session memory, KV-cache) lose isolation — missing ownership checks, concurrency races, cross-tenant reuse — one person's data gets served to another; and even without breaking isolation, timing / length side channels in the shared layer leak content. Isolation lives in the system, not the model.
+
+> Positive mirror: partition per user / tenant + ownership checks + stress-test concurrency for "no bleed"; caches are either tenant-isolated or you accept the performance cost of padding and randomization.
+
+- [Multi-tenant RAG retrieval leakage](./04-rag-agents/rag-retrieval-leakage.mdx)
+- [Cross-session memory bleed](./04-rag-agents/cross-session-memory-bleed.mdx)
+- [Inference-time side channels](./05-frontier-deployment/inference-side-channels.mdx)
+
+## 6 · Agents carry data across the boundary
+
+Agents read external content, call tools, and connect to third-party services — injected instructions hidden in untrusted content can drive them to exfiltrate private context through tools; in multi-agent collaboration, private data flows along internal channels and leaks more than external outputs do; and every MCP server you attach widens "who gets my context." The carriage is active and at scale — that's why it's weightier than passive leakage.
+
+> Positive mirror: close off egress at the tool / rendering layer, not the instruction layer; run integrations under data minimization and audit subprocessors; redact internal channels too; run an injection-exfiltration benchmark before release.
+
+- [Agent tool exfiltration](./04-rag-agents/agent-tool-exfiltration.mdx)
+- [MCP data flow & minimization](./04-rag-agents/mcp-data-flow-privacy.mdx)
+- [Multi-agent internal-channel leakage](./04-rag-agents/multi-agent-internal-leakage.mdx)
+- [Agent privacy benchmark (AgentDojo)](./04-rag-agents/agent-privacy-benchmark.mdx)
+
+## 7 · Plaintext is exposed to the infrastructure operator
+
+As long as inference runs on someone else's machine, prompts and weights are by default visible "in use" to the infrastructure operator (the cloud vendor, the platform, even co-hosted tenants). TEEs / confidential inference fence that moment inside a hardware enclave, HE·MPC route around plaintext with cryptography, on-device moves the compute back to your hardware — but every route only **relocates** the trust boundary (chip vendor, implementation correctness, local-device security); none eliminates it.
+
+> Positive mirror: once you pick a route, make "verification" real — TEEs need remote attestation checked, on-device needs "what still falls back to cloud" nailed down; write the trust root (chip vendor / OS / provider) into the threat model instead of pretending it isn't there.
+
+- [Trusted execution environments](./01-foundations/trusted-execution-environment.mdx)
+- [Homomorphic encryption / MPC](./01-foundations/he-mpc.mdx)
+- [Confidential inference](./05-frontier-deployment/confidential-inference.mdx)
+- [On-device inference privacy](./05-frontier-deployment/on-device-inference-privacy.mdx)
+
+## 8 · Where the data goes is governed by terms and law
+
+Once data is handed to a service, whether it gets trained on, retained, reviewed, passed on, or deleted is decided by **terms and law**, not technology — terms are sliced by endpoint / feature and change often, and a legal preservation order can freeze "deleted on expiry." "They say they don't train on it" is one cell; product memory persists by design; deletion only counts once it fans out across copies; and provenance tools for "was it trained on" have paraphrase-removal limits.
+
+> Positive mirror: verify terms item by item, date-stamp, review quarterly (use the [vendor data-boundary checklist](./vendor-data-boundary-checklist.mdx)); treat legal preservation as part of the threat model; build deletion as a cross-copy, auditable loop.
+
+- [Inference-service data boundary](./06-governance-compliance/inference-service-data-boundary.mdx)
+- [Fine-tuning-as-a-service privacy](./06-governance-compliance/ftaas-privacy.mdx)
+- [Persistent agent-memory privacy](./06-governance-compliance/persistent-agent-memory-privacy.mdx)
+- [Data lifecycle & deletion propagation](./06-governance-compliance/data-lifecycle-deletion.mdx)
+- [LLM watermarking & provenance](./06-governance-compliance/llm-watermarking.mdx)
+
+---
+
+:::tip How to use this index
+When a new leak worry lands, first ask "which root cause is this" — most "new" attacks are an old root cause in a new modality or setting (image extraction vis-à-vis text extraction, KV-cache reconstruction vis-à-vis timing probes). Locate the bucket, read its entries, and the mitigation approach follows; then go back to the [Privacy map](./map.mdx)'s threat matrix to check the "residual risk" — don't mistake mitigation for elimination.
+:::
