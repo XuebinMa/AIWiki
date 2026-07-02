@@ -5,52 +5,64 @@ on:
   pull_request:
     paths:
       - 'docs/**'
+      - 'privacy/**'
       - 'i18n/**'
       - '**/*.md'
       - '**/*.mdx'
       - '.vale.ini'
       - 'styles/**'
       - '.cspell.json'
+      - '.autocorrectrc'
       - 'sidebars.js'
+      - 'sidebars-privacy.js'
       - 'docusaurus.config.js'
       - 'scripts/**'
       - 'src/**'
       - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/**'
   push:
     branches: [main]
+
+# 供应链纪律：token 一律只读；第三方 action 只引用不可变版本（活分支引用是 2026-07 评审点名的风险）。
+permissions:
+  contents: read
+
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   prose:
     name: 散文质量
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
       - name: autocorrect（中英文混排空格 / 标点）
-        uses: huacnlee/autocorrect-action@main
+        uses: huacnlee/autocorrect-action@v2.13.3
 
       - name: Vale（套话 / AI 腔）
-        uses: errata-ai/vale-action@reviewdog
+        uses: errata-ai/vale-action@v2.1.1
         with:
-          version: latest
+          version: 3.9.1 # 钉住 vale 版本防规则漂移；升级手动改（Cliches.yml 只用 existence，跨版本稳定）
           fail_on_error: true
+          filter_mode: nofilter # PR 也全量扫，与本地 `vale docs i18n privacy` 等价（默认 added 只扫改动行）
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 安装 cspell
-        run: npm install -g cspell@8
-
-      - name: cspell（拼写）
-        run: cspell --no-progress "docs/**/*.{md,mdx}" "privacy/**/*.{md,mdx}" "i18n/**/*.{md,mdx}"
-
-      - name: 配置 Node（i18n 检查需要 docusaurus）
+      - name: 配置 Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: 安装依赖
         run: npm ci
+
+      - name: cspell（拼写；devDependencies 锁定版本，别再全局浮动装）
+        run: npx cspell --no-progress "docs/**/*.{md,mdx}" "privacy/**/*.{md,mdx}" "i18n/**/*.{md,mdx}"
 
       - name: i18n（侧边栏分类翻译完整性，防回退成中文）
         run: npm run check:i18n
