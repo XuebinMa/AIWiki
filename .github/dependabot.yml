@@ -11,3 +11,10 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # React 大版本跟随 Docusaurus 官方升级节奏手动升级（2026-07 决策，关闭过 #84/#82）；
+      # minor / patch 照常周更。
+      - dependency-name: react
+        update-types: ['version-update:semver-major']
+      - dependency-name: react-dom
+        update-types: ['version-update:semver-major']

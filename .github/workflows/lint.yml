@@ -54,5 +54,11 @@ jobs:
       - name: 中英镜像完整性（每条 docs 都要有 i18n/en 对应）
         run: npm run check:mirror
 
+      - name: 镜像结构对等（标题 / admonition / 内链目标集 / slug，防中改英不改）
+        run: npm run check:mirror-deep
+
+      - name: 手写计数一致性（core-20 / CLAUDE.md 现状 vs 实际条目数）
+        run: npm run check:counts
+
       - name: 构建（两 locale；连带校验 MDX / import / 死内链）
         run: npm run build
