@@ -8,7 +8,7 @@ phase: Implementation
 severity: Medium
 applies_to: "All Claude Code versions"
 evidence: Official docs
-tags: [context management, compaction, sessions, engineer]
+tags: [context management, compaction, sessions, engineer, Gemini CLI, Codex CLI, Cursor]
 sources:
   - { title: "Explore the context window — What survives compaction (Anthropic, official)", url: "https://code.claude.com/docs/en/context-window" }
   - { title: "Manage costs effectively — Manage context proactively (Anthropic, official)", url: "https://code.claude.com/docs/en/costs" }
@@ -91,6 +91,19 @@ You: /compact Focus on the fact that the repository isn't extracted yet
 Me: (after compacting) Service-layer extraction saved; pending: extract the repository layer. Continue?
 You: continue.   ← progress lives in the commit and the summary, so I pick up cleanly
 ```
+
+## Tool differences
+
+> As of 2026-07, mechanism level; trigger thresholds and defaults change fast across versions — defer to each tool's current docs.
+
+Same root cause — **compaction is always lossy; timing decides what you lose** — but each tool turns "when to compact, and into what" into a different mechanism, so don't carry one tool's muscle memory into another:
+
+- **Claude Code**: manual `/compact` (accepts a "what to keep" focus instruction) + auto-compaction near the limit, with `/context` visualizing current usage — the most controllable manual timing; the risk is the auto tier picking the moment for you.
+- **Gemini CLI**: `/compress` **replaces** the entire history with one summary, plus an auto-compression threshold configured as a fraction of the limit; facts that must survive compression go into `/memory` first — the summary replacement itself is irreversible.
+- **Codex CLI**: `/compact` summarizes to reclaim tokens; its compaction runs server-side — the summary carries prior state in an **encrypted, unreadable** form, so you can't inspect "what got dropped" the way you'd read a normal summary.
+- **Cursor**: **automatic** summarization near the limit + manual `/summarize`; large files go through a separate on-demand condensation — "conversation summary" and "file condensation" are two parallel mechanisms, don't conflate them.
+
+Whichever you use, the principle holds: **land the key facts outside the session before compacting** (memory / files / commits), and treat compaction as a lossy checkpoint, not a free context extension.
 
 ## Version notes
 

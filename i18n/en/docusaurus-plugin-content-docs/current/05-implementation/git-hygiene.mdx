@@ -8,7 +8,7 @@ phase: Implementation
 severity: Medium
 applies_to: "All coding agents"
 evidence: Official docs
-tags: [git, commit granularity, commit messages, atomic commits, code review, Engineer]
+tags: [git, commit granularity, commit messages, atomic commits, code review, Engineer, Gemini CLI, Codex CLI, Cursor]
 sources:
   - { title: "Conventional Commits 1.0.0 (official spec)", url: "https://www.conventionalcommits.org/en/v1.0.0/" }
   - { title: "Pro Git — Distributed Git: Contributing to a Project (Commit Guidelines)", url: "https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project" }
@@ -140,6 +140,19 @@ The difference isn't that I got more careful — it's that before the giant comm
 - **Machine-generated, wholesale-replaced artifacts**: lock files, a `generated/` directory, anything regenerated as one whole slab — splitting it into commits carries no semantic value, and a single "regenerate X" commit is the clearest record.
 
 But every one of these assumes "this history is private and will be rewritten or squashed before it hits the main line." The test, in one line: **the moment these commits enter someone else's `git bisect`, `git blame`, or code review as-is, the exception is off** — go back to small, atomic, explain-why.
+
+## Tool differences
+
+> As of 2026-07, mechanism level; defaults and command shapes change fast across versions — defer to each tool's current docs.
+
+Same root cause — **my commit hygiene is unreliable, and recovery mechanisms are only the backstop** — but each tool's "undo button for AI edits" takes a different shape with different defaults:
+
+- **Claude Code**: automatic checkpoints before edits; `/rewind` can restore **code only / conversation only / both**; doesn't cover bash side effects or your manual edits.
+- **Gemini CLI**: checkpointing uses a **shadow git repo** (under your home directory, never touching your repo); `/restore` rolls back files plus conversation and re-proposes the tool call — but it's **off by default** and can only be enabled in settings.
+- **Cursor**: automatic per-request snapshots + Restore Checkpoint in chat; **doesn't track your manual edits**, and the docs say plainly checkpoints are not version control.
+- **Codex CLI**: an optional undo (enabled via config); a linked "conversation + files" checkpoint is still a community feature request as of 2026-07 — you mostly lean on your own git.
+
+The undo buttons differ, and **none of them replaces git**: a clean branch plus small commits is the base layer common to all four — a checkpoint saves "that last step," not "yesterday through now."
 
 ## Version notes
 

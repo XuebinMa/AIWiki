@@ -8,7 +8,7 @@ phase: Testing
 severity: Medium
 applies_to: "All LLMs"
 evidence: Research
-tags: [code review, self-preference, verification loop, sycophancy, Engineer, QA Engineer]
+tags: [code review, self-preference, verification loop, sycophancy, Engineer, QA Engineer, Cursor, GitHub Copilot]
 sources:
   - { title: "LLM Evaluators Recognize and Favor Their Own Generations (Panickssery et al., arXiv:2404.13076)", url: "https://arxiv.org/abs/2404.13076" }
   - { title: "Benchmarking and Studying the LLM-based Code Review (SWRBench, arXiv:2509.01494)", url: "https://arxiv.org/abs/2509.01494" }
@@ -89,6 +89,19 @@ The "AI review" cluster is easy to confuse with several nearby entries on this s
 - [Sycophancy when validating ideas](../01-ideation-feasibility/sycophancy-idea-validation.mdx): there I cater to **your** leanings (what you want to hear); this entry favors **my own** output (what I wrote), independent of what you want to hear.
 - [Trust but don't verify](./trust-then-verify.mdx): that's **you** trusting my code because it "reads right"; this entry is **me**, as reviewer, trusting my own code because it "reads right"—swap the trusting party from human to AI, and the problem gets sneakier.
 - [Review sycophancy and rubber-stamping](./review-sycophancy-automation-bias.mdx): that one is about me being swayed by the author's PR framing while a person rubber-stamps my review; this entry is about my **intrinsic** preference for my own generations, which exists even with no author framing and no one rubber-stamping at all.
+
+## Tool differences
+
+> As of 2026-07, mechanism level; review-product shapes and plan tiers change fast — defer to each tool's current docs.
+
+Same root cause — **review must be independent of generation**; each vendor productizes the "independent reviewer" differently, and what they share is that none of them **reuses the writing session's context**:
+
+- **Claude Code**: review takes a **separate-context** shape — standalone review / security-review commands, or a review Action on the PR; the point is never letting the writing session review itself.
+- **GitHub Copilot**: Copilot code review is a **review product** separate from completion / agent, reviewing PRs automatically or on request.
+- **Cursor**: BugBot reviews PRs independently (bugs / security / quality, inline comments plus suggested fixes) and can spin up a cloud agent to autofix — reviewer and writer are separated by construction.
+- **Gemini Code Assist (the GitHub app — not Gemini CLI)**: auto-assigns itself as a reviewer, produces PR summaries plus in-depth reviews; its consumer tier has an announced shutdown for 2026-07-17 while the enterprise tier continues — a live demonstration of why this section must carry a date.
+
+Products churn; the discipline doesn't: **writer and reviewer use different contexts**, and these independent reviewers are a second pair of eyes, not the only gate — human spot checks and your CI stay in the loop.
 
 ## Version notes
 
