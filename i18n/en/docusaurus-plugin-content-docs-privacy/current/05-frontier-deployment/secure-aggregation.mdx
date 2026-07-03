@@ -72,8 +72,11 @@ To break it down: **secure aggregation ≠ DP**. It **hides the single point, ad
 ```text
 1. Use a mature implementation, don't roll your own crypto: masking / secret-sharing /
    threshold details are very easy to get wrong.
-2. Set the threshold and dropout tolerance right: threshold t decides "how many must
-   collude to break" and "how many dropouts still recover" — tune to your participation
+2. The threshold isn't one magic number — set four things separately: the privacy
+   threshold (how many must collude to break), dropout tolerance (how many dropouts
+   still recover), the minimum participant count, and the server/client collusion
+   model (does it defend an actively malicious server or not) — these parameters
+   aren't synonymous across secure-aggregation variants; tune to your participation
    scale and dropout rate, don't use defaults.
 3. Stack DP: secure aggregation hides the single point + DP bounds single-sample
    influence = complementary; sensitive cases need both (report ε clearly).
@@ -81,7 +84,10 @@ To break it down: **secure aggregation ≠ DP**. It **hides the single point, ad
    sample → the aggregate sum is information-rich and the single point is easier to infer.
 5. Audit two things: (1) the server implementation really can't get individual updates;
    (2) run gradient inversion + collusion analysis on your setup, confirming a single
-   update isn't recoverable within the threshold assumption.
+   update isn't recoverable within the threshold assumption. Note: runtime auditing
+   only shows the implementation doesn't visibly expose single updates — it doesn't
+   substitute for cryptographic security, which still rests on the protocol proof,
+   a mature implementation, and parameter review.
 ```
 
 Every parameter is tied to **your participation scale, dropout rate, and threat model** — copying paper thresholds / sampling will mismatch.

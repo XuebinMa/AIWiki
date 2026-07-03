@@ -66,6 +66,17 @@
 | H100 数字过乐观 | ✅ | proposal §6.1 已加条件 + 入必核（见上） |
 | 评审给的数字本身 | ↩️ | 4–8%/45–70%/「二十多个」不免检，入必核一视同仁查一手 |
 
+### R4 · ChatGPT 密码学独立评审（2026-07，卷一 / 卷五线上页面，结清 :211 该轮）
+
+> 主控核验：评审全部引述已逐条 grep 对回仓库原文（无失实引述）；其自引数字（如 Gboard「二十多个」）不因来自评审免检——该数字本就在条目出处句里带一手论文，不另采信评审转述。总评「整体质量高、无需推倒重写」。
+
+- ✅ **P0×4 全修（中英）**：①机密推理摘要不再把 Apple PCC 归为「GPU TEE」例——改「硬件隔离 + 远程证明」路线、NVIDIA GPU 机密计算与 PCC 分开点名；②TEE「加完整性保护」→「部分平台提供完整性 / 回滚防护，取决于 SGX/TDX/SEV-SNP/GPU-TEE 型号、固件与证明范围」；③HE·MPC「零硬件信任 / 不信任何硬件」（含标题）→「不把远端执行环境当信任根」+ 补客户端密钥 / 随机数 / 实现的残余信任点；④成员推断「DP 是唯一形式保证」→「最主流、最通用、最可组合的形式化防护框架」。
+- ✅ **P1×5 全修（中英）**：⑤HE 参数断言从单一 λ≥128 扩为「参数集 + lattice estimator + 深度 / 噪声预算」；⑥安全聚合门限拆四件事（隐私门限 / 掉线容忍 / 最小参与方 / 串通模型）；⑦审计断言补「运行时审计不替代密码学证明」；⑧DP-FL 延伸阅读补「主要：生产部署论文」标注行（frontmatter 单标签制度不变，接多标签待办）；⑨梯度泄露「还原质量崩」→条件化（正确裁剪 / 足够噪声 / 可复算会计下显著下降）。
+- ✅ **P2「上链」**：机密推理「公开上链」→「append-only 防篡改透明日志」（zh 独有问题，en 本就写 log）。
+- ⬜ **P2 卷一「密码学信任模型总表」**（保护什么 / 不保护什么 / 信任根）：认同，落待办表（与 map 威胁矩阵分工：总表按技术、矩阵按威胁面）。
+- 🟡 **P2 maturity 细分（productionEvidence 子字段）**：认同方向，并入既有「证据字段多标签」待办（同一治理标准：可机械派生、不靠打分）。
+- ↩️ **DP-FL evidence frontmatter 改双标签**：不改——terminology 现约定每条一个主标签，双标签属 schema 层变更（见上并入项）；语义诉求已用延伸阅读「主要 / 补充」行满足。
+
 ### R2 · 用户 + ChatGPT（2026-06，对 R1 分诊的再评审）
 
 - ✅ 认可 R1 分诊（评价「比全盘采纳更成熟」）；**证据纪律对评审者一视同仁**升为治理原则（见顶部）。
@@ -120,7 +131,8 @@
 | 收紧「训练数据抽取」绝对化表述 | P0 | ✅ **已是当前源状态**：摘要 + 版本说明早已条件化（「已有研究设置下观察到」「不保证所有设置下单调」）——评审读到的是**未重新部署的旧线上版**，本轮无需改，main 重新部署后即一致 |
 | maturity=生产 全站审计 | P0 | ✅ 本轮审 9 条：8 条证据充分（真实事故 / 厂商文档 / 已部署 TEE / Google 生产 FL·安全聚合）；`training-data-deduplication` 原仅「标准实践」口头支撑 → **本轮补 RefinedWeb（Falcon/TII，NeurIPS'23）公开生产去重管线**坐实，中英齐 |
 | 隐私地图作威胁优先入口 | P0·小 | ✅ 本轮 intro「怎么读」中英各加一句：知道泄露面就先进隐私地图威胁矩阵 |
-| 证据字段多标签（primary/supporting） | P1 | 🟡 **轻量版早已落**（R3：terminology「主要/补充」约定 + 延伸阅读开头标注）；frontmatter 机读多标签**仍待**——评审重提，作可选增强（机密推理是混合证据典型）。须可机械派生、不靠打分（接 evidenceLevel） |
+| 证据字段多标签（primary/supporting） | P1 | 🟡 **轻量版早已落**（R3：terminology「主要/补充」约定 + 延伸阅读开头标注）；frontmatter 机读多标签**仍待**——评审重提，作可选增强（机密推理是混合证据典型）。R4 再提 **maturity 细分**（productionEvidence: deployed-system / vendor-product / production-paper），并入本项一起设计。须可机械派生、不靠打分（接 evidenceLevel） |
+| 卷一「密码学信任模型总表」 | P2 | ⬜ 待做（R4 提出）：DP / TEE / HE / MPC / 安全聚合 / 机密推理 ×「保护什么 / 不保护什么 / 信任根」一览表，放卷一导言或独立页。与 `map` 威胁矩阵分工：总表按**技术**、矩阵按**威胁面**，别重复 |
 | 目录页卡片摘要过长 | P1 | ⬜ 待做：卡片只留短标题 / 一句话风险 / 风险等级 / 成熟度 / 证据 / 板块，长摘要留正文。先查 DocCard 取 description 还是摘要 |
 | 威胁矩阵拆二级页面 | P1 | ⬜ 待做：留总表 + 拆「训练期 / 推理期 / RAG·Agent / 治理 / 评测」二级索引 |
 | 隐私案例库入口 | P2 | ✅ **已落（2026-07）**：`privacy/incidents.mdx`（真实事故与实证索引，中英，slug `incidents`，侧栏 pos 8）——两层：**A 真实生产事故**（EchoLeak / CamoLeak / ChatGPT 串味 / NYT 保全令 / o3 反向定位⚠️）+ **B 里程碑演示**（Nasr 抽取 / Carlini 扩散图 / Morris 嵌入反演 / PromptPeek KV-cache / Fredrikson 反演），每条反链条目 + 一手源；两层分列即一条纪律（别把「已证明可行」当「生产已泄露」） |
@@ -208,7 +220,7 @@
 - ✅ **frontmatter 轴枚举**：`era` / `technique` / `attack_surface` / `maturity` / `audience` 定稿写进 `terminology.md`「枚举值映射（隐私 frontmatter 与 `<PrivacyMeta>`）」；`maturity`「研究 / 试验 / 生产」为硬约束（硬闸门 C）。
 - ✅ **`severity` 隐私语义**：沿用高/中/低（显示作「隐私风险」），已写 `terminology.md`；不另拆「数据敏感度」轴（PROPOSAL §13 已定）。
 - ✅ **本地搜索多实例**：已验证 `@easyops-cn/docusaurus-search-local` 的 `docsRouteBasePath` 接受 `string[]`，设为 `['/', 'privacy']`，**两实例都入本地索引**，无需切 Algolia。
-- ⬜ **技术评审人**：密码学准确性（尤卷一/卷五）需独立评审。**ChatGPT 作内容独立评审人**（R1 已收）；Claude 对其意见可提异议（如 R1 的数字、板块数、首批样板），目标协作。后续评审继续落「评审分诊记录」。
+- 🟡 **技术评审人**：密码学准确性（尤卷一/卷五）需独立评审——**卷一 / 卷五该轮已完成（R4，2026-07）**：P0×4 + P1×5 + P2×1 修复落地（中英），2 项结构增强落待办。后续新条目 / 大改仍走独立评审，继续落「评审分诊记录」。
 - ✅ **dogfooding-checklist**：`DOGFOODING.md`（repo 级精简）+ `CLAUDE.md` 一行指针；三道硬闸门进 `DOGFOODING.md` pre-PR 清单 + `STYLE-GUIDE.md`「LLM 隐私保护主题专属规范」（未堆 CLAUDE.md）。
 - ✅ **企业/供应商数据边界 checklist**：toolkit 工件「**LLM Vendor Data Boundary Checklist**」已落（`privacy/vendor-data-boundary-checklist.mdx` 中英，slug `vendor-data-boundary-checklist`）。覆盖 8 类：训练使用 / retention / abuse monitoring·人工访问 / zero data retention（覆盖与否）/ subprocessors / region·residency / DPA·BAA·合规报告 / observability·tracing 二次泄露；含逐厂商记录表（答案 + 条款出处 + 核验日期）+ 季度复核。《推理服务数据边界》双向链。
 - ✅ **第一人称纪律对照表**：已写进 `STYLE-GUIDE.md`「第一人称红线（强规则）」的「可 / 不可第一人称对照表」。
