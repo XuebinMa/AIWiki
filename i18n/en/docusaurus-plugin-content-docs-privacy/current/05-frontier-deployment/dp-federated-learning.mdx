@@ -55,7 +55,7 @@ flowchart TB
 
 Two routes, both load-bearing on "**data doesn't leave the device**" needing "**updates don't leak either**":
 
-- **Central route**: FL (raw data stays) + DP-FTRL (DP accounting suited to federated streaming, giving a user-level (ε, δ) bound) + secure aggregation (server sees only the sum). Drop any one: no DP → updates leak; no secure aggregation → the server sees single updates.
+- **Central route**: FL (raw data stays) + DP-FTRL (DP accounting suited to federated streaming, giving a user-level (ε, δ) bound) + secure aggregation (server sees only the sum). **For the goal of claiming both "the server can't see single updates" and "single-user influence is bounded,"** drop any one and it fails: no DP → updates leak; no secure aggregation → the server sees single updates — different goals (like the local route below) call for different combinations.
 - **Local route**: local DP (noise added on-device, trusting not even the server), at the cost of large noise and clear utility loss; check ε.
 
 ## Buildable recipe
@@ -127,6 +127,8 @@ The **mechanisms** of FL + DP (FedAvg, DP-FTRL, secure aggregation, local DP) ar
 :::
 
 ## Further reading and sources
+
+> Primary: a **production-deployment paper** (Gboard DP-FL — the official description of a shipped system, and the direct basis for this entry's maturity=production); supporting: research (FedAvg, the mechanism foundation) and vendor practice (Apple's local DP).
 
 - [Federated Learning of Gboard Language Models with Differential Privacy (Xu et al., ACL 2023; arXiv 2305.18465)](https://arxiv.org/abs/2305.18465) — production DP-FL: more than twenty DP-guaranteed Gboard language models deployed with FL + DP-FTRL, all next-word-prediction models now requiring DP.
 - [Learning with Privacy at Scale (Apple, 2017)](https://machinelearning.apple.com/research/learning-with-privacy-at-scale) — production local DP: on-device ε-local DP privatization + de-identification + sampling, collecting emoji / QuickType telemetry.

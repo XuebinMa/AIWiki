@@ -1,5 +1,5 @@
 ---
-title: "Homomorphic encryption and secure multi-party computation (HE·MPC): compute on ciphertext with zero hardware trust — at a steep speed cost"
+title: "Homomorphic encryption and secure multi-party computation (HE·MPC): compute on ciphertext without trusting the remote hardware — at a steep speed cost"
 slug: he-mpc
 sidebar_label: Homomorphic encryption / MPC
 sidebar_position: 3
@@ -21,7 +21,7 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="Volume 1 · Privacy foundations" technique="Privacy-preserving computation" audience={['Privacy Engineer', 'Security Engineer', 'ML Engineer']} severity="Medium" maturity="Experimental" evidence="Research" />
 
-> In one sentence: homomorphic encryption (HE) lets you **send data encrypted**, have the server **compute directly on the ciphertext**, and decrypt only at your end — the server never sees plaintext; secure multi-party computation (MPC) lets several parties **jointly compute a function without handing over their inputs**. The key difference from a TEE: **no hardware trust** — security comes from cryptographic assumptions. The cost is being **much slower** (HE especially), so today they're used in narrow scenarios, and full private LLM inference is still expensive. Volume 1 covers what they guarantee, where the cost is, and how to choose between them and a TEE.
+> In one sentence: homomorphic encryption (HE) lets you **send data encrypted**, have the server **compute directly on the ciphertext**, and decrypt only at your end — the server never sees plaintext; secure multi-party computation (MPC) lets several parties **jointly compute a function without handing over their inputs**. The key difference from a TEE: **the remote execution environment is not a trust root** — security comes from cryptographic assumptions. The cost is being **much slower** (HE especially), so today they're used in narrow scenarios, and full private LLM inference is still expensive. Volume 1 covers what they guarantee, where the cost is, and how to choose between them and a TEE.
 
 ## Mechanism: what happens on my side
 
@@ -53,7 +53,7 @@ flowchart TB
 
 ## How the defense works
 
-Security comes not from "hiding inside some hardware" but from **cryptographic assumptions**: HE rests on hard lattice problems + bootstrapping for noise control; MPC on secret sharing / garbled circuits + communication rounds, proven to "reveal nothing beyond the output" under an **explicit threat model and collusion threshold**. That's exactly the load-bearing point — **this is a trust model orthogonal to a TEE's**: a TEE asks you to trust the chip vendor; HE / MPC ask you to trust mathematical assumptions and (for MPC) the collusion threshold, with no hardware trust.
+Security comes not from "hiding inside some hardware" but from **cryptographic assumptions**: HE rests on hard lattice problems + bootstrapping for noise control; MPC on secret sharing / garbled circuits + communication rounds, proven to "reveal nothing beyond the output" under an **explicit threat model and collusion threshold**. That's exactly the load-bearing point — **this is a trust model orthogonal to a TEE's**: a TEE places its trust in hardware isolation and attestation; HE / MPC **don't treat the remote execution environment as a trust root**, building security instead on cryptographic assumptions, parameter choices, the protocol model, and implementation correctness — you still trust your own client's key security, randomness quality, and crypto-library implementation, just not the other side's hardware.
 
 ## Buildable recipe
 
@@ -66,7 +66,10 @@ Security comes not from "hiding inside some hardware" but from **cryptographic a
 3. MPC: choose protocol and threat model — semi-honest vs malicious, two-party vs
    multi-party, collusion threshold; use a mature framework (e.g. MP-SPDZ);
    evaluate communication rounds and bandwidth (MPC is usually comms-bound).
-4. Set security parameters: λ >= 128 bits; spell out the threat model and
+4. Set security parameters: target at least 128-bit, but for HE don't stop at one
+   abstract λ — re-check the concrete parameter set (ring dimension / ciphertext
+   modulus / noise budget / multiplicative depth) with your library's lattice
+   estimator; for MPC spell out the threat model (semi-honest / malicious) and
    collusion assumptions — don't leave defaults.
 5. Layer DP on the output: if the output can reveal inputs, add differential
    privacy to the output.
@@ -76,7 +79,7 @@ Every parameter (scheme, λ, collusion threshold, circuit depth) carries **your 
 
 **Minimal testable assertions** (turn the recipe above into a regression check):
 
-- How to test: ① functionality — compare ciphertext / multi-party results against plaintext computation (HE approximate schemes like CKKS must carry an **error bound**); ② security — check λ >= 128 bits and that the threat model and collusion threshold are stated and match the protocol.
+- How to test: ① functionality — compare ciphertext / multi-party results against plaintext computation (HE approximate schemes like CKKS must carry an **error bound**); ② security — target ≥ 128-bit with the HE parameter set re-checked via an estimator (not just an abstract λ), and the threat model and collusion threshold stated and matching the protocol.
 - Pass: results fall within the declared error bound; security parameters meet the bar; the threat model (semi-honest / malicious, collusion threshold) is explicit and consistent with the chosen protocol.
 - Fail: insufficient parameters / unclear threat model / using a semi-honest protocol in a malicious setting → the claimed privacy guarantee isn't met; go back and switch protocol or fix parameters.
 
@@ -110,7 +113,7 @@ HE's exact overhead multiplier (often quoted on the order of "~10⁴×") depends
 
 ## How this differs from neighboring techniques
 
-- **HE·MPC vs. TEE**: both "hand data out to be computed without leaking it," but the trust models are opposite — a TEE rests on **hardware trust** (fast, general, but you trust the chip vendor and live with side channels, see [Trusted execution environments](./trusted-execution-environment.mdx)); HE / MPC rest on **cryptography** (zero hardware trust, but much slower). The choice is trading "speed" for "zero hardware trust," or the reverse.
+- **HE·MPC vs. TEE**: both "hand data out to be computed without leaking it," but the trust models are opposite — a TEE rests on **hardware trust** (fast, general, but you trust the chip vendor and live with side channels, see [Trusted execution environments](./trusted-execution-environment.mdx)); HE / MPC rest on **cryptography** (no remote execution environment as a trust root, but much slower). The choice is trading "speed" for "not trusting the remote hardware," or the reverse.
 - **HE·MPC vs. differential privacy**: HE / MPC protect "**inputs from being seen by the computing party during computation**"; DP protects "**outputs from leaking a single sample**." They're orthogonal and often stacked — compute with HE / MPC, then add DP to the output, to close both "process" and "result."
 
 ## Version notes

@@ -95,7 +95,7 @@ Calling out each false security:
 - **"Average accuracy isn't high" ≠ safe.** Averages hide the tail — even if the overall edge over guessing is small, an attack may still **confidently pick out individual members at low FPR** (Carlini 2022's core point). Judge by TPR at low FPR.
 - **"Not overfit" ≠ no leakage.** Reducing overfitting weakens the signal but gives no formal guarantee; a well-generalizing model can still leak membership on rare / outlier records.
 - **No original text needed to count as a leak.** MIA only yields a yes/no, but when "being in this dataset" is itself sensitive (a disease, sexual orientation, a court case), that bit is a privacy incident.
-- **DP is the only formal guarantee, but watch ε.** DP gives a provable bound, but with ε too large the bound is vacuous; and it has a utility cost (see DP fine-tuning).
+- **DP is the most mainstream, most general, most composable formal defense framework — but watch ε.** DP gives a provable bound, but with ε too large the bound is vacuous; and it has a utility cost (see DP fine-tuning).
 - **Membership inference is the "root," not the "top."** Attribute inference and training-data extraction both build on "the model behaves differently on data it has seen" — fail to contain the MIA signal and the upper-layer attacks have a foundation.
 
 ## Compliance mapping

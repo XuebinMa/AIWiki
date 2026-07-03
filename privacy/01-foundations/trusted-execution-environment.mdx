@@ -27,7 +27,7 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 当我（模型）跑在 TEE 里，这边发生两件事：
 
-1. **内存 / 显存被硬件加密、隔离。** 我处理你 prompt 的那块内存，由芯片在运行时加密、加完整性保护；OS、hypervisor、同机其他租户即便有更高权限，读到的也是密文。机密计算联盟（CCC）把 TEE 的保证定义为三条：**数据机密性、数据完整性、代码完整性**（CCC, *A Technical Analysis of Confidential Computing*）。
+1. **内存 / 显存被硬件加密、隔离。** 我处理你 prompt 的那块内存，由具体 TEE 机制在运行时加密、隔离，**部分平台**另提供完整性或回滚防护——具体保证取决于 SGX / TDX / SEV-SNP / GPU TEE 的型号、固件与证明范围，别当作所有 TEE 等同；OS、hypervisor、同机其他租户即便有更高权限，读到的也是密文。机密计算联盟（CCC）把 TEE 的保证定义为三条：**数据机密性、数据完整性、代码完整性**（CCC, *A Technical Analysis of Confidential Computing*）。
 2. **远程证明（remote attestation）。** 硬件用**厂商签名的密钥**生成一份报告，证明「这是真 enclave、跑的是你指定的那份代码（measurement 匹配）」。你**先验证这份证明，再**把 prompt / 密钥发进来。NVIDIA H100 是首个支持机密计算的 GPU：片上信任根 + 签名证明报告，CPU 与 GPU 之间用 **AES-GCM-256** 加密传输（NVIDIA 官方）。
 
 红线：TEE 给的是「**外部看不到 + 可证明身份**」，**不是**「绝对安全」。它把信任**转移**到芯片厂商，不护 enclave 内代码自身的 bug，也挡不住下面会说的侧信道。
