@@ -6,9 +6,10 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "gen:meta": "node scripts/gen-entry-meta.js",
-    "prestart": "node scripts/gen-entry-meta.js",
+    "gen:mcp-index": "node scripts/gen-mcp-index.js",
+    "prestart": "node scripts/gen-entry-meta.js && node scripts/gen-mcp-index.js",
     "start": "docusaurus start",
-    "prebuild": "node scripts/gen-entry-meta.js",
+    "prebuild": "node scripts/gen-entry-meta.js && node scripts/gen-mcp-index.js",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",

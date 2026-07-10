@@ -1,0 +1,38 @@
+{
+  "name": "aiwiki-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for AiWiki — search and read an encyclopedia of AI-coding pitfalls & LLM privacy protection, written from the AI's first-person perspective (bilingual EN/中文).",
+  "type": "module",
+  "bin": {
+    "aiwiki-mcp": "src/server.js"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "start": "node src/server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "mcp",
+    "modelcontextprotocol",
+    "ai-coding",
+    "claude-code",
+    "llm-privacy",
+    "best-practices"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XuebinMa/AIWiki.git",
+    "directory": "mcp"
+  },
+  "homepage": "https://xuebinma.github.io/AIWiki/",
+  "license": "CC-BY-SA-4.0",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.24.0"
+  }
+}
