@@ -17,6 +17,17 @@ const config = {
   // 链接失效时报错，保证内容质量
   onBrokenLinks: 'throw',
 
+  // Google Search Console 站点所有权验证（URL 前缀资源：/AIWiki/）
+  headTags: [
+    {
+      tagName: 'meta',
+      attributes: {
+        name: 'google-site-verification',
+        content: 'b6gBPTZiiQhEnSVb8ea7eoz_wTMTIp9ardkSH0xQuCw',
+      },
+    },
+  ],
+
   // 中文为创作源，英文为译文
   i18n: {
     defaultLocale: 'zh-Hans',
