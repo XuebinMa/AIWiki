@@ -1,0 +1,39 @@
+# AiWiki
+
+> 从 AI 第一人称视角写的工程百科，中英双语（中文为创作源，英文为 1:1 镜像）。含两个并列主题：「AI 编码误区」——用 AI 编码工具做软件工程最容易踩的坑与对应工程护栏，覆盖软件研发全生命周期 76 条误区、5 款工具（Claude Code / Cursor / Copilot / Codex CLI / Gemini CLI），附 CVE 支撑的真实案例库；「LLM 隐私保护」——LLM 系统里隐私如何被泄露、如何被保护，机制 + 可落地配方 + 真实案例，按 LLM 发展史分六卷。每条内容标注证据来源（官方文档 / arXiv / CVE 与安全通告）并随版本更新。许可证 CC BY-SA 4.0。
+>
+> An engineering encyclopedia written from the AI's own first-person perspective, fully bilingual (Chinese is the writing source, English a 1:1 mirror). Two subjects: AI-coding pitfalls (76 entries across the software lifecycle, 5 coding tools, CVE-backed case library) and LLM privacy protection (mechanisms + actionable recipes + real incidents, organized along LLM history). Every entry tags its evidence and is version-stamped. Licensed CC BY-SA 4.0.
+
+English mirror of any page: insert `/en` after the base path, e.g. `https://xuebinma.github.io/AIWiki/en/welcome`.
+
+## 主题一：AI 编码误区（AI-coding pitfalls）
+
+- [这本书是什么](https://xuebinma.github.io/AIWiki/welcome): 主题定位、第一人称写法说明与阅读方式
+- [必读 20 条](https://xuebinma.github.io/AIWiki/core-20): 按「新手最早踩 + 后果最不可逆」挑出的高优先误区
+- [工具矩阵](https://xuebinma.github.io/AIWiki/tool-matrix): 哪些误区是范式级通用的、哪些在工具间防法不同、哪些为某工具独有
+- [机制索引](https://xuebinma.github.io/AIWiki/mechanisms): 按根因机制（上下文、训练分布、指令层级……）浏览全部误区
+- [安全索引（威胁模型）](https://xuebinma.github.io/AIWiki/threat-model): 按威胁维度串起 AI 编码安全 / 治理相关的误区与案例
+- [AI 代码审查专题](https://xuebinma.github.io/AIWiki/code-review): AI 当代码审查者时会怎么失守，以及人该怎么补位
+- [案例库](https://xuebinma.github.io/AIWiki/category/-案例库): 含 CVE 编号的真实事故复盘（Codex CLI RCE、Gemini CLI RCE、Copilot CamoLeak、Replit 删库、三星源码泄露）
+- [模板与清单](https://xuebinma.github.io/AIWiki/category/-模板与清单): 可直接取用的检查清单、提示词模板与工作流（权限配置、PR 审查清单、发布安全清单等）
+
+误区正文按软件研发八阶段组织：准备与协作（00）→ 灵感与可行性（01）→ 需求分析（02）→ 概要设计（03）→ 详细设计（04）→ 编码实现（05）→ 测试（06）→ 验收与发布（07）；各阶段与全部条目的 URL 见[站点地图](https://xuebinma.github.io/AIWiki/sitemap.xml)。
+
+## 主题二：LLM 隐私保护（LLM privacy protection）
+
+- [这个主题是什么](https://xuebinma.github.io/AIWiki/privacy/): 主题定位、第一人称红线（只讲可外部观察的行为）与组织方式
+- [隐私地图](https://xuebinma.github.io/AIWiki/privacy/map): 全主题技术板块总览与「威胁 → 缓解」对照
+- [必读 12 条](https://xuebinma.github.io/AIWiki/privacy/core-12): 最高优先的隐私结论与配方
+- [最小隐私基线](https://xuebinma.github.io/AIWiki/privacy/baseline): 上线一个 LLM 系统前的最小隐私动作集
+- [泄露机制索引](https://xuebinma.github.io/AIWiki/privacy/mechanisms): 按泄露机制浏览（记忆回吐、成员推断、嵌入反演……）
+- [真实事故与实证](https://xuebinma.github.io/AIWiki/privacy/incidents): 真实隐私事故与实证研究索引
+- [厂商数据边界清单](https://xuebinma.github.io/AIWiki/privacy/vendor-data-boundary-checklist): 评估 LLM 供应商数据边界的可操作清单
+
+正文按 LLM 发展史分六卷：基础（01-foundations）→ 记忆与提取（02-memorization-extraction）→ 对话式 LLM（03-conversational-llms）→ RAG 与 Agent（04-rag-agents）→ 前沿部署（05-frontier-deployment）→ 治理合规（06-governance-compliance）。
+
+## 项目与协作
+
+- [GitHub 仓库](https://github.com/XuebinMa/AIWiki): 源文件、Issue 与讨论
+- [贡献指南](https://github.com/XuebinMa/AIWiki/blob/main/CONTRIBUTING.md): 如何补充条目或纠错
+- [写作规范](https://github.com/XuebinMa/AIWiki/blob/main/STYLE-GUIDE.md): 第一人称红线、证据纪律与双语镜像规则
+- [站点地图](https://xuebinma.github.io/AIWiki/sitemap.xml): 全部页面 URL
