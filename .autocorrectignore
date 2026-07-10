@@ -3,3 +3,7 @@ build/
 .docusaurus/
 styles/
 package-lock.json
+# 生成产物（机器可读索引，源 .mdx 已被 lint；JSON 规则集与 markdown 不同会误报）
+static/api/
+# MCP 包的锁文件
+mcp/package-lock.json
