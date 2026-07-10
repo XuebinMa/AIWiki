@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://xuebinma.github.io/AIWiki/sitemap.xml
