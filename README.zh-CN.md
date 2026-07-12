@@ -66,6 +66,16 @@
 - 🧭 **[工具矩阵](https://xuebinma.github.io/AIWiki/tool-matrix)** —— Claude Code、Cursor、Copilot、Codex、Gemini 各自的差异
 - 👤 **[按角色浏览](https://xuebinma.github.io/AIWiki/roles)** —— 项目经理 / 架构师 / 工程师 / 测试 / 运维
 
+## 在编辑器里用（MCP）
+
+整部百科可以作为 MCP server 接入——问你的 AI 助手「帮我查查 AiWiki 里为什么长会话会变笨」，它就能拉到对应条目、机制和出处：
+
+```bash
+claude mcp add aiwiki -- npx -y aiwiki-mcp
+```
+
+任何 MCP 客户端（Cursor、Windsurf、Claude Desktop……）都可用，详见 [`mcp/README.md`](./mcp/README.md)。
+
 ## 本地运行
 
 基于 [Docusaurus](https://docusaurus.io/)（原生支持版本化、双语 i18n、全文搜索）。
