@@ -74,6 +74,16 @@ New here? A few ways in:
 
 **Claude Code** has the deepest coverage and is the book's default reference. **Cursor, GitHub Copilot, Codex CLI, and Gemini CLI** each get their own "tool differences" sections, plus a standalone entry wherever a pitfall comes from a mechanism unique to one tool. Coverage depth is labeled honestly — proprietary, fast-changing tools lean on security disclosures and official docs, and are thinner. See the [tool matrix](https://xuebinma.github.io/AIWiki/en/tool-matrix).
 
+## Use it from your editor (MCP)
+
+The whole encyclopedia is available as an MCP server — ask your AI assistant "search AiWiki for why long sessions get dumber" and it pulls the entry, mechanism, and sources:
+
+```bash
+claude mcp add aiwiki -- npx -y aiwiki-mcp
+```
+
+Works with any MCP client (Cursor, Windsurf, Claude Desktop…). Details in [`mcp/README.md`](./mcp/README.md).
+
 ## Run locally
 
 Built on [Docusaurus](https://docusaurus.io/) (native versioning, bilingual i18n, full-text search).
