@@ -45,7 +45,7 @@ Plenty of "best-practice lists" and "config dumps" for AI coding tools already e
 
 - **76 pitfall entries** across the 8 phases of the software lifecycle
 - **5 real-world case studies** (3 CVE-backed)
-- **12 toolkit pieces** — checklists, prompt templates, and ready-to-copy workflows
+- **13 toolkit pieces** — checklists, prompt templates, and ready-to-copy workflows
 - **5 coding tools** covered, indexed in one [tool matrix](https://xuebinma.github.io/AIWiki/en/tool-matrix)
 
 | Phase | Directory |

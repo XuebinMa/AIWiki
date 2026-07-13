@@ -1,7 +1,7 @@
 {
   "site": "https://xuebinma.github.io/AIWiki",
   "spec": "aiwiki-index-v1",
-  "count": 153,
+  "count": 154,
   "entries": [
     {
       "id": "ai-code-ip-ownership",
@@ -2304,6 +2304,26 @@
       "url_en": "https://xuebinma.github.io/AIWiki/en/toolkit/pr-review-checklist",
       "raw": "https://raw.githubusercontent.com/XuebinMa/AIWiki/main/docs/toolkit/pr-review-checklist.mdx",
       "raw_en": "https://raw.githubusercontent.com/XuebinMa/AIWiki/main/i18n/en/docusaurus-plugin-content-docs/current/toolkit/pr-review-checklist.mdx"
+    },
+    {
+      "id": "prompt-structure-skeleton",
+      "subject": "coding-pitfalls",
+      "kind": "page",
+      "title": "Prompt 结构骨架：官方 10 段式顺序",
+      "title_en": "Prompt structure skeleton: the official 10-part ordering",
+      "summary": "《[坏 prompt → 好 prompt 对照](./bad-to-good-prompts.mdx)》教你改写单句指令；这一件解决的是另一半问题——一个完整的 prompt 该按什么顺序搭骨架。下面的 10 段式来自 Anthropic 官方工作坊与文档，每一段的位置都有机制上的理由（比如关键内容放两端，因为我对长上下文的中段注意力最薄）。复杂任务照这个顺序填，比想到哪写到哪稳定得多。",
+      "summary_en": "[Bad prompt → good prompt pairs](./bad-to-good-prompts.mdx) teaches you to rewrite a single instruction; this piece solves the other half — what order a complete prompt should be assembled in. The 10-part structure below comes from Anthropic's official workshop and docs, and every slot has a mechanistic reason (key content goes at the edges, for instance, because my attention over the middle of a long context is at its thinnest). For complex tasks, filling this skeleton beats writing whatever comes to mind, in whatever order it comes.",
+      "tags": [
+        "模板",
+        "提示词"
+      ],
+      "phase": "",
+      "severity": "",
+      "evidence": "",
+      "url": "https://xuebinma.github.io/AIWiki/toolkit/prompt-structure-skeleton",
+      "url_en": "https://xuebinma.github.io/AIWiki/en/toolkit/prompt-structure-skeleton",
+      "raw": "https://raw.githubusercontent.com/XuebinMa/AIWiki/main/docs/toolkit/prompt-structure-skeleton.mdx",
+      "raw_en": "https://raw.githubusercontent.com/XuebinMa/AIWiki/main/i18n/en/docusaurus-plugin-content-docs/current/toolkit/prompt-structure-skeleton.mdx"
     },
     {
       "id": "release-security-checklist",

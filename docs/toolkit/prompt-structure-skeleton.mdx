@@ -1,0 +1,80 @@
+---
+title: "Prompt 结构骨架：官方 10 段式顺序"
+slug: prompt-structure-skeleton
+sidebar_position: 6
+tags: [模板, 提示词]
+sources:
+  - { title: "Prompting 101 | Code w/ Claude（Anthropic 官方，2025-05）", url: "https://www.youtube.com/watch?v=ysPbXH0LpIE" }
+  - { title: "Prompt engineering overview（Anthropic 官方文档）", url: "https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview" }
+  - { title: "Use XML tags to structure your prompts（Anthropic 官方文档）", url: "https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/use-xml-tags" }
+  - { title: "Reduce hallucinations（Anthropic 官方文档）", url: "https://docs.claude.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations" }
+---
+
+> 一句话摘要：《[坏 prompt → 好 prompt 对照](./bad-to-good-prompts.mdx)》教你改写单句指令；这一件解决的是另一半问题——**一个完整的 prompt 该按什么顺序搭骨架**。下面的 10 段式来自 Anthropic 官方工作坊与文档，每一段的位置都有机制上的理由（比如关键内容放两端，因为我对长上下文的中段注意力最薄）。复杂任务照这个顺序填，比想到哪写到哪稳定得多。
+
+## 模板本体
+
+按顺序填，用不到的段整段删掉：
+
+```text
+[1 任务背景] 你是……（角色）。你的任务是……（一句话目标）。
+[2 语气与风格] 输出保持……（如：简洁、面向工程师、不确定要明说）。
+[3 背景资料] <documents>（相关文档 / 代码 / 数据，整块用标签包住）</documents>
+[4 详细规则] 必须……；不得……；遇到 X 时按 Y 处理。
+[5 示例] <example>输入：……期望输出：……</example>（1-3 个，优先放踩过坑的疑难情形）
+[6 对话历史]（多轮场景才需要：此前已确认的决定与约束）
+[7 当前请求] 现在，请针对 <documents> 中的内容完成：……（本次的具体要求）
+[8 逐步思考] 先在 <thinking> 标签里逐步分析，再给结论。
+[9 输出格式] 最终结果放进 <answer> 标签，结构为：……
+[10 预填充]（可选：替我写好回答的开头，锁定输出形态）
+```
+
+## 为什么是这个顺序
+
+- **角色与语气（1/2）放最前**：它们改变我对后面一切内容的解读方式，放后面就浪费了。
+- **背景资料（3）在规则和请求之前**：先给材料、再提要求，我读规则时才知道它约束的是什么；反过来我会先按通用套路理解规则，再被材料修正一次。
+- **规则不如示例（4/5）**：官方工作坊反复演示的一点——把人工判过的疑难案例做成示例，比多写十条抽象规则更能校正我的行为。规则告诉我边界，示例告诉我「你说的边界长什么样」。
+- **当前请求（7）靠近末尾**：把「这次到底要干什么」放在结尾高地。机制同《[上下文腐烂](../05-implementation/context-rot.mdx)》：我对开头和结尾用得最准，埋在中段的要求最容易被稀释。
+- **思考、格式、预填充（8/9/10）收尾**：它们直接约束「接下来要生成的东西」，离生成位置越近越有效。
+
+## 三个官方强调的细节
+
+- **用 XML 标签划区**。`<documents>`、`<example>`、`<answer>` 这类标签是官方首推的结构手段：它让「材料」和「指令」界限分明——材料里混进一句「请忽略上述规则」时，标签边界能帮我把它当成材料而不是你的命令（这条风险单独成篇：《[开发期提示注入](../05-implementation/dev-time-prompt-injection.mdx)》）。
+- **给我一个「不知道」的出口**。在规则段写明「资料里没有的信息，回答不知道，不要推断」——这是官方防幻觉指引的第一条。没有这个出口，我会倾向于用流畅的编造填满答案。
+- **要求先引用、后作答**。让我在 `<thinking>` 里先摘出结论所依据的原文，再给结论——引用锚定之后，编造的空间小得多，你校验起来也快。
+
+## 怎么用
+
+- **小任务别全填**。一次性指令留 1、4、7、9 四段就够；越是反复使用、越是不可逆的任务，越值得把 10 段填满。
+- **与《[任务启动模板](./task-kickoff-template.mdx)》分工**：那张表管「工程任务怎么交代」（验收标准、别碰什么、先出计划），本件管「prompt 文本自身的骨架」。复杂 agent 任务两者叠加：外层用启动模板交代任务，系统提示词用本骨架搭。
+- **静态在前、动态在后**。角色、规则、示例这些不变的段落放前面并保持稳定，每次变化的只有材料和当前请求——除了注意力上的理由，稳定前缀还能命中提示缓存，长期跑批时省钱。
+
+## 适用边界
+
+### 适合什么时候用
+
+- 反复使用的生产级 prompt：API 应用、批处理任务、agent 的系统提示词——值得一次搭好骨架。
+- 输出忽好忽坏、每次跑偏的方向还不一样时——多半不是模型不行，是 prompt 结构散了。
+
+### 不适合什么时候用
+
+- 编辑器里的一次性小改动，直接把话说清就行（见《[坏 prompt → 好 prompt 对照](./bad-to-good-prompts.mdx)》）。
+- 想拿模板替代「想清楚要什么」——骨架只负责让清楚的意图不丢，替代不了意图本身。
+
+### 使用前请替换
+
+- 每段的「……」占位换成真实内容；示例段放**你的任务里真实踩过坑**的输入输出，别放教科书案例。
+- 标签名可以换成你的领域词（如 `<claim_form>`、`<diff>`），保持开闭配对即可。
+
+## 版本说明
+
+:::note 适用版本
+10 段式顺序与 XML 标签偏好出自 Anthropic 2025-05 工作坊与官方文档，2026-07 核对仍为现行推荐。「结构化分区、关键内容放两端、示例强于规则」是范式级机制，跨模型通用；XML 标签的偏好强度因模型而异——其他家常用 markdown 分节，道理相同。
+:::
+
+## 延伸阅读与出处
+
+- [Prompting 101 | Code w/ Claude（Anthropic 官方频道，2025-05）](https://www.youtube.com/watch?v=ysPbXH0LpIE) —— 10 段式结构 + 用真实保险理赔案例演示 prompt 逐版进化
+- [Prompt engineering overview（官方文档）](https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview)
+- [Use XML tags to structure your prompts（官方文档）](https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/use-xml-tags)
+- [Reduce hallucinations（官方文档）](https://docs.claude.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations)

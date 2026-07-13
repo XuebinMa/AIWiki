@@ -1,0 +1,80 @@
+---
+title: "Prompt structure skeleton: the official 10-part ordering"
+slug: prompt-structure-skeleton
+sidebar_position: 6
+tags: [模板, 提示词]
+sources:
+  - { title: "Prompting 101 | Code w/ Claude (Anthropic official, 2025-05)", url: "https://www.youtube.com/watch?v=ysPbXH0LpIE" }
+  - { title: "Prompt engineering overview (Anthropic official docs)", url: "https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview" }
+  - { title: "Use XML tags to structure your prompts (Anthropic official docs)", url: "https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/use-xml-tags" }
+  - { title: "Reduce hallucinations (Anthropic official docs)", url: "https://docs.claude.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations" }
+---
+
+> One-line summary: [Bad prompt → good prompt pairs](./bad-to-good-prompts.mdx) teaches you to rewrite a single instruction; this piece solves the other half — **what order a complete prompt should be assembled in**. The 10-part structure below comes from Anthropic's official workshop and docs, and every slot has a mechanistic reason (key content goes at the edges, for instance, because my attention over the middle of a long context is at its thinnest). For complex tasks, filling this skeleton beats writing whatever comes to mind, in whatever order it comes.
+
+## The template
+
+Fill the parts in order; delete any part you don't need:
+
+```text
+[1 Task context] You are … (role). Your task is … (one-sentence goal).
+[2 Tone] Keep the output … (e.g., concise, engineer-facing, say so when unsure).
+[3 Background material] <documents>(relevant docs / code / data, wrapped as one block)</documents>
+[4 Detailed rules] You must …; you must not …; when X happens, do Y.
+[5 Examples] <example>Input: … Expected output: …</example> (1–3, prefer tricky cases that bit you)
+[6 Conversation history] (multi-turn only: decisions and constraints already agreed)
+[7 The immediate request] Now, for the content in <documents>, do: … (this run's concrete ask)
+[8 Step-by-step thinking] Analyze step by step inside <thinking> tags first, then conclude.
+[9 Output format] Put the final result inside <answer> tags, structured as: …
+[10 Prefill] (optional: write the start of my reply for me, locking the output's shape)
+```
+
+## Why this order
+
+- **Role and tone (1/2) go first**: they change how I interpret everything that follows; placing them later wastes them.
+- **Background material (3) before rules and the request**: give me the material first, then the demands — that way I read the rules already knowing what they constrain, instead of parsing them generically and correcting later.
+- **Rules lose to examples (4/5)**: the point the official workshop demonstrates over and over — baking human-judged tricky cases into examples corrects my behavior better than ten more abstract rules. Rules tell me where the boundary is; examples show me what your boundary looks like.
+- **The immediate request (7) near the end**: put "what this run is actually about" on the high ground at the end. Same mechanism as [Context rot](../05-implementation/context-rot.mdx): I use the beginning and the end most accurately, and demands buried in the middle get diluted.
+- **Thinking, format, prefill (8/9/10) close it out**: they constrain "what gets generated next," and the closer they sit to the generation point, the stronger they bind.
+
+## Three details the official material stresses
+
+- **Partition with XML tags.** Tags like `<documents>`, `<example>`, `<answer>` are the officially recommended structuring device: they keep "material" and "instructions" cleanly separated — when a stray "ignore the rules above" sits inside the material, the tag boundary helps me treat it as material rather than as your command (that risk has its own entry: [Dev-time prompt injection](../05-implementation/dev-time-prompt-injection.mdx)).
+- **Give me a way out that says "I don't know."** State in the rules: "If the material doesn't contain it, answer that you don't know — do not infer." This is the first item in the official anti-hallucination guidance. Without that exit, I lean toward filling the answer with fluent invention.
+- **Quote first, answer second.** Have me extract the source passages my conclusion rests on inside `<thinking>` before concluding — anchored to quotes, there is far less room to fabricate, and your review gets faster too.
+
+## How to use it
+
+- **Don't fill everything for small tasks.** For a one-off instruction, parts 1, 4, 7, and 9 are enough; the more reusable and the more irreversible the task, the more the full 10 parts pay off.
+- **Division of labor with the [task kickoff template](./task-kickoff-template.mdx)**: that sheet covers "how to brief an engineering task" (acceptance criteria, what not to touch, plan first); this piece covers "the skeleton of the prompt text itself." For complex agent tasks, stack them: brief the task with the kickoff template, build the system prompt on this skeleton.
+- **Static up front, dynamic at the back.** Keep the unchanging parts — role, rules, examples — up front and stable, so only the material and the immediate request vary per run. Beyond the attention argument, a stable prefix hits prompt caching, which saves real money on long-running batch work.
+
+## Where it applies
+
+### Good fit
+
+- Production prompts you reuse: API applications, batch jobs, agent system prompts — worth assembling the skeleton once, properly.
+- When output quality swings run to run and the failure direction keeps changing — usually the prompt's structure has fallen apart, not the model.
+
+### Poor fit
+
+- One-off small edits in your editor — just say it clearly (see [Bad prompt → good prompt pairs](./bad-to-good-prompts.mdx)).
+- Using a template as a substitute for knowing what you want — the skeleton keeps a clear intent from getting lost; it cannot replace the intent.
+
+### Replace before use
+
+- Swap every "…" placeholder for real content; fill the examples with inputs and outputs that **actually bit you in this task**, not textbook cases.
+- Rename tags to your domain words (say `<claim_form>`, `<diff>`) — just keep open and close tags paired.
+
+## Version notes
+
+:::note Applicable versions
+The 10-part ordering and the XML-tag preference come from Anthropic's 2025-05 workshop and official docs, still the current recommendation as of a 2026-07 check. "Structured partitioning, key content at the edges, examples over rules" are paradigm-level mechanisms that generalize across models; how strongly a model prefers XML tags varies — other vendors often use markdown sectioning, same idea.
+:::
+
+## Further reading & sources
+
+- [Prompting 101 | Code w/ Claude (Anthropic official channel, 2025-05)](https://www.youtube.com/watch?v=ysPbXH0LpIE) — the 10-part structure plus a real insurance-claim case evolved prompt version by version
+- [Prompt engineering overview (official docs)](https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview)
+- [Use XML tags to structure your prompts (official docs)](https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/use-xml-tags)
+- [Reduce hallucinations (official docs)](https://docs.claude.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations)
