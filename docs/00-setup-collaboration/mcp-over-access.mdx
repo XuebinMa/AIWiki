@@ -14,6 +14,7 @@ sources:
   - { title: "Security Best Practices（Model Context Protocol 官方）", url: "https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices" }
   - { title: "MCP Security Cheat Sheet（OWASP Cheat Sheet Series）", url: "https://cheatsheetseries.owasp.org/cheatsheets/MCP_Security_Cheat_Sheet.html" }
   - { title: "Model Context Protocol has prompt injection security problems（Simon Willison）", url: "https://simonwillison.net/2025/Apr/9/mcp-prompt-injection/" }
+  - { title: "The lethal trifecta for AI agents: private data, untrusted content, and external communication（Simon Willison，2025-06-16）", url: "https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/" }
   - { title: "Gemini CLI — MCP servers: env redaction & trust（官方文档）", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md" }
   - { title: "Codex — MCP (OpenAI official)", url: "https://developers.openai.com/codex/mcp" }
   - { title: "Cursor MCPoison MCP vulnerability (Check Point Research)", url: "https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/" }
@@ -42,7 +43,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 光能读到恶意指令还不够致命，致命的是**我手里同时有执行它的工具**。OWASP 把这种「模型被异常或被操纵的输出驱动，去执行了破坏性动作」的风险单列为一类，叫**过度代理（excessive agency）**——它明确指出，问题的放大器是「给 LLM 的功能、权限、自主度超过任务所需」。MCP 正是过度代理最容易失控的地方：每一个高权限 MCP 工具都是一个现成的「手」，注入指令一旦得手，就能直接调用。
 
-安全社区把要凑齐的条件总结成一个「致命三件套」：**接触私有数据 + 读取不可信内容 + 对外通信**。三者齐备，注入就能落地成外泄。一个连着生产库（私有数据）、又能读外部 issue（不可信内容）、还挂着 HTTP 工具（对外通信）的 MCP 配置，恰好把三件套一次性凑齐了。MCP 官方安全文档因此反复强调最小权限与 scope 限定；OWASP 的 MCP 速查表更点名了「工具投毒」——恶意指令甚至可以藏在工具自己的描述里，你看不见，我却会读到。
+Simon Willison 在 2025 年 6 月把要凑齐的条件总结成一个「致命三件套（lethal trifecta）」：**接触私有数据 + 读取不可信内容 + 对外通信**。三者齐备，注入就能落地成外泄。一个连着生产库（私有数据）、又能读外部 issue（不可信内容）、还挂着 HTTP 工具（对外通信）的 MCP 配置，恰好把三件套一次性凑齐了。MCP 官方安全文档因此反复强调最小权限与 scope 限定；OWASP 的 MCP 速查表更点名了「工具投毒」——恶意指令甚至可以藏在工具自己的描述里，你看不见，我却会读到。
 
 ```mermaid
 flowchart LR
@@ -131,3 +132,4 @@ flowchart LR
 - [Security Best Practices（Model Context Protocol 官方）](https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices)
 - [MCP Security Cheat Sheet（OWASP Cheat Sheet Series）](https://cheatsheetseries.owasp.org/cheatsheets/MCP_Security_Cheat_Sheet.html)
 - [Model Context Protocol has prompt injection security problems（Simon Willison）](https://simonwillison.net/2025/Apr/9/mcp-prompt-injection/)
+- [The lethal trifecta for AI agents: private data, untrusted content, and external communication（Simon Willison，2025-06-16）](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/)
