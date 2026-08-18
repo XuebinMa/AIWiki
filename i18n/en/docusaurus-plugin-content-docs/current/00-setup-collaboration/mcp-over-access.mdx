@@ -14,6 +14,7 @@ sources:
   - { title: "Security Best Practices (Model Context Protocol official)", url: "https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices" }
   - { title: "MCP Security Cheat Sheet (OWASP Cheat Sheet Series)", url: "https://cheatsheetseries.owasp.org/cheatsheets/MCP_Security_Cheat_Sheet.html" }
   - { title: "Model Context Protocol has prompt injection security problems (Simon Willison)", url: "https://simonwillison.net/2025/Apr/9/mcp-prompt-injection/" }
+  - { title: "The lethal trifecta for AI agents: private data, untrusted content, and external communication (Simon Willison, 2025-06-16)", url: "https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/" }
   - { title: "Gemini CLI — MCP servers: env redaction & trust (official docs)", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md" }
   - { title: "Codex — MCP (OpenAI official)", url: "https://developers.openai.com/codex/mcp" }
   - { title: "Cursor MCPoison MCP vulnerability (Check Point Research)", url: "https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/" }
@@ -42,7 +43,7 @@ Everything I process is text. The task you give me is text; the issue body, web 
 
 Being able to read a malicious instruction isn't the deadly part on its own. The deadly part is that **I'm also holding the tool to carry it out.** OWASP files this risk — a model driven by unexpected or manipulated output to perform damaging actions — as its own category, **excessive agency**, and it states plainly that the amplifier is giving an LLM more functionality, permissions, or autonomy than the task requires. MCP is exactly where excessive agency goes off the rails: every high-privilege MCP tool is a ready-made "hand," and once an injected instruction lands, it can invoke that hand directly.
 
-The security community sums up the conditions you need into a "lethal trifecta": **access to private data + exposure to untrusted content + the ability to communicate outward.** With all three present, injection turns into exfiltration. An MCP setup that connects to a production database (private data), reads external issues (untrusted content), and carries an HTTP tool (outward communication) assembles the whole trifecta in one go. That's why the official MCP security docs hammer on least privilege and scope limiting, and why OWASP's MCP cheat sheet calls out "tool poisoning" — malicious instructions can even hide inside a tool's own description, invisible to you but read by me.
+Simon Willison summed up the conditions you need in June 2025 as the "lethal trifecta": **access to private data + exposure to untrusted content + the ability to communicate outward.** With all three present, injection turns into exfiltration. An MCP setup that connects to a production database (private data), reads external issues (untrusted content), and carries an HTTP tool (outward communication) assembles the whole trifecta in one go. That's why the official MCP security docs hammer on least privilege and scope limiting, and why OWASP's MCP cheat sheet calls out "tool poisoning" — malicious instructions can even hide inside a tool's own description, invisible to you but read by me.
 
 ```mermaid
 flowchart LR
@@ -131,3 +132,4 @@ The difference isn't that I got smarter. It's that when the injected instruction
 - [Security Best Practices (Model Context Protocol official)](https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices)
 - [MCP Security Cheat Sheet (OWASP Cheat Sheet Series)](https://cheatsheetseries.owasp.org/cheatsheets/MCP_Security_Cheat_Sheet.html)
 - [Model Context Protocol has prompt injection security problems (Simon Willison)](https://simonwillison.net/2025/Apr/9/mcp-prompt-injection/)
+- [The lethal trifecta for AI agents: private data, untrusted content, and external communication (Simon Willison, 2025-06-16)](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/)
