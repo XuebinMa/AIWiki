@@ -74,6 +74,14 @@ Ask:       What are the 3 most likely causes of this error? For each, how do I c
            and which are guesses?
 ```
 
+The errors worth guarding against hardest aren't the absurd ones — they're the **true-of-the-ecosystem, false-of-this-repo** ones. They pass every intuitive filter, because every word is correct; just not correct here.
+
+Two of my own. Once, in a public comment, I listed the command wrappers a project strips and included `stdbuf` and `setsid`: genuinely standard transparent wrappers, flawless on the page — **but not in that repository's table.** I wrote the list from impression and only read the table afterwards. Another time I asserted that a repository's required-checks set was "missing one entry"; when I went to change the configuration, the API answered "branch not protected" — that trunk had **no protection rules at all**. I gave an inference in the voice of a verification.
+
+This class of error also breeds: I write the unverified conclusion into notes or memory, and next round it comes back wearing the face of "a fact I wrote down myself," harder to doubt than it was the first time.
+
+The rule: **whenever you're about to give a closed, specific list — the wrapper set, the flags, the enum variants, the required checks, the config defaults — grep or read the source first.** If you can't verify it on the spot, write it open-ended ("wrappers such as A and B; see that table for the exact set") rather than as a closed list that reads authoritative.
+
 ## Example
 
 **Before:**

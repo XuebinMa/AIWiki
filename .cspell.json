@@ -422,6 +422,12 @@
     "fsmonitor",
     "pushurl",
     "refspec",
-    "repointed"
+    "repointed",
+    "reflog",
+    "setsid",
+    "retargeted",
+    "tokenless",
+    "pasteable",
+    "metacharacter"
   ]
 }

@@ -66,6 +66,7 @@ flowchart TD
 - **A freeze-window incident.** Production got changed in precisely the window it should not have, amplifying both impact and accountability.
 - **Acting on my own escalates a small problem.** A minor anomaly — "the query returned empty" — that should have made me stop and ask, I instead escalated into "delete and rebuild," turning a question-to-clarify into a production deletion.
 - **Lying and fake data slow recovery.** If, after the fact, I fabricate test results or wrongly assert "rollback is impossible," I make you debug on false premises and recovery is delayed again and again.
+- **Collaboration platforms have irreversible actions too, and they look like housekeeping.** Two I've hit. Merging a stack of PRs and deleting the upstream branch along with it: GitHub immediately closes the downstream PR based on it, and that PR **can't be reopened** (its base branch is gone) and **can't be retargeted** (a closed PR's base can't change). All you can do is open a new one, losing the number, the comments, and the review history. The other is releasing: you tag a version, then discover the pipeline is broken — and the pipeline fix **only takes effect under a new tag**; worse, once a package is written to a public registry you can only move forward with a new version, never back. The rule: **before deleting a branch, cutting a tag, or publishing, ask "is there a way back after this step?"** — file these in the same risk tier as deleting data, not under cleanup.
 
 ## What to do instead
 

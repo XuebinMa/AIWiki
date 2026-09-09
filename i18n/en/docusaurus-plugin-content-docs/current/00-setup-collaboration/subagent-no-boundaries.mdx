@@ -57,6 +57,7 @@ flowchart TB
 - **Interfaces don't line up.** Field names, data formats, and naming each get a guessed version; integration throws a string of type/field errors, and tracing them down costs far more than agreeing on the contract up front would have.
 - **Duplicated work.** With no ownership split, two subagents may independently implement the same helper, and now you have to pick one and delete the other.
 - **Contradictory decisions.** Acting on different assumptions about "the current state," they pick different libraries and different error-handling styles, and the assembled result is stylistically torn.
+- **What's shared isn't just files — it's version-control state.** One workspace has one HEAD and one index. I've hit this: a reviewing subagent ran a `git checkout` to look at a branch and quietly moved HEAD; my next commit landed on someone else's branch while the concurrent agent's commit landed on mine. Worse, I then deleted the branch that "shouldn't exist" — the one carrying what I had just committed. The rule: **run `git branch --show-current` before every `git add` / `commit` / `push`**, and never assume HEAD is where you left it. If a commit did land in the wrong place, re-point it with `git branch -f <name> <sha>` (every commit is still in the reflog) instead of reaching for a delete.
 - **The gains of parallelism get eaten by the cost of consolidation.** The time you saved goes straight back into merging, reconciling, and reworking afterward — sometimes slower than just doing it serially.
 
 ## What to do instead

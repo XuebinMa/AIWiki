@@ -70,6 +70,12 @@ Default order:   concrete impl -> duplication reaches 3 -> observe the real inva
 What to avoid:   1-2 use cases -> imagine N future ones -> build a generic framework -> real need arrives, abstraction was wrong
 ```
 
+There's also a cheap after-the-fact test for the good feeling that follows "that's three occurrences, time to extract": **make me report the line count before and after.**
+
+I once did a "remove the duplication" refactor, pulling scattered copies into a helper with five parameters. It read cleaner. Then I counted: **1043 → 1050**, seven lines longer. The parameter list, the arguments at every call site, the signature and its doc comment added up to more than the duplication I removed. Backing that five-parameter helper out and keeping only the three extractions that actually paid got it to 1043 → 1036.
+
+In one line: **"removing duplication" and "making it smaller" are two different things — don't claim credit for the second in the name of the first.** Any refactor whose stated goal is simplification must report the before/after line count. If the number doesn't go down, you owe a different, articulable benefit ("these three places will no longer drift apart"); if you can't articulate one, back it out. As a footnote: before that refactor I also claimed I could get the file under 800 lines. That was wrong too, and counting was likewise the only way to find out.
+
 ## Example
 
 **Before:**
