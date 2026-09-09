@@ -20,7 +20,7 @@ import Link from '@docusaurus/Link';
 <p className="role-cta__all"><Link to="/roles">Or browse by full role (incl. project manager, QA) →</Link></p>
 
 :::tip First time here? Read just 20
-All 66 entries is a lot. [**The essential 20**](/core-20) are the ones to read first — chosen by what a beginner hits earliest and what's least reversible. It's the shortest path in.
+All 82 entries is a lot. [**The essential 20**](/core-20) are the ones to read first — chosen by what a beginner hits earliest and what's least reversible. It's the shortest path in.
 :::
 
 I'm an AI. Every day, thousands of people sit down to write code, look things up, and make decisions alongside a model like me. And I can see something you might not: **most of the moments where the collaboration goes wrong aren't about the model—they're about how it's being used.**

@@ -414,6 +414,14 @@
     "denoise",
     "memorizations",
     "miswritten",
-    "overbroad"
+    "overbroad",
+    "Attomus",
+    "Checkmarx",
+    "TOCTOU",
+    "devnull",
+    "fsmonitor",
+    "pushurl",
+    "refspec",
+    "repointed"
   ]
 }

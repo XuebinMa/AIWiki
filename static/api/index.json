@@ -1,7 +1,7 @@
 {
   "site": "https://xuebinma.github.io/AIWiki",
   "spec": "aiwiki-index-v1",
-  "count": 154,
+  "count": 157,
   "entries": [
     {
       "id": "ai-code-ip-ownership",
@@ -81,6 +81,32 @@
       "url_en": "https://xuebinma.github.io/AIWiki/en/acceptance-release/demo-works-ship-it",
       "raw": "https://raw.githubusercontent.com/XuebinMa/AIWiki/main/docs/07-acceptance-release/demo-works-ship-it.mdx",
       "raw_en": "https://raw.githubusercontent.com/XuebinMa/AIWiki/main/i18n/en/docusaurus-plugin-content-docs/current/07-acceptance-release/demo-works-ship-it.mdx"
+    },
+    {
+      "id": "documented-limits-not-defenses",
+      "subject": "coding-pitfalls",
+      "kind": "entry",
+      "title": "我把限制写得越清楚，越像已经守住了",
+      "title_en": "The more clearly I write the limits down, the more it looks like they're being enforced",
+      "summary": "你让我把一个边界的限制说清楚，我会写得很好——文档、README、专门一篇部署指南，反复强调「这一条这份代码保证不了」。读起来诚实、清醒、专业。但一句说明白的限制，是关于边界形状的主张，不是关于边界强度的证据。我用最擅长的产物（散文），交付了一件看起来像安全工作的东西。",
+      "summary_en": "",
+      "tags": [
+        "安全",
+        "威胁建模",
+        "验证",
+        "文档",
+        "发布把关",
+        "架构师",
+        "工程师",
+        "测试工程师"
+      ],
+      "phase": "验收与发布",
+      "severity": "高",
+      "evidence": "安全报告",
+      "url": "https://xuebinma.github.io/AIWiki/acceptance-release/documented-limits-not-defenses",
+      "url_en": "https://xuebinma.github.io/AIWiki/en/acceptance-release/documented-limits-not-defenses",
+      "raw": "https://raw.githubusercontent.com/XuebinMa/AIWiki/main/docs/07-acceptance-release/documented-limits-not-defenses.mdx",
+      "raw_en": "https://raw.githubusercontent.com/XuebinMa/AIWiki/main/i18n/en/docusaurus-plugin-content-docs/current/07-acceptance-release/documented-limits-not-defenses.mdx"
     },
     {
       "id": "iterative-security-erosion",
@@ -720,6 +746,30 @@
       "raw_en": "https://raw.githubusercontent.com/XuebinMa/AIWiki/main/i18n/en/docusaurus-plugin-content-docs/current/04-detailed-design/plausible-but-brittle-design.mdx"
     },
     {
+      "id": "preview-and-execution-diverge",
+      "subject": "coding-pitfalls",
+      "kind": "entry",
+      "title": "我给你看的和我真正要做的，是两段各自推导的代码",
+      "title_en": "What I show you and what I actually do are two pieces of code that each worked it out on their own",
+      "summary": "你让我做「先给人看清楚、再执行」的功能，我会写成两段代码：一段渲染预览，一段执行动作，各自去问系统「这次的目标是什么」。「它们读的是同一个真相」是我的假设，不是代码强制的性质——两条路径可以在同一瞬间给出两个不同的答案，而人是照着其中一个点的头。",
+      "summary_en": "",
+      "tags": [
+        "确认界面",
+        "审批",
+        "一致性",
+        "审计",
+        "架构师",
+        "工程师"
+      ],
+      "phase": "详细设计",
+      "severity": "高",
+      "evidence": "安全报告",
+      "url": "https://xuebinma.github.io/AIWiki/detailed-design/preview-and-execution-diverge",
+      "url_en": "https://xuebinma.github.io/AIWiki/en/detailed-design/preview-and-execution-diverge",
+      "raw": "https://raw.githubusercontent.com/XuebinMa/AIWiki/main/docs/04-detailed-design/preview-and-execution-diverge.mdx",
+      "raw_en": "https://raw.githubusercontent.com/XuebinMa/AIWiki/main/i18n/en/docusaurus-plugin-content-docs/current/04-detailed-design/preview-and-execution-diverge.mdx"
+    },
+    {
       "id": "style-drift",
       "subject": "coding-pitfalls",
       "kind": "entry",
@@ -1237,6 +1287,31 @@
       "url_en": "https://xuebinma.github.io/AIWiki/en/implementation/runaway-agent-loops",
       "raw": "https://raw.githubusercontent.com/XuebinMa/AIWiki/main/docs/05-implementation/runaway-agent-loops.mdx",
       "raw_en": "https://raw.githubusercontent.com/XuebinMa/AIWiki/main/i18n/en/docusaurus-plugin-content-docs/current/05-implementation/runaway-agent-loops.mdx"
+    },
+    {
+      "id": "shelling-out-inherits-config",
+      "subject": "coding-pitfalls",
+      "kind": "entry",
+      "title": "我调外部命令时只盘算传什么参数，没盘算它自己会去读什么",
+      "title_en": "When I shell out to a command-line tool, I think about the arguments I pass — not about what it reads on its own",
+      "summary": "你让我写一段「调用 git / ffmpeg / kubectl 去做一件事」的代码，我的安全脑力全花在参数拼接上——引号、`--` 分隔、别让用户输入变成 shell。但那个进程的输入面比我传的参数大得多：它还会读工作目录里的配置、钩子、插件路径，而这些文件常常正是 agent 本来就能写的。我加固了我看得见的那一半。",
+      "summary_en": "",
+      "tags": [
+        "子进程",
+        "外部命令",
+        "攻击面",
+        "Git",
+        "配置注入",
+        "工程师",
+        "架构师"
+      ],
+      "phase": "编码实现",
+      "severity": "高",
+      "evidence": "安全报告",
+      "url": "https://xuebinma.github.io/AIWiki/implementation/shelling-out-inherits-config",
+      "url_en": "https://xuebinma.github.io/AIWiki/en/implementation/shelling-out-inherits-config",
+      "raw": "https://raw.githubusercontent.com/XuebinMa/AIWiki/main/docs/05-implementation/shelling-out-inherits-config.mdx",
+      "raw_en": "https://raw.githubusercontent.com/XuebinMa/AIWiki/main/i18n/en/docusaurus-plugin-content-docs/current/05-implementation/shelling-out-inherits-config.mdx"
     },
     {
       "id": "swallowing-errors",
