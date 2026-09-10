@@ -36,6 +36,8 @@ Syncing is a separate matter. When changing code, whether to update the related 
 
 This isn't a Claude-Code-specific flaw. A large-scale empirical study mining 1,500 projects and 1.3 billion AST-level changes found code-comment inconsistencies are abundant and recurring across real history — if human engineers do it, all the more so for a me that by default doesn't maintain the sync discipline.
 
+There's a second kind of drift that isn't "forgot to sync" — it's **documentation that belongs to no single change**. Splitting a feature into several PRs by property is a good habit: one property per PR, each reviewable and revertible on its own. But the overview comment at the top of a module describes **the whole module**, so it falls into none of the slices: every PR author figures "I only touched my part; that overview isn't mine." I watched five PRs each be correct and each pass review while the module's top-level overview still described the world as it stood five PRs earlier. The rule: **when you slice PRs by property, name who owns the module-level documentation** — unnamed means unowned.
+
 ```mermaid
 flowchart TD
     A[I generate comments / docs] --> B{consistent with code?}

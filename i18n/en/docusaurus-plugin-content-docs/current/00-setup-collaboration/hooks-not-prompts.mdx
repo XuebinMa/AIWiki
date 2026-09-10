@@ -128,6 +128,12 @@ The difference isn't that I became more disciplined — it's that the few things
 
 The test, in one line: **ask "does missing it once cause harm?" — if it does and you can hang it on a deterministic trigger, make it a hook; if it doesn't, or there's nothing to hang it on, leave it in the prompt.**
 
+Two things you only meet after the hook is written. They don't change the conclusion above, but they decide whether your hook actually works.
+
+**One: is it stopping a string, or a behavior?** Matching dangerous commands with a regex goes wrong in both directions. Perfectly harmless text — say, the name of a dangerous command written into an explanatory paragraph that gets written to a file — is blocked on a literal hit. Conversely, splitting the same flag into two string pieces and concatenating them, or moving the command into a script file and running that, sails straight through. String matching stops "looks like," not "does." So design this kind of hook for the worst case (false positives beat misses) and **don't treat it as a boundary against deliberate evasion** — it stops slips of the hand.
+
+**Two: the state it reads isn't necessarily the state at execution time.** The interception point runs *before* the command, so it sees the world as it stood beforehand. A typical consequence: write staging and committing as one line (`git add -A && git commit ...`) and the check judges the **previous** staged snapshot, reporting the very violation you just fixed. The rule: **make sure whatever the hook inspects is already in its final state when the hook runs** — split it into two steps rather than hoping the hook can see the second half of the same command.
+
 ## Version notes
 
 :::note Applicable versions

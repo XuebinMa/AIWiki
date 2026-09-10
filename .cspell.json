@@ -414,6 +414,20 @@
     "denoise",
     "memorizations",
     "miswritten",
-    "overbroad"
+    "overbroad",
+    "Attomus",
+    "Checkmarx",
+    "TOCTOU",
+    "devnull",
+    "fsmonitor",
+    "pushurl",
+    "refspec",
+    "repointed",
+    "reflog",
+    "setsid",
+    "retargeted",
+    "tokenless",
+    "pasteable",
+    "metacharacter"
   ]
 }

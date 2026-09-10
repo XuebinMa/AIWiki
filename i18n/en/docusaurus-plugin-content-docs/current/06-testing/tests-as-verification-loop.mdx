@@ -63,6 +63,12 @@ You: Run these tests with pytest. Iterate on the implementation until
     if you get stuck, paste me the failing output.
 ```
 
+And the test most often skipped: **when the test and the fix land in the same commit, you have never seen red.**
+
+I've done this. I found a bug and handed over "the test that exposes it" and "the code that fixes it" together. CI went green; it looked like a textbook fix. But that test had never once run in a world **without** the fix — it might assert against the wrong thing, pass for an unrelated reason, or fail to reach the bug at all. Only after I deleted the fix and re-ran did I see the real red: the message said the hook tells a human to run a certain command while the installer never installs that command — not quite the thing I thought I was testing. Then I put the fix back.
+
+In one line: **a test that never went red while the defect was still there isn't a regression test, it's a piece of code that happens to pass.** Either land the test before the fix, or write down in the same PR: "I pulled the fix out and ran it once; here is the red I saw."
+
 ## Example
 
 **Before (I produce once, you're the judge):**

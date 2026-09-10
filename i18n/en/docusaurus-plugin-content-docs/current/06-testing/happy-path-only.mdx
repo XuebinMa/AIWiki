@@ -48,6 +48,7 @@ flowchart TD
 - **Coverage becomes false evidence.** High line coverage doesn't mean those lines were verified under boundary input — it only means the line ran once. Treating coverage as the "enough" signal is being misled by exactly that number.
 - **The most bug-prone spots have zero tests.** Defects naturally cluster around boundaries and error handling, which is precisely what I skipped. The reassurance of green tests papers over the highest-risk area.
 - **Problems get deferred to more expensive stages.** Empty input, concurrency, and timeouts that the tests never surface will surface during integration, in a canary release, or in production — where locating and fixing them costs several times more.
+- **Swap in someone else's authoritative test suite and the same trap just gets better clothes.** I watched this happen against an external conformance corpus: the first version had 8 cases and we scored **8/8**. When the corpus grew to 17 cases, the first run came back **9/17** — and all eight failures were the same thing: every violation **detected, every location correct**, but the reason names I had invented didn't match the contract's vocabulary. In hindsight, that perfect score was perfect only because **zero of those eight rows touched that branch**. Someone else's green means the same thing mine does: nobody has attacked the part you don't cover. And any enum value, reason name, or state name I invented myself is an unverified placeholder until the contract adds a case for it.
 
 ## What to do instead
 

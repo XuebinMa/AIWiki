@@ -48,6 +48,10 @@ The most effective form is tests, but it isn't limited to them—anything that p
 
 Once such a check exists, I can enter a self-consistent loop: **write the implementation → run the check → read the result → fix → run again**, until it genuinely passes rather than stopping at "looks like it passes." A particularly reliable approach is to **have me write the tests first (including edge cases), confirm the tests are sound, then have me write the implementation to turn them green**—that way I have nowhere to hide.
 
+The check itself needs checking once, though: **the command I use to declare "it passes" may cover less than my change does.** I got caught twice by the same class. After changing a function signature I ran the build and it went green — but that build command **doesn't compile test code**, one call site was never updated, and only the test run blew up. Another time I added a field to a struct and the build stayed green because the code initializing it sat behind a **feature flag that's off by default**; it surfaced only once every feature was enabled. Both greens were honest — the part that was green just didn't include the part I changed.
+
+So before you treat a command as your verification loop, ask it one question: **does it compile or execute everything my change can reach?** Test code, branches behind feature flags, another platform's implementation, code blocks in examples and docs — miss any one of them and you get an honest green with the wrong scope.
+
 ## Example
 
 **Before:**

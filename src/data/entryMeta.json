@@ -300,6 +300,13 @@
         "工程师"
       ]
     },
+    "preview-and-execution-diverge": {
+      "severity": "高",
+      "roles": [
+        "架构师",
+        "工程师"
+      ]
+    },
     "style-drift": {
       "severity": "中",
       "roles": [
@@ -395,6 +402,13 @@
       "roles": [
         "工程师",
         "运维工程师"
+      ]
+    },
+    "shelling-out-inherits-config": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "架构师"
       ]
     },
     "swallowing-errors": {
@@ -498,6 +512,14 @@
       "severity": "高",
       "roles": [
         "项目经理",
+        "工程师",
+        "测试工程师"
+      ]
+    },
+    "documented-limits-not-defenses": {
+      "severity": "高",
+      "roles": [
+        "架构师",
         "工程师",
         "测试工程师"
       ]
@@ -858,6 +880,13 @@
         "Engineer"
       ]
     },
+    "preview-and-execution-diverge": {
+      "severity": "High",
+      "roles": [
+        "Architect",
+        "Engineer"
+      ]
+    },
     "style-drift": {
       "severity": "Medium",
       "roles": [
@@ -953,6 +982,13 @@
       "roles": [
         "Engineer",
         "DevOps Engineer"
+      ]
+    },
+    "shelling-out-inherits-config": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "Architect"
       ]
     },
     "swallowing-errors": {
@@ -1056,6 +1092,14 @@
       "severity": "High",
       "roles": [
         "Project Manager",
+        "Engineer",
+        "QA Engineer"
+      ]
+    },
+    "documented-limits-not-defenses": {
+      "severity": "High",
+      "roles": [
+        "Architect",
         "Engineer",
         "QA Engineer"
       ]

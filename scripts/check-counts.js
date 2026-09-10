@@ -53,6 +53,18 @@ const CLAIMS = [
     label: '"All [N entries]"',
   },
   {
+    file: 'docs/intro.md',
+    pattern: /全书 (\d+) 条太多/,
+    expect: docsCount,
+    label: '「全书 N 条太多」',
+  },
+  {
+    file: 'i18n/en/docusaurus-plugin-content-docs/current/intro.md',
+    pattern: /All (\d+) entries is a lot/,
+    expect: docsCount,
+    label: '"All N entries is a lot"',
+  },
+  {
     file: 'CLAUDE.md',
     pattern: /已铺 (\d+) 条误区/,
     expect: docsCount,
