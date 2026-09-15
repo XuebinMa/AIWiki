@@ -1,0 +1,90 @@
+<!doctype html>
+<!--
+  Source of truth for static/img/og-cover.png (the social card).
+
+  The PNG that shipped from 2026-07-10 to 2026-09-13 said "76 pitfalls" while
+  the book had 82. Nobody caught it because the image had no source: the number
+  lived only in pixels, so no check could read it. This file exists so the
+  number is text, and scripts/check-counts.js can hold it to the real count.
+
+  Regenerate: bash scripts/og-cover/render.sh
+-->
+<meta charset="utf-8" />
+<title>AiWiki og:image</title>
+<style>
+  :root {
+    --ink: #0b0f14;
+    --green-bright: #3fb950;
+    --white: #f0f6fc;
+    --grey: #8b949e;
+    --pill: #161b22;
+    --pill-edge: #30363d;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 2560px; height: 1280px; }
+  body {
+    background:
+      radial-gradient(1100px 700px at 88% 4%, rgba(46, 160, 67, 0.16), transparent 62%),
+      radial-gradient(900px 600px at 4% 96%, rgba(46, 160, 67, 0.10), transparent 60%),
+      var(--ink);
+    color: var(--white);
+    font-family: -apple-system, "SF Pro Display", "Helvetica Neue", "PingFang SC", sans-serif;
+    padding: 96px 0 0 196px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .dots { display: flex; gap: 24px; margin-bottom: 76px; }
+  .dots i { width: 30px; height: 30px; border-radius: 50%; display: block; }
+  .dots i:nth-child(1) { background: #ff5f57; }
+  .dots i:nth-child(2) { background: #febc2e; }
+  .dots i:nth-child(3) { background: #28c840; }
+
+  .mono {
+    font-family: "SF Mono", "JetBrains Mono", Menlo, monospace;
+    letter-spacing: -0.01em;
+  }
+  .prompt { font-size: 46px; color: var(--green-bright); margin-bottom: 34px; }
+
+  .wordmark {
+    font-size: 232px;
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 1.02;
+    margin-bottom: 48px;
+  }
+  .wordmark b { color: var(--green-bright); font-weight: 800; }
+
+  .tagline { font-size: 66px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 22px; }
+  .tagline-cjk { font-size: 50px; color: var(--grey); font-weight: 400; margin-bottom: 68px; }
+
+  .pills { display: flex; gap: 42px; margin-bottom: 78px; }
+  .pill {
+    border: 2px solid var(--pill-edge);
+    background: var(--pill);
+    border-radius: 999px;
+    padding: 26px 52px;
+    font-size: 48px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .pill em { color: var(--green-bright); font-style: normal; }
+
+  .footer { font-size: 42px; color: var(--grey); }
+</style>
+
+<div class="dots"><i></i><i></i><i></i></div>
+
+<div class="mono prompt">~/AiWiki &gt; what you keep getting wrong about working with me</div>
+
+<div class="wordmark">Ai<b>Wiki</b></div>
+
+<div class="tagline">AI-coding pitfalls — written in the AI's own voice.</div>
+<div class="tagline-cjk">用 AI 第一人称视角写的「AI 编码避坑」百科</div>
+
+<div class="pills">
+  <!-- scripts/check-counts.js reads the number below. Keep the wording. -->
+  <div class="pill"><em>82</em> pitfalls</div>
+  <div class="pill"><em>5</em> tools</div>
+  <div class="pill">中文 / English</div>
+</div>
+
+<div class="mono footer">xuebinma.github.io/AIWiki · CC BY-SA 4.0</div>

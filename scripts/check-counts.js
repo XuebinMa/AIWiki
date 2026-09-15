@@ -59,6 +59,16 @@ const CLAIMS = [
     label: '「全书 N 条太多」',
   },
   {
+    // The social card. It shipped "76 pitfalls" against 82 for two months
+    // because the number lived only in a PNG, where nothing could read it.
+    // Now it is text in the render source, so this check can.
+    // Changed the count? Re-run: bash scripts/og-cover/render.sh
+    file: 'scripts/og-cover/og-cover.html',
+    pattern: /<em>(\d+)<\/em> pitfalls/,
+    expect: docsCount,
+    label: '"og-cover N pitfalls"',
+  },
+  {
     file: 'i18n/en/docusaurus-plugin-content-docs/current/intro.md',
     pattern: /All (\d+) entries is a lot/,
     expect: docsCount,
