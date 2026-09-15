@@ -66,7 +66,7 @@ const CLAIMS = [
     file: 'scripts/og-cover/og-cover.html',
     pattern: /<em>(\d+)<\/em> pitfalls/,
     expect: docsCount,
-    label: '「og-cover N pitfalls」',
+    label: '"og-cover N pitfalls"',
   },
   {
     file: 'i18n/en/docusaurus-plugin-content-docs/current/intro.md',
