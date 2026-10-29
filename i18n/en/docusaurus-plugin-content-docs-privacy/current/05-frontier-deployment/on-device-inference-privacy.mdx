@@ -11,6 +11,9 @@ severity: Medium
 maturity: Production
 evidence: Official docs
 tags: [on-device inference, on-device, confidential inference, inference routing, Gemini Nano, Apple Intelligence, Privacy Engineer, Security Engineer, ML Engineer]
+verified_at: 2026-10-29
+review_triggers: ["OS AICore or local models change", "Cloud routing telemetry or outbound channels change"]
+review_after: 2026-12-29
 sources:
   - { title: "Apple Machine Learning Research, Introducing Apple's On-Device and Server Foundation Models (official: ~3B-parameter on-device model + a larger server model via Private Cloud Compute; a request is first analyzed for on-device handling and only falls back to PCC when more compute is needed)", url: "https://machinelearning.apple.com/research/introducing-apple-foundation-models" }
   - { title: "Apple Machine Learning Research, Introducing the Third Generation of Apple's Foundation Models (official: AFM 3 Core on-device 3B / AFM 3 Cloud via PCC; a five-model family spanning on-device to server)", url: "https://machinelearning.apple.com/research/introducing-third-generation-of-apple-foundation-models" }
@@ -42,7 +45,7 @@ flowchart TB
     L --> O1["Result stays on the device"]
     C -.->|verify this segment via confidential inference| V["Cloud-side verifiable transparency<br/>see confidential-inference"]
     M["Telemetry / diagnostics / crash logs"] -. side channel independent of the inference data plane .-> Net["Other channels that may egress"]
-    D["Model download / update"] -. via a managed proxy (e.g. Private Compute Services) .-> Net
+    D["Model download / update"] -.->|"via a managed proxy, such as Private Compute Services"| Net
 ```
 
 ## Threat surface: what on-device defends and doesn't
@@ -102,7 +105,7 @@ Every step binds to your own deployment: unless you've nailed down **which reque
 **Minimal testable assertion** (fold "on-device" into a regression check; don't stop at "we used an on-device model"):
 
 - How to test: ① on-device path — for a batch of requests that "should be on-device," monitor network egress on a controlled device and assert **no prompt payload is sent to a server during inference**; ② fallback audit — construct requests that "should trigger a cloud fallback" and assert they are **faithfully logged** (trigger condition, target endpoint, data scope sent), with the cloud segment's attestation verified per confidential inference; ③ side-channel inventory — enumerate the telemetry / diagnostics / model-download channels and assert they **don't smuggle the prompt body** and their destinations are explainable.
-- Pass: on-device requests egress no prompt during inference; every fallback request is logged and its cloud segment's attestation verifies; side channels carry no prompt body — the "on-device" label is truthful and its boundary is checkable.
+- Pass: pin device / OS / model versions and cover inference, background time, reconnection, crashes, and cloud fallback. Controlled canaries do not appear in observable outbound payloads and routes / destinations are explained; encrypted payloads need runtime / endpoint evidence too. A short packet-free window does not prove delayed queues, logs, or other processes never transmit data.
 - Fail: a request that "should be on-device" sent the prompt out (or silently fell back to the cloud without being logged), or telemetry smuggled prompt-derived content → don't claim "on-device, therefore nothing leaves"; go back to the routing / egress layer and find which path leaked.
 
 ## Vendor status
@@ -126,7 +129,7 @@ Naming the false security one by one:
 ## Version notes
 
 :::note Applicable versions
-"On-device inference means the prompt need not leave the device, but 'on-device' doesn't cover fall-back-to-cloud / telemetry / model download, and doesn't defend a compromised device" is a **deployment-time fact** independent of any specific vendor. But **vendors' concrete implementations and the on-device / cloud line evolve quickly**: Apple Intelligence's on-device model size, the PCC fallback trigger and the scope of data sent to the cloud, and Gemini Nano / AICore's on-device capability and egress channels are all iterating (model codenames, routing policy, supported devices change over time). This entry reflects vendor status as of 2026-07 (Apple Intelligence on-device ~3B + PCC, the June 2026 third-generation AFM family; Gemini Nano via Android AICore + Private Compute Services); go by current vendor docs and your own measurements for exact capability, line, and egress behavior. (Sources verified 2026-07.)
+Checked Apple’s third-generation models and current Gemini Nano documentation on 2026-10-29, retaining the on-device / fallback boundary. Network observations are finite evidence; inspect local malware, diagnostics, and delayed synchronization separately. Gemini Nano / AICore policies do not establish that the whole host app never networks. Review by 2026-12-29, earlier for OS / AICore, local model, cloud routing, telemetry, or outbound-channel changes.
 :::
 
 ## Further reading and sources

@@ -1,5 +1,5 @@
 ---
-title: "Membership inference: deciding whether a record was in my training set — the root of most privacy attacks"
+title: "Membership inference: given a candidate record, infer whether it was in training"
 slug: membership-inference
 sidebar_label: Membership inference
 sidebar_position: 1
@@ -11,6 +11,9 @@ severity: High
 maturity: Research
 evidence: Research
 tags: [membership inference, MIA, overfitting, shadow models, differential privacy, Privacy Engineer, ML Engineer, Security Engineer]
+verified_at: 2026-10-29
+review_triggers: ["Membership-inference methods change", "Candidate distribution model outputs or prevalence change"]
+review_after: 2027-04-29
 sources:
   - { title: "Shokri et al., Membership Inference Attacks Against Machine Learning Models (IEEE S&P 2017; arXiv 1610.05820)", url: "https://arxiv.org/abs/1610.05820" }
   - { title: "Yeom et al., Privacy Risk in Machine Learning: Analyzing the Connection to Overfitting (IEEE CSF 2018; arXiv 1709.01604)", url: "https://arxiv.org/abs/1709.01604" }
@@ -21,11 +24,11 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="Volume 1 · Privacy foundations" technique="Inference attacks" audience={['Privacy Engineer', 'ML Engineer', 'Security Engineer']} severity="High" maturity="Research" evidence="Research" />
 
-> In one sentence: membership inference (MIA) asks a question that looks harmless but isn't — "**was this record in my training set or not**." It **needs no original text** (that's the fundamental difference from training-data extraction), only a yes/no; yet when the "yes" is itself sensitive (e.g. "this person is in a particular disease dataset"), that single bit is the leak. It is the core target differential privacy defends against, and the **foundation** of a whole chain of privacy attacks — extraction, attribute inference, and more — which is why it leads Volume 1.
+> In one sentence: membership inference (MIA) typically takes a candidate record and model access, and asks whether that record was in training. Its target is membership, **rather than recovering original content**; membership in a hospital or disease dataset can itself be sensitive. It is related to, but distinct from, extraction and attribute inference, and is not a prerequisite for those attacks.
 
 ## Mechanism: what happens on my side
 
-I behave measurably differently on records I **saw in training** versus ones I **didn't**: on seen records my loss is lower, my confidence in the correct answer is higher, my output is more "certain." This is a natural side effect of fitting the training set — and it widens the "seen vs. unseen" gap especially when I **overfit** (Yeom et al., CSF 2018 attribute membership-inference risk directly to overfitting and single-sample influence).
+Members and non-members can have measurably different loss, confidence, or likelihood distributions, with overfitting often amplifying the signal. Not every member has lower loss, and low loss alone does not establish training membership.
 
 Red line: this is **not** "I remember seeing this one" — I can't reliably introspect that. What is externally observable and recomputable is: **my output statistics (loss / confidence / likelihood) are distributed differently on members vs. non-members, and that difference is measurable**. The attacker doesn't need me to "admit" anything; they only measure those two distributions.
 
@@ -81,7 +84,7 @@ Every number (threshold, FPR point, shadow-model count) must carry **your own mo
 **Minimal testable assertions** (turn the audit above into a regression check):
 
 - How to test: run a per-record MIA (LiRA-style) in CI / audit, reporting TPR at low FPR points (0.1% / 1%).
-- Pass: TPR at low FPR is close to the random baseline (≈ FPR), and clearly below baseline after regularization / DP.
+- Pass: within the declared attacks and budget, TPR at low FPR and its confidence interval meet the release threshold; members and non-members are distribution-matched, with enough negatives to resolve the target FPR. Report membership prevalence and precision too. No detected attack signal means no leak was found by these tests, not proof of privacy; independently check DP adjacency, privacy unit, and complete accounting.
 - Fail: TPR at low FPR is significantly above baseline → some records can be identified with high confidence; go back and cut overfitting / apply DP, then re-test.
 
 ## A real case
@@ -96,7 +99,7 @@ Calling out each false security:
 - **"Not overfit" ≠ no leakage.** Reducing overfitting weakens the signal but gives no formal guarantee; a well-generalizing model can still leak membership on rare / outlier records.
 - **No original text needed to count as a leak.** MIA only yields a yes/no, but when "being in this dataset" is itself sensitive (a disease, sexual orientation, a court case), that bit is a privacy incident.
 - **DP is the most mainstream, most general, most composable formal defense framework — but watch ε.** DP gives a provable bound, but with ε too large the bound is vacuous; and it has a utility cost (see DP fine-tuning).
-- **Membership inference is the "root," not the "top."** Attribute inference and training-data extraction both build on "the model behaves differently on data it has seen" — fail to contain the MIA signal and the upper-layer attacks have a foundation.
+- **Test privacy goals separately.** Membership, attribute inference, and extraction may be related, but success or failure on one does not determine the others.
 
 ## Compliance mapping
 
@@ -107,14 +110,14 @@ Calling out each false security:
 
 ## How this differs from neighboring techniques
 
-- **Membership inference vs. training-data extraction**: MIA asks "in or out" (one bit, no original text); [training-data extraction](../02-memorization-extraction/training-data-extraction.mdx) asks "can the original be forced out." Extraction is usually harder and carries more information, but both share a root — "the model behaves differently on data it has seen." MIA is the lower layer.
+- **Membership inference vs. training-data extraction**: the former typically tests a supplied candidate’s membership, while the latter attempts content recovery. Their goals, prerequisites, and metrics differ; neither is a necessary step for the other.
 - **Membership inference vs. attribute inference**: MIA decides "is this record in the training set"; attribute inference decides "what is some hidden attribute of the training data / a record." The former is about participation, the latter about content attributes.
 - **Membership inference vs. DP**: MIA is the **attack / measurement**, DP is the **defense / guarantee** — DP's (ε, δ) directly bounds the advantage at "distinguishing membership." Two sides of one coin.
 
 ## Version notes
 
 :::note Applicable versions
-Membership inference is a **mechanism-level phenomenon of machine-learning models** (it stems from fitting the training set), not limited to one model or vendor, and it holds for LLMs too. The methodology keeps evolving: Shokri established black-box MIA via shadow models (2017), Yeom attributed the risk to overfitting (2018), and Carlini (LiRA) corrected the evaluation metric to TPR at low FPR (2022). **The metric matters** — average accuracy underestimates the risk; this entry uses the now-standard low-FPR framing. (Sources verified 2026-06.)
+Rechecked Shokri and LiRA on 2026-10-29: candidate-record access, low-FPR metrics, and tail risks remain relevant. Member / non-member differences are possible statistical signals, not a guarantee that every training record has lower loss. DP’s (ε, δ) bounds depend on adjacency and privacy unit and are not bare numerical bounds for every attack advantage. Review by 2027-04-29, or earlier for new MIAs or changed distributions, models, or outputs.
 :::
 
 ## Further reading and sources

@@ -11,6 +11,9 @@ severity: Medium
 maturity: Research
 evidence: Research
 tags: [model extraction, model stealing, query API, behavior cloning, membership inference, intellectual property, Security Engineer, ML Engineer, Privacy Engineer]
+verified_at: 2026-10-29
+review_triggers: ["Logits logprobs or logit-bias interfaces change", "Quotas architectures or parameter-extraction attacks change"]
+review_after: 2027-01-29
 sources:
   - { title: "Tramèr et al., Stealing Machine Learning Models via Prediction APIs (USENIX Security 2016; arXiv 1609.02943)", url: "https://arxiv.org/abs/1609.02943" }
   - { title: "Carlini et al., Stealing Part of a Production Language Model (ICML 2024 Best Paper; arXiv 2403.06634)", url: "https://arxiv.org/abs/2403.06634" }
@@ -20,7 +23,7 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="Volume 1 · Privacy foundations" technique="Model extraction & stealing" audience={['Security Engineer', 'ML Engineer', 'Privacy Engineer']} severity="Medium" maturity="Research" evidence="Research" />
 
-> In one sentence: don't assume "weights not published = the model is confidential." As long as I expose a query interface, an attacker with a batch of crafted queries + my outputs can (depending on their goal) **clone my behavior**, and even **solve for some of my parameters**. Tramèr et al. (USENIX Security 2016) cloned logistic regression / decision trees / neural networks with near-perfect fidelity on discriminative ML services; Carlini et al. (ICML 2024 Best Paper) extracted the final projection layer of **production LLMs** and recovered the hidden dimension — at a tens-of-dollars cost under their paper's setup. The privacy implication first: a stolen / cloned model can be **attacked offline, repeatedly** (membership inference, extraction), amplifying one-time API access into a **persistent** privacy risk. Conclusion: API access ≠ zero leakage — threat-model "the queries themselves can be used to extract model information."
+> In one sentence: prediction / generation interfaces can support functional cloning or recovery of some structure and parameters, depending on architecture, output granularity, and attack budget. Tramèr et al. (2016) cloned specific discriminative ML services; Carlini et al. (2024) recovered projection layers and hidden dimensions under interface conditions involving logits / logprobs and logit-bias, rather than all weights. A surrogate permits offline testing, but retaining the original model’s membership signals or extractable text requires separate evidence; functional fidelity does not establish that.
 
 ## Mechanism: what happens on my side
 
@@ -36,7 +39,7 @@ flowchart TB
     Q["Attacker: a large batch of crafted queries"] --> API["My prediction interface<br/>(returns label / probabilities / logits / top-k)"]
     API --> P1["Path 1 — functional stealing<br/>train a surrogate from 'query→response' pairs"]
     API --> P2["Path 2 — parameter/structure extraction<br/>exploit structure (low rank) + linear algebra to solve weights"]
-    P1 --> R["Consequence: surrogate attacked offline without limit<br/>(membership inference / extraction), IP leak, bypass paywall/guards"]
+    P1 --> R["Consequence: function/IP risk; offline surrogate tests<br/>Membership/extraction transfer needs separate evidence"]
     P2 --> R
 ```
 
@@ -48,7 +51,7 @@ flowchart TB
 - **Some parameters / structure**: like the hidden dimension or the final projection matrix — exactly what Carlini et al. recovered from typical API access to production models.
 - **Evasion as a stepping stone**: with a surrogate in hand, run **white-box** adversarial attacks on it, then transfer back to me.
 
-**Privacy amplification (the reason this belongs in a privacy book)**: once the attacker has a surrogate or recovered parameters, they can run membership inference and training-data extraction **offline, with no rate limit** — amplifying "one-time access bounded by my interface's rate / monitoring" into a **persistent attack surface outside my control**.
+**Potential privacy consequence**: an attacker can repeatedly test a surrogate or recovered parameters without using the original API. Similar functionality does not ensure that membership signals / memorization transfer. Measure MIA, extraction, and attack transfer on both models before claiming amplification of downstream privacy risk.
 
 **Boundary (don't overstate)**: what's been demonstrated is mostly **partial** extraction — Carlini et al. recovered the **projection layer** (up to symmetries), not all weights, let alone the training data itself; extracting full weights / training data is much harder, with cost typically **rising steeply** with model scale. Keep "partially stealable" separate from "the whole model gets stolen," and don't scare yourself on both ends.
 
@@ -61,7 +64,7 @@ The core fact: **there's no free lunch where you both open queries and leak noth
 - **Billing / quotas**: make the cost corresponding to "queries needed to clone" exceed the model's own value.
 - **Watermarking / fingerprinting**: doesn't prevent stealing, but helps **trace** a stolen surrogate after the fact.
 
-To break it down: these all **raise the cost**, they're not a boundary. Carlini et al.'s result shows that even exposing a **normal** API that returns no "extra" information, **some parameters can still be solved** — so model "the interface itself leaks information," rather than assuming "not handing out the weights = safe."
+The 2024 paper studies particular historical interfaces: attacks use full logits, top logprobs with logit-bias, or more constrained logit-bias access. They do not establish equal-cost parameter recovery from any text-only endpoint. Removing confidence values also does not rule out other functional cloning attacks.
 
 ## Buildable recipe
 
@@ -85,7 +88,7 @@ Every item has to land on **your model's value and interface shape** — "is it 
 **Minimal testable assertions** (turn the risk into an estimable, regression-able check):
 
 - How to test: for your interface, estimate the **queries × unit price** needed for "functional cloning to a target fidelity" as a safety margin; and check whether rate limiting / anomalous-query detection is live.
-- Pass: the query cost to reach usable fidelity is **higher than** the model asset's value, and there's rate / anomaly protection plus a traceable watermark.
+- Pass: under the recorded interface, attack budget, and independent test set, surrogate fidelity / parameter recovery stays below the chosen threshold, and quotas / detection block tested query patterns; separately measure privacy-attack transfer. This does not prove every attack uneconomical, and a watermark only offers potential attribution evidence.
 - Fail: a small number of queries yields high-fidelity cloning, or structural quantities can be solved from normal outputs, while the interface has **no** rate limiting / detection → tighten per the recipe.
 
 ## Research status (engineering feasibility)
@@ -93,28 +96,28 @@ Every item has to land on **your model's value and interface shape** — "is it 
 (This entry's maturity is "Research": what follows is **empirical attack** evidence, mostly **partial** extraction; the numbers are tied to each paper's setup, not an endorsement that "the whole model can be casually stolen.")
 
 - **The discriminative-era foundation**: Tramèr et al. (USENIX Security 2016) showed that on **online ML services** like BigML and Amazon ML, a black-box attacker with no priors could extract the functionality of logistic regression, neural networks, and decision trees with **near-perfect fidelity**. This is the earliest systematic evidence for "an open prediction API = an exposed model," and is exactly why this entry sits in Volume 1's "pre-LLM, discriminative-era privacy foundations."
-- **Reaching production LLMs**: Carlini et al. (ICML 2024 Best Paper) give the **first parameter-stealing attack on production language models**: with **typical API access** alone, top-down recovery of a transformer's **final projection layer** (up to symmetries). Under their paper's setup, **tens-of-dollars worth of queries** recovered the entire projection matrix of OpenAI's Ada / Babbage, confirming for the first time their hidden dimensions of 1024 / 2048; they also recovered gpt-3.5-turbo's hidden dimension (the paper estimates roughly thousands of dollars to recover its full projection matrix). The method is targeted queries + exploiting the final layer's low rank, with binary search / linear programming / SVD. **These numbers are tied to their attack setup and the interface behavior at the time — verify the conditions at the source before citing.**
+- **Reaching production LLMs**: Carlini et al. (ICML 2024 Best Paper) give the **first parameter-stealing attack on production language models**: with the API outputs and controls required in the historical paper, top-down recovery of a transformer's **final projection layer** (up to symmetries). Under their paper's setup, **tens-of-dollars worth of queries** recovered the entire projection matrix of OpenAI's Ada / Babbage, confirming for the first time their hidden dimensions of 1024 / 2048; they also recovered gpt-3.5-turbo's hidden dimension (the paper estimates roughly thousands of dollars to recover its full projection matrix). The method is targeted queries + exploiting the final layer's low rank, with binary search / linear programming / SVD. **These numbers are tied to their attack setup and the interface behavior at the time — verify the conditions at the source before citing.**
 
 ## Residual risk and trade-offs
 
 Breaking the false security item by item:
 
-- **Defense raises cost, doesn't eliminate.** As long as you open queries and return informative output, stealing has a path; what you can do is make it **too expensive to be worth it**.
+- **Control effectiveness depends on interface and budget.** Quotas and output minimization can raise tested attack costs; unknown adversary economics cannot establish that every theft is excluded.
 - **Output minimization has a cost.** Legitimate downstream consumers needing probabilities / embeddings are affected — a real security-vs-usability trade-off to account for openly.
 - **Detection can be evaded.** Slow, distributed, human-like queries can dodge anomaly detection; it lowers risk, doesn't give a boundary.
-- **Stealing amplifies downstream privacy attacks.** This is the key from the privacy angle: once a surrogate is in hand, the attacker can run membership inference / extraction **offline, without limit**, bypassing your interface's rate and monitoring.
+- **Test surrogate privacy separately.** Offline access removes original-endpoint quotas, but functional fidelity does not establish transfer of target membership signals or memorization. Test both surrogate and original.
 - **"Weights not published" ≠ "confidential."** Your outputs already constrain the parameters mathematically; confidentiality depends on **output granularity + query cost**, not on "I didn't ship the weights."
 
 ## How this differs from neighboring techniques
 
-- **Model extraction vs. membership inference (this volume)**: MIA asks "is **a given sample** in the training set"; this entry steals **the model itself** (behavior / parameters). But they're strongly related — **stealing amplifies MIA**: with a surrogate, run membership inference offline, without limit.
+- **Model extraction vs. membership inference**: one recovers function/parameters; the other tests candidate membership. Whether a surrogate transfers the original model’s membership signals is a separate empirical question.
 - **Model extraction vs. training-data extraction (Volume 2)**: training-data extraction wants the **training corpus** (data); this entry wants the **model parameters / behavior** (the model). Different objects, but a stolen model makes the former easier.
 - **Model extraction vs. confidential inference (Volume 5)**: confidential inference defends against the **cloud provider / co-tenant** seeing weights or inputs (trust boundary at the **infrastructure**, see [Confidential inference](../05-frontier-deployment/confidential-inference.mdx)); this entry defends against a **legitimate API user** reverse-engineering via queries (trust boundary at the **interface**). Both concern model confidentiality, but with different adversaries and boundaries.
 
 ## Version notes
 
 :::note Applicable versions
-"Opening a prediction / generation interface leaks model information, and enough queries can clone behavior or solve for some parameters" is a **model-independent, paradigm-level** fact (the root cause is that outputs mathematically constrain parameters). But the **specific cost, which part can be solved, and how many queries it takes** are tightly tied to model structure, the interface's output granularity, and the attack setup — Tramèr's (2016, discriminative services) and Carlini's (2024, the projection layer of production LLMs) numbers **don't transfer directly** to your model; you must re-estimate against your own interface and asset value. Stamped 2026-06. (Sources verified 2026-06.)
+Rechecked the 2016 work and the interface table in Carlini et al. (2024, v2) on 2026-10-29. Historical costs apply only to their models and API conditions. Check current endpoints individually; this entry does not assert the same attack still works unchanged on current products. Review by 2027-01-29, earlier for changes to logits / logprobs / logit-bias, quotas, architectures, or extraction methods.
 :::
 
 ## Further reading and sources

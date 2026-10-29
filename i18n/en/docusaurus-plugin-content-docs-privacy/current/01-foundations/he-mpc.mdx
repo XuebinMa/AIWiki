@@ -1,5 +1,5 @@
 ---
-title: "Homomorphic encryption and secure multi-party computation (HE·MPC): compute on ciphertext without trusting the remote hardware — at a steep speed cost"
+title: "Homomorphic encryption and secure multi-party computation: protocol assumptions, permitted output, and workload costs"
 slug: he-mpc
 sidebar_label: Homomorphic encryption / MPC
 sidebar_position: 3
@@ -11,121 +11,75 @@ severity: Medium
 maturity: Experimental
 evidence: Research
 tags: [homomorphic encryption, secure multi-party computation, FHE, MPC, privacy-preserving computation, Privacy Engineer, Security Engineer, ML Engineer]
+verified_at: 2026-10-29
+review_triggers: ["Cryptographic schemes or security estimators change", "Protocol corruption collusion model or performance benchmarks change"]
+review_after: 2027-04-29
 sources:
-  - { title: "Gentry, Fully Homomorphic Encryption Using Ideal Lattices (STOC 2009, pp. 169-178)", url: "https://research.ibm.com/publications/fully-homomorphic-encryption-using-ideal-lattices" }
-  - { title: "Evans, Kolesnikov & Rosulek, A Pragmatic Introduction to Secure Multi-Party Computation (Foundations and Trends in Privacy and Security, 2018)", url: "https://www.cs.virginia.edu/~evans/pragmaticmpc/pragmaticmpc.pdf" }
-  - { title: "Confidential Computing Consortium, A Technical Analysis of Confidential Computing (v1.3, 2022; compares HE / MPC / TEE)", url: "https://confidentialcomputing.io/wp-content/uploads/sites/10/2023/03/CCC-A-Technical-Analysis-of-Confidential-Computing-v1.3_unlocked.pdf" }
+  - { title: "Gentry: Fully Homomorphic Encryption Using Ideal Lattices (STOC 2009)", url: "https://research.ibm.com/publications/fully-homomorphic-encryption-using-ideal-lattices" }
+  - { title: "A Pragmatic Introduction to Secure Multi-Party Computation: author repository", url: "https://github.com/evansuva/pragmaticmpc" }
 ---
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="Volume 1 · Privacy foundations" technique="Privacy-preserving computation" audience={['Privacy Engineer', 'Security Engineer', 'ML Engineer']} severity="Medium" maturity="Experimental" evidence="Research" />
 
-> In one sentence: homomorphic encryption (HE) lets you **send data encrypted**, have the server **compute directly on the ciphertext**, and decrypt only at your end — the server never sees plaintext; secure multi-party computation (MPC) lets several parties **jointly compute a function without handing over their inputs**. The key difference from a TEE: **the remote execution environment is not a trust root** — security comes from cryptographic assumptions. The cost is being **much slower** (HE especially), so today they're used in narrow scenarios, and full private LLM inference is still expensive. Volume 1 covers what they guarantee, where the cost is, and how to choose between them and a TEE.
+> In one sentence: homomorphic encryption lets a key-holding client outsource computation on encrypted inputs; MPC lets parties compute jointly under a protocol. Confidentiality depends on cryptographic assumptions, parameters, and corruption models, with endpoints, keys, and implementations still trusted. Permitted outputs can reveal inputs. Performance depends on scheme, circuit, and communication rather than one overhead multiplier without a matched benchmark.
 
 ## Mechanism: what happens on my side
 
-- **Homomorphic encryption (HE)**: you send the prompt under homomorphic encryption, I (the server / model) do additions and multiplications **on the ciphertext**, return a **ciphertext** result, and only you (holding the private key) can decrypt; plaintext never appeared on my side. Gentry gave the **first fully homomorphic** scheme using ideal lattices, and used **bootstrapping** (homomorphically evaluating the decryption circuit on the ciphertext itself to "refresh" noise) to make **circuits of arbitrary depth** computable (Gentry, STOC 2009).
-- **Secure multi-party computation (MPC)**: split the computation across parties (client and server, or several servers); using **garbled circuits** or **secret sharing**, each party sees only its own "share," **no single party sees a complete input**, yet together they compute the correct output (Evans et al., 2018, surveying Yao's garbled circuits, SPDZ, etc.).
-
-Red line: I shouldn't say "I **promise** not to look at your data" — the accurate statement is: **under cryptographic assumptions, I (the computing party) hold only ciphertext / shares and cannot see plaintext**. That's a mathematical property, not a promise.
+An HE server evaluates encrypted inputs and returns encrypted results for client decryption. Gentry’s 2009 first fully homomorphic scheme uses bootstrapping to manage noise and support deeper circuits; encoding, approximation, and correctness require scheme-specific analysis. MPC participants already know their own inputs. Secret sharing, garbled circuits, and related techniques constrain their views under a specified model beyond their own inputs and permitted outputs. Red line: functional correctness tests do not prove cryptographic security, and HE input confidentiality does not automatically establish correct results from a malicious server.
 
 ```mermaid
 flowchart TB
-    subgraph HE["homomorphic encryption (single-party outsourcing)"]
-      U1["you: encrypt prompt"] -->|ciphertext| Srv["me: compute on ciphertext"]
-      Srv -->|ciphertext result| U1b["you: decrypt to plaintext"]
-    end
-    subgraph MPC["secure multi-party computation (joint compute)"]
-      A["party A's share"] --> F["protocol: each sees only its share"]
-      B["party B's share"] --> F
-      F --> O["joint output, inputs never revealed"]
-    end
+    U["Client input and key"] --> C["HE encryption"]
+    C --> H["Server evaluates encrypted inputs"]
+    H --> D["Client decrypts permitted result"]
+    A["MPC party A: own input"] --> P["Protocol under corruption/collusion/output model"]
+    B["MPC party B: own input"] --> P
+    P --> O["Permitted outputs may themselves reveal information"]
 ```
 
-## Threat surface: what they do and don't defend
+## Threat surface
 
-- **Defend**: a computing party snooping inputs and intermediate values — HE defends against the **single** outsourced computing party; MPC defends against parties **within the collusion threshold**.
-- **Doesn't defend ① a mismatched threat model**: protocols come in **semi-honest (honest-but-curious)** and **malicious** flavors — semi-honest only stops "peeking," not "tampering." Using a semi-honest protocol where a malicious party exists is a common false security.
-- **Doesn't defend ② MPC collusion**: once parties beyond the protocol's assumed threshold collude, the guarantee breaks.
-- **Doesn't defend ③ the output itself leaking**: the protocol guarantees "the process leaks no input," but the **function's output** may reveal inputs — for privacy you still layer DP on the output.
-- **Doesn't defend ④ after decryption**: once you decrypt an HE result or reveal an MPC output, the plaintext is back in the ordinary world and subject to every other privacy risk.
+HE input confidentiality does not cover compromised key-holding endpoints, metadata not covered by the analysis, or output use. Semi-honest MPC does not automatically provide malicious security; check collusion, dropout, fairness, and guaranteed output delivery for the protocol. Even correct secure computation can produce a function output that determines another input with auxiliary knowledge, without violating a definition permitting that output.
 
 ## How the defense works
 
-Security comes not from "hiding inside some hardware" but from **cryptographic assumptions**: HE rests on hard lattice problems + bootstrapping for noise control; MPC on secret sharing / garbled circuits + communication rounds, proven to "reveal nothing beyond the output" under an **explicit threat model and collusion threshold**. That's exactly the load-bearing point — **this is a trust model orthogonal to a TEE's**: a TEE places its trust in hardware isolation and attestation; HE / MPC **don't treat the remote execution environment as a trust root**, building security instead on cryptographic assumptions, parameter choices, the protocol model, and implementation correctness — you still trust your own client's key security, randomness quality, and crypto-library implementation, just not the other side's hardware.
+HE/MPC do not use remote execution hardware as the sole confidentiality root, while still relying on local hardware, randomness, libraries, and key management. If the objective also bounds a record’s contribution to statistical output, separately design a DP mechanism with units, adjacency, budget, and composition. Arbitrary functions cannot simply receive a little noise, and DP does not promise zero disclosure.
 
 ## Buildable recipe
 
 ```text
-1. Pick the paradigm: outsource data to a "single" party to compute -> HE; data
-   spread across "multiple" parties to compute jointly -> MPC.
-2. HE: choose a scheme — CKKS (approximate arithmetic, fits ML's floats) /
-   BFV·BGV (exact integers); use a mature library (OpenFHE, Microsoft SEAL);
-   reduce circuit depth / configure bootstrapping for noise on deep circuits.
-3. MPC: choose protocol and threat model — semi-honest vs malicious, two-party vs
-   multi-party, collusion threshold; use a mature framework (e.g. MP-SPDZ);
-   evaluate communication rounds and bandwidth (MPC is usually comms-bound).
-4. Set security parameters: target at least 128-bit, but for HE don't stop at one
-   abstract λ — re-check the concrete parameter set (ring dimension / ciphertext
-   modulus / noise budget / multiplicative depth) with your library's lattice
-   estimator; for MPC spell out the threat model (semi-honest / malicious) and
-   collusion assumptions — don't leave defaults.
-5. Layer DP on the output: if the output can reveal inputs, add differential
-   privacy to the output.
+1. Define input holders, permitted outputs, and adversary; choose HE outsourcing or an MPC protocol
+   with explicit corruption/collusion/dropout assumptions.
+2. Fix scheme, parameters, security estimator, library, keys/randomness, and endpoint responsibilities.
+3. Check approximate-arithmetic error; verify integrity separately for malicious HE servers and
+   fairness/output delivery for MPC.
+4. Benchmark latency/throughput/bandwidth for actual circuit, scale, communication, and bootstrapping.
+5. Assess permitted outputs and auxiliary knowledge; independently check DP units/budgets if selected.
 ```
 
-Every parameter (scheme, λ, collusion threshold, circuit depth) carries **your threat model and load**; HE / MPC feasibility depends heavily on circuit depth and data scale — a paper demo may not transfer to LLM scale.
+**Minimal testable assertion**: results match plaintext computation within declared error, parameters/protocol models receive independent review, and output recipients are authorized. Tests support those implementation checks, not a security proof. Failed tested attacks do not establish absence of leakage.
 
-**Minimal testable assertions** (turn the recipe above into a regression check):
+## Real cases / engineering feasibility
 
-- How to test: ① functionality — compare ciphertext / multi-party results against plaintext computation (HE approximate schemes like CKKS must carry an **error bound**); ② security — target ≥ 128-bit with the HE parameter set re-checked via an estimator (not just an abstract λ), and the threat model and collusion threshold stated and matching the protocol.
-- Pass: results fall within the declared error bound; security parameters meet the bar; the threat model (semi-honest / malicious, collusion threshold) is explicit and consistent with the chosen protocol.
-- Fail: insufficient parameters / unclear threat model / using a semi-honest protocol in a malicious setting → the claimed privacy guarantee isn't met; go back and switch protocol or fix parameters.
-
-## A real case / engineering feasibility
-
-(This entry's maturity is "Experimental": the **cryptographic primitives are mature**, but at LLM scale this is still an engineering-feasibility question; what follows is the state of play, not a "production" endorsement.)
-
-HE / MPC are deployed in **narrow scenarios**: private set intersection (PSI), secure aggregation in federated learning, encrypted database queries, and more. ML has private-inference prototypes, but **full private LLM inference is limited by overhead**, currently seen on small models, partial stages, or combined with TEE / DP. The foundation and the systematization are, respectively, Gentry (2009, first FHE) and Evans et al. (2018, an MPC engineering survey).
+Gentry provides the FHE foundation and Evans et al. a systematic MPC introduction. Neither certifies latency or security for a 2026 LLM deployment. Private-inference feasibility requires measurements for model, precision, communication, and key responsibilities, rather than extrapolating full-scale production from early prototypes.
 
 ## Residual risk and trade-offs
 
-Calling out each false security:
-
-- **"Encrypted = secure" depends on the threat model.** Semi-honest ≠ malicious; the wrong protocol makes the guarantee exist in name only.
-- **MPC collusion breaks the guarantee.** Security is tied to the "colluding parties don't exceed the threshold" assumption — if that fails, so does the guarantee.
-- **The output can still leak.** The protocol covers "the process"; the output's reconstruction risk needs DP.
-- **Performance is the top barrier.** HE has **orders-of-magnitude** overhead, MPC has **communication** overhead — both can slow LLM inference to the point of impracticality; measure against your own circuit depth and data scale.
-
-:::caution To be verified
-HE's exact overhead multiplier (often quoted on the order of "~10⁴×") depends heavily on the scheme, circuit depth, parameters, and whether bootstrapping is used; this entry **does not state a single bald multiplier** — measure on your own load. A specific first-source benchmark is to be verified (recorded in `BACKLOG-privacy.md`).
-:::
-
-- **Approximate schemes have numerical error.** CKKS does approximate arithmetic on ciphertext, introducing error that affects model accuracy — evaluate against an error bound.
-
-## Compliance mapping
-
-- **GDPR / data minimization**: HE / MPC can complete processing without exposing raw data to the computing party — a strong technical argument for "data minimization / appropriate technical measures."
-- **Liability isn't automatically waived**: even if the computing party can't see plaintext, data flows, output handling, and party relationships remain subject to contract and law (as with a TEE, a technical guarantee ≠ dissolution of legal liability).
-
-(Compliance evolves with the statute version; this section is stamped 2026-06 — verify the latest enacted text before citing.)
+Party views, permitted output, correctness, and availability are distinct goals. Communication rounds, ciphertext expansion, deep circuits, and approximation may become bottlenecks; measure their actual magnitude. Encryption does not automatically remove contractual or personal-data obligations, and this entry does not certify a jurisdiction-specific outcome.
 
 ## How this differs from neighboring techniques
 
-- **HE·MPC vs. TEE**: both "hand data out to be computed without leaking it," but the trust models are opposite — a TEE rests on **hardware trust** (fast, general, but you trust the chip vendor and live with side channels, see [Trusted execution environments](./trusted-execution-environment.mdx)); HE / MPC rest on **cryptography** (no remote execution environment as a trust root, but much slower). The choice is trading "speed" for "not trusting the remote hardware," or the reverse.
-- **HE·MPC vs. differential privacy**: HE / MPC protect "**inputs from being seen by the computing party during computation**"; DP protects "**outputs from leaking a single sample**." They're orthogonal and often stacked — compute with HE / MPC, then add DP to the output, to close both "process" and "result."
+[TEE](./trusted-execution-environment.mdx) relies on hardware isolation, attestation, and approved software; HE/MPC rely on cryptographic protocols with endpoint trust. [DP](../03-conversational-llms/dp-fine-tuning.mdx) bounds a defined unit’s distinguishability in releases, distinct from hiding intermediate computation views. Combine them when the objectives require it.
 
 ## Version notes
 
 :::note Applicable versions
-HE / MPC are **model-agnostic** cryptographic mechanisms; the primitive layer (FHE since Gentry 2009, MPC since Yao in the 1980s) is mature and stable, but **their feasibility at LLM scale changes rapidly with schemes, hardware acceleration, and libraries**. This entry reflects the 2026-06 engineering state; performance and applicability are whatever your measurements and the libraries' current versions say. (Sources verified 2026-06.)
+Checked the FHE foundation and author-maintained MPC book repository on 2026-10-29. The direct book PDF timed out; protocols were not re-proved and concrete deployments were not certified. No universal multiplier is given without a matched primary benchmark. Review by 2027-04-29, earlier for schemes/estimators, corruption models, implementations, or workload benchmarks.
 :::
 
 ## Further reading and sources
 
-Mixed evidence — **primary: Research** (Gentry, Evans et al.); **supplementary: standard / framework** (CCC's HE / MPC / TEE comparison).
-
-- [Fully Homomorphic Encryption Using Ideal Lattices (Gentry, STOC 2009)](https://research.ibm.com/publications/fully-homomorphic-encryption-using-ideal-lattices) — research: the first fully homomorphic encryption scheme + bootstrapping, enabling arbitrary-depth circuits on ciphertext.
-- [A Pragmatic Introduction to Secure Multi-Party Computation (Evans et al., 2018)](https://www.cs.virginia.edu/~evans/pragmaticmpc/pragmaticmpc.pdf) — research: an MPC engineering survey (Yao's garbled circuits, secret sharing, SPDZ, semi-honest vs malicious).
-- [A Technical Analysis of Confidential Computing (CCC, v1.3)](https://confidentialcomputing.io/wp-content/uploads/sites/10/2023/03/CCC-A-Technical-Analysis-of-Confidential-Computing-v1.3_unlocked.pdf) — standard: places HE / MPC and TEE in one trust-model framework for comparison.
+- [Gentry: Fully Homomorphic Encryption Using Ideal Lattices (STOC 2009)](https://research.ibm.com/publications/fully-homomorphic-encryption-using-ideal-lattices)
+- [A Pragmatic Introduction to Secure Multi-Party Computation: author repository](https://github.com/evansuva/pragmaticmpc)

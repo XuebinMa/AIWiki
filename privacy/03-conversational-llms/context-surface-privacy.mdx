@@ -11,7 +11,11 @@ severity: 高
 maturity: 研究
 evidence: 研究支持
 tags: [上下文面隐私, 系统提示词提取, 提示词泄露, 上下文窗口, 越狱绕过, 安全工程师, 隐私工程师]
+verified_at: 2026-10-29
+review_triggers: ["上下文组装或角色层级变化", "工具权限或提取攻击变化"]
+review_after: 2027-01-29
 sources:
+  - { title: "OWASP LLM07:2025 系统提示词泄露", url: "https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/" }
   - { title: "OWASP Top 10 for LLM Applications 2025 — LLM07:2025 System Prompt Leakage", url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf" }
   - { title: "Zhang, Carlini & Ippolito, Effective Prompt Extraction from Language Models (COLM 2024. arXiv 2307.06865)", url: "https://arxiv.org/abs/2307.06865" }
   - { title: "Sha & Zhang, Prompt Stealing Attacks Against Large Language Models (arXiv 2402.12959)", url: "https://arxiv.org/abs/2402.12959" }
@@ -22,13 +26,13 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="卷三 · 对话大模型" technique="上下文面隐私" audience={['安全工程师', '隐私工程师']} severity="高" maturity="研究" evidence="研究支持" />
 
-> 一句话摘要：把规则、密钥、其他用户的数据、检索片段塞进我的上下文窗口，然后指望「用户看不到系统提示词」——靠不住。在我这边，系统提示词、对话历史、工具返回、检索片段全都活在**同一个上下文窗口**里，对我而言**没有内建的机密 / 公开分层**；只要在这个窗口里，攻击者就可能用普通对话把它套出来（已有研究在 3 类提示词来源 × 11 个 LLM 上观测到「简单文本攻击高概率提取系统提示词」，Zhang、Carlini & Ippolito，COLM 2024）。结论先行：**系统提示词不是秘密，也不该当安全控制**（OWASP LLM07:2025）——别把凭据 / 业务逻辑 / 他人数据放进上下文，并默认它可被提取。
+> 一句话摘要：系统提示词、历史、检索片段和工具结果进入模型可用上下文后，就成为潜在提取面。角色与指令层级可以影响服从行为，但不能替代后端访问控制或证明秘密绝不可被复现。已有研究在特定模型与提示词集合观测到提取；这不证明任意上下文都必然可提取。按 OWASP LLM07:2025，系统提示词不应保存凭据，也不应成为唯一安全控制。
 
 ## 机制：我这边发生了什么
 
 在我的前向计算里，系统提示词、开发者指令、对话历史、工具返回、RAG 检索片段，被拼成**一段连续的 token 序列**喂进来。我对它们的处理**没有内建的「机密 / 公开」分层**——「系统」与「用户」的边界是一个**软约定**（靠特殊分隔符 / 角色标签 + 训练倾向维持），不是一道**强制隔离**。
 
-红线说清楚（这是机制倾向，不是承诺）：训练让我**倾向于**不直接复述系统提示词、倾向于遵守「不要透露上面的内容」这类指令——但这是一个**统计倾向，不是强制边界**。可被外部观察到的是：足够的改写、角色扮演、翻译、编码、摘要类请求，能把这个倾向绕过，让输出里**重现**系统提示词的内容。换句话说，「让我别说」和「我说不出来」是两回事——我做不到后者，因为那段文本就在我当前的上下文里。
+红线：研究显示部分攻击可诱导提取，但“内容在上下文”不蕴含“攻击必然成功”。指令层级、训练和检测可降低经验风险；保密授权仍须在可信后端执行，不能靠模型自述“我绝不说”。
 
 ```mermaid
 flowchart TB
@@ -120,7 +124,7 @@ flowchart TB
 ## 版本说明
 
 :::note 适用版本
-「系统提示词 / 上下文不是机密」是一个**与模型无关的范式级**事实——根因在于 LLM 把系统、开发者、用户、工具、检索各路输入**拼成一段连续 token 序列**、缺乏强制的机密分层，跨厂商通用。具体的提取成功率、哪种绕过有效，随模型与防御持续演进，本段打戳 2026-06；攻防两侧都在动，引用任何具体成功率前请回一手核条件。OWASP 版本为 **2025**（LLM07:2025）。（出处核验于 2026-06。）
+2026-10-29 核对提示词提取原始研究与 OWASP 深链，保留上下文最小化与后端授权原则。论文的 prompt reconstruction 可能是语义相近的逆向提示词，不应统一叫原文逐字恢复。2027-01-29 前，或上下文组装、角色层级、工具权限、提取攻击变化时复核。
 :::
 
 ## 延伸阅读与出处
@@ -131,3 +135,5 @@ flowchart TB
 - [Effective Prompt Extraction from Language Models（Zhang、Carlini & Ippolito，COLM 2024；arXiv 2307.06865）](https://arxiv.org/abs/2307.06865) —— 3 类提示词来源 × 11 个 LLM，简单文本攻击高概率提取系统提示词，并给出判别真提示词 vs 幻觉的框架。
 - [Prompt Stealing Attacks Against Large Language Models（Sha & Zhang；arXiv 2402.12959）](https://arxiv.org/abs/2402.12959) —— 从模型的回答反推背后提示词：信息可从输出侧泄露，堵直接索取不等于堵泄露。
 - [System Prompt Extraction Attacks and Defenses in Large Language Models（arXiv 2505.23817）](https://arxiv.org/abs/2505.23817) —— 系统提示词提取的攻防两侧综述，防御端仍是开放问题（本条 maturity 据此标「研究」）。
+
+- [OWASP LLM07:2025 系统提示词泄露](https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/)

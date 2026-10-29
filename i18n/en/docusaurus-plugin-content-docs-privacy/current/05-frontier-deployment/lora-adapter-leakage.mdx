@@ -11,7 +11,11 @@ severity: Medium
 maturity: Research
 evidence: Research
 tags: [Membership Inference, LoRA, Adapter, Fine-tuning, Parameter-Efficient Fine-Tuning, Supply Chain, Differential Privacy, Privacy Engineer, ML Engineer, Security Engineer]
+verified_at: 2026-10-29
+review_triggers: ["Publication status or bases adapters change", "Membership-inference methods or release permissions change"]
+review_after: 2027-01-29
 sources:
+  - { title: "PreCurious author manuscript v3", url: "https://arxiv.org/abs/2403.09562" }
   - { title: "Ran et al., LoRA-Leak: Membership Inference Attacks Against LoRA Fine-tuned Language Models (arXiv 2507.18302, 2025-07; ⚠️preprint)", url: "https://arxiv.org/abs/2507.18302" }
   - { title: "Liu et al., PreCurious: How Innocent Pre-Trained Language Models Turn into Privacy Traps (ACM CCS 2024, DOI 10.1145/3658644.3690279)", url: "https://dl.acm.org/doi/10.1145/3658644.3690279" }
   - { title: "Wen et al., Last One Standing: A Comparative Analysis of Security and Privacy of Soft Prompt Tuning, LoRA, and In-Context Learning (arXiv 2310.11397, 2023; ⚠️preprint)", url: "https://arxiv.org/abs/2310.11397" }
@@ -21,7 +25,7 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="Vol. 5 · Frontier & Deployment" technique="Inference Attacks" audience={['Privacy Engineer', 'ML Engineer', 'Security Engineer']} severity="Medium" maturity="Research" evidence="Research" />
 
-> In one sentence: you fine-tune with LoRA / an adapter on **private data**, then publish that delta to HuggingFace, reasoning "the base is public and I only shipped a tiny diff, so my data is safe." That comfort is false — **the published delta is exactly where the fine-tuning signal is concentrated**: the difference between the base and the fine-tuned model is itself the **fingerprint of the fine-tune data**. An attacker who holds your adapter **and** that public base can use the public base as a **reference frame** and run **membership inference / extraction** amplified by the delta. LoRA-Leak (arXiv 2507.18302, ⚠️preprint) measures it: even under conservative fine-tuning settings, membership inference still reaches **0.775 AUC**, and "use the public pre-trained model as a reference" is precisely the move that prior MIAs neglected yet that amplifies leakage. Bottom line up front: **"the delta is small / the base is public" is not privacy — the public base is a free reference in the attacker's hands that raises your members' distinguishability.**
+> In one sentence: a released LoRA delta trained on private data, together with its public base, may provide measurable signals for reference-based membership inference. The LoRA-Leak preprint reports 0.775 AUC in a specified conservative setup, not every base model. Successful MIA does not establish text extraction. PreCurious actively constructs the base model and is a separate threat.
 
 ## The Mechanism: What Happens on My Side
 
@@ -38,7 +42,7 @@ flowchart TB
     BASE["Public base weights<br/>(anyone can download)"] --> REF["Attacker: use base as reference frame"]
     DELTA --> REF
     REF --> SUB["Fine-tuned behavior minus base behavior<br/>net out general difficulty, keep fine-tune-set delta signal"]
-    SUB --> MIA["Membership inference / extraction amplified<br/>(measurable: TPR at low FPR / AUC, not introspection)"]
+    SUB --> MIA["Reference-based membership inference: measured distinguishability<br/>(measurable: TPR at low FPR / AUC, not introspection)"]
 ```
 
 ## Threat Surface: Attacker Model and Distinguishability
@@ -89,7 +93,7 @@ Every number (AUC, low-FPR bucket, threshold) must carry **your own base, adapte
 **Minimal testable assertion** (fold "publishing an adapter" into a regressible check in CI / the release pipeline):
 
 - How to test: in the release pipeline, run a reference-based MIA audit against "base + delta to be published," report TPR at low FPR (0.1% / 1%) and overall AUC, and run one verbatim-extraction probe against the member set.
-- Pass: at low FPR, TPR is near the random baseline (≈ FPR) and AUC is near 0.5, and the verbatim-extraction probe pulls out no recognizable original text; if DP is used, (ε, δ) can be independently recomputed and the privacy unit matches the object to be protected.
+- Pass: under the preregistered model / rank / data split, attacks, and budget, low-FPR TPR with intervals, overall AUC, and separately measured extraction meet release thresholds. Successful MIA does not establish extractability; no detection is not proof of safety. For DP, independently recompute complete composition with adjacency and privacy unit fixed.
 - Fail: at low FPR, TPR is significantly above baseline, or AUC is clearly above 0.5, or original text can be extracted → judged "the adapter can leak the fine-tune set"; go back and add dropout / layer exclusion / DP, or switch to private hosting; don't publish openly.
 
 ## Research Progress and Engineering Feasibility (The Reality of Publishing LoRAs / Adapters)
@@ -120,22 +124,18 @@ Puncture the false security one by one:
 
 ## Compliance Mapping
 
-- **GDPR**: "whether a person is in a given fine-tune set" can identify an individual and is personal data; **publicly releasing** an adapter from which membership can be inferred with high confidence is equivalent to leaking personal data via the published artifact, touching minimization, purpose limitation, and security obligations. The pre-publication member-distinguishability audit is one link in the "technical measures taken" argument.
-- **Anonymization threshold**: if membership of the fine-tune set can be inferred with high confidence from your published delta, any claim of "de-identified / anonymized" does not hold (consistent with GDPR's high bar for "truly anonymous data") — MIA is the touchstone that tests it.
-- **OWASP LLM02:2025**: sensitive information disclosure includes the facet of "the model / published artifact lets outsiders infer training membership"; a public adapter is one concrete carrier of this.
-
-(Compliance evolves with statute / framework versions; this section is stamped 2026-07, verify against the latest text in force before citing.)
+Identifiable membership inference may engage personal-data obligations. Legal anonymity and appropriate measures depend on jurisdiction, reasonably available attacks, and the concrete release. MIA is one technical evidence source; this entry does not derive a legal determination from one attack or its failure.
 
 ## Distinction from Adjacent Techniques
 
-- **This entry vs [DP Fine-tuning](../03-conversational-llms/dp-fine-tuning.mdx) (Vol. 3)**: that one is a **defense** (DP training bounds single-sample influence); this one is an **attack** — the attacker uses **your published adapter** for reference-based membership inference / extraction. DP fine-tuning is precisely this entry's **primary mitigation** (caps the MIA advantage), hence the cross-link.
+- **This entry vs [DP Fine-tuning](../03-conversational-llms/dp-fine-tuning.mdx) (Vol. 3)**: that one is a **defense** (DP training bounds single-sample influence); this one is an **attack** — the attacker uses **your published adapter** for reference-based membership inference (test extraction separately). DP fine-tuning is precisely this entry's **primary mitigation** (caps the MIA advantage), hence the cross-link.
 - **This entry vs [Membership Inference Attacks](../01-foundations/membership-inference.mdx) (Vol. 1)**: that one is the **general foundation** of MIA (the behavioral gap between members / non-members); this one is its **specific amplification via a shared artifact (delta + public base)** in the LoRA setting — the increment is the "public base as reference" move, plus the supply-chain premise that "you publish the delta yourself."
 - **This entry vs [Fine-tuning-as-a-Service Privacy](../06-governance-compliance/ftaas-privacy.mdx) (Vol. 6)**: that one is the **vendor-API-side** data boundary and alignment erosion (you hand data to the vendor, where the data goes on the vendor side); this one is the **open-weights supply-chain** side — **you yourself publish the delta**, and the artifact lands in the attacker's hands. One is "how the vendor handles data after you hand it over," the other is "a derived artifact you actively make public."
 
 ## Version Notes
 
-:::note Applicable Versions
-"A public base as a reference can amplify membership inference on a LoRA / adapter fine-tune set" is currently supported mainly by **LoRA-Leak (arXiv 2507.18302, 2025-07, ⚠️preprint, no formal publication found)** — its "0.775 AUC / conservative settings" and "dropout and excluding specific LM layers effective" are bound to its three-model, three-task experimental setup, **cannot be ported directly**, and must be re-tested with your own base, adapter rank, dataset, and fine-tuning steps. The supply-chain variant (an attacker actively crafts the base to amplify MIA + extraction) has first-hand empirical support in **PreCurious (CCS 2024, peer-reviewed)**, but that is an **attacker-crafts-the-base** active path — don't mix it with "honest public base + passive reference." The adjacent comparison **Wen et al. (arXiv 2310.11397, ⚠️preprint)** uses a black-box caliber and doesn't swap numbers with the primary source. This attack/defense evolves with parameter-efficient fine-tuning and MIA methods; this section is stamped 2026-07. (Sources verified 2026-07.)
+:::note Applicable versions
+Checked LoRA-Leak v1, Wen et al.’s manuscript, and PreCurious v3 on 2026-10-29. LoRA-Leak still says submitted to IEEE; acceptance is not assumed. Its 0.775 AUC is an example under specified conservative tuning, not every base / rank. Keep honest-base reference attacks, malicious-base attacks, and extraction evidence separate. Review by 2027-01-29, earlier for publication status, bases / adapters, attack methods, or release permissions.
 :::
 
 ## Further Reading and Sources
@@ -145,3 +145,5 @@ Evidence is mixed — **primary: research-backed** (LoRA-Leak, ⚠️preprint, t
 - [LoRA-Leak: Membership Inference Attacks Against LoRA Fine-tuned Language Models (Ran et al., arXiv 2507.18302, 2025-07; ⚠️preprint)](https://arxiv.org/abs/2507.18302) —— primary source of this entry: comprises fifteen MIAs (ten existing + five improved that use the **public pre-trained model as a reference**), revealing "LoRA tuning few parameters ≠ the fine-tune data is immune to MIA"; under conservative settings, membership inference reaches **0.775 AUC** (three models, three tasks); of four defenses, only **dropout and excluding specific LM layers** reduce risk while preserving utility. ⚠️ Preprint, numbers bound to its experimental setup.
 - [PreCurious: How Innocent Pre-Trained Language Models Turn into Privacy Traps (Liu et al., ACM CCS 2024; DOI 10.1145/3658644.3690279)](https://dl.acm.org/doi/10.1145/3658644.3690279) —— peer-reviewed first-hand empirical study (supply-chain variant): an attacker who **releases the pre-trained model and only has black-box access to the fine-tuned model** can **simultaneously amplify both membership inference and data extraction** on the fine-tune set. Used as strong evidence that "the publish/adopt-the-base link is itself a privacy attack surface"; **not** extrapolated to "honest base + honest fine-tuning is also extracted this way."
 - [Last One Standing: A Comparative Analysis of Security and Privacy of Soft Prompt Tuning, LoRA, and In-Context Learning (Wen et al., arXiv 2310.11397, 2023; ⚠️preprint)](https://arxiv.org/abs/2310.11397) —— adjacent comparison: under a black-box, loss-based MIA it compares the robustness of LoRA / soft prompt tuning / in-context learning, showing "LoRA's leakage surface must be viewed bound to its specific setting." ⚠️ Preprint, its caliber (black-box) differs from the primary source (reference-based), so don't swap numbers.
+
+- [PreCurious author manuscript v3](https://arxiv.org/abs/2403.09562)

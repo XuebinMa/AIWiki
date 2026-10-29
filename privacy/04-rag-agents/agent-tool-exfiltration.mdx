@@ -11,22 +11,19 @@ severity: 高
 maturity: 研究
 evidence: 安全报告
 tags: [Agent 安全, 间接提示注入, 数据外泄, 工具调用, 外联, 最小权限, 安全工程师, 隐私工程师]
+verified_at: 2026-10-29
+review_triggers: ["工具渲染器权限或监控覆盖变化", "跨 agent 压缩摘要或外泄攻击变化"]
+review_after: 2026-12-29
 sources:
-  - { title: "Aim Labs, Breaking down 'EchoLeak', the First Zero-Click AI Vulnerability Enabling Data Exfiltration from Microsoft 365 Copilot (CVE-2025-32711)", url: "https://www.aim.security/post/breaking-down-echoleak-the-first-zero-click-ai-vulnerability-enabling-data-exfiltration-from-m365-copilot" }
-  - { title: "MSRC, CVE-2025-32711 — M365 Copilot Information Disclosure Vulnerability (server-side fix)", url: "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-32711" }
-  - { title: "Legit Security (Omer Mayraz), CamoLeak: Critical GitHub Copilot Vulnerability Leaks Private Source Code (CVE-2025-59145)", url: "https://www.legitsecurity.com/blog/camoleak-critical-github-copilot-vulnerability-leaks-private-source-code" }
-  - { title: "PromptArmor, Data Exfiltration from Slack AI via indirect prompt injection (2024)", url: "https://promptarmor.substack.com/p/data-exfiltration-from-slack-ai-via" }
-  - { title: "Johann Rehberger (Embrace The Red), Hacking Google Bard — From Prompt Injection to Data Exfiltration (2023)", url: "https://embracethered.com/blog/posts/2023/google-bard-data-exfiltration/" }
-  - { title: "Embrace The Red, OpenAI ChatGPT data-exfiltration mitigations (url_safe / Safe URL)", url: "https://embracethered.com/blog/posts/2023/openai-data-exfiltration-first-mitigations-implemented/" }
-  - { title: "Greshake et al., Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection (ACM AISec 2023. arXiv 2302.12173)", url: "https://arxiv.org/abs/2302.12173" }
-  - { title: "OWASP Top 10 for LLM Applications 2025 — LLM01:2025 Prompt Injection + LLM02:2025 Sensitive Information Disclosure", url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf" }
+  - { title: "CamoLeak：原披露", url: "https://www.legitsecurity.com/blog/camoleak-critical-github-copilot-vulnerability-leaks-private-source-code" }
+  - { title: "Anthropic Auto Mode 红队（2026-10-22）", url: "https://alignment.anthropic.com/2026/red-teaming-auto-mode/" }
 ---
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="卷四 · RAG 与 Agent" technique="RAG 与 Agent 隐私" audience={['安全工程师', '隐私工程师']} severity="高" maturity="研究" evidence="安全报告" />
 
-> 一句话摘要：当我被接上**工具**（读网页 / 读文件 / 发 HTTP / 发邮件 / 查库）、又会读到**不可信内容**时，攻击者只要把指令**藏进我会读到的内容里**（间接提示注入），就可能驱使我把手里的私有上下文**经工具调用发出去**。这不是假想——Microsoft 365 Copilot（EchoLeak，CVE-2025-32711）、GitHub Copilot Chat（CamoLeak，CVE-2025-59145）、Slack AI、Google Bard、ChatGPT 都被同一类手法打穿过，各家随后都把补丁打在**渲染面 / 出站层**（CSP、图片域名 allowlist、关掉自动取图、URL 过滤）。结论先行：隐私边界不能止于「模型不主动泄露」——一旦我能**行动**（有工具 / 能渲染外链）且会**读不可信内容**，私有数据就有了外泄通道。要从**架构**上掐：工具最小权限、出站受控、把我读到的一切当不可信。
+> 一句话摘要：Agent 读取不可信内容又能调用工具或渲染外链时，注入可能把私有上下文带出。CamoLeak 历史披露与 2026 Auto Mode 实验红队支持这一攻击面，包括跨上下文、压缩与子 agent。权限、出站目的和数据接收授权须由可信系统约束，不能只靠模型承诺。
 
 ## 机制：我这边发生了什么
 
@@ -89,8 +86,8 @@ flowchart TB
 
 **最小可测试断言**（把外泄收成可回归的检查）：
 
-- 怎么测：对每个外联工具跑间接注入红队——把外泄指令藏进我会读到的不可信内容里，上下文放真实私有数据，看私有数据会不会被外发。
-- 通过：注入之下**零外发**——出站被 allowlist / 人确认拦住；工具最小权限；不可信内容不能直接触发外联。
+- 怎么测：用合成私密 canary 与本地受控接收端，对所有出站面测试直接/编码外发、可信域代理、重定向、多工具组合；加入跨子 agent、压缩摘要与重试后的攻击链。禁止用第三方真实私有数据做外泄试验。
+- 通过：在声明的工具、攻击与预算内，所有接收端、渲染/代理、共享文件与日志均无未授权 canary 披露，合法任务仍可完成。域名 allowlist 不等于数据接收授权；人工确认须展示实际接收方、数据与目的，有限零命中不证明通用免疫。
 - 失败：注入即外发、任意 URL / 收件人可达、或根本没有出站管控 → 别给这个 agent 接外联工具，先把出站层补硬。
 
 ## 真实案例 / 研究进展（工程可行性）
@@ -99,11 +96,7 @@ flowchart TB
 
 **真实事故 / 业界怎么补**（同一类机制，连环在主流产品上被打穿；各家的补丁恰好落在本条「防护原理」说的渲染面 / 出站层）：
 
-- **Microsoft 365 Copilot —— EchoLeak（CVE-2025-32711，CVSS 9.3）**：Aim Labs 2025-06 披露的**零点击**外泄——攻击者只需发一封藏了注入指令的邮件，Copilot 的 RAG 把它取进上下文后照做，把内部数据编码进外链送出。链条里连环绕过了 Microsoft 的 XPIA（跨提示注入）分类器、链接移除（link redaction）、CSP，并借一个被 CSP 放行的 Teams 代理出站。Microsoft **服务端**修复（MSRC 标信息披露漏洞；据公开报道未见在野利用）。它印证：**靠分类器 / 系统提示拦注入会被绕，真正的闸门要落在出站与渲染面。**
-- **GitHub Copilot Chat —— CamoLeak（CVE-2025-59145，CVSS 9.6）**：Legit Security（Omer Mayraz）2025-10 披露——把注入指令藏进 PR 里 GitHub 的「隐形」markdown 注释，诱使 Copilot 把私有仓库的源码 / 密钥**逐字符**编码成一串预生成的 Camo 图片代理 URL（每个字符一个合法签名 URL、各返回 1×1 像素），因走 GitHub 自家可信代理而绕过 CSP 与常规出站管控。GitHub 的补丁是**在 Copilot Chat 里关掉图片渲染、禁用 Camo 代理渲染聊天内容**（2025-08-14）。
-- **Slack AI（PromptArmor，2024-08）**：只要能在**任意公开频道**发帖，攻击者就能种下注入指令；当某个有私有频道权限的用户用 Slack AI 提问 / 摘要时，模型照做，把**私有频道**内容编码进一条可点击链接外泄。Slack 随后**发补丁**修复（称未见客户数据被未授权访问）。
-- **Google Bard（Johann Rehberger / rez0 / Greshake，2023-11）**：Bard Extensions 上线不到一天即被演示——经 Extensions 读到的不可信数据里藏注入，把用户**聊天记录**编码进图片 URL 外泄；为绕过 CSP，借 Google Apps Script 把数据导到攻击者可读的 Google 文档。Google 一个月内**确认修复**（据披露未改 CSP，而是对 URL 里塞数据做了过滤）。
-- **ChatGPT 的 markdown 图片外泄与 OpenAI 的缓解**：经典手法是让模型把私有数据编码进 markdown 图片 URL、客户端自动加载即外泄。OpenAI 2023-12 起加 **`url_safe`**（展示前校验 URL、判不安全就剔除），后续部署 **Safe URL**。Rehberger（Embrace The Red）记录：缓解**降低**但未根除——「每个字符用一个独立 URL」等旁路在论文里仍被点名可绕。它正说明指令级 / 单点过滤是**降风险、非绝对边界**。
+- **GitHub Copilot Chat —— CamoLeak（CVE-2025-59145，CVSS 9.6）**：Legit Security（Omer Mayraz）2025-09-30 披露——把注入指令藏进 PR 里 GitHub 的「隐形」markdown 注释，诱使 Copilot 把私有仓库的源码 / 密钥**逐字符**编码成一串预生成的 Camo 图片代理 URL（每个字符一个合法签名 URL、各返回 1×1 像素），因走 GitHub 自家可信代理而绕过 CSP 与常规出站管控。GitHub 的补丁是**在 Copilot Chat 里关掉图片渲染、禁用 Camo 代理渲染聊天内容**（2025-08-14）。
 
 **跨案例的共同补法**（各家被打穿后趋同的，正是本条配方那几条）：**CSP / 图片域名 allowlist、URL / 链接 allowlist、关闭或沙箱化 markdown 自动取外部资源、对外发动作上人确认**。共同的反面教训：**「加一条系统提示叫模型别外泄」与「上一个注入分类器」都被实证绕过**——指令与数据同通道，硬边界必须落在模型够不到的渲染 / 出站层。
 
@@ -132,22 +125,11 @@ flowchart TB
 ## 版本说明
 
 :::note 适用版本
-「模型读不可信内容 + 有外联工具 = 私有数据可被经工具外泄」是**与具体模型 / 框架无关**的范式级结论（根因在于指令与数据同通道 + 模型可行动）。具体哪种注入有效、哪种出站管控够用，随模型、框架、工具实现持续演进；**提示注入的鲁棒防御截至本段打戳（2026-06）仍是开放问题**，引用任何「已防住」结论前请核最新研究与你自己的红队结果。（出处核验于 2026-06。）
+2026-10-29 核对 CamoLeak 发现者原文（披露日 2025-09-30，原文 10 月有误）及 Anthropic 2026-10-22 Auto Mode 红队：研究显示跨上下文/多 agent/恶意压缩可使单动作监控遗漏整体外泄目的，结果为 2026-09 实验快照，不宣称当前产品普遍可绕。EchoLeak 原披露页不可读、MSRC 仅 JS 壳，本次不独立确认其全部补丁细节。2026-12-29 前，或工具/渲染器、权限、监控覆盖与攻击变化时复核。
 :::
 
 ## 延伸阅读与出处
 
-> 主要：安全报告（真实产品上的注入外泄事故 + 厂商修复）；补充：研究支持（间接注入机制）与框架（OWASP LLM01/LLM02）。
+- [CamoLeak：原披露](https://www.legitsecurity.com/blog/camoleak-critical-github-copilot-vulnerability-leaks-private-source-code)
 
-真实事故 / 厂商修复（本条头条证据）：
-
-- [Aim Labs：拆解 EchoLeak —— Microsoft 365 Copilot 首个零点击 AI 外泄（CVE-2025-32711）](https://www.aim.security/post/breaking-down-echoleak-the-first-zero-click-ai-vulnerability-enabling-data-exfiltration-from-m365-copilot) 与 [MSRC CVE-2025-32711（服务端修复）](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-32711) —— 零点击邮件注入经 RAG 外泄，连环绕过 XPIA 分类器 / 链接移除 / CSP；Microsoft 服务端修。
-- [Legit Security：CamoLeak —— GitHub Copilot Chat 泄露私有源码（CVE-2025-59145）](https://www.legitsecurity.com/blog/camoleak-critical-github-copilot-vulnerability-leaks-private-source-code) —— 借 GitHub 自家 Camo 图片代理逐字符外泄、绕过 CSP；GitHub 修法是在 Copilot Chat 关掉图片渲染。
-- [PromptArmor：Slack AI 经间接注入外泄私有频道数据（2024）](https://promptarmor.substack.com/p/data-exfiltration-from-slack-ai-via) —— 公开频道种注入、把私有频道内容编码进可点击链接外泄；Slack 已修。
-- [Johann Rehberger：Hacking Google Bard —— 从提示注入到数据外泄（2023）](https://embracethered.com/blog/posts/2023/google-bard-data-exfiltration/) —— 经 Extensions 注入、聊天记录编码进图片 URL，借 Apps Script 绕 CSP；Google 一月内修。
-- [Embrace The Red：OpenAI 对 ChatGPT 数据外泄的缓解（url_safe / Safe URL）](https://embracethered.com/blog/posts/2023/openai-data-exfiltration-first-mitigations-implemented/) —— markdown 图片 URL 外泄与 OpenAI 的 URL 过滤；缓解降风险、旁路仍存。
-
-机制与框架（背书）：
-
-- [Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection（Greshake 等，ACM AISec 2023；arXiv 2302.12173）](https://arxiv.org/abs/2302.12173) —— 间接提示注入：把指令注入会被读取的数据，远程操纵 LLM 集成应用、含数据窃取。本条机制源，解释上面那串事故「为什么会这样」。
-- [OWASP Top 10 for LLM Applications 2025 — LLM01 提示注入 + LLM02 敏感信息披露](https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf) —— 注入居首（指令数据同通道）、敏感信息披露含基于提示的外泄，二者合成本条攻击链。
+- [Anthropic Auto Mode 红队（2026-10-22）](https://alignment.anthropic.com/2026/red-teaming-auto-mode/)

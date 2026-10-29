@@ -11,7 +11,12 @@ severity: 中
 maturity: 生产
 evidence: 官方文档
 tags: [TEE, 机密计算, 远程证明, 侧信道, 信任根, 隐私工程师, 安全工程师, ML 工程师]
+verified_at: 2026-10-29
+review_triggers: ["CPU/GPU驱动固件或安全模式变化", "证明策略撤销或侧信道公告变化"]
+review_after: 2026-12-29
 sources:
+  - { title: "NVIDIA 生产机密推理集成（2026-09-22）", url: "https://developer.nvidia.com/blog/enabling-private-high-performance-production-ai-inference-with-nvidia-confidential-computing/" }
+  - { title: "NVIDIA Trust and Threat Model（Dev；配置与排除项）", url: "https://docs.nvidia.com/confidential-computing/virtual-machines/threat-model" }
   - { title: "Confidential Computing Consortium, A Technical Analysis of Confidential Computing (v1.3, 2022)", url: "https://confidentialcomputing.io/wp-content/uploads/sites/10/2023/03/CCC-A-Technical-Analysis-of-Confidential-Computing-v1.3_unlocked.pdf" }
   - { title: "NVIDIA, Confidential Computing on H100 GPUs for Secure and Trustworthy AI（官方：GPU TEE、远程证明、CPU-GPU 加密）", url: "https://developer.nvidia.com/blog/confidential-computing-on-h100-gpus-for-secure-and-trustworthy-ai/" }
   - { title: "Van Bulck et al., Foreshadow: Extracting the Keys to the Intel SGX Kingdom (USENIX Security 2018)", url: "https://www.usenix.org/conference/usenixsecurity18/presentation/bulck" }
@@ -21,14 +26,14 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="卷一 · 隐私根基" technique="隐私保护计算" audience={['隐私工程师', '安全工程师', 'ML 工程师']} severity="中" maturity="生产" evidence="官方文档" />
 
-> 一句话摘要：可信执行环境（TEE）用**硬件**把「**使用中的数据**」（data in use）圈进一个加密、可远程证明的飞地（enclave），让同租户、恶意 OS / hypervisor、甚至云运营商都看不到里面——这是把 LLM 的 prompt 与权重**对云厂商保密**的硬件路线。但记牢两条边界：**信任根是芯片厂商**（你信的是 Intel / AMD / NVIDIA 的密钥与实现），且 TEE 反复被**微架构侧信道**攻破（Foreshadow 一类）。它是卷五「机密推理」的承重墙，所以先在卷一交代清楚它**保证什么、不保证什么**。
+> 一句话摘要：可信执行环境（TEE）用**硬件**把「**使用中的数据**」（data in use）圈进一个加密、可远程证明的飞地（enclave），让同租户、恶意 OS / hypervisor、甚至云运营商都看不到里面——这是把 LLM 的 prompt 与权重**对云厂商保密**的硬件路线。但记牢两条边界：**信任根是芯片厂商及获准的软件/证明策略**（包括密钥、实现与端点验证），且 TEE 反复被**微架构侧信道**攻破（Foreshadow 一类）。它是卷五「机密推理」的承重墙，所以先在卷一交代清楚它**保证什么、不保证什么**。
 
 ## 机制：我这边发生了什么
 
 当我（模型）跑在 TEE 里，这边发生两件事：
 
 1. **内存 / 显存被硬件加密、隔离。** 我处理你 prompt 的那块内存，由具体 TEE 机制在运行时加密、隔离，**部分平台**另提供完整性或回滚防护——具体保证取决于 SGX / TDX / SEV-SNP / GPU TEE 的型号、固件与证明范围，别当作所有 TEE 等同；OS、hypervisor、同机其他租户即便有更高权限，读到的也是密文。机密计算联盟（CCC）把 TEE 的保证定义为三条：**数据机密性、数据完整性、代码完整性**（CCC, *A Technical Analysis of Confidential Computing*）。
-2. **远程证明（remote attestation）。** 硬件用**厂商签名的密钥**生成一份报告，证明「这是真 enclave、跑的是你指定的那份代码（measurement 匹配）」。你**先验证这份证明，再**把 prompt / 密钥发进来。NVIDIA H100 是首个支持机密计算的 GPU：片上信任根 + 签名证明报告，CPU 与 GPU 之间用 **AES-GCM-256** 加密传输（NVIDIA 官方）。
+2. **远程证明（remote attestation）。** 硬件用**厂商签名的密钥**生成一份报告，证明「这是真 enclave、跑的是你指定的那份代码（measurement 匹配）」。你**先验证这份证明，再**把 prompt / 密钥发进来。NVIDIA H100 是首个支持机密计算的 GPU：片上信任根 + 签名证明报告，CPU 与 GPU 之间用 **受支持模式下的认证加密** 加密传输（NVIDIA 官方）。
 
 红线：TEE 给的是「**外部看不到 + 可证明身份**」，**不是**「绝对安全」。它把信任**转移**到芯片厂商，不护 enclave 内代码自身的 bug，也挡不住下面会说的侧信道。
 
@@ -60,7 +65,7 @@ TEE 靠三件套成立：**硬件隔离 + 运行时内存加密 + 远程证明**
    GPU TEE（NVIDIA H100 / H200 机密计算）保护 GPU 侧的模型推理。
 2. 客户端做证明验证（关键）：发数据前——验厂商签名、比对 measurement（是否
    你指定的代码 / 模型）、检查厂商证书链与撤销状态；任一不符就拒发。
-3. 链路加密：CPU-GPU、客户端-enclave 全程加密（如 H100 的 AES-GCM-256），
+3. 链路加密：CPU-GPU、客户端-enclave 全程加密（如 H100 的 受支持模式下的认证加密），
    别让数据在进出飞地的通道上裸奔。
 4. 缩小 TCB：飞地内只放必要代码（模型 + 最小运行时），减少「enclave 内 bug」面。
 5. 跟微码 / 补丁：侧信道靠厂商微码与缓解持续打补丁，锁定具体 CPU 型号与微码版本。
@@ -71,16 +76,14 @@ TEE 靠三件套成立：**硬件隔离 + 运行时内存加密 + 远程证明**
 **最小可测试断言**（把证明验证收成可回归的检查，别停在「我们用了 TEE」）：
 
 - 怎么测：篡改 / 伪造 enclave 或改动代码 measurement，跑客户端验证流程。
-- 通过：measurement 不匹配、厂商签名无效、或证书链 / 撤销检查失败时，客户端**一律拒绝发送明文**；只有全部通过才发。
-- 失败：客户端不验证证明（或只建了 TLS、却不比对 measurement）→ 等于没用 TEE，回去把证明验证设成发送前置闸门。
+- 通过：measurement 不匹配、厂商签名无效、或证书链 / 撤销检查失败时，客户端**一律拒绝发送明文**；还需 freshness、撤销及密钥通道绑定全部通过才发。
+- 失败：签名、freshness、撤销、measurement 策略或密钥通道绑定失败后仍发送敏感数据；通过这些检查也不证明硬件没有未知侧信道。
 
 ## 真实案例 / 厂商现状
 
-TEE 是**在产**技术：Intel SGX / TDX、AMD SEV-SNP 是 CPU 侧的成熟产品；**NVIDIA H100 是首个支持机密计算的 GPU**——标准 PyTorch / TensorFlow / ONNX 模型**不改动**即可在 GPU TEE 里跑，客户端只需在发数据前加一步证明验证（NVIDIA 官方）。这把「机密推理」从理论推到了「能在主流 AI 栈上落地」。
+TEE 有在产实现，但不同平台不能用「飞地」一词抹平差异：SGX、TDX、SEV-SNP 的隔离粒度、TCB 与证明不同。NVIDIA 2026 年官方威胁模型进一步区分 Hopper / Blackwell 与链路模式：Blackwell 多 GPU CC 支持加密 NVLink；Hopper Protected PCIe 模式的 GPU 间 NVLink 并未加密。模型代码可能复用，驱动、运行时、传输与证明仍需部署适配，不是客户端多加一次验签就完成。
 
-:::caution 待核验
-Apple Private Cloud Compute（PCC）被宣传为面向消费级的机密推理生产实例，本条**未深核**其机制细节（远程证明范围、对 Apple 自身的信任假设）。引用前请核 Apple Security 官方文档（已记入 `BACKLOG-privacy.md`「写作前必核」）。
-:::
+Apple PCC 以设备端验证、获准软件与透明性构成特定设计；其细节见[机密推理](../05-frontier-deployment/confidential-inference.mdx)。不把 PCC 特有机制推广成全部 TEE 的保证。
 
 ## 残余风险与权衡
 
@@ -88,9 +91,9 @@ Apple Private Cloud Compute（PCC）被宣传为面向消费级的机密推理�
 
 - **「跑在 TEE 里」≠ 安全。** 侧信道史（Foreshadow / SGAxe / ÆPIC…）一再证明机密性会被攻破；安全性绑定具体 CPU 型号、微码版本与补丁状态，不是一劳永逸。
 - **「有 TEE 就不用信云厂商」≠ 消除信任。** 你只是把信任**从云运营商转移到芯片厂商**——根密钥、证明服务、硬件实现都得信。信任没消失，只换了对象。
-- **不验证远程证明 = 没用 TEE。** 最常见的落地错误：建了飞地却不在客户端比对 measurement，等于把明文发给一个「自称」TEE 的黑盒。
+- **未验证证明，就未建立客户端声称的远端身份保证。** 硬件可能仍在保护数据，但客户端不能确认密钥已绑定到允许的软件与平台状态。
 - **TEE 不管 enclave 内的 bug。** 飞地内的内存损坏、逻辑漏洞照样泄密；TCB 越大风险越高。
-- **性能开销随场景差异大。** 内存加密、CPU-GPU 加密传输、权重换入换出都会带来开销，**从个位数百分比到数倍均有报告**，取决于 workload / 模型规模 / batch / 是否含权重保护与远程证明——落地必须用你的负载实测，别搬单一乐观数（具体数字待一手核，见 `BACKLOG-privacy.md`）。
+- **性能需按完整受保护路径实测。** 报告硬件代际 / 模式、模型、输入输出长度、批量、并发、CPU-GPU / GPU-GPU 传输和证明是否计入；本文不提供缺少同条件一手基准的通用开销范围。
 
 ## 合规映射
 
@@ -101,13 +104,13 @@ Apple Private Cloud Compute（PCC）被宣传为面向消费级的机密推理�
 
 ## 与相邻技术的区别
 
-- **TEE vs HE / MPC**：TEE 靠**硬件信任**换性能——快、通用，但要信芯片厂商、且有侧信道；HE / MPC 靠**密码学**——不信任何硬件，但慢得多（见《[HE·MPC](./he-mpc.mdx)》——同卷另一条地基）。三者常被放在一起选型：用硬件信任换速度，还是用密码学换「零硬件信任」。
-- **TEE vs DP**：TEE 护「**使用中的数据不被外部看到**」（运营 / 部署面）；差分隐私护「**模型输出不泄露单样本**」（训练面）。一个挡外部窥视、一个限内部泄露，正交，可叠加。
+- **TEE vs HE / MPC**：TEE 靠**硬件信任**换性能——快、通用，但要信芯片厂商、且有侧信道；HE / MPC 靠**密码学**——不把远端执行硬件当机密性信任根，但慢得多（见《[HE·MPC](./he-mpc.mdx)》——同卷另一条地基）。三者常被放在一起选型：用硬件信任换速度，还是用密码学换「不信任远端硬件」。
+- **TEE vs DP**：TEE 护「**使用中的数据不被外部看到**」（运营 / 部署面）；差分隐私限制定义单位在发布物中的可区分性（须核邻接、预算与组合）。一个挡外部窥视、一个限内部泄露，正交，可叠加。
 
 ## 版本说明
 
 :::note 适用版本
-TEE 是**与具体模型无关**的硬件机制，但**强绑定具体芯片与微码**：保证、性能、已知侧信道都随 CPU / GPU 代际和补丁变化。本条按 2026-06 的产品现状（Intel SGX/TDX、AMD SEV-SNP、NVIDIA H100/H200 机密计算）表述；具体型号的安全与开销以厂商当下文档和你的实测为准。（出处核验于 2026-06。）
+2026-10-29 核对 NVIDIA 当前 Dev 威胁模型、2026-09 TensorRT-LLM 部署文章及 Foreshadow 原始依据。Dev 文档不是所有发行版的保证；具体 CPU / GPU、驱动、固件和安全模式须固定。尤其 CVM 不隔离终端用户与租户自己运行的软件：远程证明还要核 freshness、撤销状态、允许的 measurement 与密钥通道绑定，证明软件身份不证明它无漏洞。2026-12-29 前，或硬件 / 驱动更新、证明策略或安全公告变化时复核。
 :::
 
 ## 延伸阅读与出处
@@ -115,5 +118,9 @@ TEE 是**与具体模型无关**的硬件机制，但**强绑定具体芯片与�
 证据为混合——**主要：官方文档 / 标准**（CCC、NVIDIA）；**补充：研究**（Foreshadow 侧信道）。
 
 - [A Technical Analysis of Confidential Computing（CCC，v1.3）](https://confidentialcomputing.io/wp-content/uploads/sites/10/2023/03/CCC-A-Technical-Analysis-of-Confidential-Computing-v1.3_unlocked.pdf) —— 标准：TEE 的机密性 / 完整性 / 代码完整性定义与「data in use」缺口。
-- [Confidential Computing on H100 GPUs（NVIDIA 官方）](https://developer.nvidia.com/blog/confidential-computing-on-h100-gpus-for-secure-and-trustworthy-ai/) —— 官方：首个机密计算 GPU、片上信任根、远程证明、CPU-GPU AES-GCM-256 加密。
+- [Confidential Computing on H100 GPUs（NVIDIA 官方）](https://developer.nvidia.com/blog/confidential-computing-on-h100-gpus-for-secure-and-trustworthy-ai/) —— 官方：首个机密计算 GPU、片上信任根、远程证明、CPU-GPU 受支持模式下的认证加密 加密。
 - [Foreshadow: Extracting the Keys to the Intel SGX Kingdom（Van Bulck 等，USENIX Security 2018）](https://www.usenix.org/conference/usenixsecurity18/presentation/bulck) —— 研究：L1TF 瞬态执行从 SGX enclave 抽出受保护内存，连证明密钥都被提取。
+
+- [NVIDIA Trust and Threat Model（Dev；配置与排除项）](https://docs.nvidia.com/confidential-computing/virtual-machines/threat-model)
+
+- [NVIDIA 生产机密推理集成（2026-09-22）](https://developer.nvidia.com/blog/enabling-private-high-performance-production-ai-inference-with-nvidia-confidential-computing/)

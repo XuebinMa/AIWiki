@@ -11,7 +11,11 @@ severity: 中
 maturity: 研究
 evidence: 研究支持
 tags: [成员推断, LoRA, 适配器, 微调, 参数高效微调, 供应链, 差分隐私, 隐私工程师, ML 工程师, 安全工程师]
+verified_at: 2026-10-29
+review_triggers: ["论文发表状态或底座适配器变化", "成员推断方法或发布权限变化"]
+review_after: 2027-01-29
 sources:
+  - { title: "PreCurious 作者预印本 v3", url: "https://arxiv.org/abs/2403.09562" }
   - { title: "Ran et al., LoRA-Leak: Membership Inference Attacks Against LoRA Fine-tuned Language Models (arXiv 2507.18302, 2025-07；⚠️预印本)", url: "https://arxiv.org/abs/2507.18302" }
   - { title: "Liu et al., PreCurious: How Innocent Pre-Trained Language Models Turn into Privacy Traps (ACM CCS 2024, DOI 10.1145/3658644.3690279)", url: "https://dl.acm.org/doi/10.1145/3658644.3690279" }
   - { title: "Wen et al., Last One Standing: A Comparative Analysis of Security and Privacy of Soft Prompt Tuning, LoRA, and In-Context Learning (arXiv 2310.11397, 2023；⚠️预印本)", url: "https://arxiv.org/abs/2310.11397" }
@@ -21,7 +25,7 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="卷五 · 前沿与落地" technique="推断类攻击" audience={['隐私工程师', 'ML 工程师', '安全工程师']} severity="中" maturity="研究" evidence="研究支持" />
 
-> 一句话摘要：你在**私有数据**上做 LoRA / 适配器微调，然后把这份 delta 发到 HuggingFace，心想「底座是公开的，我只发了一小块差量，我的数据藏得住」。这份心安是假的——**发布的 delta 恰恰把微调信号浓缩在了一处**：底座与微调后模型之间的差，本身就是**微调数据的指纹**。攻击者只要同时握有你的适配器**和**那个公开底座，就能把公开底座当**参照系**，跑一次被 delta 放大的**成员推断 / 抽取**。LoRA-Leak（arXiv 2507.18302，⚠️预印本）实测：即便在保守微调设置下，成员推断仍能到 **0.775 AUC**，且「拿公开预训练模型当参照」正是被以往 MIA 忽略、却能放大泄露的那一手。结论先行：**「delta 小 / 底座公开」不是隐私——公开底座是攻击者手里的免费参照，把你的成员可区分度抬高了。**
+> 一句话摘要：发布私有数据微调的 LoRA delta 和公开底座，可能为参照式成员推断提供可测信号。LoRA-Leak 预印本报告指定保守设置中 0.775 AUC，非所有底座的固定结果；MIA 成功不等于原文可抽取。主动构造底座的 PreCurious 是另一威胁，须分别验证。
 
 ## 机制：我这边发生了什么
 
@@ -38,7 +42,7 @@ flowchart TB
     BASE["公开底座权重<br/>（人人可下）"] --> REF["攻击者：把底座当参照系"]
     DELTA --> REF
     REF --> SUB["微调后行为 减去 底座行为<br/>扣掉一般难度，留下微调集的差量信号"]
-    SUB --> MIA["成员推断 / 抽取被放大<br/>（可测：低 FPR 下 TPR / AUC，非内省）"]
+    SUB --> MIA["参照式成员推断：实测可区分度<br/>（可测：低 FPR 下 TPR / AUC，非内省）"]
 ```
 
 ## 威胁面：攻击者模型与可区分度
@@ -85,7 +89,7 @@ flowchart TB
 **最小可测试断言**（把「发布适配器」收成 CI / 发布流水线里可回归的检查）：
 
 - 怎么测：发布流水线里对「底座 + 待发 delta」跑参照式 MIA 审计，report 低 FPR（0.1% / 1%）下的 TPR 与整体 AUC，并对成员集跑一次逐字抽取试探。
-- 通过：低 FPR 下 TPR 接近随机基线（约等于 FPR）、AUC 接近 0.5，且逐字抽取试探取不出可辨认原文；上了 DP 则 (ε, δ) 可被独立复算、隐私单位与要保护对象一致。
+- 通过：在预注册的模型 / 秩 / 数据划分、攻击与预算下，低 FPR 的 TPR 及区间、整体 AUC 与独立抽取指标满足发布门槛。MIA 成功不等于原文可抽取；未检出也不证明安全。若使用 DP，按完整组合、邻接关系与隐私单位独立复算。
 - 失败：低 FPR 下 TPR 显著高于基线、或 AUC 明显大于 0.5、或原文可被抽出 → 判「适配器可泄露微调集」，回去上 dropout / 排层 / DP，或改私有托管，别直接公开发。
 
 ## 研究进展与工程可行性（LoRA / 适配器发布的现实）
@@ -116,22 +120,18 @@ flowchart TB
 
 ## 合规映射
 
-- **GDPR**：「某人是否在某微调集中」可识别到个人、属个人数据；把能被高置信反推成员的适配器**公开发布**，等于经由发布物泄露个人数据，触及最小化、目的限制与安全义务。发布前的成员可区分度审计，是「已尽技术措施」论证的一环。
-- **匿名化门槛**：若能从你发布的 delta 高置信反推微调集成员，所谓「已脱敏 / 匿名」就不成立（与 GDPR 对「真正匿名数据」的高门槛一致）——MIA 是检验它的试金石。
-- **OWASP LLM02:2025**：敏感信息泄露包含「模型 / 发布物让外部推断出训练成员」这一面；公开适配器是其中一个具体载体。
-
-（合规随法条 / 框架版本演进，本段打戳 2026-07，引用前核对最新生效文本。）
+可识别的成员推断可能触及个人数据义务；是否达到法律上的匿名及应采取哪些措施须按法域、合理可用攻击和具体发布评估。MIA 是技术证据之一，本文不从一次攻击或失败直接作法律定性。
 
 ## 与相邻技术的区别
 
-- **本条 vs《[DP 微调](../03-conversational-llms/dp-fine-tuning.mdx)》（卷三）**：那条是**防御**（DP 训练给单样本影响上界）；本条是**攻击**——攻击者拿你**发布的适配器**做参照式成员推断 / 抽取。DP 微调正是本条的**主要缓解**（把 MIA 优势封顶），故互链。
+- **本条 vs《[DP 微调](../03-conversational-llms/dp-fine-tuning.mdx)》（卷三）**：那条是**防御**（DP 训练给单样本影响上界）；本条是**攻击**——攻击者拿你**发布的适配器**做参照式成员推断（抽取另测）。DP 微调正是本条的**主要缓解**（把 MIA 优势封顶），故互链。
 - **本条 vs《[成员推断攻击](../01-foundations/membership-inference.mdx)》（卷一）**：那条是 MIA 的**通用地基**（成员 / 非成员行为差异）；本条是它在 LoRA 场景下、经由**共享工件（delta + 公开底座）的特定放大**——增量在「公开底座当参照」这一手，以及「你亲手把 delta 发出去」这个供应链前提。
 - **本条 vs《[微调即服务隐私](../06-governance-compliance/ftaas-privacy.mdx)》（卷六）**：那条是**厂商 API 侧**的数据边界与对齐侵蚀（你把数据交给厂商、数据在厂商侧的去向）；本条是**开放权重供应链**侧——**你自己把 delta 公开发布**，工件落在攻击者手里。一个是「数据交出去后厂商怎么处置」，一个是「派生工件被你主动公开」。
 
 ## 版本说明
 
 :::note 适用版本
-「公开底座当参照可放大 LoRA / 适配器微调集的成员推断」目前主要证据是 **LoRA-Leak（arXiv 2507.18302，2025-07，⚠️预印本，未见正式发表）**——其「0.775 AUC / 保守设置」「dropout 与排除特定 LM 层有效」绑定其三模型三任务实验设置，**不可直接迁移**，落地须以你自己的底座、适配器秩、数据集与微调步数重测。供应链变体（攻击者主动构造底座放大 MIA + 抽取）有 **PreCurious（CCS 2024，同行评审）** 一手实证，但那是**攻击者构造底座**的主动路径，别与「诚实公开底座 + 被动参照」混用。相邻对照 **Wen et al.（arXiv 2310.11397，⚠️预印本）** 采黑盒口径，不与主源数字互换。此类攻防随参数高效微调与 MIA 方法迭代演进，本段打戳 2026-07。（出处核验于 2026-07。）
+2026-10-29 核对 LoRA-Leak v1、Wen 等原稿与 PreCurious v3：LoRA-Leak 页面仍标已提交 IEEE，未据此假定录用；0.775 AUC 仅为指定保守微调设置中的示例，不等于每个底座/秩结果。诚实底座参照、主动恶意底座与数据抽取分开计证据。2027-01-29 前，或论文发表状态、底座 / 适配器、攻击方法与发布权限变化时复核。
 :::
 
 ## 延伸阅读与出处
@@ -141,3 +141,5 @@ flowchart TB
 - [LoRA-Leak: Membership Inference Attacks Against LoRA Fine-tuned Language Models（Ran 等，arXiv 2507.18302，2025-07；⚠️预印本）](https://arxiv.org/abs/2507.18302) —— 本条主源：含十五种 MIA（十既有 + 五种以**公开预训练模型作参照**的改进版），揭示「LoRA 只调少量参数 ≠ 微调数据对 MIA 免疫」；保守设置下成员推断达 **0.775 AUC**（三模型三任务）；四种防御中仅 **dropout 与排除特定 LM 层**保效用地降风险。⚠️ 预印本，数字绑定其实验设置。
 - [PreCurious: How Innocent Pre-Trained Language Models Turn into Privacy Traps（Liu 等，ACM CCS 2024；DOI 10.1145/3658644.3690279）](https://dl.acm.org/doi/10.1145/3658644.3690279) —— 同行评审一手实证（供应链变体）：攻击者**发布预训练模型、仅黑盒访问微调后模型**，即可**同时放大**微调集的**成员推断与数据抽取**。用作「发布 / 采用底座这一环本身是隐私攻击面」的强证据；**不**外推为「诚实底座 + 诚实微调也被此抽取」。
 - [Last One Standing: A Comparative Analysis of Security and Privacy of Soft Prompt Tuning, LoRA, and In-Context Learning（Wen 等，arXiv 2310.11397，2023；⚠️预印本）](https://arxiv.org/abs/2310.11397) —— 相邻对照：黑盒、基于损失的 MIA 下对比 LoRA / 软提示 / 上下文学习的稳健性，说明「LoRA 泄露面须绑定其具体设置看」。⚠️ 预印本，口径（黑盒）与主源（参照式）不同，不互换数字。
+
+- [PreCurious 作者预印本 v3](https://arxiv.org/abs/2403.09562)

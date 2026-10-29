@@ -11,9 +11,13 @@ severity: Medium
 maturity: Research
 evidence: Research
 tags: [property inference, distribution inference, population property, inference attacks, membership inference, meta-classifier, Privacy Engineer, ML Engineer, Security Engineer]
+verified_at: 2026-10-29
+review_triggers: ["Property ratios or adversary knowledge change", "Distribution-inference methods or release modes change"]
+review_after: 2027-04-29
 sources:
+  - { title: "Dissecting Distribution Inference (SaTML 2023)", url: "https://arxiv.org/abs/2212.07591" }
   - { title: "Ganju, Wang, Yang, Gunter, Borisov, Property Inference Attacks on Fully Connected Neural Networks using Permutation Invariant Representations (ACM CCS 2018)", url: "https://dl.acm.org/doi/10.1145/3243734.3243834" }
-  - { title: "Suri & Evans, Formalizing and Estimating Distribution Inference Risks (PoPETs 2022)", url: "https://petsymposium.org/popets/2022/" }
+  - { title: "Suri & Evans, Formalizing and Estimating Distribution Inference Risks (PoPETs 2022)", url: "https://arxiv.org/abs/2109.06024" }
 ---
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
@@ -44,19 +48,19 @@ flowchart TB
 
 **Attacker model / prerequisites** (these decide feasibility — spell them out per BACKLOG-privacy.md "classification checklist"):
 
-- **White-box vs black-box**: Ganju et al.'s demonstration is **white-box** — the attacker has my parameters (open / shared weights, parameter exchange in federated learning, model exfiltration). That's the strongest, most direct setting. Property / distribution inference also has **black-box** variants (query only, train the meta-classifier on observed output behavior), but black-box is generally harder with less information. **First, be clear which exposure surface you have.**
+- **White-box vs black-box**: Ganju et al. study parameter access; later attacks query outputs. Empirical strength depends on the method and adversary knowledge, so black-box is not always weaker than a tested white-box attack.
 - **Can train shadow models**: the attacker needs to train same-architecture shadow models on data with **known property ratios** (knowing or approximating my training pipeline and architecture).
 - **Binary / distinguishing**: the classic setting is **distinguishing two makeups** (A vs B), not reading out a continuous ratio directly; estimating "exactly what percent" is harder and depends heavily on the ratio range the shadow models cover.
 - **Success criterion**: the meta-classifier's **distinguishing accuracy** on held-out target models — and (see below) the `n_leaked` Suri & Evans convert it into.
 
 ## How the defense works
 
-Say it bluntly up front: **distribution inference can't be pushed to zero — that's statistical reality**, just like the population-correlation part in [Model inversion & attribute inference](./model-inversion-attribute-inference.mdx). As long as parameters / outputs vary statistically with the training set's makeup (they must, or the model learned nothing), there is in principle a learnable signal. So the honest goal is "**assess and be informed**," not "promise the attacker can infer no population property." Treating the latter as achievable is this entry's false security.
+Distribution-inference risk arises when a model observably depends on training-set composition, but a particular sensitive property need not be encoded or leaked. Measure the relevant task and evaluate resampling, training, and release controls; learning useful patterns does not imply that every group property is inferable.
 
 Given that, what you *can* do is **raise the attack cost and shrink the leakage**:
 
 - **DP helps somewhat, but it's aimed at the wrong target**: DP bounds a **single sample's** influence on parameters, which is directly effective against attacks "targeting an individual in training" (membership inference / individual inversion); but distribution inference wants the **overall makeup**, an aggregate that DP's individual-level guarantee **doesn't directly cover** — don't treat DP as a silver bullet for distribution inference. (DP mechanism: [DP fine-tuning](../03-conversational-llms/dp-fine-tuning.mdx).)
-- **Control the parameter exposure surface**: white-box is the strongest setting. If you can avoid publishing raw weights, do (distill / expose only an API / use secure aggregation in federated learning), pushing the attacker back from white-box to black-box and sharply reducing the signal.
+- **Control parameter exposure**: release weights or host an API as needed, and test white-box / black-box attacks separately. Distillation and quotas may change risk; secure aggregation protects individual updates in transit, not group information in the final model.
 - **Quantify with `n_leaked`, not gut feel**: Suri & Evans (PoPETs 2022) convert "the meta-classifier's distinguishing accuracy" into an intuitive quantity — **how many records the adversary would need to sample directly from the population distribution to match that distinguishing power**. This turns an abstract "attack success rate" into "equivalent to leaking N samples," easy to align with your asset sensitivity.
 
 ## Buildable recipe
@@ -64,7 +68,7 @@ Given that, what you *can* do is **raise the attack cost and shrink the leakage*
 ```text
 1. First identify the exposure surface: is your model open weights / federated
    parameter exchange (white-box), or API-only (black-box)? Distribution-inference
-   signal is strongest under white-box — treat "must we publish weights?" as a privacy
+   test both white-box and black-box signals — treat "must we publish weights?" as a privacy
    decision, not an engineering default.
 
 2. Put "training-set population makeup" on the asset list: it may be a trade secret
@@ -78,7 +82,7 @@ Given that, what you *can* do is **raise the attack cost and shrink the leakage*
 
 4. Report risk with n_leaked, not just an accuracy: convert the meta-classifier's
    distinguishing power into "equivalent to the attacker sampling how many records"
-   (Suri & Evans). Easier to distinguish → smaller n_leaked → more real risk.
+   (Suri & Evans). For a fixed property-ratio pair and attack conditions, higher distinguishing accuracy means larger n_leaked and more equivalent information leakage.
 
 5. Tighten the exposure surface: distill / expose only an API / add secure aggregation
    where you can, pushing white-box back to black-box. Stacking DP weakens individual-
@@ -91,26 +95,26 @@ Every conclusion is tied to **your model architecture, exposure surface, and the
 **Minimal testable assertions** (turn distribution-inference risk into a regression check):
 
 - How to test: train a batch of shadow models with known property ratios + a meta-classifier, and under your real exposure surface (white-box parameters / black-box outputs) measure the meta-classifier's distinguishing accuracy for "the two population makeups you care about," then convert to `n_leaked`.
-- Pass: under the form you **actually expose externally** (e.g. API-only, with secure aggregation), the meta-classifier's distinguishing accuracy is **near chance**, or the corresponding `n_leaked` is **large enough that direct sampling is cheaper for the attacker** (i.e. the model brings no significant additional distribution leakage).
-- Fail: under a form where you expose weights, the meta-classifier can **significantly distinguish** the two makeups you care about and `n_leaked` is small → tighten the exposure surface per the recipe (distill / withdraw white-box / secure aggregation), and record the residual risk honestly in privacy evals.
+- Pass: with the property-ratio pair, prior, model, and access mode held fixed, distinguishing accuracy and its confidence interval meet the threshold and equivalent `n_leaked` is low. This measures distributional information, not a count of recovered records; do not rank different ratio pairs solely by this value.
+- Fail: the two compositions are distinguishable under the stated conditions and equivalent `n_leaked` exceeds the tolerance → record the group leakage, evaluate resampling / release controls, and retest. Secure aggregation hides individual updates; it does not automatically remove group-property signals from the final model.
 
 ## Research status (engineering feasibility)
 
 (This entry's maturity is "Research": below is **empirical-attack / formalization** evidence, tightly bound to the experimental datasets and settings — not an endorsement that "any model can be casually read for its training-set ratio.")
 
 - **Reading a training set's population makeup out of a fully connected network (white-box)**: Ganju et al. (ACM CCS 2018) proposed property inference via a meta-classifier exploiting FCNN **permutation invariance**; on US **Census Income** data it distinguishes training sets that are "**38% vs 65% women**" and "**0% vs 87% white**" — revealing that "sharing the weights of a model trained on a sensitive population leaks that training data's population makeup." (This entry does not cite a single top-line accuracy figure: that number was not verifiable; we describe only the setup and the makeup conditions it distinguishes.)
-- **Formalizing the risk + giving `n_leaked`**: Suri & Evans (PoPETs 2022) formalize the above as **distribution inference** and propose the `n_leaked` metric — converting distinguishing accuracy into "how many records the adversary would need to sample directly from the distribution to match that distinguishing power." **Hard**-to-distinguish ratio pairs (e.g. 0.5 vs 0.51) need much more sampling (one figure the paper gives is 95% distinguishing accuracy ≈ `n_leaked` 84), while **easy** ratio pairs (e.g. 0.5 vs 0.9) need very little (the same 95% accuracy ≈ `n_leaked` 3). This makes "how severe is distribution inference" quantifiable against asset sensitivity.
+- **The correct direction of `n_leaked`**: Suri & Evans (PoPETs 2022) use the equivalent number of direct samples from the candidate distributions needed to match the attack’s distinguishing power. For fixed candidate distributions, higher values mean more distributional information leaked by the model. This is neither an extra sampling cost the attacker must pay nor a count of recovered records. Their 95%-accuracy examples give approximately 3 for ratios 0.5 vs 1.0 and 42 for 0.5 vs 0.52; differing ratio separations prevent a simple cross-task ranking.
 - (Founding thread: meta-classifier property inference traces back to Ateniese et al., "Hacking Smart Machines with Smarter Ones," Int. J. Security and Networks 2015; the two papers above advanced it to neural networks and to formal quantification. Verify the latest literature before citing specific enhancements.)
 
 ## Residual risk and trade-offs
 
 Breaking the false security item by item:
 
-- **Distribution inference can't be pushed to zero.** As long as parameters / outputs vary with the training set's makeup (they must), there's a learnable statistical signal; the honest goal is "assess, be informed, shrink the additional leakage," not "the attacker gets nothing."
+- **Statistical intuition is not an impossibility proof.** Leakage of a property depends on the task, data, and mechanism. Measure explicit property pairs without promising absolute safety or claiming mitigation impossible.
 - **DP is not the silver bullet here.** DP gives an **individual-level** guarantee; distribution inference wants the **aggregate makeup** — the targets don't coincide. Stacking DP weakens individual attacks, but don't treat it as the cure for distribution inference.
-- **White-box is the strongest setting.** Publishing weights / federated parameter exchange turns the signal up to maximum. Distill / expose only an API / add secure aggregation to push the attacker back to black-box — an exposure-surface decision to make at design time.
+- **Access mode alone is not a risk ranking.** Parameter access adds information, but a particular white-box attack can be weaker than a better black-box method. Compare with model, knowledge, and budget held fixed.
 - **"Population makeup" is also an asset to protect.** It may be a trade secret (data sources) or group privacy (a sensitive attribute's ratio). Defending only "a single record" misses this whole class of risk.
-- **The numbers are tightly bound to the setting.** Ganju's distinguishable makeups (38% vs 65%, etc.) and Suri & Evans's `n_leaked` (84 / 3, etc.) are bound to the Census dataset and specific ratio pairs — don't transfer them into "my model is this number too."
+- **Numbers depend on the setting.** Ganju’s ratios come from a particular Census task; the 3 / 42 examples for `n_leaked` come from specified candidate ratios and 95% accuracy. They are not record-leak counts for arbitrary models.
 
 ## How this differs from neighboring techniques
 
@@ -122,11 +126,13 @@ Make the "**individual vs population**" axis explicit — it's the fundamental b
 ## Version notes
 
 :::note Applicable versions
-"Parameter / output statistics carry traces of the training distribution and can be read by a meta-classifier into a population property" is a **model-independent** paradigm-level fact. But **how fine a makeup can be distinguished, and what `n_leaked` is**, are tightly tied to model architecture, exposure surface (white-box / black-box), the ratio range the shadow models cover, and the dataset — Ganju et al.'s (2018) Census-distinguishable makeups and Suri & Evans's (2022) `n_leaked` values **don't transfer directly** to your setup; you must run distribution-inference audits against your own exposure surface. Enhancements beyond these two papers keep evolving; stamped 2026-06. (Sources verified 2026-06.)
+Corrected the direction of `n_leaked` and the acceptance criteria against the original paper on 2026-10-29. Also checked Dissecting Distribution Inference (SaTML 2023): its black-box attack outperforms the earlier white-box attack in most evaluated settings, and resampling can help. Thus “white-box is always stronger” and “every property must leak” are not universal conclusions. Review by 2027-04-29, earlier for changed adversary knowledge, property ratios, or release modes.
 :::
 
 ## Further reading and sources
 
 - [Property Inference Attacks on Fully Connected Neural Networks using Permutation Invariant Representations (Ganju et al., ACM CCS 2018)](https://dl.acm.org/doi/10.1145/3243734.3243834) — white-box property inference: a meta-classifier exploiting FCNN permutation invariance distinguishes a training set's population makeup on Census Income data (38% vs 65% women, 0% vs 87% white). This entry's primary source.
-- [Formalizing and Estimating Distribution Inference Risks (Suri & Evans, PoPETs 2022)](https://petsymposium.org/popets/2022/) — formalizes attribute inference as distribution inference and proposes `n_leaked` (≈84 for hard ratio pairs, ≈3 for easy ones) to quantify the risk. This entry's basis for the distribution-inference formalization and quantification.
+- [Formalizing and Estimating Distribution Inference Risks (Suri & Evans, PoPETs 2022)](https://arxiv.org/abs/2109.06024) — defines distribution inference and equivalent `n_leaked`; larger values mean more equivalent information leakage.
 - (Foundational, optional) Ateniese et al., "Hacking Smart Machines with Smarter Ones" (Int. J. Security and Networks 2015) — the origin of meta-classifier property inference.
+
+- [Dissecting Distribution Inference (SaTML 2023)](https://arxiv.org/abs/2212.07591)

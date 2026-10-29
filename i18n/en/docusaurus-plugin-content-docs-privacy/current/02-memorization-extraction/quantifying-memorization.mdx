@@ -11,6 +11,9 @@ severity: Medium
 maturity: Research
 evidence: Research
 tags: [memorization auditing, quantifying memorization, canary, exposure, membership inference, differential privacy, Privacy Engineer, ML Engineer, Security Engineer]
+verified_at: 2026-10-29
+review_triggers: ["Candidate spaces rank estimators or inclusion strategies change", "Model families or extraction attacks change"]
+review_after: 2027-04-29
 sources:
   - { title: "Carlini et al., The Secret Sharer: Evaluating and Testing Unintended Memorization in Neural Networks (USENIX Security 2019; arXiv 1802.08232)", url: "https://arxiv.org/abs/1802.08232" }
   - { title: "Carlini et al., Quantifying Memorization Across Neural Language Models (ICLR 2023; arXiv 2202.07646)", url: "https://arxiv.org/abs/2202.07646" }
@@ -57,7 +60,7 @@ This entry is a **defender's measurement tool**, so the "threat surface" becomes
 
 ## How the defense works
 
-The intuition for **exposure**: place the canary into its whole randomness space, rank all candidates by "how much the model prefers each"; the further forward the canary ranks (the larger its shift from where a random one should sit), the higher the exposure. Its value is giving "memorization" a **comparable, regression-able** unit — so you can answer questions that were otherwise guesswork:
+**Exposure**: for a fixed template, candidate space R, and score, `exposure = log2(|R|) - log2(rank(canary))`. It measures controlled-candidate rank displacement, not stored bits of real PII. Report approximate-rank estimation error; do not directly compare different spaces/templates/repetitions.
 
 - "Does this version memorize more or less than the last?" → compare exposure.
 - "How much did dedup / DP actually suppress memorization?" → look at the exposure drop.
@@ -87,7 +90,7 @@ Every number is tied to **your model, data, and canary design** — don't copy p
 **Minimal testable assertions** (turn the audit into a regression check):
 
 - How to test: fix a set of known canaries (with several duplication tiers), and after each training run compute exposure under the same convention, comparing to the previous baseline.
-- Pass: each canary's exposure is **below the set threshold** and **not above** the previous baseline; versions with dedup / DP should show a visible exposure drop.
+- Pass: with candidate space, template, inclusion frequency, access, and estimator fixed, exposure and its estimation interval meet the threshold, with controls without injected canaries; hold training budget fixed for A/B comparisons. Low exposure only supports this canary test, not absence of leakage across real data or stronger extraction attacks.
 - Fail: some canary's exposure approaches "full memorization" (the order of magnitude where it can be extracted verbatim), or a new version rises for no reason, or there's no exposure baseline at all → the audit didn't pass; don't ship.
 
 ## Research status (engineering feasibility)
@@ -116,7 +119,7 @@ Breaking the false security item by item:
 ## Version notes
 
 :::note Applicable versions
-The canary + exposure audit method (USENIX Security 2019) and the trend of memorization rising with scale / duplication / context (ICLR 2023) are **model-independent** measurement science, common across vendors. But the **absolute exposure value, thresholds, and scaling slope** are all tied to your model, data, and canary design; paper values **don't transfer directly**, and every new version and every scale-up must be **re-measured** with your own canaries. Stamped 2026-06. (Sources verified 2026-06.)
+Checked Secret Sharer and Quantifying Memorization v3 on 2026-10-29. Size / repetition / context trends are empirical within their settings; cross-family behavior is more complicated, not a universal monotonic law. Use controlled non-PII canaries; the Smart Compose example remains a historical report from the original paper. Review by 2027-04-29, earlier for candidate spaces / rank estimators, inclusion strategies, model families, or extraction attacks.
 :::
 
 ## Further reading and sources

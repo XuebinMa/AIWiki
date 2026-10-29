@@ -11,7 +11,11 @@ severity: High
 maturity: Research
 evidence: Research
 tags: [model inversion, attribute inference, inference attacks, confidence leakage, membership inference, differential privacy, Privacy Engineer, ML Engineer, Security Engineer]
+verified_at: 2026-10-29
+review_triggers: ["Inversion access model or output granularity changes", "Sensitive population attributes or baselines change"]
+review_after: 2027-04-29
 sources:
+  - { title: "CCS 2015 paper (author-hosted)", url: "https://www.cs.toronto.edu/~ristenpart/papers/mi-ccs.pdf" }
   - { title: "Fredrikson et al., Model Inversion Attacks that Exploit Confidence Information and Basic Countermeasures (ACM CCS 2015)", url: "https://dl.acm.org/doi/10.1145/2810103.2813677" }
   - { title: "Fredrikson et al., Privacy in Pharmacogenetics: An End-to-End Case Study of Personalized Warfarin Dosing (USENIX Security 2014)", url: "https://www.usenix.org/conference/usenixsecurity14/technical-sessions/presentation/fredrikson_matthew" }
 ---
@@ -58,7 +62,7 @@ Three complementary measures:
 - **Differential privacy**: DP bounds single-sample influence on the model, weakening inversion / inference "targeting an individual in training" (see [DP fine-tuning](../03-conversational-llms/dp-fine-tuning.mdx)); but the part of attribute inference **rooted in population correlation**, DP can't suppress.
 - **Careful class granularity**: avoid "one class = one real person," which makes inversion directly equivalent to "reconstruct this person."
 
-To break it down: **attribute inference can't be "zeroed out" by technology** — half of it is statistical reality. The honest goal is "**lower the additional leakage the model brings**," not promising "the attacker can infer no attribute." Treating the latter as achievable is this entry's false security.
+To break it down: **attribute inference can't be "zeroed out" by technology** — some of it can arise from population correlations. The honest goal is "**lower the additional leakage the model brings**," not promising "the attacker can infer no attribute." Treating the latter as achievable is this entry's false security.
 
 ## Buildable recipe
 
@@ -83,7 +87,7 @@ Every conclusion is tied to **your model, class design, and output granularity**
 **Minimal testable assertions** (turn inference risk into a regression check):
 
 - How to test: run model inversion (optimize input to maximize target-class confidence) + attribute inference (partial features + population prior) against your interface, evaluating reconstruction recognizability / attribute-inference accuracy under your output granularity / DP config.
-- Pass: under labels-only / coarsened confidence + DP, inversion reconstructions are **not recognizable to an individual** and attribute-inference accuracy is **near the population baseline** (i.e. "the model brings no significant additional leakage").
+- Pass: on authorized or synthetic test data, under the stated interface and attack budget, reconstruction identifiability and attribute-inference gain over a no-model baseline, including confidence intervals, meet the threshold. Failure of limited attacks does not prove all inversion impossible; coarsened outputs do not rule out attacks under other access models.
 - Fail: fine confidence can be optimized into a **recognizable** class representative, or attribute inference is **significantly above** the population baseline, while the interface has no output-granularity control / no DP → tighten per the recipe.
 
 ## Research status (engineering feasibility)
@@ -100,7 +104,7 @@ Breaking the false security item by item:
 
 - **Confidence is the fuel.** Exposing fine probabilities = oiling inversion / inference; output minimization has a usability cost, but it's a real trade-off.
 - **Model inversion ≠ verbatim recovery of a training image.** It gives a class representative; the harm is when "class = a person." Don't conflate it with gradient inversion / training-data extraction "pulling up any original image."
-- **Attribute inference can't be pushed to zero.** Half of it comes from population statistics; the honest goal is "lower the model's additional leakage," not "the attacker gets nothing."
+- **Attribute inference can't be pushed to zero.** Some can arise from population statistics; the honest goal is "lower the model's additional leakage," not "the attacker gets nothing."
 - **DP suppresses the individual, not the statistics.** DP weakens inversion targeting an individual in training, but can't touch the correlation between an attribute and observable features.
 - **Class granularity is a modeling decision.** "One class, one real person" makes inversion directly equal "reconstruct this person" — something to avoid at design time.
 
@@ -113,10 +117,12 @@ Breaking the false security item by item:
 ## Version notes
 
 :::note Applicable versions
-"Confidence outputs can be used to invert a class representative / infer a sensitive attribute" is a **model-independent** paradigm-level fact (the output carries more than the prediction). But **how recognizable inversion gets, and how far above baseline attribute inference rises**, are tightly tied to model type, class granularity, output granularity, and data — Fredrikson et al.'s (2014/2015) face / warfarin conclusions **don't transfer directly** to your setup; you must run inversion / inference audits against your own interface. Later GAN / diffusion enhancements keep evolving; stamped 2026-06. (Sources verified 2026-06.)
+Rechecked the author-hosted CCS 2015 paper and USENIX 2014 warfarin study on 2026-10-29. A class representative is not pixel-exact recovery of a particular training photo. Attribute inference can use population correlations and can target non-members. DP bounds the additional contribution of the defined record / user, not existing statistical knowledge. Review by 2027-04-29, earlier for new inversion access models, sensitive populations, or output interfaces.
 :::
 
 ## Further reading and sources
 
 - [Model Inversion Attacks that Exploit Confidence Information and Basic Countermeasures (Fredrikson et al., ACM CCS 2015)](https://dl.acm.org/doi/10.1145/2810103.2813677) — founds model inversion: black-box confidence to reconstruct recognizable faces of a face-recognition model's training-set members. This entry's primary source.
 - [Privacy in Pharmacogenetics: An End-to-End Case Study of Personalized Warfarin Dosing (Fredrikson et al., USENIX Security 2014)](https://www.usenix.org/conference/usenixsecurity14/technical-sessions/presentation/fredrikson_matthew) — a real attribute-inference case: inferring a sensitive genotype from a dosing model + partial demographics. This entry's attribute-inference basis.
+
+- [CCS 2015 paper (author-hosted)](https://www.cs.toronto.edu/~ristenpart/papers/mi-ccs.pdf)

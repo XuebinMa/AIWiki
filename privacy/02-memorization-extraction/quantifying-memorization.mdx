@@ -11,6 +11,9 @@ severity: 中
 maturity: 研究
 evidence: 研究支持
 tags: [记忆审计, 量化记忆, 探针, 暴露度, 成员推断, 差分隐私, 隐私工程师, ML 工程师, 安全工程师]
+verified_at: 2026-10-29
+review_triggers: ["候选空间排名估计或注入策略变化", "模型族或抽取攻击变化"]
+review_after: 2027-04-29
 sources:
   - { title: "Carlini et al., The Secret Sharer: Evaluating and Testing Unintended Memorization in Neural Networks (USENIX Security 2019. arXiv 1802.08232)", url: "https://arxiv.org/abs/1802.08232" }
   - { title: "Carlini et al., Quantifying Memorization Across Neural Language Models (ICLR 2023. arXiv 2202.07646)", url: "https://arxiv.org/abs/2202.07646" }
@@ -57,7 +60,7 @@ flowchart TB
 
 ## 防护原理
 
-**暴露度（exposure）**的直觉定义：把这条 canary 放进它所属的整个随机空间，按「模型有多偏好每个候选」排序；canary 排得越靠前（相对随机应有的位置偏移越大），exposure 越高。它的价值在于给「记忆」一个**可比较、可回归**的量纲——于是你能回答这些原本只能拍脑袋的问题：
+**暴露度（exposure）**：在固定模板、候选空间 R 和打分规则下，`exposure = log2(|R|) - log2(rank(canary))`。它量受控候选的排名偏移，不是保存真实 PII 的比特数。近似排名须报告估计误差，不同空间/模板/重复次数不可直接比。
 
 - 「这版比上版记得更多还是更少？」→ 比 exposure。
 - 「去重 / 加 DP 到底压下去多少记忆？」→ 看 exposure 降幅。
@@ -83,7 +86,7 @@ flowchart TB
 **最小可测试断言**（把审计收成可回归的检查）：
 
 - 怎么测：固定一组已知 canary（含若干重复次数档），每次训练后用同一口径算 exposure，与上一版基线对比。
-- 通过：各 canary 的 exposure **低于设定阈值**、且**不高于**上一版基线；有去重 / DP 的版本 exposure 应可见下降。
+- 通过：在相同候选空间、模板、注入频次、访问与估计器下，exposure 及估计区间满足预设门槛，并有未注入对照；A/B 对比固定训练预算。低 exposure 只约束本探针测试，不证明全部真实语料或更强抽取攻击无泄露。
 - 失败：某 canary exposure 接近「完全记忆」（可被逐字抽取的量级）、或新版无故升高、或根本没有 exposure 基线 → 审计未通过，别发。
 
 ## 真实案例 / 研究进展（工程可行性）
@@ -112,7 +115,7 @@ flowchart TB
 ## 版本说明
 
 :::note 适用版本
-canary + exposure 的审计方法（USENIX Security 2019）与记忆随规模 / 重复 / 上下文上升的趋势（ICLR 2023）是**与具体模型无关**的测量学，跨厂商通用。但 **exposure 的绝对值、阈值、scaling 斜率**都绑定你的模型、数据与探针设计，论文取值**不能直接迁移**；每个新版本、每次放大模型都要用你自己的探针**重测**。本段打戳 2026-06。（出处核验于 2026-06。）
+2026-10-29 核对 Secret Sharer 与 Quantifying Memorization v3：规模 / 重复 / 上下文趋势是其设置中的实证，跨模型族更复杂，不作任意模型必单调的定律。受控 canary 不含真实 PII，生产 Smart Compose 用例保留为原论文历史报告。2027-04-29 前，或候选空间 / 排名估计、注入策略、模型族与新抽取攻击变化时复核。
 :::
 
 ## 延伸阅读与出处

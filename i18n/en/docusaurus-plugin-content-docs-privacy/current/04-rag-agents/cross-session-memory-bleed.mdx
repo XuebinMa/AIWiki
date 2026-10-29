@@ -11,6 +11,9 @@ severity: High
 maturity: Production
 evidence: Security advisory
 tags: [cross-session bleed, multi-tenant, memory isolation, cache, race condition, data boundary, Security Engineer, Privacy Engineer, ML Engineer]
+verified_at: 2026-10-29
+review_triggers: ["Identities cache keys or permissions change", "Pool cancellation logic or storage versions change"]
+review_after: 2027-01-29
 sources:
   - { title: "OpenAI — March 20 ChatGPT outage (official postmortem: a redis-py race condition exposed cross-user data)", url: "https://openai.com/index/march-20-chatgpt-outage/" }
   - { title: "OWASP Top 10 for LLM Applications 2025 — LLM02:2025 Sensitive Information Disclosure", url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf" }
@@ -20,7 +23,7 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="Volume 4 · RAG and agents" technique="RAG & agent privacy" audience={['Security Engineer', 'Privacy Engineer', 'ML Engineer']} severity="High" maturity="Production" evidence="Security advisory" />
 
-> In one sentence: when many users share one memory / session / cache infrastructure and it **isn't strictly isolated per user**, I may hand one person's conversation history, memory, even billing info **to another**. This isn't "I misremembered" — it's **tenant-isolation failure** at the infrastructure layer. Real case: in March 2023 a redis-py concurrency race in ChatGPT let some users see others' chat **titles** and the **first message** of a new conversation, and about **1.2% of active Plus users** had their name / email / billing address / last-four card digits exposed in a roughly **9-hour** window (OpenAI's official postmortem). Conclusion first: cross-session isolation is the **system's responsibility**, not "I'll be careful not to mix things up" — scope every cache / memory / session by user, with concurrency safety + ownership checks + auditing.
+> In one sentence: shared sessions/memory/caches can return A’s data to B if identity and permission binding fail. In OpenAI’s 2023 incident, 1.2% describes possible payment-data exposure among Plus subscribers active in a specific nine-hour window, not confirmed viewing of every record. Isolation relies on system authentication, authorization, pool concurrency, and ownership checks, not model promises.
 
 ## Mechanism: what happens on my side
 
@@ -77,14 +80,14 @@ Every step is tied to **your multi-tenancy model and storage stack** — without
 **Minimal testable assertions** (turn bleed into a regression check):
 
 - How to test: run concurrent multi-tenant read/write load (incl. connection-reuse / request-cancellation race scenarios), plus a cross-session isolation check on persistent memory.
-- Pass: **zero bleed** under high concurrency — each user's response contains only their own data; ownership checks are live; all keys are scoped per user.
+- Pass: use two genuinely distinct authenticated principals A/B with controlled canaries, covering concurrency, cancellation, reconnection, retries, pooled connections, and permission revocation. Responses / caches / memory / logs must show no unauthorized cross-principal read; retain positive controls for authorized sharing and same-identity paths. Finite non-detection cannot exclude every race, and keys must bind trusted identity and current permissions.
 - Fail: cross-user hits appear, or keys aren't user-scoped, or there's no concurrency test at all → don't ship multi-tenant; close the isolation gaps first.
 
 ## Real case / engineering status (incident postmortem)
 
 (This entry's maturity is "Production": tenant isolation is **standard production practice**; below is the real incident of "what happens if you get it wrong" + the framework framing, not an endorsement that "isolation is foolproof.")
 
-- **ChatGPT cross-user data bleed (OpenAI, 2023-03)**: a server change spiked Redis request cancellations, and redis-py under Asyncio gave **each connection a small probability of returning bad data**. Result: some users saw others' chat **titles**, and possibly the **first message** of others' new conversations; about **1.2% of active ChatGPT Plus users** had their name / email / billing address / card type / last-four card digits seen by another active user within a roughly **9-hour** window. OpenAI's fix was to **add a redundant check** that the Redis-returned data matches the requester, plus log auditing. This is a textbook cross-tenant incident of "shared cache + concurrency race + missing ownership check." (The numbers and window are tied to this event; defer to the official postmortem before citing.)
+- **ChatGPT 2023 incident**: the official report describes response mismatches with redis-py cancellation and connection reuse, affecting titles, possibly first messages, and some payment data. The 1.2% refers only to possible risk in the specified nine-hour active-Plus cohort; full card numbers were not exposed. It is not a universal bleed probability.
 - **Framework framing**: OWASP **LLM02:2025 Sensitive Information Disclosure** lists "cross-user leakage of PII / credentials / proprietary data" as a Top 10 risk for LLM apps — cross-session memory bleed is one typical path to it.
 
 ## Residual risk and trade-offs
@@ -105,7 +108,7 @@ Breaking the false security item by item:
 ## Version notes
 
 :::note Applicable versions
-"Shared memory / cache without per-user isolation bleeds across tenants" is a **tech-stack-independent** system fact (the root cause is multi-tenant shared storage + concurrency + missing ownership checks). The ChatGPT incident's **specific numbers (1.2%, ~9-hour window) are tied to that event**, illustrative only, not a general probability; the redis-py race was its specific cause, and your stack has its own race surface. Isolation and concurrency safety are **stack-specific** engineering and must be re-tested against your own storage / concurrency model. Stamped 2026-06. (Sources verified 2026-06.)
+Rechecked the 2023 official postmortem on 2026-10-29. The 1.2% refers to active Plus subscribers during a specific nine-hour window whose payment data may have been exposed, not confirmed viewing of every affected record. Full card numbers were not exposed. This cache incident does not prove every model architecture entirely stateless. Review by 2027-01-29, earlier for identities / cache keys, pool cancellation, permissions, or storage-service versions.
 :::
 
 ## Further reading and sources

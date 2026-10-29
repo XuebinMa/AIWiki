@@ -11,7 +11,12 @@ severity: Medium
 maturity: Production
 evidence: Official docs
 tags: [data lifecycle, deletion propagation, data lineage, right to be forgotten, backups, vector store, Compliance Engineer, Privacy Engineer, Security Engineer]
+verified_at: 2026-10-29
+review_triggers: ["NIST1.1 or jurisdictional erasure guidance changes", "Backup restoration erasure or subprocessors change"]
+review_after: 2027-01-29
 sources:
+  - { title: "NIST Privacy Framework 1.1 project status", url: "https://www.nist.gov/privacy-framework/new-projects/privacy-framework-version-11" }
+  - { title: "ICO erasure and backups (UK; under review)", url: "https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/individual-rights/right-to-erasure/" }
   - { title: "GDPR Art. 17 — Right to erasure ('right to be forgotten') + Art. 19 notification duty", url: "https://gdpr-info.eu/art-17-gdpr/" }
   - { title: "NIST Privacy Framework v1.0 (NIST CSWP, 2020-01-16) — data lifecycle & Control-P", url: "https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.01162020.pdf" }
 ---
@@ -20,7 +25,7 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="Volume 6 · Governance and compliance" technique="Data lifecycle & data governance" audience={['Privacy Engineer', 'Compliance Engineer', 'Security Engineer']} severity="Medium" maturity="Production" evidence="Official docs" />
 
-> In one sentence: "I deleted that record" ≠ "the data is gone." Once a piece of personal data enters the system, it gets copied to a pile of places — primary DB, backups, logs, caches, vector store / embeddings, fine-tuned / derived models, analytics warehouses, third-party subprocessors. The right to be forgotten (GDPR Art. 17) only counts when deletion **propagates to every copy**; and **my side** — baked into weights, embedded into the vector store — is exactly the hardest cell to delete. The NIST Privacy Framework treats this as a governance problem spanning the **data lifecycle** (collection → processing → storage → disposition / deletion). Conclusion first: govern by "**data lineage + deletion propagation**," and don't read "deleted from the primary DB" as "deleted" — that's the most common false security here.
+> In one sentence: deleting the primary record does not clear logs, backups, caches, vectors, and other derivatives. Use lineage to identify erasure targets, handle valid requests, lawful retention exceptions and recipient notification, and replay deletion after backup restoration. GDPR erasure is not unconditional instant clearing; whether model parameters involve personal data and how to remedy it require case-specific assessment.
 
 ## Mechanism: what happens on my side
 
@@ -73,7 +78,7 @@ The **NIST Privacy Framework** (v1.0) governs privacy risk by the **data lifecyc
 - **Data lineage**: know **where each class of personal data flows and gets copied to** — without lineage, deletion propagation is blind deletion.
 - **Deletion propagation (fan-out)**: a deletion request must **fan out** to all **known copies**, not just delete the primary DB.
 
-**GDPR Art. 17/19** is the legal driver: a controller must take "**reasonable steps, including technical measures**," to inform other controllers of erasure (Art. 17(2)), and notify recipients of rectification / erasure (Art. 19); but the standard is "**reasonable / not disproportionate effort**," explicitly **acknowledging** the technical difficulty of backups and the like. To break it down: the "reasonableness" leeway the law gives is a backstop for "genuinely can't," **not** an excuse for "couldn't be bothered to build lineage or delete" — you still must be able to show you took reasonable technical measures.
+**Separate applicability, exceptions, and notification duties.** Article 17(2) concerns reasonable notification after a controller made data public; Article 19 concerns recipients and exceptions for impossibility / disproportionate effort. Neither grants blanket backup delays. UK ICO guidance requires valid erasure requests to cover live and backup systems; where backup overwrite is delayed, put data beyond use pending replacement and explain the arrangement. This UK guidance is under review following the Data (Use and Access) Act and does not replace EU jurisdiction-specific interpretation.
 
 ## Buildable recipe
 
@@ -83,7 +88,7 @@ The **NIST Privacy Framework** (v1.0) governs privacy risk by the **data lifecyc
    / subprocessors. Without this map, deletion propagation is a non-starter.
 2. Make the deletion request a fan-out workflow: one request triggers deletion / scheduled
    deletion across all known copies, with an end-to-end audit trail.
-3. Backups: use a "periodic full expiry" strategy (GDPR-acknowledged), and explicitly
+3. Backups: use a "periodic full expiry" strategy (subject to lawful basis, beyond-use controls, and deletion replay after restoration), and explicitly
    record "the deletion request takes effect in the next backup rotation cycle," stating
    that window in your response.
 4. Vector store: delete the embedding and index entry along with the source document,
@@ -99,7 +104,7 @@ Every step is tied to **your own data map and jurisdiction** — without spellin
 **Minimal testable assertions** (turn deletion propagation into an auditable check):
 
 - How to test: sample a subject who has **requested deletion**, check for residue across **all known stores**; and probe with extraction / retrieval to see whether the model and vector store can still surface it.
-- Pass: **no residue** in any store (or within a **documented** backup expiry window), the probe can't surface it, and there's an **end-to-end audit trail** proving the request fanned out to every copy.
+- Pass: every store in the lineage has erasure or a lawful retention basis, with audited backup expiry, access blocking, and deletion replay after restoration; controlled probes cannot retrieve data through declared paths. Probe failure does not prove unknown copies absent, and lawful retention must not be labeled physical erasure.
 - Fail: some copy remains with **no expiry plan**, or the probe can still surface it from the model / vector store, or no audit trail → deletion propagation isn't closed-loop; don't claim "deleted."
 
 ## Governance status (engineering practice)
@@ -107,14 +112,14 @@ Every step is tied to **your own data map and jurisdiction** — without spellin
 (This entry's maturity is "Production": data-lifecycle governance is a mature engineering practice **driven by GDPR and structured by the NIST Privacy Framework**; but "complete propagation" is **always imperfect** in engineering — backups and derived models especially. Below is the governance structure and status, no unverified case named.)
 
 - **A standard makes the lifecycle a governable function set**: the NIST Privacy Framework (CSWP, 2020-01-16) decomposes privacy risk along the data lifecycle (incl. storage and disposition / deletion) into Identify-P / Govern-P / Control-P, giving "where to govern deletion" a standardized skeleton; its "data processing ecosystem" view matches the reality of "copies spread to many parties."
-- **The law acknowledges propagation is hard but requires reasonable effort**: GDPR Art. 17 establishes the right to be forgotten, Art. 17(2) requires "reasonable steps (incl. technical measures)" to inform others of erasure, and Art. 19 requires notifying recipients; the "reasonable / not disproportionate" standard explicitly acknowledges the technical constraints of backups — which is exactly why "deletion propagation" is a **recognized, not-auto-solved** engineering problem, approximated with lineage + fan-out workflows rather than assuming "delete once = cleared."
+- **Erasure and notification have distinct conditions.** Check valid requests, lawful exceptions, recipient notification, and backup handling separately. UK ICO beyond-use guidance is not blanket permission for all EU cases.
 
 ## Residual risk and trade-offs
 
 Breaking the false security item by item:
 
 - **Deletion propagation is never perfect.** Copies not on your lineage map (shadow copies, ad-hoc exports, personal downloads) are blind spots — propagation only covers **known** copies.
-- **Within the backup expiry window, the data is still there.** "Takes effect next rotation cycle" is a compliance-acceptable approach, but **disclose** the effective window honestly; don't call it "deleted instantly."
+- **Delayed backup overwrite is not automatically compliant.** Handle backups for valid requests and prevent ordinary use. Record the minimum necessary expiry plan, deletion replay after restoration, and applicable legal basis; stating a rotation period alone is insufficient.
 - **The copy in the derived model isn't truly deleted.** Deleting the source ≠ the model forgetting; true deletion needs unlearning / retraining, itself not well solved (see [Verifiable deletion and machine unlearning](../05-frontier-deployment/machine-unlearning.mdx), Volume 5).
 - **Third-party propagation rides on contract, not technical enforcement.** You can require and audit it, but you can't press delete on their machines unilaterally.
 - **"Reasonable effort" can become an excuse.** Reasonableness is a backstop for the genuinely impossible; using it to cover "didn't build lineage" won't hold up in an audit / litigation.
@@ -136,7 +141,7 @@ Breaking the false security item by item:
 ## Version notes
 
 :::note Applicable versions
-"Personal data spreads into many copies across a system, and deletion must propagate to every one to count" is a **tech-stack-independent** governance fact (the root cause is data being copied to primary DB / backups / logs / vector store / derived models / third parties). The NIST Privacy Framework is **v1.0 (2020-01-16)** (note 1.1 is in progress); GDPR text and local regulations / regulator guidance update over time. **This section is stamped 2026-06** — verify the **latest statute and your jurisdiction's guidance** before acting. (Sources verified 2026-06.)
+Checked NIST’s current 1.1 project page (still presents the IPD and closed comment period; not treated as final publication) and UK ICO erasure guidance on 2026-10-29. The EU official text was bot-blocked, so the older secondary transcription is not represented as independently rechecked in full. Legal-to-engineering mappings remain conditional. Review by 2027-01-29, earlier for NIST 1.1 status, jurisdictional guidance, backup restoration / erasure, or subprocessors.
 :::
 
 ## Further reading and sources
@@ -145,3 +150,7 @@ Breaking the false security item by item:
 
 - [GDPR Art. 17 — Right to erasure ('right to be forgotten')](https://gdpr-info.eu/art-17-gdpr/) — the right-to-be-forgotten statute: the erasure duty, Art. 17(2) informing others, Art. 19 notifying recipients, and the "reasonable / not disproportionate effort" standard. This entry's legal driver.
 - [NIST Privacy Framework v1.0 (NIST CSWP, 2020-01-16)](https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.01162020.pdf) — the standard skeleton for governing privacy risk along the data lifecycle (incl. storage and disposition / deletion) via Identify-P / Govern-P / Control-P, with the "data processing ecosystem" view. This entry's governance-structure basis.
+
+- [ICO erasure and backups (UK; under review)](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/individual-rights/right-to-erasure/)
+
+- [NIST Privacy Framework 1.1 project status](https://www.nist.gov/privacy-framework/new-projects/privacy-framework-version-11)
