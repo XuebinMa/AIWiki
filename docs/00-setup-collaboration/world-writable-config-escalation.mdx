@@ -10,27 +10,30 @@ applies_to: "Coding Agent 通用"
 evidence: 安全报告
 tags: [配置安全, 提权, 供应链, 信任边界, Windows, 安全, Claude Code, Cursor, Codex CLI, Gemini CLI, 运维工程师, 架构师, 工程师]
 sources:
-  - { title: "CVE-2026-35603: AI Coding Tools Privilege Escalation（Cymulate Research Labs）", url: "https://cymulate.com/blog/cve-2026-35603-ai-coding-tools-privilege-escalation/" }
-  - { title: "CVE-2026-35603 — Claude Code 系统级配置加载本地提权（GitLab Advisory Database）", url: "https://advisories.gitlab.com/npm/@anthropic-ai/claude-code/CVE-2026-35603/" }
+  - { title: "GHSA-5cwg-9f6j-9jvx (Anthropic official advisory)", url: "https://github.com/anthropics/claude-code/security/advisories/GHSA-5cwg-9f6j-9jvx" }
+  - { title: "CVE-2026-35603 research (Cymulate)", url: "https://cymulate.com/blog/cve-2026-35603-ai-coding-tools-privilege-escalation/" }
+verified_at: 2026-10-29
+review_after: 2026-11-29
+review_triggers: [security_advisory_change, configuration_loading_change]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['运维工程师', '架构师', '工程师']} phase="准备与协作" severity="高" appliesTo="Coding Agent 通用" evidence="安全报告" />
 
-> 一句话摘要：你让我从一个「谁都能写」的系统级目录（Windows 上的 `C:\ProgramData`）载入配置和 hook，却没人校验那个目录归谁、文件是谁放的。于是一个低权限的本地用户只要往那儿丢一份配置、挂一个「每次启动就跑」的 hook，我就会在**每一个**启动我的用户（包括管理员）名下替他执行那条命令——不用提权、不用你点确认、不留告警。
+> 一句话摘要：历史 Windows 漏洞表明，如果低权限账户能抢先创建并写入受信任的系统配置目录，后续启动工具的其他用户可能执行攻击者配置的命令。风险取决于实际 ACL、加载路径、版本和受害进程权限。
 
 ## 现象
 
 你把我的系统级配置交给一个约定俗成的位置——Windows 上的 `C:\ProgramData\<工具名>\`。在你看来这是「系统级、给所有用户共用」的正经地方，跟 Program Files 一样体面。
 
-问题是：`C:\ProgramData` 默认**对非管理员用户可写**。而我（以及同类工具）安装时既没预先把自己的子目录建好、也没给它加 ACL，载入配置前更不检查这份文件到底是谁写的。于是任何一个普通账户都能抢先把这个子目录创建出来，放一份我会乖乖载入的配置文件——里面挂一个开机即触发的 hook 或 notify 命令。下一个启动我的人（很可能是管理员）一开工，那条命令就在**他的**身份下跑起来了。
+问题是：`C:\ProgramData` 的默认 ACL 允许普通用户创建部分子目录/文件；这不表示其下每个既有目录与文件都可改写。研究中受影响的工具安装时既没预先把自己的子目录建好、也没给它加 ACL，载入配置前更不检查这份文件到底是谁写的。于是任何一个普通账户都能抢先把这个子目录创建出来，放一份我会乖乖载入的配置文件——里面挂一个开机即触发的 hook 或 notify 命令。下一个启动我的人（很可能是管理员）一开工，那条命令就在**他的**身份下跑起来了。
 
 ## 为什么会这样
 
 因为我信任的是「**路径**」，不是「**属主**」。
 
-我被设计成「从这个系统级路径读默认配置」。读的时候，我默认这个位置是可信的——毕竟它听起来就该由系统或管理员掌管。但我没有去问内核一句「这个目录、这个文件，到底归谁、谁能写」。在 Windows 上，`ProgramData` 这个「听起来很系统」的目录恰恰默认对普通用户开放写入，而各家工具又都没在安装时把自己的子目录抢先建好并锁上——于是「该由管理员掌管」只是我的假设，不是系统强制的事实。
+我被设计成「从这个系统级路径读默认配置」。读的时候，我默认这个位置是可信的——毕竟它听起来就该由系统或管理员掌管。但我没有去问内核一句「这个目录、这个文件，到底归谁、谁能写」。在 Windows 上，`ProgramData` 这个「听起来很系统」的目录恰恰默认对普通用户开放写入，而研究中的相应版本未在安装时把自己的子目录抢先建好并锁上——于是「该由管理员掌管」只是我的假设，不是系统强制的事实。
 
 更糟的是，我读进来的不只是惰性数据，而是**会执行的东西**：几乎每家工具都有事件触发的命令执行面——hooks、notify 命令、启动钩子——本意是让你把「每次怎么样就自动做某事」固化下来。可一旦这份「每次自动做某事」的配置来自一个攻击者能写的地方，它就成了攻击者的「每次自动**替我**做某事」。Cymulate 的研究把这条链拼齐了：**世界可写的配置目录 + 不校验来源就载入 + 一个会自动触发的执行面**，三者叠在一起，普通用户就能让任意命令在每个开我的人名下运行。
 
@@ -39,7 +42,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 - **跨用户代码执行 + 本地提权。** 一个低权限用户植入一次，命令就在**所有**启动该工具的用户上下文里跑——包括管理员。攻击者不用提权，等管理员来替他提。
 - **持久化。** 配置躺在那儿，每次启动都重新触发；不像一次性 exploit，它是长期驻留的后门。
 - **凭据窃取与横向移动的落脚点。** 拿到管理员上下文的执行权后，读凭据、对外发请求、跳到能连上的系统，都顺理成章（与[网络出口控制](./network-egress-control.mdx)、[默认埋漏洞 / 泄露敏感数据](../07-acceptance-release/security-data-leaks.mdx)同属一条链）。
-- **这不是某一家的疏忽。** Cymulate 指出同一模式在 Claude Code、Cursor、Codex CLI、Gemini CLI 四款上都出现过——是一类**范式级**的共性坑，不是孤例。
+- **历史研究覆盖多款工具。** Cymulate 的报告描述 Claude Code、Cursor、Codex CLI、Gemini CLI 的受测路径；它的其他厂商状态是报告时间的观察，不能证明 2026-10-29 所有最新版本仍可利用。
 
 ## 最佳实践
 
@@ -77,24 +80,24 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 这条针对的是「**多用户**机器 + 从**共享系统路径**载入**会执行**的配置」这一组合；不是每台机器都踩得到：
 
-- **纯单用户机器**：整台机只有你一个账户、没有「别的低权限用户」可被跨——没有「他植入、你触发」的链路，风险被环境消掉了。
+- **没有不可信本地写入者的环境**：此类跨用户植入的前提不成立；但恶意进程、下载脚本或受攻陷账户仍可能写入，不能仅凭“单用户”认定没有配置风险。
 - **已全盘加固的受控镜像**：`ProgramData` 子目录在镜像里已统一预创建 + 锁权限，且不允许普通用户落地写入——加固已经在系统层做掉了。
 
 判据：例外成立的前提是**「同机没有不可信的本地用户能写到那个配置源」**。一旦是多用户、或普通用户能写共享配置目录，就回到默认——校验来源、放写保护位置。
 
 ## 与相邻误区的区别
 
-- [只靠软权限、缺 OS 级沙箱](./sandbox-filesystem-isolation.mdx)：那条讲**被攻破的 agent 逃出沙箱**（运行时隔离）；本条更靠前——攻击者**根本不用先攻破我**，只要往一个我信任的可写路径喂一份配置，我就主动替他执行。一个是「逃出去」，一个是「从源头被喂坏」。
-- [一上来就全量授权](./over-permissioning.mdx)：那条管**给我的权限**太宽；本条管**我信任的配置来源**不设防——即便权限收紧，从世界可写路径载入的 hook 仍能绕过，因为问题不在「我被允许做什么」，而在「这条指令是谁放进来的」。
+- [只靠软权限、缺 OS 级沙箱](./sandbox-filesystem-isolation.mdx)：那条讲**运行时访问范围与隔离**（运行时隔离）；本条更靠前——攻击者**根本不用先攻破我**，只要往一个我信任的可写路径喂一份配置，我就主动替他执行。一个是「逃出去」，一个是「从源头被喂坏」。
+- [一上来就全量授权](./over-permissioning.mdx)：那条管**给我的权限**太宽；本条管**我信任的配置来源**不设防——配置 hook 可能运行在普通工具审批之外，但不能据此声称它必然突破 OS 或进程权限，因为问题不在「我被允许做什么」，而在「这条指令是谁放进来的」。
 - [一个 `.codex` 配置把「打开仓库」变成静默 RCE](../cases/codex-cli-config-rce.mdx)：那个案例是载入恶意**项目级**配置、打开仓库的**本人**中招；本条是**系统级、跨用户**——一次植入，殃及同机每一个启动该工具的用户。
 
 ## 版本说明
 
 :::note 适用版本
-**CVE-2026-35603 是这一类里 Claude Code 的具体实例**（`C:\ProgramData\ClaudeCode\managed-settings.json` + session-start hook）；Anthropic 已弃用该路径、迁到写保护的 `Program Files` 并通知企业客户。Cymulate 的研究指出同一模式在 **Claude Code / Cursor / Codex CLI / Gemini CLI** 四款上都出现过——**各家修复状态以 Cymulate 报告与官方公告为准、会随时间变化（截至 2026-06）**。但「别从世界可写路径载入会执行的配置」这条原则不随某次修复失效：它针对的是机制，不是某个版本。具体到非 Windows 平台，凡是「系统级配置目录默认可被非特权用户写」的设定都可能复现同一链路。
+Claude Code 官方 GHSA-5cwg-9f6j-9jvx 明确该 Windows 漏洞影响 `< 2.1.75`，修复为 `2.1.75`。利用需要低权限本地用户植入配置及受害用户随后启动；获得的是该进程的执行权限，管理员组成员不等于进程自动拥有提升权限。Cymulate 其他产品结论只按报告所测版本与环境引用，不作当前全产品漏洞证明。
 :::
 
 ## 延伸阅读与出处
 
-- [CVE-2026-35603: AI Coding Tools Privilege Escalation（Cymulate Research Labs）](https://cymulate.com/blog/cve-2026-35603-ai-coding-tools-privilege-escalation/)：一手研究，拆解「世界可写 `ProgramData` 配置目录 + 不校验来源载入 + 自动执行面」如何在四款 AI 编码工具上形成跨用户提权。
-- [CVE-2026-35603 — Claude Code 系统级配置加载本地提权（GitLab Advisory Database）](https://advisories.gitlab.com/npm/@anthropic-ai/claude-code/CVE-2026-35603/)：CVE 收录与影响版本 / 修复说明。
+- [GHSA-5cwg-9f6j-9jvx (Anthropic official advisory)](https://github.com/anthropics/claude-code/security/advisories/GHSA-5cwg-9f6j-9jvx)
+- [CVE-2026-35603 research (Cymulate)](https://cymulate.com/blog/cve-2026-35603-ai-coding-tools-privilege-escalation/)

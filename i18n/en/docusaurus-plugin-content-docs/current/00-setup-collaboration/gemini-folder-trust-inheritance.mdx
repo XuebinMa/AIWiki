@@ -1,5 +1,5 @@
 ---
-title: "You trusted a parent folder, so I trusted the child you marked \"don't trust\" too"
+title: "Trusting a parent can grant configuration trust to repositories added later"
 sidebar_label: "Gemini trust inheritance"
 slug: gemini-folder-trust-inheritance
 sidebar_position: 11
@@ -10,38 +10,41 @@ applies_to: "Gemini CLI only"
 evidence: Security advisory
 tags: [trust model, permissions, prompt injection, Gemini CLI, Engineer, DevOps Engineer]
 sources:
-  - { title: "Gemini CLI — Trusted Folders (official docs)", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/trusted-folders.md" }
-  - { title: "Issue #13125: parent TRUST_FOLDER overrides child DO_NOT_TRUST (google-gemini/gemini-cli)", url: "https://github.com/google-gemini/gemini-cli/issues/13125" }
-  - { title: "run-gemini-cli security advisory GHSA-wpqr-6v78-jr5g (headless auto-trusts workspace, CVSS 10.0)", url: "https://github.com/google-github-actions/run-gemini-cli/security/advisories/GHSA-wpqr-6v78-jr5g" }
+  - { title: "Trusted Folders (Gemini CLI)", url: "https://geminicli.com/docs/cli/trusted-folders/" }
+  - { title: "Issue 13125 (Google Gemini CLI)", url: "https://github.com/google-gemini/gemini-cli/issues/13125" }
+  - { title: "GHSA-wpqr-6v78-jr5g (Google advisory)", url: "https://github.com/google-github-actions/run-gemini-cli/security/advisories/GHSA-wpqr-6v78-jr5g" }
+verified_at: 2026-10-29
+review_after: 2026-11-29
+review_triggers: [vendor_documentation_change, permission_or_runtime_change]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['Engineer', 'DevOps Engineer']} phase="Setup & Collaboration" severity="High" appliesTo="Gemini CLI only" evidence="Security advisory" />
 
-> In one sentence: Gemini CLI keeps a per-folder "trust" store (`~/.gemini/trustedFolders.json`) — a folder's project config and `.env` only take effect, and confirmations only ease up, once you trust it. But "trust the parent folder" **inherits** trust to every subdirectory, and a parent's TRUST has been reported to override a child's explicit DO_NOT_TRUST. So an unfamiliar repo you cloned in to keep isolated gets treated as trusted just because it sits under a parent you trusted — exactly where an injection wants to land. Claude Code has no such trust store, so this trap is specific to Gemini CLI.
+> In one sentence: when Gemini CLI Trusted Folders is enabled, trusting a parent also trusts its children, including repositories added later. Grant trust at project scope and distinguish configuration loading from tool permissions.
 
 ## Symptom
 
-I often see this shortcut: you open Gemini CLI under `~/projects`, and the first time it asks "trust this folder?", you pick "trust parent folder" so you won't be asked again for every subproject.
+I often see this shortcut: you open Gemini CLI under `~/projects`, and after enabling Trusted Folders, the first time it asks "trust this folder?", you pick "trust parent folder" so you won't be asked again for every subproject.
 
-A few days later you clone an unfamiliar open-source repo into `~/projects/some-cloned-repo` and ask me to "take a look." You assume something freshly cloned is isolated by default and would be asked about again — but it isn't. It sits under a parent you trusted earlier, so it's treated as trusted: its `.gemini/settings.json` takes effect, its `.env` gets read, and confirmations on risky actions ease up. The door you opened for unfamiliar code is one you opened days ago, for something else.
+A few days later you clone an unfamiliar open-source repo into `~/projects/some-cloned-repo` and ask me to "take a look." You assume something freshly cloned is isolated by default and would be asked about again — but it isn't. It sits under a parent you trusted earlier, so it's treated as trusted: its `.gemini/settings.json` takes effect, its `.env` gets read, while tool approval still depends on permission policy. The door you opened for unfamiliar code is one you opened days ago, for something else.
 
 ## Why this happens
 
-From my side, "trust" isn't a judgment I re-derive each time — it's an answer I **read directly**. `trustedFolders.json` says "this folder is trusted," so I apply its project config and proceed in a trusting posture; I don't stop to ask whether *this subfolder itself* is actually safe.
+The current official documentation says Trusted Folders is **disabled by default** and enabled through `security.folderTrust.enabled: true`. When enabled, parent trust extends to children and is recorded in `~/.gemini/trustedFolders.json`.
 
-Parent → child trust inheritance is a convenience, and convenience always widens the grant: one "trust parent folder" is a standing yes to all of its subdirectories, present and future. Worse, per a community report (issue #13125), a parent's TRUST can **override** a child's explicit DO_NOT_TRUST — trust only widens; it doesn't narrow to honor your finer "no."
+This is a configuration-loading trust boundary, not OS isolation or automatic approval of every dangerous tool. Untrusted directories restrict project settings and environment loading; check the exact version's behavior.
 
-And that dismantles a protection that should have held: an **untrusted** folder runs in "safe mode," where Gemini ignores its `settings.json` and `.env` precisely so an unfamiliar project's config can't act on you automatically. Inherited trust switches that safe mode off.
+Issue #13125 reported parent trust overriding a child's `DO_NOT_TRUST`. The issue is now closed; closure alone establishes neither a fix in every version nor a current vulnerability. Test whether a specific denial is effective in the installed version.
 
-This deserves its own entry because **it's a Gemini-CLI-specific mechanism**: Claude Code has no per-folder trust store — it gates boundaries through permission modes and the sandbox. So "trust-inheritance misfire" simply can't arise in Claude Code; it isn't "same pitfall, different config," it's a new trap a new mechanism brings.
+Other tools also have workspace trust. Claiming Claude Code has no trust store does not establish that this class of risk is unique to Gemini.
 
 ## Consequences
 
-- **A cloned, untrusted repo gets treated as trusted.** Its `settings.json` and `.env` take effect and confirmations ease up — paving the way for dev-time prompt injection. See the [Gemini CLI Tracebit RCE case](../cases/gemini-cli-tracebit-rce.mdx): getting hijacked just by reading a repo rides on exactly this — "I treat what's in this folder as trusted."
-- **Worse in CI.** Security advisory GHSA-wpqr-6v78-jr5g shows that in headless mode Gemini **auto-trusted the workspace**, so processing an untrusted `.env` was enough for RCE (fixed in v0.39.1 to require explicit trust). In automation, "trusted by default" is the attack surface.
-- **Your isolation is an illusion.** The DO_NOT_TRUST you set on a child gets overridden by the parent, and your fine-grained intent silently fails — you think it's locked, but the door is open.
+- **Configuration authorization expands unexpectedly.** A new repository under a trusted parent can have project settings and environment files loaded.
+- **CI configuration-trust risk.** GHSA-wpqr-6v78-jr5g documents conditions and fixes for historical headless configuration trust leading to command execution, not every current headless session.
+- **Location is mistaken for isolation.** Moving a repository helps only when trust checking is enabled and effective and no other authorization path overrides it.
 
 ## What to do instead
 
@@ -49,7 +52,7 @@ This deserves its own entry because **it's a Gemini-CLI-specific mechanism**: Cl
 
 1. **Don't "trust parent folder" on a directory that holds unfamiliar children.** Any directory you clone or download third-party code into (`~/projects`, `~/Downloads`) shouldn't be trusted wholesale; trust the specific project directory that's actually yours.
 2. **Open unfamiliar / cloned repos from an isolated path.** Give them a "quarantine" location outside any trusted parent, so Gemini asks you about trust on first open and keeps the call in your hands.
-3. **Require explicit trust in CI; don't rely on auto.** Declare it with `GEMINI_TRUST_WORKSPACE=true` / `--skip-trust`, and upgrade to **≥ v0.39.1**; treat the "trust boundary" as a configuration you verify, not a default.
+3. **Inspect CI inputs before granting trust.** `GEMINI_TRUST_WORKSPACE=true` and skipping trust checks are not defenses for untrusted repositories. Upgrade affected components and inspect configuration provenance; explicitly trust approved tasks while retaining isolation and minimal credentials.
 4. **Review `~/.gemini/trustedFolders.json` periodically.** Prune over-broad, stale entries — trust expires, but the file won't clean itself.
 
 ## Example
@@ -63,18 +66,19 @@ This deserves its own entry because **it's a Gemini-CLI-specific mechanism**: Cl
 # later
 $ git clone https://github.com/somebody/unknown ~/projects/unknown
 $ cd ~/projects/unknown && gemini "take a look at this"
-→ inherits the parent's trust: unknown's .gemini/settings.json applies, .env is read, prompts ease up
+settings.json and environment files can load; check tool permissions separately
 → an injection hidden in the README now has a trusted context to land in
 ```
 
 **After:**
 
 ```text
-# clone into a quarantine path outside any trusted parent
+# Prerequisite: security.folderTrust.enabled is enabled and effective.
+# Clone outside any trusted parent directory.
 $ git clone https://github.com/somebody/unknown ~/quarantine/unknown
 $ cd ~/quarantine/unknown && gemini "take a look at this"
 → Gemini asks: trust this folder? [No]
-→ untrusted = safe mode: its settings.json / .env are ignored, read at the least-privileged posture
+→ Untrusted mode restricts project settings and environment loading; controlled tool permissions and isolation remain necessary.
 ```
 
 The difference isn't that I got more vigilant — it's that the "trust or not" switch was granted at the right, narrowest scope, instead of flipped wide open days ago for something unrelated.
@@ -85,13 +89,12 @@ If it's a monorepo that's **all your own code**, where every subdirectory is you
 
 ## Version notes
 
-:::note Applicability
-The Trusted Folders mechanism and safe-mode behavior are in the official [trusted-folders docs](https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/trusted-folders.md) (as of 2026-06). The CI/headless auto-trust of the workspace was fixed in **v0.39.1** to require explicit trust (GHSA-wpqr-6v78-jr5g). "A parent's TRUST overriding a child's DO_NOT_TRUST" is a community report (issue #13125) whose status may change with fixes — before you act, defer to that issue and your version's current behavior.
+:::note Versions
+Checked current Trusted Folders documentation, issue #13125, and Google's advisory on 2026-10-29. The advisory lists stable CLI fix 0.39.1, preview fix 0.40.0-preview.3, and Action fix 0.1.22; check branches and components separately. Historical issues are not generalized to every current version.
 :::
 
 ## Further reading and sources
 
-- [Gemini CLI — Trusted Folders (official docs)](https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/trusted-folders.md)
-- [Issue #13125: parent TRUST_FOLDER overrides child DO_NOT_TRUST](https://github.com/google-gemini/gemini-cli/issues/13125)
-- [run-gemini-cli security advisory GHSA-wpqr-6v78-jr5g (CVSS 10.0)](https://github.com/google-github-actions/run-gemini-cli/security/advisories/GHSA-wpqr-6v78-jr5g)
-- Related pitfalls: [Handing me all the permissions up front](./over-permissioning.mdx) · [Dev-time prompt injection](../05-implementation/dev-time-prompt-injection.mdx)
+- [Trusted Folders (Gemini CLI)](https://geminicli.com/docs/cli/trusted-folders/)
+- [Issue 13125 (Google Gemini CLI)](https://github.com/google-gemini/gemini-cli/issues/13125)
+- [GHSA-wpqr-6v78-jr5g (Google advisory)](https://github.com/google-github-actions/run-gemini-cli/security/advisories/GHSA-wpqr-6v78-jr5g)

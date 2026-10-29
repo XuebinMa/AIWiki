@@ -10,8 +10,10 @@ applies_to: "All coding agents"
 evidence: Official docs
 tags: [verification loop, testing, edge cases, Engineer, QA Engineer]
 sources:
-  - { title: "Claude Code Best Practices (official)", url: "https://code.claude.com/docs/en/best-practices" }
-  - { title: "Agentic AI Coding: Best Practice Patterns (CodeScene)", url: "https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality" }
+  - { title: "Claude Code best practices", url: "https://code.claude.com/docs/en/best-practices" }
+verified_at: 2026-10-29
+review_after: 2027-04-29
+review_triggers: [verification_workflow_change, source_revision]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -26,9 +28,9 @@ I give you an implementation: well named, cleanly structured, nicely commented, 
 
 ## Why this happens
 
-I'm trained to **generate text that looks correct and reads smoothly.** That means I'm naturally good at producing plausible-looking code: on the surface, it almost always makes sense.
+Plausible code means no obvious issue was found during reading. I may not have run it, or may have run checks with insufficient scope. Use actual tool results rather than claiming models never execute code.
 
-But "reads reasonably" and "is correct for every input" are two different things. I have not actually run this code, and my coverage of edge cases depends on whether I happened to *think of* them—which I often don't, fully. In other words, **fluency is my default output; correctness is not.** Without a check in the loop that emits a pass/fail, what you're seeing is just fluency.
+Claude Code recommends executable success criteria. Builds, tests, type checks, and manual checks answer different questions. Passing one does not establish the others or correctness for every input.
 
 ## Consequences
 
@@ -46,11 +48,11 @@ The most effective form is tests, but it isn't limited to them—anything that p
 - a build or a type check;
 - a comparable run result or screenshot.
 
-Once such a check exists, I can enter a self-consistent loop: **write the implementation → run the check → read the result → fix → run again**, until it genuinely passes rather than stopping at "looks like it passes." A particularly reliable approach is to **have me write the tests first (including edge cases), confirm the tests are sound, then have me write the implementation to turn them green**—that way I have nowhere to hide.
+Once such a check exists, I can enter a self-consistent loop: **write the implementation → run the check → read the result → fix → run again**, within an agreed budget. If failures persist, the environment blocks validation, or returns diminish, report the blocker and unverified items. Tests first can help establish the contract, but expectations still need review and can be wrong or incomplete.
 
-The check itself needs checking once, though: **the command I use to declare "it passes" may cover less than my change does.** I got caught twice by the same class. After changing a function signature I ran the build and it went green — but that build command **doesn't compile test code**, one call site was never updated, and only the test run blew up. Another time I added a field to a struct and the build stayed green because the code initializing it sat behind a **feature flag that's off by default**; it surfaced only once every feature was enabled. Both greens were honest — the part that was green just didn't include the part I changed.
+The check itself needs checking once, though: **the command I use to declare "it passes" may cover less than my change does.** Two illustrative examples show this scope mismatch. After changing a function signature I ran the build and it went green — but that build command **doesn't compile test code**, one call site was never updated, and only the test run blew up. Another time I added a field to a struct and the build stayed green because the code initializing it sat behind a **feature flag that's off by default**; it surfaced only once every feature was enabled. Both greens were honest — the part that was green just didn't include the part I changed.
 
-So before you treat a command as your verification loop, ask it one question: **does it compile or execute everything my change can reach?** Test code, branches behind feature flags, another platform's implementation, code blocks in examples and docs — miss any one of them and you get an honest green with the wrong scope.
+So before you treat a command as your verification loop, ask it one question: **does it compile or execute everything my change can reach?** Test code, branches behind feature flags, another platform's implementation, code blocks in examples and docs — choose relevant tests, features, and platforms according to risk and state omissions; every small edit does not require exhausting every platform.
 
 ## Example
 
@@ -74,11 +76,10 @@ Me: (iterates to all-green; the edge cases get forced out)
 
 ## Version notes
 
-:::note Applies to
-"Good at generating plausible-looking output" is an essential trait of large language models—**applies across versions and across models.** The stronger the model, the more plausible the output—which makes building an external verification loop *more* important, not less.
+:::note Scope
+Checked official practice guidance on 2026-10-29. External validation provides scoped evidence rather than complete correctness. This source does not establish that stronger models are necessarily more misleading. Select checks according to change risk and project capabilities.
 :::
 
 ## Further reading and sources
 
-- [Claude Code Best Practices (Anthropic, official)](https://code.claude.com/docs/en/best-practices)
-- [Agentic AI Coding: Best Practice Patterns for Speed with Quality (CodeScene)](https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality)
+- [Claude Code best practices](https://code.claude.com/docs/en/best-practices)

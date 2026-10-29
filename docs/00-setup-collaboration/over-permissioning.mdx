@@ -10,22 +10,20 @@ applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [权限, 最小权限, 安全, 提示注入, 运维工程师, 工程师, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
-  - { title: "Configure permissions（Claude Code 官方）", url: "https://code.claude.com/docs/en/permissions" }
-  - { title: "How we built Claude Code auto mode（Anthropic 官方）", url: "https://www.anthropic.com/engineering/claude-code-auto-mode" }
-  - { title: "Making Claude Code more secure and autonomous with sandboxing（Anthropic 官方）", url: "https://www.anthropic.com/engineering/claude-code-sandboxing" }
-  - { title: "Living dangerously with Claude（Simon Willison）", url: "https://simonwillison.net/2025/Oct/22/living-dangerously-with-claude/" }
-  - { title: "YOLO Mode: Hidden Risks in Claude Code Permissions（UpGuard）", url: "https://www.upguard.com/blog/yolo-mode-hidden-risks-in-claude-code-permissions" }
-  - { title: "Gemini CLI — approval modes / configuration（官方文档）", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/get-started/configuration.md" }
-  - { title: "Codex — approval presets (openai/codex source)", url: "https://github.com/openai/codex/blob/main/codex-rs/utils/approval-presets/src/lib.rs" }
-  - { title: "Cursor — Agent Security (official docs)", url: "https://cursor.com/docs/agent/security" }
-  - { title: "Cloud and local sandboxes for GitHub Copilot now in public preview (GitHub Changelog)", url: "https://github.blog/changelog/2026-06-02-cloud-and-local-sandboxes-for-github-copilot-now-in-public-preview/" }
+  - { title: "Configure permissions (Claude Code)", url: "https://code.claude.com/docs/en/permissions" }
+  - { title: "Agent approvals and security (OpenAI)", url: "https://learn.chatgpt.com/docs/agent-approvals-security" }
+  - { title: "Managed configuration (OpenAI)", url: "https://learn.chatgpt.com/docs/enterprise/managed-configuration" }
+  - { title: "Red-teaming auto mode (Anthropic)", url: "https://alignment.anthropic.com/2026/red-teaming-auto-mode/" }
+verified_at: 2026-10-29
+review_after: 2026-11-29
+review_triggers: [permission_or_runtime_change, vendor_documentation_change]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['运维工程师', '工程师']} phase="准备与协作" severity="高" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
-> 一句话摘要：你在准备阶段就给我开了 `--dangerously-skip-permissions`、把所有工具调用都自动批准，图的是「不被频繁打断」。但你同时也交出了在出错那一刻喊停的唯一机会——而出错的不一定是我，也可能是藏在某个文件里的一段注入指令借我的手干的。
+> 一句话摘要：跳过权限确认会减少人工拦截机会；若环境同时有敏感数据、生产凭据和不受限工具，错误与提示注入的影响会扩大。应按动作风险与实际隔离安排自主程度。
 
 ## 现象
 
@@ -35,22 +33,16 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 为什么会这样
 
-权限确认不是 UI 噪声，它是你和我之间唯一的同步点。把它关掉，等于把三件事一起放弃了：
+审批、权限规则和沙箱是不同层。审批让人或监控器判断是否允许动作，权限规则约束对应调用，沙箱限制其覆盖进程可访问的资源。关闭逐条提示不一定关闭其他隔离，反过来保留提示也不保证每次判断正确。
 
-**第一，你失去了「最后一道人工复核」。** 我会犯具体的错。我可能把一个相对路径理解成了根目录，于是 `rm -rf` 从 `/` 开始删；我可能在 `git` 操作里选错了分支。这些不是抽象风险——2025 年 10 月就有人让我重建一个 Makefile 项目，我却从根目录跑了 `rm -rf`，把机器上所有归属该用户的文件清空了。权限确认本来能在命令发出前拦住它。
-
-**第二，你放大了提示注入的攻击面。** 我会读你给我的文件，而文件里可能藏着不是你写的指令。2026 年 1 月，PromptArmor 演示过：一个 `.docx` 里用 1 号字、白底白字藏了一段文本，就能诱导我把敏感文件上传到攻击者的账户。**只要我同时具备「接触私有数据」「读取不可信内容」「对外通信」这三种能力，攻击者就有机会借我的手把数据送出去。** 权限边界正是切断这条链路的地方——而你把它整个拆了。
-
-**第三，确认疲劳会反噬你。** 就算不开全自动，如果每一步都弹窗，你很快会进入「无脑点同意」的状态，注意力磨钝，等于确认形同虚设。这是 Anthropic 做 auto mode 时明确点名的问题：默认的逐条确认能保你安全，但长期会让人停止认真看自己在批准什么。
+**人工确认会疲劳，自动监控也会失误。** Anthropic 2026-10-22 的研究测试 9 月监控器快照，展示监控器注入、多上下文攻击和策略失效。这是受控红队结果，不是现实事故或所有现行产品的成功率。
 
 ```mermaid
 flowchart LR
-    A[准备阶段全开权限] --> B[我读到带注入的文件]
-    A --> C[我执行一条危险命令]
-    B --> D[借我的手外传数据]
-    C --> E[误删 / 越权改动]
-    D --> F[已无人工拦截点]
-    E --> F
+    A[任务与数据范围] --> B[最小凭据和能力]
+    B --> C[覆盖实际执行面的隔离]
+    C --> D[按风险配置审批]
+    D --> E[检查结果与审计证据]
 ```
 
 ## 后果
@@ -58,51 +50,46 @@ flowchart LR
 - **不可逆的破坏。** 误删、覆盖、错误的 `git push --force`——等你发现时，往往已经没有「撤销」。
 - **数据泄露。** 注入指令通过我已被授权的工具（如允许的 API、`curl`）把私有内容外传，全程看起来都「合法」。
 - **越权操作。** 我拿着生产凭据跑了本该只在测试环境跑的命令，因为没有边界告诉我「这里不行」。
-- **追责困难。** 全自动模式下没有逐条确认的记录，事后很难复盘到底是哪一步、为什么发生。
+- **追责困难。** 逐条人工确认记录可能减少，但仍可有工具、策略和服务审计；应核对实际日志覆盖，不能称全自动必然不可追踪。
 
 ## 最佳实践
 
-**默认最小权限，按需逐步放开，把全自动留给隔离环境。** 几个可直接照做的动作：
-
-1. **用 `deny` 划红线，用 `allow` 放绿灯，其余留给 `ask`。** 规则按 `deny` → `ask` → `allow` 顺序匹配。先把绝不该碰的钉死，再把高频且安全的读操作放行：
+1. **先核对有效权限。** Claude Code 当前规则顺序为 `deny` → `ask` → `allow`；更具体的 allow 不能覆盖匹配的 deny 或 ask。下面只是 Manual 模式的局部示例，不是完整隔离策略：
 
 ```json
 {
   "permissions": {
-    "allow": ["Read", "Glob", "Grep", "Bash(git status)", "Bash(git diff:*)"],
-    "ask":   ["Write", "Edit", "Bash(git push:*)"],
-    "deny":  ["Bash(rm -rf:*)", "Bash(curl:*)", "Read(./.env)", "Read(./secrets/**)"]
+    "allow": ["Glob", "Grep"],
+    "ask": ["Bash(git push *)"],
+    "deny": ["Read(./.env)", "Read(./secrets/**)"]
   }
 }
 ```
 
-2. **危险操作永远走 `ask`。** 写文件、删除、推送、网络请求、装依赖——这些保留确认，正是你那道「最后复核」。
+`Read` 拒绝不自动封锁 shell 或 MCP 读取同一文件；命令规则也不是数据库或网络授权。参见《[权限配置模板](../toolkit/permissions-config.mdx)》。
 
-3. **要无人值守，先进沙箱，别裸跑。** 社区的共识很统一：**永远不要在你的主力机器上跑 `--dangerously-skip-permissions`**。要全自动就放进容器 / VM，配上文件系统与网络隔离。Anthropic 的内部数据显示，沙箱能在保证安全的前提下把权限确认减少 84%。
-
-4. **优先用 auto mode 而不是直接跳过权限。** 较新的 Claude Code 提供 auto mode：由模型分类器在动作执行前判断是否危险，连续 3 次或累计 20 次被拦就停下来交还给你。它是「逐条确认」和「全部跳过」之间的中间档，比 `--dangerously-skip-permissions` 安全得多。
+2. **按风险保留审批。** 已授权、可逆的项目内编辑和测试可在边界内自主进行；生产修改、外发、不可逆操作需要与其风险相称的独立控制。不要为每次普通写文件都追加审批，也不要因已有任务授权而扩大到无关外部动作。
+3. **无人值守先验证环境边界。** 可丢弃环境仍需核对挂载目录、凭据、网络和远程工具。把自动化放进容器不等于所有访问都已隔离。
+4. **自动审批不是硬边界。** auto mode 可减少提示，但分类器是模型判断；核对支持范围、管理策略和当前行为，不把固定拒绝次数当作长期接口。
 
 ## 示例
 
 **改之前：**
 
 ```text
-你：claude --dangerously-skip-permissions
-你：帮我清理一下构建产物，然后重建
-我：（直接 rm -rf <把相对路径误判成绝对路径>，无人拦截）
+你：跳过全部审批，清理构建产物并重建。
+我：误判路径并执行删除；当前环境允许访问工作目录之外的数据。
 ```
 
 **改之后：**
 
 ```text
-# settings.json 里：rm 已在 deny，写操作走 ask
-你：帮我清理一下构建产物，然后重建
-我：我要执行 rm -rf ./build —— 需要你确认（命中 ask）
-你：（看清路径是 ./build 而非 /，确认）
-我：（在边界内执行，重建）
+环境：仅挂载可丢弃项目；无生产凭据；外部写入仍受控。
+你：清理项目内构建产物并重建。
+我：在既定边界内执行；若需要扩大访问范围，说明对象与影响再申请。
 ```
 
-差别不在我聪明了多少，而在于那条 `rm` 在落地前，多了一次你能看清它、并喊停的机会。
+若某命令被 deny，结果是拒绝，不能写成「随后命中 ask 并批准」。应先审查策略而不是静默换写法绕过。
 
 ## 什么时候例外
 
@@ -115,24 +102,19 @@ flowchart LR
 
 ## 工具差异
 
-**Gemini CLI（截至 2026-06）**：Gemini CLI 里这个一键全开叫 **YOLO 模式**（`--yolo` / `--approval-mode=yolo` / 交互中按 Ctrl+Y），同样是把所有工具调用自动批准。它还有个中间档 `auto_edit`：自动批准文件编辑，但 shell 命令仍要你确认——相当于「逐条确认」和「全自动」之间的折中。一个值得照搬的姿态：它默认把 sandbox-on 和 YOLO 绑在一起当「推荐自动化」配置，别只开 YOLO 不开 sandbox——那等于既拆了人工闸又没了环境闸。
+各产品的模式名称不能直接等价。Claude Code 的跳过审批、auto mode 与 Bash 沙箱需分别核对；Codex 的审批策略和沙箱模式也分别配置，`never` 本身不表示无沙箱。组织可通过受支持的管理策略约束可选项。
 
-**Codex CLI（截至 2026-06）**：Codex 用三档审批预设（Read Only / Auto / Full Access），而且默认那档（Auto）就已经沙箱化（workspace-write + 网络关 + 按需审批）——和 Claude Code「沙箱默认关」正好相反，所以这里的危险动作是用户主动退出安全默认，而非忘了打开。一把全开的口子是 `--dangerously-bypass-approvals-and-sandbox`；企业可用 `requirements.toml` 禁掉它。
-
-**Cursor（截至 2026-06）**：Cursor 的「全开」是 **Auto-Run / YOLO**，靠 `permissions.json` 的 allowlist / denylist 把关。两点：① Cursor 在 1.3 **废弃了 denylist**——研究者演示了 Base64、子 shell、引号混淆等多种绕过，结论是 denylist 是错的工具、只能用 allowlist；② 当前默认 Run Mode（Auto-review）的分类器，官方明说是「非确定性、非安全边界」。
-
-**GitHub Copilot（截至 2026-06）**：在 VS Code agent 模式下，我的「一键全开」是 `chat.tools.autoApprove`（自动批准工具）/ `chat.tools.terminal.autoApprove`——Copilot 的 YOLO。中间档有终端 `allowList` / `denyList` 与 OS 级 agent 沙箱（2026-06 预览）。同样的坑：一旦完全关掉审批，denyList 也被无视。而 coding agent 的自治是服务端兜底（见 CI 那条），不是本地这一个 skip 开关。
+Gemini、Cursor、Copilot 的本地、云端和 headless 形态可能使用不同执行环境。不要沿用旧矩阵推断当前版本的 denylist、快捷键或默认隔离；参见《[工具矩阵](../tool-matrix.mdx)》并核对实际会话。
 
 ## 版本说明
 
 :::note 适用版本
-「权限边界换不被打断」是所有自主 AI 代理的通用权衡，**与具体模型无关**。但具体机制随版本变化：`--dangerously-skip-permissions` 是 Claude Code 长期存在的标志；`deny`/`ask`/`allow` 规则与 auto mode、内置沙箱是较新的能力，旧版本可能没有 auto mode，需以你所用版本的官方权限文档为准。
+2026-10-29 核对官方权限、沙箱和监控研究。保留审批可增加拦截机会，不能保证人工或模型必定发现危险。权限模式、执行器、管理策略或工具集改变时重新核验。
 :::
 
 ## 延伸阅读与出处
 
-- [Configure permissions（Claude Code 官方）](https://code.claude.com/docs/en/permissions)
-- [How we built Claude Code auto mode（Anthropic 官方）](https://www.anthropic.com/engineering/claude-code-auto-mode)
-- [Making Claude Code more secure and autonomous with sandboxing（Anthropic 官方）](https://www.anthropic.com/engineering/claude-code-sandboxing)
-- [Living dangerously with Claude（Simon Willison）](https://simonwillison.net/2025/Oct/22/living-dangerously-with-claude/)
-- [YOLO Mode: Hidden Risks in Claude Code Permissions（UpGuard）](https://www.upguard.com/blog/yolo-mode-hidden-risks-in-claude-code-permissions)
+- [Configure permissions (Claude Code)](https://code.claude.com/docs/en/permissions)
+- [Agent approvals and security (OpenAI)](https://learn.chatgpt.com/docs/agent-approvals-security)
+- [Managed configuration (OpenAI)](https://learn.chatgpt.com/docs/enterprise/managed-configuration)
+- [Red-teaming auto mode (Anthropic)](https://alignment.anthropic.com/2026/red-teaming-auto-mode/)

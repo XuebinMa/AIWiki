@@ -1,5 +1,5 @@
 ---
-title: Not wiring me to version-matched docs, then letting me code APIs from memory and web search
+title: "I write APIs from memory without checking the actual version’s documentation and types"
 sidebar_label: "Coding from memory without versioned docs"
 slug: no-versioned-docs
 sidebar_position: 8
@@ -10,9 +10,11 @@ applies_to: "All coding agents"
 evidence: Official docs
 tags: [doc source, Context7, MCP, hallucination, version drift, retrieval, Engineer, Architect]
 sources:
-  - { title: "Context7 (upstash/context7, a version-aware docs MCP source)", url: "https://github.com/upstash/context7" }
-  - { title: "Connect Claude Code to tools via MCP (Claude Code official)", url: "https://code.claude.com/docs/en/mcp" }
-  - { title: "Claude Code Best Practices (Anthropic official)", url: "https://code.claude.com/docs/en/best-practices" }
+  - { title: "Context7 (maintainer repository)", url: "https://github.com/upstash/context7" }
+  - { title: "Claude Code best practices", url: "https://code.claude.com/docs/en/best-practices" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: [dependency_or_retrieval_change, vendor_documentation_change]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -29,22 +31,16 @@ The code comes out. The names and arguments look reasonable, so you merge it. Th
 
 ## Why this happens
 
-There are three layers to the root cause, and all of them come from one fact: I'm a model with a training cutoff.
+**Training knowledge is not the project's version state.** I can mix API versions, but can also obtain newer information from repositories, retrieval, and tools. A cutoff does not mean all later facts are unknowable.
 
-**First, my knowledge has an expiry date, but your dependencies keep moving.** What the library changed after my cutoff—which method it removed, which argument's default it flipped—I simply don't know. When you give me neither the version nor the docs, I fall back on whichever version is most vivid in memory, usually the older one that appeared most often in training data, not the one you actually pinned.
-
-**Second, without a version-correct source of truth, I fill the gap with something that "looks right."** Generating code is, at bottom, me predicting the token sequence that most resembles a correct answer. With no authoritative reference, a method with a fluent name and a plausible signature that doesn't exist looks exactly as credible to me as a real one. That's where a hallucinated API comes from—I'm not lying; with no factual anchor, I'm mistaking the statistically most likely shape for the truth.
-
-**Third, a web search is not the same as version-correct.** You assume "just let it search the web and it'll be accurate," but the page I find might be a three-year-old tutorial for an old version, a low-quality second-hand rehash, or a mix of fragments from several major versions. I have no reliable way to tell which one matches your pinned version, so I copy it—carrying someone else's staleness and mistakes straight into your code.
+**Retrieved material needs applicability checks.** Search results can be stale; a documentation MCP may lack the requested version or return irrelevant fragments. Read lockfiles, installed packages, type declarations, source, and official version documentation, then verify signatures and defaults.
 
 ```mermaid
 flowchart LR
-    A[Ask me to call a library] --> B{Version-matched docs wired in?}
-    B -- No --> C[Training memory + web search]
-    C --> D["Old API / mixed versions / hallucinated methods<br/>all look right"]
-    D --> E[Breaks at runtime]
-    B -- Yes --> F[Defer to the docs you gave me]
-    F --> G[Version-correct calls]
+    A[Establish installed dependency version] --> B[Read matching docs or local types/source]
+    B --> C[Check signatures and behavior]
+    C --> D[Compile or run minimal call]
+    D --> E[Record sources and uncertainties]
 ```
 
 ## Consequences
@@ -58,7 +54,7 @@ flowchart LR
 
 **Wire me to a version-matched source of truth, and tell me explicitly: defer to the docs, don't trust memory.** A few things you can do right away:
 
-1. **Wire in a version-aware doc source.** The easiest path is to connect an MCP docs source like [Context7](https://github.com/upstash/context7)—it pulls official docs and examples for the exact library and version you specify straight into my context. Claude Code connecting to external data sources via MCP is built for exactly this.
+1. **Wire in a version-aware doc source.** Context7 offers MCP and CLI/Skills retrieval options. Its maintainer describes version-specific documentation; verify the returned library ID, version, and passages. Do not assume every library release is covered or require an extra MCP when local evidence already suffices.
 
 ```text
 # Name the version in your prompt, and tell me to consult the doc source
@@ -67,7 +63,7 @@ You: Use <library>@3.4 to write X. First check Context7 for the real 3.4 signatu
 
 2. **Bring the pinned version's official docs into context.** Without MCP, the next best thing: download the key pages of that version's docs into the repo, or write the dependency version and a docs link into `CLAUDE.md` so I can match against it every time.
 
-3. **For critical APIs, state explicitly "defer to what you gave me, not my memory."** That one sentence directly shifts my priorities—when an external source of truth exists, I'll trust it over my default reliance on memory.
+3. **For critical APIs, state explicitly "defer to what you gave me, not my memory."** The request helps focus the work, but does not guarantee correct source use. Record the actual source and version checked.
 
 4. **For unfamiliar or fast-moving libraries, make me verify the real signatures.** Have me check every method name and argument I use against the doc source, rather than calling it done the moment I've written it. Where I'm unsure, I'd rather say "I couldn't find this in the docs, you'll need to confirm" than guess.
 
@@ -94,22 +90,15 @@ The difference isn't that I understand the library better—it's that I now hold
 
 ## When the exception applies
 
-Wiring in a doc source hedges against "my memory doesn't match your version." When that mismatch risk is low to begin with, skipping it is reasonable:
-
-- **A stable, long-standing API I know cold.** A language standard library, a mature library whose signatures haven't shifted in years — its usage is both dense and consistent in my training data, so my odds of mixing versions are low, and a dedicated doc source is over-preparation.
-- **Throwaway or exploratory code.** A spike, a temp script, a prototype about to be discarded — run-it-and-toss-it, where no one hits a production landmine because I wrote it the way some minor version does. Correct here means "it runs," not "version-perfect."
-- **You've already fed the version facts into context.** When the relevant doc snippets, `.d.ts` types, or official examples are already pasted in or readable in the repo, the source of truth is in place, and stacking an MCP doc source on top is redundant.
-
-The test, in one line: **ask "did this library change after my cutoff, and could I be mixing versions?" — if it could have, or you're unsure I remember it right, wire in version-matched docs; only when it's stable enough that I'd get it right blind, or the code is disposable anyway, can you skip it.**
+Reliable local types, official examples, or tests can be sufficient without installing another documentation tool. Stable APIs and disposable prototypes can justify lighter checks, but model familiarity alone is not verification. One-time scripts that alter persistent data still need version and side-effect checks.
 
 ## Version notes
 
-:::note Applicable versions
-"Training has a cutoff, and I have no awareness of the specific version you pinned" is an inherent property of every large model. It is **independent of the specific model**—a newer model just pushes the cutoff date later; it doesn't change the fact that everything after the cutoff is unknown to me. Version-aware doc sources (Context7 and other MCP docs tools) are a newer external capability; it depends on whether your client supports MCP and whether the doc source covers your library. This entry and "Hallucinating APIs on fast-moving libraries / version drift" (Implementation phase) are two sides of the same root cause: that one patches it at the moment code is written; this one blocks it at the source, during setup.
+:::note Scope
+Checked Context7 maintainer guidance and Claude Code documentation on 2026-10-29. Versioned sources support verification rather than guarantee correctness. Recheck changes to libraries, source coverage, or retrieval tools.
 :::
 
 ## Further reading and sources
 
-- [Context7 (upstash/context7, a version-aware docs MCP source)](https://github.com/upstash/context7)
-- [Connect Claude Code to tools via MCP (Claude Code official)](https://code.claude.com/docs/en/mcp)
-- [Claude Code Best Practices (Anthropic official)](https://code.claude.com/docs/en/best-practices)
+- [Context7 (maintainer repository)](https://github.com/upstash/context7)
+- [Claude Code best practices](https://code.claude.com/docs/en/best-practices)

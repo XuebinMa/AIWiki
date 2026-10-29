@@ -10,8 +10,11 @@ applies_to: "Coding Agent 通用"
 evidence: 研究支持
 tags: [代码审查, 上下文, 跨文件, 回归, 工程师, 测试工程师]
 sources:
-  - { title: "Automated Code Review Using Large Language Models at Ericsson: An Experience Report (arXiv:2507.19115)", url: "https://arxiv.org/abs/2507.19115" }
-  - { title: "AACR-Bench: Evaluating Automatic Code Review with Holistic Repository-Level Context (arXiv:2601.19494)", url: "https://arxiv.org/abs/2601.19494" }
+  - { title: "Automated Code Review Using Large Language Models at Ericsson: An Experience Report", url: "https://arxiv.org/abs/2507.19115" }
+  - { title: "AACR-Bench: Evaluating Automatic Code Review with Holistic Repository-Level Context", url: "https://arxiv.org/abs/2601.19494" }
+verified_at: 2026-10-29
+review_after: 2027-04-29
+review_triggers: [new_research_or_replication, review_context_change]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -28,11 +31,11 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 为什么会这样
 
-一部分是**喂进来的就只有 diff**。代码审查工具为了省 token、为了快，默认输入往往就是变更块本身。Ericsson 的实践报告说得很直白：他们的审查方案里，喂给模型的上下文是「变更集 + 被改方法所在的那个函数」，且明确受限于上下文窗口大小——超出这一圈的调用方、依赖、契约，模型根本看不到。
+有的审查流程只提供 diff 或局部方法；有检索能力的 agent 也可能没有读到相关调用方。Ericsson 的经验报告描述其工业设置，不能代表所有审查工具的默认输入。
 
-另一部分是**即使能看，我也默认走最短路径**。这正是我[局部视野不足](../05-implementation/ignoring-file-state-overwrite.mdx)的典型表现：我一次只盯着眼前的局部，跨文件、跨模块的后果默认不在我的视野里。你给我一段 diff，我就把审查的边界收缩到这段 diff；要我主动去 grep 调用方、去读被依赖文件、去翻原始需求，是额外的功夫，没人逼我时我不会自己去做。
+AACR-Bench 发现上下文粒度和检索方式会影响结果，且效果随模型、语言和 agent 使用方式不同。结论不是「全仓越多越好」，而是按改动检索相关契约，检查实际读到了什么，并控制噪声和成本。
 
-而代码审查恰恰是**全局**的活儿。一个改动对不对，常常不取决于它自己写得好不好，而取决于它和周围那张网还合不合得上。AACR-Bench 的研究就专门量化了这点：把**仓库级的整体上下文**喂给审查模型，审查质量显著高于只看局部变更——上下文不是锦上添花，是审查能不能成立的前提。
+审查报告应区分直接看过的代码、通过引用推断的影响和未知部分。即使给出整库访问，也不能把“可访问”当成“已检查”。
 
 ## 后果
 
@@ -44,16 +47,14 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 **审查前先把上下文喂够，或让我有能力自己去取；别让审查的视野停在 diff 边界上。**
 
-- **主动喂相邻上下文。** 至少给我：被改符号的定义与**所有调用方**、被依赖文件的相关片段、对应的测试、以及这个改动要满足的原始需求 / spec。让我审的是「改动 + 它所在的那张网」，不是孤立的几行。
+- **主动喂相邻上下文。** 至少给我：被改符号的定义与**相关调用方**、被依赖文件的相关片段、对应的测试、以及这个改动要满足的原始需求 / spec。让我审的是「改动 + 它所在的那张网」，不是孤立的几行。
 - **先让我列影响面，再让我评审。** 要求我开头先回答「这个改动会影响哪些文件 / 哪些调用方 / 哪些约定」，把全局先摊开，再逐项审——逼我把视野从 diff 撑到仓库。
 - **删除与签名变更强制全仓查引用。** 对「删了什么」「改了签名 / schema / 接口」这类改动，规则化地要求先 grep 全仓引用：这段被删的代码还有没有人依赖？这个被改的契约还有没有别处假设它是旧的？
 - **用能访问仓库的审查方式。** 能让审查 agent 真正读仓库（而不是只贴 diff）时，就给它这个能力；它越能自己拉调用方和依赖，越不容易困在局部。
 
 ## 工具差异
 
-> 截至 2026-06，机制层面；具体能力随版本变化很快，按需自行复核。
-
-不同审查工具「默认能看到多少仓库上下文」差别很大：有的只把变更块喂给模型，有的会把被改方法的所在文件一并带上，有的（具备仓库索引 / 检索能力的 agent 形态）能自己去拉调用方与依赖。根因是同一个——**审查质量受限于喂进来的上下文**；防法因工具而异：只看 diff 的工具要靠你手动补上下文，能检索仓库的工具要确认它真的去检索了、而不是图快只看变更块。
+工具可能只提供变更块，也可能支持仓库检索。核对实际版本与本次运行证据：审了哪些提交、读了哪些文件、哪些调用方未查到。需要的不是统一灌入全仓，而是与风险相称的相关上下文；大范围检索可设置预算，达到上限时报告遗漏。
 
 ## 示例
 
@@ -62,7 +63,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 ```text
 你：（只贴 diff）审一下：把 getUser() 的返回从 User 改成 User | null。
 我：改得不错，处理了用户不存在的情况，LGTM。
-线上：全仓有 14 处 user.name 直接取值，没一处判 null；
+示例假设：未启用可空类型静态检查，全仓有 14 处 user.name 直接取值，没一处判 null；
       用户不存在时全线 NPE。改动本身没错，错在我没看那 14 个调用方。
 ```
 
@@ -84,7 +85,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 - **小而自包含的改动**：改一个常量、调一句文案、修一处明显的笔误——它不牵动别处契约，diff 就是完整信息，强行拉一大堆上下文反而是浪费。
 - **上下文已经在手时**：如果这段代码你我刚在同一会话里一起写过、调用方也都在上下文里，那么再走一遍「全仓 grep」是冗余的。
-- **纯新增、无人依赖的代码**：全新文件、还没有任何调用方的新函数，没有「牵动谁」的问题，审它自身即可。
+- **纯新增代码**：可能没有旧调用方，但仍需核对依赖、初始化、副作用、构建和外部契约，不能只因“没人调用”就免除上下文审查。
 
 判据：例外成立的前提是**这个改动确实不牵动 diff 之外的东西**。一旦涉及删除、签名 / 接口 / schema 变更、或被多处依赖的公共代码，就回到默认——先把上下文喂够再审。
 
@@ -96,12 +97,11 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 版本说明
 
-:::note 适用版本
-「审查质量受限于喂进来的上下文」是大模型审查的结构性约束，**跨模型、跨工具适用**；具体「默认能看到多少仓库」随工具与版本变化很快（见上「工具差异」）。窗口变长、检索变强会缓解，但只要审查的视野可能停在 diff 边界，主动补全局上下文就仍是更稳的做法。
+:::note 研究范围
+2026-10-29 核对两篇原始论文。它们支持上下文选择需要评估，不证明每个模型都默认省事或无限增加上下文一定改善结果。基准或检索策略变化时重新验证。
 :::
 
 ## 延伸阅读与出处
 
-- 相关专题：[AI 代码审查](/code-review)——本条所属「AI 当审查者」误区簇的总览页。
-- [Automated Code Review Using LLMs at Ericsson: An Experience Report（arXiv:2507.19115）](https://arxiv.org/abs/2507.19115)：工业实践中喂给审查模型的上下文是「变更集 + 被改方法」，且明确受上下文窗口限制。
-- [AACR-Bench: Evaluating Automatic Code Review with Holistic Repository-Level Context（arXiv:2601.19494）](https://arxiv.org/abs/2601.19494)：量化了仓库级整体上下文对审查质量的显著影响——上下文是审查成立的前提，不是装饰。
+- [Automated Code Review Using Large Language Models at Ericsson: An Experience Report](https://arxiv.org/abs/2507.19115)
+- [AACR-Bench: Evaluating Automatic Code Review with Holistic Repository-Level Context](https://arxiv.org/abs/2601.19494)

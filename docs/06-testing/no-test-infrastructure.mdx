@@ -10,8 +10,10 @@ applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [验证闭环, 测试, CI, 工程师, 测试工程师]
 sources:
-  - { title: "Best practices for Claude Code（Anthropic 官方）", url: "https://code.claude.com/docs/en/best-practices" }
-  - { title: "Agentic AI Coding: Best Practice Patterns for Speed with Quality（CodeScene）", url: "https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality" }
+  - { title: "Claude Code best practices", url: "https://code.claude.com/docs/en/best-practices" }
+verified_at: 2026-10-29
+review_after: 2027-04-29
+review_triggers: [verification_workflow_change, source_revision]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -28,11 +30,9 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 为什么会这样
 
-搭测试设施这件事，**不产出可见成果**。装框架、配 runner、写一个只断言 `1 + 1 === 2` 的冒烟测试、改 CI 配置——做完这一圈，你的功能一行都没多。而我被优化成**尽快产出你能看到的东西**：能跑的功能、能合的 diff、一句「搞定了」。在这套激励下，脚手架天然排在实现后面，而「后面」往往就等于「没有」。
+我可能在任务范围和验证方式不明确时只交实现，遗漏可重复运行的检查。这是工作流风险，不应解释成所有模型没有长期工程直觉或必然嫌测试麻烦。
 
-更深一层：我不会主动为「未来的自己」铺路。我没有持续的工程直觉去想「这个项目以后要改一百次，得先有张安全网」——除非你把它写进任务，否则我默认它不在范围内。
-
-可这恰恰拆掉了我自己最需要的东西。我擅长生成**貌似合理**的代码，但我没真跑过它（详见[信任但不验证](./trust-then-verify.mdx)）。我要从「貌似合理」走到「真的对」，靠的就是一个能给出通过/失败信号的检验，让我自己进入「写 → 跑 → 读结果 → 修」的循环。**没有测试设施，这个循环根本无处闭合**——我只能停在「看起来对」，你也只能停在「看起来对」。
+没有专用测试框架，也不等于无法验证。现成的测试、类型检查、构建、静态分析或可比对脚本都可能提供部分证据；关键是它们是否检查了本次修改的行为，而不是形式上装过一个库。
 
 ## 后果
 
@@ -47,22 +47,22 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 一套「最小可用」的测试设施只要三件东西：
 
-1. **一个能跑的测试**：哪怕只断言一件最简单的事，重点是它真的能被执行、能变绿。
+1. **一个有意义的可运行检查**：先检查项目已有工具；验证代表性行为，并故意引入安全的失败确认它能报错。单纯断言常量不证明功能被测试。
 2. **一条跑它的命令**：比如 `npm test`，让我（和你）随时能一键拿到通过/失败。
-3. **接进 CI**：让这条命令在每次提交时自动跑，把验证从「人记得跑」变成「机器一定跑」。
+3. **按需接入 CI**：明确事件和检查范围；要阻止合并，还需将检查设为必需状态。不是每次提交都会自动覆盖所有路径。
 
 可以直接这样要求我：
 
 ```text
 在写实现之前，先为这个项目搭好最小测试设施：
-1. 选一个该语言/框架的主流测试库并装上；
-2. 写一个能跑通的冒烟测试，确认 runner 正常工作；
+1. 先查看已有测试工具；只有确实需要时才增加依赖；
+2. 写一个覆盖代表行为的检查，并确认它能因目标错误失败；
 3. 给我一条跑测试的命令，写进 README / package.json；
 4. 加一个 CI 配置，让测试在每次 push 时自动运行。
 全部跑通、给我看到绿色，再开始写功能。
 ```
 
-立起脚手架之后，再让我按[信任但不验证](./trust-then-verify.mdx)里的做法工作：先写测试、再写实现去让它变绿。这时验证闭环才真正合上——**宁可一个真实跑通的测试，也别零。**
+立起脚手架之后，再让我按[信任但不验证](./trust-then-verify.mdx)里的做法工作：先写测试、再写实现去让它变绿。这时验证闭环才真正合上——**优先一个确实检验目标行为的轻量检查，不以框架数量判断质量。**
 
 ## 示例
 
@@ -90,7 +90,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 「先搭测试设施」是默认，但有几种情况，不搭才是对的：
 
-- **写完即弃的探针 / 一次性脚本**：为验证可行性临时写的 demo、跑一遍就删的数据迁移——它根本不会被改第二次，那张「未来改一百次」的安全网没有对象，建框架配 CI 是纯开销。靠你跑一遍肉眼确认就够了。
+- **低影响可丢弃探针**：可以不建整套框架，但仍需适当验证。一次性迁移可能改变持久数据，必须按风险校验不变量、空跑与恢复，不能只看一遍就算安全。
 - **项目已经有现成设施**：测试库、runner、CI 都在，你只是加个功能——这时不是「搭设施」，是直接用，本条不适用，照[信任但不验证](./trust-then-verify.mdx)写测试即可。
 - **环境上根本立不起来、且有更划算的检验**：某些一次性胶水代码，搭隔离测试的成本远超它本身，而一条类型检查 / 构建 / 跑一次比对输出的脚本就能给出红绿信号——那就用那个轻量检验，别为它硬起一套框架。
 
@@ -98,12 +98,10 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 版本说明
 
-:::note 适用版本
-「优先产出可见成果、不主动搭设施」是当前模型被优化方向的副作用，**全版本、且跨模型适用**。无论模型多强，只要任务里没有明确要求「先搭测试设施」，我就倾向于跳过它——所以这一条的解法在你的提示词和项目约定里，而不在模型版本里。
+:::note 适用范围
+官方文档支持给 agent 可执行的验证方式，不证明全模型必定跳过测试。按风险选择验证深度与预算，避免为低影响改动无条件新增框架、依赖或全套 CI。
 :::
 
 ## 延伸阅读与出处
 
-- [Best practices for Claude Code（Anthropic 官方）](https://code.claude.com/docs/en/best-practices) —— 「Give Claude a way to verify its work」一节，以及把「trust-then-verify gap」列为常见失败模式。
-- [Agentic AI Coding: Best Practice Patterns for Speed with Quality（CodeScene）](https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality)
-- 同主线条目：[信任但不验证](./trust-then-verify.mdx)
+- [Claude Code best practices](https://code.claude.com/docs/en/best-practices)

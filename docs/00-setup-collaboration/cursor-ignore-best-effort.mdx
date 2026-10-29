@@ -1,5 +1,5 @@
 ---
-title: 我以为 `.cursorignore` 把密钥挡在外面了——它只是尽力而为，挡不住我
+title: "我把 `.cursorignore` 当成秘密隔离，却漏掉了终端和 MCP"
 sidebar_label: ".cursorignore 不是安全边界"
 slug: cursor-ignore-best-effort
 sidebar_position: 12
@@ -10,15 +10,17 @@ applies_to: "Cursor 特有"
 evidence: 官方文档
 tags: [忽略文件, 敏感数据, 数据泄露, Cursor, 工程师, 运维工程师]
 sources:
-  - { title: "Cursor — Ignore Files (official docs)", url: "https://cursor.com/docs/context/ignore-files" }
-  - { title: "Cursor reads .env files by default (Cursor community forum bug report)", url: "https://forum.cursor.com/t/cursor-reads-env-files-by-default/152167" }
+  - { title: "Ignore file (Cursor official documentation)", url: "https://cursor.com/docs/reference/ignore-file" }
+verified_at: 2026-10-29
+review_after: 2026-11-29
+review_triggers: [vendor_documentation_change, permission_or_runtime_change]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['工程师', '运维工程师']} phase="准备与协作" severity="高" appliesTo="Cursor 特有" evidence="官方文档" />
 
-> 一句话摘要：Cursor 的 `.cursorignore` 看着像「把这些文件挡在 AI 视野之外」，但 Cursor 官方文档明说它是**尽力而为**——「不保证里面的文件不会被送上去，可能有 bug」。它挡的是被动索引 / 读取，挡不住我在 agent 模式下直接用 shell `cat` 你「忽略」的文件。把「忽略了 = AI 看不到」当成密钥的护栏，是个会出事的错觉。
+> 一句话摘要：`.cursorignore` 能限制索引和受支持的直接读取，但不是所有工具的文件隔离边界。官方明确终端与 MCP 工具不受它约束；敏感文件仍需强制访问控制。
 
 ## 现象
 
@@ -26,12 +28,9 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 为什么会这样
 
-问题在于 `.cursorignore` **被当成读屏障来用，但它的合同不是读屏障**。Cursor 官方文档对它的措辞是 **best-effort**：明说**不保证**里面的文件不会被送上去、而且**可能有 bug**。它主要影响的是**被动索引和读取**（Cursor 不去主动索引这些文件）——但这有两个洞：
+当前官方文档说明 `.cursorignore` 限制索引及相关 AI 功能的直接访问，但 agent 的终端和 MCP 工具不在覆盖范围。官方也提醒不能保证完全保护；不要把旧版社区报告或旧措辞当成当前已证实的缺陷。
 
-- **agent 能绕过它。** 在 agent 模式下我还能直接跑 shell，一句 `cat .env` 就把你「忽略」的文件读进了上下文——忽略文件不拦我的 shell 访问。
-- **它本就不保证。** 既然官方都说「不保证、可能有 bug」，你就不能把安全押在它身上。事实也出过实例：某个版本（v2.5.17）**违背文档默认值，把 `.env` 读进了 agent 与补全上下文**。
-
-机制上的关键对比：这是一个**被当成「读拦截」卖、但合同上只是「尽量不读」的文件**。它和 Claude Code 的 `permissions.deny` 里 `Read(./.env)` **不是一回事**——后者是客户端强制拦截，前者是一句尽力而为的承诺。Claude Code 没有一个「叫 ignore、却被当读屏障」的文件，所以这类「我以为挡住了其实没挡」的坑是 Cursor 特有的。
+`Read` 权限拒绝规则也只约束对应工具路径，不能自动阻止 shell、其他工具或远程 server 读取同一数据。忽略文件与强制文件系统隔离是不同层；其他产品也可能发生把局部规则当全局屏障的误判。
 
 ## 后果
 
@@ -40,12 +39,10 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 最佳实践
 
-**别把 `.cursorignore` 当安全边界；它是降噪工具，不是密钥屏障。**
-
-1. **真要锁，用强制层或别让密钥进仓库。** 密钥用 secret manager / 环境注入，别落在工作目录里；要拦读取就用真正强制的机制，而不是一句「忽略」。
-2. **把秘密挪出我够得到的地方。** 我读不到的，就外带不了——最稳的隔离是「文件根本不在我能 `cat` 的路径里」。
-3. **`.cursorignore` 留给它该干的活：降噪。** 用它把 `node_modules`、构建产物、无关大文件挡出上下文，省 token、提质量——这是它设计的用途。
-4. **升级并复核版本默认。** 既然出过「违背文档默认值读 `.env`」的回归，就把「敏感文件到底有没有被读」当成要按版本核验的事。
+1. 保留 `.cursorignore`，用来限制索引、上下文和受支持功能的文件访问；对秘密不要只依赖它。
+2. 把不需要的凭据移出 agent 可访问范围，并检查环境变量、终端、MCP 和子进程路径。secret manager 注入后，秘密仍可能对相应进程可见。
+3. 用受控账户、文件系统权限、隔离环境和最小凭据提供实际边界；用无效测试秘密核对允许与拒绝路径。
+4. 升级后重新检查文件规则和工具行为，核对实际配置而非只看文件名。
 
 ## 示例
 
@@ -56,18 +53,18 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 .env
 secrets/
 → 心理模型：「敏感文件已隔离，我可以放心让 Cursor 自由探索」
-→ 实际：agent 一句 `cat .env` 照读；或某版本 bug 直接把它读进上下文
+→ 实际：若 shell 权限允许，agent 仍可用 `cat .env` 读取
 ```
 
 **改之后（密钥根本不在仓库里）：**
 
 ```text
 # 密钥走 secret manager / CI 注入，工作目录里压根没有 .env
-# .cursorignore 只用来降噪：
+# .cursorignore 继续限制受支持功能的索引与访问：
 node_modules/
 dist/
 *.log
-→ 没有可读的密钥文件 = 没有可外带的密钥
+→ 同时检查进程环境和工具凭据，确保不需要的秘密不对 agent 可见
 ```
 
 ## 什么时候例外
@@ -77,11 +74,9 @@ dist/
 ## 版本说明
 
 :::note 适用版本
-`.cursorignore` 是 best-effort、不保证文件不被送上去——这是 Cursor 官方 [ignore-files 文档](https://cursor.com/docs/context/ignore-files)的明文（截至 2026-06）。「某版本把 `.env` 读进上下文」的回归绑定具体版本（社区报告 v2.5.17），可能已修——**把『敏感文件有没有被读』当成按版本核验的事**，别假设。`.cursorindexingignore`（只挡索引、不挡读取）是更弱的一档，更不该当安全用。
+2026-10-29 核对 Cursor 当前 Ignore file 文档。`.cursorindexingignore` 只控制索引，更不能当作全部读取隔离。社区 v2.5.17 报告是历史线索，不证明当前版本仍有同一缺陷；此处不依赖它来判断当前覆盖范围。
 :::
 
 ## 延伸阅读与出处
 
-- [Cursor — Ignore Files（官方文档，"best-effort … not guaranteed"）](https://cursor.com/docs/context/ignore-files)
-- [Cursor reads .env files by default（社区 forum bug 报告）](https://forum.cursor.com/t/cursor-reads-env-files-by-default/152167)
-- 相关误区：[把该进 settings 的规矩写进 CLAUDE.md](./settings-vs-claudemd.mdx) · [开发期提示注入](../05-implementation/dev-time-prompt-injection.mdx)
+- [Ignore file (Cursor official documentation)](https://cursor.com/docs/reference/ignore-file)
