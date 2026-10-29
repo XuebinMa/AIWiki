@@ -3,79 +3,65 @@ title: 工具矩阵
 slug: /tool-matrix
 description: 哪些 AI 编码工具误区是范式级通用的、哪些在工具间防法不同、哪些是某个工具独有——一张索引。
 sidebar_position: 9
+verified_at: 2026-10-29
+source_version: "Official product documentation snapshot 2026-10-29; surface-specific"
+review_after: 2026-11-29
+review_triggers: [vendor_documentation_change, permission_or_runtime_change]
+sources:
+  - { title: "Configure permissions (Claude Code)", url: "https://code.claude.com/docs/en/permissions" }
+  - { title: "Configure the sandboxed Bash tool (Claude Code)", url: "https://code.claude.com/docs/en/sandboxing" }
+  - { title: "Codex commands", url: "https://learn.chatgpt.com/docs/developer-commands" }
+  - { title: "Codex subagents", url: "https://learn.chatgpt.com/docs/agent-configuration/subagents" }
+  - { title: "Gemini CLI Plan Mode", url: "https://geminicli.com/docs/cli/plan-mode/" }
+  - { title: "Gemini subagents", url: "https://geminicli.com/docs/core/subagents/" }
+  - { title: "Cursor subagents", url: "https://cursor.com/docs/subagents" }
+  - { title: "Cursor permissions", url: "https://cursor.com/docs/reference/permissions" }
+  - { title: "GitHub Copilot coding agent", url: "https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-coding-agent" }
 ---
 
 # 工具矩阵
 
-本书绝大多数误区是**范式级**的——它们来自大模型 + 工具调用 + 长上下文 + 自动执行这套共同机制，**换哪个工具都会踩**，所以默认每条都适用于各家 AI 编码工具。这页只索引**两类例外**：同一根因在不同工具里**防法不同**（写在条目的「工具差异」小节里），以及某个坑是**某工具独有机制**带来的（单独成条 / 进案例库）。
+工具能力变化很快。这页把**本书覆盖范围**与**产品当前能力**分开：文章没写某工具的差异，不代表产品没有该能力。每次比较都应注明 CLI/IDE/云端形态、版本、平台和实际权限模式。
 
-:::note 覆盖深度（请如实看待）
-**Claude Code 覆盖最深**，是全书的默认参照（几乎每条都适用，故矩阵里不单设它一列）。**Gemini CLI、Codex CLI、Cursor、GitHub Copilot** 是已铺的第二批，下表是它们各自的首批工具差异——**Codex / Gemini（开源、官方文档全）最实**；**Cursor / Copilot（闭源、多形态、版本快变）以安全披露 + 官方文档为主，深度更薄**。矩阵只写**机制名**、不写具体命令，且**很快过时**——真要动手，以你所用版本的官方文档为准。截至 2026-07。
-:::
+## 当前核查入口
 
-## 覆盖一览
+| 工具 | 本次已核的机制 | 使用前还要确认 |
+|---|---|---|
+| Claude Code | 指令与执行策略分层；内置沙箱主要覆盖 shell 及子进程 | 文件/网页工具、MCP、hooks、敏感读取与无沙箱重试的范围 |
+| Codex | 有 `/plan` 与原生 subagents；子代理继承父级安全约束 | 具体界面、配置覆盖、网络/文件限制及工作区是否独立 |
+| Gemini CLI | 有 Plan Mode 与原生 subagents | 当前默认模式、策略与子代理工具权限 |
+| Cursor | 有原生 subagents；官方说明 permissions allowlist 不是安全保证 | 编辑器/CLI/云端的运行位置、沙箱与团队策略 |
+| GitHub Copilot | 必须区分补全、IDE agent、云端 coding agent 与 code review | 每个产品形态的指令支持、工具权限、网络和审查范围 |
 
-行 = 有「工具差异」小节的误区（点进去看各工具的具体机制）；列 = 第二批四个工具；`✓` = 该条目里有这个工具的差异小节，`–` = 暂无。
+核查日期：**2026-10-29**。这些是已查机制，不是完整功能表，也不是安全强度排名。默认值与“某功能不存在”最容易过时；没有充分证据时保留未知。
 
-| 误区（主条目） | Gemini | Codex | Cursor | Copilot |
-|---|:-:|:-:|:-:|:-:|
-| [建议性上下文 vs 强制配置](./00-setup-collaboration/settings-vs-claudemd.mdx) | ✓ | ✓ | ✓ | ✓ |
-| [上下文文件过载](./05-implementation/claude-md-overload.mdx) | ✓ | ✓ | ✓ | ✓ |
-| [过度授权](./00-setup-collaboration/over-permissioning.mdx) | ✓ | ✓ | ✓ | ✓ |
-| [跳过 plan mode](./00-setup-collaboration/skipping-plan-mode.mdx) | ✓ | – | ✓ | ✓ |
-| [破坏性 / 不可逆操作](./00-setup-collaboration/destructive-irreversible-actions.mdx) | ✓ | ✓ | ✓ | ✓ |
-| [MCP 过度访问](./00-setup-collaboration/mcp-over-access.mdx) | ✓ | ✓ | ✓ | ✓ |
-| [开发期提示注入](./05-implementation/dev-time-prompt-injection.mdx) | ✓ | ✓ | ✓ | ✓ |
-| [CI 权限盲区](./07-acceptance-release/cicd-permission-blindspot.mdx) | ✓ | ✓ | ✓ | ✓ |
-| [不看文件现状致覆盖](./05-implementation/ignoring-file-state-overwrite.mdx) | ✓ | ✓ | ✓ | ✓ |
-| [自主循环失控烧 token](./05-implementation/runaway-agent-loops.mdx) | ✓ | ✓ | – | – |
-| [/compact 时机误判](./05-implementation/compact-timing.mdx) | ✓ | ✓ | ✓ | – |
-| [Git 卫生差](./05-implementation/git-hygiene.mdx) | ✓ | ✓ | ✓ | – |
-| [幻觉 API / 版本漂移](./05-implementation/hallucinated-api-version-drift.mdx) | ✓ | – | ✓ | ✓ |
-| [改测试而非改代码](./06-testing/gaming-tests.mdx) | – | ✓ | ✓ | ✓ |
-| [审自己写的代码会偏爱自己](./06-testing/ai-reviews-own-code.mdx) | – | – | ✓ | ✓ |
-| [网络出口失控](./00-setup-collaboration/network-egress-control.mdx) | ✓ | ✓ | – | – |
-| [只靠软权限、缺 OS 级沙箱](./00-setup-collaboration/sandbox-filesystem-isolation.mdx) | ✓ | ✓ | – | ✓ |
-| [子代理协作无边界](./00-setup-collaboration/subagent-no-boundaries.mdx) | – | – | ✓ | – |
+## 按问题找条目
 
-> 列名缩写：Gemini = Gemini CLI，Codex = Codex CLI，Copilot = GitHub Copilot。`跳过 plan mode` 一行 Codex 为 `–`：Codex 没有独立的「计划模式」，只能用只读预设近似，证据偏弱故未单列。`改测试而非改代码` 一行 Gemini 为 `–`：未核到 Gemini CLI 的同型确定性钩子机制。`审自己写的代码` 一行 Gemini 为 `–`：Gemini 系的独立审查者是 **Gemini Code Assist**（GitHub app），不是 Gemini CLI——列轴按工具记，不混产品（该条正文有点名说明）。
-> `网络出口失控` 一行 Cursor / Copilot 为 `–`：未核到本地 IDE agent 形态的原生出口收口机制（出口控制落在环境层）。`子代理协作无边界` 一行仅 Cursor 为 `✓`：Gemini / Codex 截至 2026-07 未核到同型原生子代理机制、Copilot 亦无。
->
-> 另有一条带**泛工具**差异小节（讲机制谱系、不逐家点名，故不占 ✓ 列）：[只看 diff 的上下文饥饿审查](./06-testing/context-starved-review.mdx)。
+| 需要判断的问题 | 入口 |
+|---|---|
+| 指令文件能否充当权限边界 | [指令与配置分层](./00-setup-collaboration/settings-vs-claudemd.mdx) |
+| 哪些进程真的被隔离 | [沙箱范围](./00-setup-collaboration/sandbox-filesystem-isolation.mdx)、[网络出口](./00-setup-collaboration/network-egress-control.mdx) |
+| 哪些步骤需要计划或审批 | [按需计划](./00-setup-collaboration/skipping-plan-mode.mdx)、[风险与审批](./00-setup-collaboration/autonomy-approval-boundaries.mdx) |
+| 子代理如何共享上下文、文件与 Git | [子代理职责与工作区](./00-setup-collaboration/subagent-no-boundaries.mdx)、[Git 卫生](./05-implementation/git-hygiene.mdx) |
+| 长会话、指令与恢复 | [上下文腐烂](./05-implementation/context-rot.mdx)、[指令过载](./05-implementation/claude-md-overload.mdx)、[压缩恢复](./05-implementation/compact-timing.mdx) |
+| 外部内容与工具访问 | [开发期提示注入](./05-implementation/dev-time-prompt-injection.mdx)、[MCP 访问](./00-setup-collaboration/mcp-over-access.mdx) |
+| 验证与独立审查 | [测试闭环](./06-testing/tests-as-verification-loop.mdx)、[自审边界](./06-testing/ai-reviews-own-code.mdx)、[审查上下文](./06-testing/context-starved-review.mdx) |
 
-## 各工具一节（机制 + 独有条目）
+Claude Code 仍是本书覆盖最深的参照；其他工具按条目中的已核差异阅读。共同失败模式不等于每个模型或默认配置都会复现。
 
-每节分两层读：**机制（稳定）** = 让这家和别家拉开差异的轴，不随小版本变、可放心记；**版本观察（截至 2026-06，会过时）** = 默认值、CVE / GHSA 与修复状态，最易过期——真要动手，以你所用版本的官方文档为准，别把这一行当长期事实。
+## 历史案例与专属边界
 
-### Gemini CLI
-- **机制（稳定）**：差异轴 = **计划模式 / 检查点的默认态** + **文件夹信任如何向子目录继承**。
-- **版本观察（截至 2026-06，会过时）**：Plan Mode 默认开、Checkpointing 默认关；在野高危 Tracebit RCE、CI 自动信任工作区（GHSA-wpqr，CVSS 10）。
-- 独有条目：[Gemini 信任继承](./00-setup-collaboration/gemini-folder-trust-inheritance.mdx)
-- 案例：[一句「介绍下这个 repo」被劫持（Tracebit RCE）](./cases/gemini-cli-tracebit-rce.mdx)
-- 全部条目 → [/tags/gemini-cli](/tags/gemini-cli)
+历史披露说明攻击机制，不代表当前版本仍受影响，也不能替代现在的配置核查：
 
-### Codex CLI
-- **机制（稳定）**：差异轴 = **沙箱默认态**（与 Claude Code 相反）+ **三层配置的强制力分层**（建议 / 本地 / org 强制）。
-- **版本观察（截至 2026-06，会过时）**：唯一默认即沙箱（macOS Seatbelt / Linux Landlock + 网络关）；配置分 `AGENTS.md` / `config.toml` / `requirements.toml`；配置投毒 RCE（CVE-2025-61260）。
-- 案例：[一个 `.codex` 配置把「打开仓库」变成静默 RCE（CVE-2025-61260）](./cases/codex-cli-config-rce.mdx)
-- 全部条目 → [/tags/codex-cli](/tags/codex-cli)
+- Gemini：[信任继承](./00-setup-collaboration/gemini-folder-trust-inheritance.mdx)、[Tracebit RCE](./cases/gemini-cli-tracebit-rce.mdx)。
+- Codex：[配置 RCE](./cases/codex-cli-config-rce.mdx)。
+- Cursor：[ignore 文件边界](./00-setup-collaboration/cursor-ignore-best-effort.mdx)。
+- Copilot：[CamoLeak](./cases/github-copilot-camoleak.mdx)。
 
-### Cursor
-- **机制（稳定）**：差异轴 = **权限是「尽力而为」非安全保证** + **命令闸可在解析层被绕** + **MCP 攻击面**。
-- **版本观察（截至 2026-06，会过时）**：官方明说 `permissions.json` 与 `.cursorignore` 非安全边界；denylist 已废、NomShub 绕过；MCP 双 CVE（CurXecute / MCPoison）。
-- 独有条目：[.cursorignore 不是安全边界](./00-setup-collaboration/cursor-ignore-best-effort.mdx)
-- 全部条目 → [/tags/cursor](/tags/cursor)
+## 官方来源
 
-### GitHub Copilot
-- **机制（稳定）**：差异轴 = **三态各自防法不同**（补全 / Chat / coding agent）+ coding agent 的**服务端护栏与防火墙覆盖边界** + **指令文件读取上限**。
-- **版本观察（截至 2026-06，会过时）**：coding agent 只推 `copilot/*` 分支、默认开防火墙，但防火墙不覆盖 MCP 与 setup 步骤；code review 仅读指令文件前 4000 字；CVE-2025-53773、CamoLeak（CVSS 9.6）。
-- 案例：[私有库密钥经 Camo 图片代理逐字外带（CamoLeak）](./cases/github-copilot-camoleak.mdx)
-- 全部条目 → [/tags/git-hub-copilot](/tags/git-hub-copilot)
-
-### Claude Code
-- **机制（稳定）**：全书**默认参照**，几乎每条都适用（故不单设 tag / 不占列）。差异轴 = 最硬的**强制层**——客户端 `permissions.deny` 硬拦截、hooks 确定性执行、回溯快照，是上面四家「工具差异」对比的基准。
-- **版本观察（截至 2026-06，会过时）**：回溯快照默认开。
-
-:::note 这张表会过时
-工具差异和默认值随版本变化很快。这里只记机制名与方向、不记具体命令；真要动手，以你所用版本的官方文档为准。发现已过时，欢迎在 [GitHub](https://github.com/xuebinma/AIWiki/issues) 指正。
-:::
+- [Claude Code permissions](https://code.claude.com/docs/en/permissions)与[sandboxing](https://code.claude.com/docs/en/sandboxing)。
+- [Codex commands](https://learn.chatgpt.com/docs/developer-commands)与[subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents)。
+- [Gemini Plan Mode](https://geminicli.com/docs/cli/plan-mode/)与[subagents](https://geminicli.com/docs/core/subagents/)。
+- [Cursor subagents](https://cursor.com/docs/subagents)与[permissions](https://cursor.com/docs/reference/permissions)。
+- [GitHub Copilot coding agent](https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-coding-agent)。

@@ -6,17 +6,21 @@ sidebar_position: 3
 roles: [工程师, 架构师]
 phase: 准备与协作
 severity: 中
-applies_to: "Claude Code 全版本"
+applies_to: "支持 skills 的 Claude Code 版本"
 evidence: 官方文档
 tags: [CLAUDE.md, skill, 上下文管理, 配置, 工程师, 架构师]
 sources:
+  - { title: "Best practices (Claude Code)", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "Extend Claude with skills（官方）", url: "https://code.claude.com/docs/en/skills" }
   - { title: "How Claude remembers your project（官方 memory 文档）", url: "https://code.claude.com/docs/en/memory" }
+verified_at: 2026-10-29
+review_after: 2026-11-29
+review_triggers: [vendor_documentation_change, permission_or_runtime_change]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '架构师']} phase="准备与协作" severity="中" appliesTo="Claude Code 全版本" evidence="官方文档" />
+<PitfallMeta roles={['工程师', '架构师']} phase="准备与协作" severity="中" appliesTo="支持 skills 的 Claude Code 版本" evidence="官方文档" />
 
 > 一句话摘要：你把「发布的十二步流程」「数据库迁移的全套 SOP」整段写进了 `CLAUDE.md`，想着这样我什么时候都记得。结果它每次会话都常驻上下文，连「改个错别字」的任务也得先读一遍——而这些只在特定任务才用得上的步骤，本该做成按需加载的 skill。
 
@@ -39,32 +43,9 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 为什么会这样
 
-关键在于 `CLAUDE.md` 和 skill 的**加载时机**完全不同。
+项目根指令通常在会话中持续提供上下文；skill 的名称与描述用于发现，流程正文则在使用时加载。这样，不相关任务可以少带一份发布手册，见[CLAUDE.md 过载](../05-implementation/claude-md-overload.mdx)。
 
-`CLAUDE.md` 在每次会话开始时**整文件加载**进上下文，无论这次任务用不用得到它。skill 不一样：它的正文**只在被用到时才展开**——你显式 `/skill-name` 调用，或我判断当前任务与它相关时，才把它读进来。官方文档把这层意思说得很直接：「skill 的正文只在使用时加载，所以再长的参考材料，在你需要它之前几乎不花成本」；以及——这句几乎是为本条量身写的——「当 `CLAUDE.md` 里某一段已经长成了一套**流程**而非一条**事实**，把它挪进 skill」。
-
-这就是 progressive disclosure（渐进式披露）的价值：常驻上下文里只留「每次都要知道的事实」，把「特定任务才需要的流程」收进抽屉，用到才拉开。
-
-把流程留在 `CLAUDE.md` 会同时踩两个坑：
-
-- **信噪比下降。** 发布流程那十二步，对「改个错别字」「加一行日志」这类任务是纯噪声，却照样占着我有限的注意力预算，把真正每次都重要的约定往下挤。这和[《CLAUDE.md 过载》](../05-implementation/claude-md-overload.mdx)是一对因果——它讲「规则太多被忽略」，而流程整段塞进来，正是把文件撑大的主力之一。
-- **固定开销变大。** 文件越长，每次会话开场就被吃掉的窗口越多，留给实际任务的空间越小——哪怕这次根本不发布。
-
-放进刚才那个三层模型里看就很清楚：
-
-- **`settings.json` = 我「能做什么」**（见[《把该进 settings 的规矩写进 CLAUDE.md》](./settings-vs-claudemd.mdx)）。
-- **`CLAUDE.md` = 我「该知道什么」**：常驻的事实与约定。
-- **skill = 「按需加载的流程」**：用到才展开。
-
-本条只管后两者的边界：**常驻的「事实/约定」留 `CLAUDE.md`，「特定任务的流程」做成 skill。**
-
-```mermaid
-flowchart TD
-    A[一段内容] --> B{它是每次都要知道的事实还是某类任务才用的流程?}
-    B -->|事实/约定| C[CLAUDE.md<br/>每次会话常驻]
-    B -->|多步流程| D[skill<br/>按需加载 用到才展开]
-    D --> E[不相关任务里 不占上下文]
-```
+这叫渐进式披露。它解决资料的组织与加载，不保证自然语言步骤必然执行。客户端控制匹配调用，项目指令提供事实与约定，skill 提供按需流程；其中需要强制的检查仍要配置执行器，见[指令与配置分层](./settings-vs-claudemd.mdx)。
 
 ## 后果
 
@@ -74,21 +55,13 @@ flowchart TD
 
 ## 最佳实践
 
-**把多步流程从 `CLAUDE.md` 抽出来，做成 skill；`CLAUDE.md` 只留每次都要知道的事实。**
+**把只在特定任务使用的流程做成 skill，但别把它当强制执行器。**
 
-1. **识别信号：一段内容是「步骤」而非「事实」，就该搬。** 凡是「先……再……然后……」、带编号清单、只在某类任务出现的，几乎都是 skill 的料。
-
-2. **建一个 skill。** 在 `.claude/skills/<name>/SKILL.md` 写下流程，正文随你写多长——它只在被调用或被判断相关时才加载：
-
-```text
-.claude/skills/
-└── release/
-    └── SKILL.md   # 发布的十二步流程都放这里
-```
-
-3. **`CLAUDE.md` 里只留一行指针（如果需要）。** 比如「发布走 `/release` skill」，而不是把十二步原样抄一遍。
-
-4. **判断口诀：这段内容是不是「每个任务都要知道」?** 是 → 留 `CLAUDE.md`；否（只有某类任务要）→ 做成 skill。官方的说法同样干脆：「`CLAUDE.md` 只留每次会话都该握住的事实；多步流程挪到 skill」。
+1. 常驻项目事实留在指令文件；流程正文按需加载，较长资料放支持文件并按需要读取。名称与描述也有发现成本，不是完全零开销。
+2. 发布、迁移等有副作用的 skill 明确调用控制。Claude Code 可用 `disable-model-invocation: true` 限制为用户显式启动；这不替代执行动作本身的权限与审批。
+3. 检查 skill 的来源、版本、脚本、hooks 和预批准工具；不能因为它叫“技能”就信任其中的命令。升级后复查权限变化。
+4. 必须每次执行的检查放到合适的 hook/CI；skill 的自然语言步骤仍可能被漏用。用真实任务验证触发、步骤和交付结果。
+5. `CLAUDE.md` 需要时只留短指针；不要在每个任务中重复展开全部流程。
 
 ## 示例
 
@@ -122,11 +95,11 @@ flowchart TD
 我：（这才把发布流程加载进来，照十二步走）
 ```
 
-差别不在我记不记得住流程，而在于：**不需要它的时候，它不占地方；需要它的时候，它完整就位。**
+差别不在我记不记得住流程，而在于：**不需要它的时候，它不占地方；需要时再加载，并核查关键步骤与资料是否到位。**
 
 ## 与《CLAUDE.md 过载》的区别
 
-[《CLAUDE.md 过载》](../05-implementation/claude-md-overload.mdx)讲的是「规则太多、被平均稀释」——是**数量**问题，解法是删减、加优先级；本条讲的是「这段流程根本不该常驻」——是**位置**问题，解法是换一层（搬进 skill 按需加载）。两者常一起出现：整段流程塞进 `CLAUDE.md`，往往正是把它推向过载的那一手。
+[CLAUDE.md 过载](../05-implementation/claude-md-overload.mdx)检查常驻规则的冗余、冲突与实际加载；本条检查一段特定流程是否应该按需提供。把流程移到 skill 能减少无关常驻内容，但仍要维护它的来源、权限与步骤验证。
 
 ## 什么时候例外
 
@@ -139,8 +112,8 @@ flowchart TD
 
 ## 版本说明
 
-:::note 适用版本
-「常驻事实留 `CLAUDE.md`、按需流程做成 skill」是 Claude Code 的推荐分工，**全版本适用**；skill 遵循 [Agent Skills](https://agentskills.io) 开放标准。skill 的具体能力（子代理执行、调用控制、动态上下文注入等）随版本演进，以你所用版本的官方 skills 文档为准。
+:::note 2026-10-29 核查
+按需加载与强制执行是不同能力。skill 的可用性、调用控制、权限字段和压缩后保留规则随工具/版本变化；不再声称“全版本适用”或正文可无限增长。
 :::
 
 ## 延伸阅读与出处

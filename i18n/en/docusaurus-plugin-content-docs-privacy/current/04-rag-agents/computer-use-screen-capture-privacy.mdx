@@ -1,5 +1,5 @@
 ---
-title: "Computer-use screen-capture privacy: to operate the UI, I take the whole screen in — including everything unrelated to the task"
+title: "Computer-use screen-capture privacy: the captured display, window, or region can exceed the task’s needs"
 slug: computer-use-screen-capture-privacy
 sidebar_label: Computer-use screen-capture privacy
 sidebar_position: 8
@@ -17,32 +17,35 @@ sources:
   - { title: "OpenAI, Operator System Card (2025-01-23: CUA reads screenshots to operate GUIs, takeover mode hands sensitive input to the user, watch mode requires human supervision, monitor model, screenshot injection classifier)", url: "https://openai.com/index/operator-system-card/" }
   - { title: "OpenAI, Introducing Operator (research preview: in takeover mode Operator does not collect / screenshot the user's entered sensitive info; sensitive sites require watch-mode supervision)", url: "https://openai.com/index/introducing-operator/" }
   - { title: "OWASP Top 10 for LLM Applications 2025 — LLM02:2025 Sensitive Information Disclosure + LLM01:2025 Prompt Injection", url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf" }
+verified_at: 2026-10-29
+review_after: 2026-11-29
+review_triggers: [vendor_documentation_change, permission_or_runtime_change]
 ---
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="Volume 4 · RAG and agents" technique="RAG & agent privacy" audience={['Security Engineer', 'Privacy Engineer']} severity="High" maturity="Production" evidence="Official docs" />
 
-> In one sentence: a GUI / computer-use agent works by **repeatedly taking screenshots** — see the screen, then click and type. What it sees isn't "the task-relevant patch" but **everything currently displayed**: other open apps, pop-up notifications, background documents, other browser tabs, other people's data on a shared / screen-shared display, even a password manager that happens to be visible. All of it rides the screenshot into the model — **ambient private data far beyond what the task needs**. This isn't injection (that goes to [Agent tool exfiltration](./agent-tool-exfiltration.mdx)) and it isn't MCP data flow ([MCP data flow & least collection](./mcp-data-flow-privacy.mdx)); it's **input-surface over-capture**: the screenshot is a firehose of ambient private data. Conclusion first: Anthropic's computer use tool and OpenAI's Operator have both shipped, and both flag this surface in their own docs (keep sensitive data off-screen, isolate in a dedicated VM, hand sensitive input to a human, supervise on sensitive sites). The real boundary isn't "the model looks at less on its own" — it's the **capture surface**: get the unrelated and sensitive stuff off the screen before you screenshot it.
+> In one sentence: GUI agents send captured interface content to the model; **clicking a task button does not mean the image contains only task-required data**. The host determines the surface: a display, dedicated VM, browser viewport, window, or region. Do not equate them all with the user’s entire host desktop. Check actual payloads and authorized surfaces, then isolate, clear, or mask unrelated sensitive content before sending it.
 
 ## Mechanism: what happens on my side
 
-At the core of computer-use is an agent loop: I request a `screenshot`, your environment renders **the whole currently-displayed screen** into an image and returns it, I use that to decide where to click and what to type, then I screenshot again to see the result — and so on until the task is done. Anthropic's docs put it bluntly: a screenshot is to "See what's currently displayed on screen"; the newer `zoom` action can even re-view a region at **full resolution** to read small text. OpenAI's CUA works the same way — it operates a GUI's buttons, menus, and text fields by reading **screenshots**.
+In a screenshot-based agent loop, I request an observation; the application captures an image and returns it, then executes clicks / typing from tool calls. **I receive the surface supplied by the host.** Anthropic’s current `computer_toolset_20260801` docs define `screenshot` as the full display and `zoom` as a specified region; your application executes the tools in its environment. This does not make every browser-use or window-use implementation able to see every app on the user’s host computer.
 
-The crux: **a screenshot captures the whole display, not "the little patch relevant to the task."** Whatever else is open at that moment — the inbox preview in a mail client, a Slack / SMS notification in the corner, a background contract PDF you left open, a medical record in another browser tab — if it's visible, it's in the image, and it rides that tool call into the model.
+The key is that **capture scope can exceed task scope**. A full display can contain notifications and other visible windows; one window or browser viewport can still contain unrelated sidebars, tab titles, or personal data on the same page. Hidden text in inactive tabs and covered windows is not automatically in a screenshot merely because those surfaces are open. DOM / accessibility text sent separately by the host is another data flow to audit.
 
-To be clear about the red line: I shouldn't write "I'll look at the task-relevant content and filter out unrelated private stuff on my own" — **what I look at and what gets sent isn't something I select by intent while reasoning.** It's a data transfer determined by "which slice of screen your environment screenshots for me." What's externally observable and reproducible is the **screenshot payload itself**: it contains everything on screen at capture time, and it lands in this API request and the pipeline that processes it — auditable frame by frame, region by region, independent of whether I "want to look only at what's relevant." One-line test: the predicate must be something others can observe from outside (what's actually in the image), not something only I "know" (which part I should look at).
+Externally testable evidence is the screenshot payload, selected display / window / tab / region, and any accompanying text. The model may request a region, but the host must authorize and crop before capture / transmission. “I will ignore unrelated areas” is not minimization. **Redacting the final answer cannot recall an image already sent to a model provider.**
 
 ```mermaid
 flowchart TB
-    subgraph SCREEN["the whole screen at capture time"]
+    subgraph SCREEN["Actual host-authorized capture surface"]
       T["task-relevant window<br/>(the UI I need to operate)"]
       I1["unrelated apps / background docs"]
       I2["notification pop-ups<br/>(email / IM / SMS previews)"]
-      I3["other tabs / other people's data<br/>(shared screen · projected)"]
+      I3["Visible tab titles / third-party data<br/>(when within the capture surface)"]
       I4["credentials that happen to be visible<br/>(password manager · login page)"]
     end
-    SCREEN -->|"screenshot action<br/>captures the whole display"| SHOT["screenshot payload<br/>(everything on screen, not filtered by intent)"]
+    SCREEN -->|"Capture display / window / region"| SHOT["Actual screenshot payload<br/>(check task-required scope)"]
     SHOT --> M["sent to the model + pipeline"]
     M --> LOOP["click / type from image → screenshot again"]
     LOOP -.->|"agent loop screenshots repeatedly"| SCREEN
@@ -62,7 +65,7 @@ No attacker required — **the act of capturing itself** pulls ambient private d
 
 **Boundaries** (drawing lines against the two nearest entries):
 
-- **This entry vs [Agent tool exfiltration](./agent-tool-exfiltration.mdx)**: that one is **attacker-driven** injection → sending private data **out** through a tool (action / output side); this one is **attacker-free input-surface over-capture** — to operate the UI, taking the whole screen (including unrelated / sensitive content) **in** (input side). Opposite directions.
+- **This entry vs [Agent tool exfiltration](./agent-tool-exfiltration.mdx)**: that one is **attacker-driven** injection → sending private data **out** through a tool (action / output side); this one is **attacker-free input-surface over-capture** — to operate the UI, taking unrelated / sensitive data from the captured surface **in** (input side). Opposite directions.
 - **This entry vs [MCP data flow & least collection](./mcp-data-flow-privacy.mdx)**: that one is about the host handing **context-field slices** to each MCP server per protocol and consent (structured data flow); this one is about the **screen-pixel** input path — the unit of collection is "visible screen region," not "context field," and the minimization moves differ too (clear the desktop / isolate a VM, rather than narrowing fields per server).
 
 ## What protects it
@@ -80,7 +83,8 @@ The boundary made explicit: **these are "narrow the capture surface + hand sensi
 ## Implementation (recipe)
 
 ```text
-1. Dedicated isolated environment: run computer-use in a separate VM / container +
+1. Record which display / VM / window / tab / region the host captures and any extra
+   text it sends. Then run computer-use in a separate VM / container +
    separate user profile, minimal privileges; keep only the task window on the desktop,
    not sharing the screen with personal mail / medical records / source code.
    (Matches Anthropic security precaution #1)
@@ -106,25 +110,25 @@ Bind every step to **your own inventory of sensitive surfaces** — without spel
 
 **Minimal testable assertion** (turn "how much gets captured in" into a regression audit, don't stop at "we isolated the environment"):
 
-- How to test: on a **controlled** desktop, run a representative computer-use task and persist every screenshot payload it actually emits; run **region / surface recognition** on the images — do any show apps outside the task window, notification pop-ups, credential views, or (in projection scenarios) other people's windows; and construct a "login / payment" step to verify it switches to human takeover and that **no** screenshot is produced during takeover.
+- How to test: in a controlled environment, place synthetic canaries inside the authorized region, in an unrelated visible window, and outside the captured surface. Inspect actual frames, selected scope, and accompanying text. Test human takeover for sensitive input and verify whether this implementation pauses screenshots and other input collection. Restrict and promptly delete audit samples.
 - Passes: the visible content in every screenshot ⊆ the windows / regions the task requires (no out-of-bounds apps, no notifications, no credentials, no third-party data); the sensitive-input step goes through human takeover with zero screenshots during takeover. Both assertions green.
 - Fails: screenshots show apps / notifications / credentials / other people's windows outside the task, or the sensitive input got screenshotted directly → narrow the desktop (clear the stage / isolated profile / dedicated VM), change that step to human takeover, downgrade that site to watch mode.
 
 ## Real-world state / vendor reality (Production: shipped computer-use / Operator + their official privacy & safety guidance)
 
-Let me be honest up front (this is the accuracy bar for this entry): for the **pure over-capture** angle, as of this timestamp (2026-06) there is **no public, confirmed postmortem of an actual victim breach** — reported computer-use / GUI-agent incidents are mostly the **attacker-driven** screen-content injection path, which belongs to [Agent tool exfiltration](./agent-tool-exfiltration.mdx). So this entry's `maturity=Production` is **not** backed by a specific breach, but by "the capability has shipped + is broadly available + vendor docs spell these capture-surface risks out as explicit warnings and product mechanisms":
+This section gives vendor capability and control examples, **not a list of confirmed over-capture incidents**. `maturity=Production` reflects shipped capabilities and official documentation, not verification of every host’s capture scope or privacy controls:
 
-- **Anthropic — Computer use tool (official docs, beta, updated with each model).** The docs define a screenshot as "See what's currently displayed on screen," and give four **security precautions**: (1) use a **dedicated VM / container** with minimal privileges; (2) **don't give the model access to sensitive data** (such as account login information) to prevent information theft; (3) restrict internet access to a **domain allowlist** to reduce exposure to malicious content; (4) ask a human to **confirm** decisions with **real-world consequences** and actions requiring affirmative consent. The docs also state that screenshots / mouse / keyboard input are **captured and stored by your environment** (not retained by Anthropic), and that a classifier runs **on the screenshot side** — steering the model to **ask for user confirmation** when it flags a suspected injection. This is the vendor's explicit acknowledgment of "capture-surface over-capture + screen-content risk."
+- **Anthropic — Computer use tool (current docs, checked 2026-10-29).** In `computer_toolset_20260801`, `screenshot` captures the full display and `zoom` a specified region. The application executes tools, produces images, and returns them to the API. Verify how that display relates to the user’s host desktop, along with image history, logs, and backend terms. **Local screenshot generation does not mean the provider neither processes nor retains it.**
 - **Anthropic Privacy Center — What personal data Computer use processes (official).** A dedicated page explains that computer use captures / processes **screenshots and mouse, keyboard input**, and describes its processing and backend retention — turning "what this input surface collects" into a user-facing privacy statement.
 - **OpenAI — Operator / CUA (Operator System Card, 2025-01-23; research preview).** CUA operates GUIs by **reading screenshots**; OpenAI wraps the sensitive surface in several mechanisms: **takeover mode** — for sensitive input like login / payment, it asks the user to take over, and **during takeover it doesn't collect or screenshot the user's input**; **watch mode** — sensitive sites like email / finance require user supervision and pause when the user leaves; plus a **monitor model**, **proactive refusal** of high-risk tasks, and an **injection classifier** for screen content. These are precisely the productized form of this entry's "hand sensitive input to a human, supervise on sensitive sites, clear the capture surface."
 
-The common landing point: **both vendors have shipped computer-use, and both treat "a screenshot takes everything on screen in" as a privacy / safety surface to actively manage — using isolated environments, human takeover, and human supervision to narrow the capture surface, rather than assuming the model looks only at what's relevant.** This input surface is auditable frame by frame and determined by environment and product design.
+These examples show that environment and product design can narrow capture. **The images and accompanying data actually sent** are the audit evidence. Operator remains a January 2025 historical example, not a claim that today’s computer-use products all share its takeover or supervision mechanisms.
 
 ## Residual risk and trade-offs
 
 Puncturing false security, point by point:
 
-- **"I only did task-relevant actions, so I only looked at relevant content" is wrong.** A screenshot captures the **whole display**, not "the patch I operated on." As long as unrelated / sensitive content was visible at the time, it's in the image and gets sent — independent of which actions I took. This is the single most important misjudgment in this entry.
+- **Operating only task controls is not collecting only task data.** Inspect actual surfaces and payloads; one window can still contain unrelated sidebars or notifications. Conversely, do not count an uncaptured host desktop or hidden tab text as data collected by a screenshot.
 - **Isolated VMs / stage-clearing have a cost, and it isn't zero.** A dedicated VM / clean profile adds setup and ops friction; many real tasks **need** access to the user's own logged-in state, files, and mailbox, and clearing those off the screen entirely makes the task impossible — so you trade off "usable" against "captures less," using takeover / watch mode to backstop the most sensitive parts rather than wiping everything wholesale.
 - **Human takeover / supervision fatigues and can be bypassed.** takeover / watch mode rely on a human stepping in at the critical moment; approval fatigue, wandering attention, or a task engineered to pop takeover frequently all lead to careless approval. They reduce risk; they don't give an absolute boundary.
 - **Notifications are a fleeting high-risk surface.** A pop-up visible only for the instant of capture is enough to be frozen in; without "do not disturb" mode, a one-time code / DM / email preview can land in the frame at any moment — and this kind of leak is the hardest to notice after the fact.
@@ -142,7 +146,7 @@ Puncturing false security, point by point:
 ## Version notes
 
 :::note Applicable versions
-"computer-use works by taking screenshots over and over → everything on screen (including unrelated / sensitive content) gets captured into the model" is a **vendor-independent**, paradigm-level conclusion (the root cause is the "screen pixels as input" interaction style). But the **specific mechanisms** inside — Anthropic computer use's security precautions and screenshot-side injection classifier, its backend retention / ZDR arrangements, OpenAI Operator's takeover / watch mode and monitor model — **evolve by version, and vendor implementations change fast**: this entry is verified against Anthropic's computer use tool docs and privacy page, OpenAI's Operator System Card (**2025-01-23**) and Introducing Operator, and OWASP's LLM Top 10 2025, timestamped **2026-06**; computer-use features are still largely in beta / research preview, so base any deployment decision on the **current** vendor docs, their defaults, and your own capture-surface audit. (Sources verified 2026-06; WebFetch returned 403 on OpenAI's official pages — Operator's takeover / watch-mode descriptions were cross-verified against its official pages and multiple third-party accounts.)
+This revision checks Anthropic’s current capture actions and application execution boundary as of **2026-10-29**, distinguishes display / window / tab / region, and revises payload tests. The OpenAI Operator System Card (**2025-01-23**), launch announcement, and earlier vendor privacy examples retain their original timestamps as historical controls. **Current defaults, retention, and availability across all products were not re-verified.** Audit actual tool versions and captured surfaces rather than inferring host-desktop visibility from “computer use.”
 :::
 
 ## Further reading and sources

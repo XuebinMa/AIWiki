@@ -428,6 +428,19 @@
     "retargeted",
     "tokenless",
     "pasteable",
-    "metacharacter"
+    "metacharacter",
+    "CIMD",
+    "MRTR",
+    "PMPA",
+    "PMPA's",
+    "Unmodeled",
+    "indistinguishability",
+    "prespecified",
+    "reflogs",
+    "unsandboxed",
+    "worktree",
+    "worktrees",
+    "Bugbot",
+    "modelcontextprotocol"
   ]
 }

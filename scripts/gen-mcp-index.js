@@ -17,11 +17,13 @@
  */
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const REPO = path.resolve(__dirname, '..');
 const OUT_FILE = path.join(REPO, 'static/api/index.json');
+const V2_OUT_FILE = path.join(REPO, 'static/api/index-v2.json');
 const SITE = 'https://xuebinma.github.io/AIWiki';
-const RAW_BASE = 'https://raw.githubusercontent.com/XuebinMa/AIWiki/main';
+const RAW_REPO = 'https://raw.githubusercontent.com/XuebinMa/AIWiki';
 const EXCLUDE_DIRS = new Set(['_templates']);
 const DOC_EXT = /\.mdx?$/;
 const NUMBER_PREFIX = /^\d+-/;
@@ -63,12 +65,13 @@ function frontmatter(text) {
 }
 
 function scalar(fm, key) {
-  const m = fm.match(new RegExp(`^${key}:\\s*(.+)$`, 'm'));
+  // These helpers parse inline values only; whitespace must not consume the next field.
+  const m = fm.match(new RegExp(`^${key}:[ \\t]*(.+)$`, 'm'));
   return m ? m[1].trim().replace(/^["']|["']$/g, '') : undefined;
 }
 
 function list(fm, key) {
-  const m = fm.match(new RegExp(`^${key}:\\s*\\[(.*?)\\]`, 'm'));
+  const m = fm.match(new RegExp(`^${key}:[ \\t]*\\[(.*?)\\]`, 'm'));
   if (!m) return [];
   return m[1]
     .split(',')
@@ -78,7 +81,7 @@ function list(fm, key) {
 
 // 正文里的「一句话摘要」引用块；没有则回退 frontmatter description。
 function summaryOf(text, fm) {
-  const m = text.match(/^>\s*一句话摘要[：:]\s*([\s\S]*?)(?=\n[^>]|\n$)/m);
+  const m = text.match(/^>[ \t]*一句话摘要[：:][ \t]*([^\n]*(?:\n>[ \t]*[^\n]*)*)/m);
   if (m) {
     return m[1]
       .split('\n')
@@ -90,9 +93,9 @@ function summaryOf(text, fm) {
   return scalar(fm, 'description') || '';
 }
 
-// 英文镜像的摘要块是 "> One-line summary:" 或原样中文标记的直译；宽松匹配。
+// 兼容项目规范的 In one sentence 与早期的 One-line summary。
 function summaryOfEn(text, fm) {
-  const m = text.match(/^>\s*(?:One-line summary|一句话摘要)[：:]\s*([\s\S]*?)(?=\n[^>]|\n$)/m);
+  const m = text.match(/^>[ \t]*(?:In one sentence|One-line summary|一句话摘要)[：:][ \t]*([^\n]*(?:\n>[ \t]*[^\n]*)*)/im);
   if (m) {
     return m[1]
       .split('\n')
@@ -114,7 +117,11 @@ function routeOf(instance, relFile, slug) {
   return `${instance.routeBase}/${[...cleanDirs, slug].join('/')}`;
 }
 
-function build() {
+function build({ sourceCommit = '' } = {}) {
+  if (sourceCommit && !/^[a-f0-9]{40}$/i.test(sourceCommit)) {
+    throw new Error('sourceCommit must be a full Git commit SHA');
+  }
+  const rawBase = `${RAW_REPO}/${sourceCommit || 'main'}`;
   const entries = [];
   for (const inst of INSTANCES) {
     const srcBase = path.join(REPO, inst.src);
@@ -133,15 +140,17 @@ function build() {
       const enFile = path.join(enBase, relFile);
       let titleEn = '';
       let summaryEn = '';
+      let enFm = '';
       if (fs.existsSync(enFile)) {
         const enText = fs.readFileSync(enFile, 'utf8');
-        const enFm = frontmatter(enText);
+        enFm = frontmatter(enText);
         titleEn = scalar(enFm, 'title') || '';
         summaryEn = summaryOfEn(enText, enFm);
       }
 
       entries.push({
-        id: slug.replace(/^\//, '') || 'privacy-intro',
+        id: `${inst.subject}:${slug.replace(/^\//, '') || 'privacy-intro'}`,
+        legacy_id: slug.replace(/^\//, '') || 'privacy-intro',
         subject: inst.subject,
         kind: inst.isEntry(fm) ? 'entry' : 'page',
         title,
@@ -149,14 +158,26 @@ function build() {
         summary: summaryOf(text, fm),
         summary_en: summaryEn,
         tags: list(fm, 'tags'),
+        tags_en: list(enFm, 'tags'),
         phase: scalar(fm, 'phase') || '',
         severity: scalar(fm, 'severity') || '',
         evidence: scalar(fm, 'evidence') || '',
+        verified_at: scalar(fm, 'verified_at') || '',
+        review_after: scalar(fm, 'review_after') || '',
+        review_triggers: list(fm, 'review_triggers'),
+        source_version: scalar(fm, 'source_version') || '',
+        maturity: scalar(fm, 'maturity') || '',
+        maturity_en: scalar(enFm, 'maturity') || '',
+        technique: scalar(fm, 'technique') || '',
+        attack_surface: scalar(fm, 'attack_surface') || '',
+        audience: list(fm, 'audience'),
+        era: scalar(fm, 'era') || '',
+        sources: [...fm.matchAll(/\burl:\s*["']([^"']+)["']/g)].map((m) => m[1]),
         url: `${SITE}${route}`,
         url_en: `${SITE}/en${route}`,
-        raw: `${RAW_BASE}/${inst.src}/${relFile.split(path.sep).join('/')}`,
+        raw: `${rawBase}/${inst.src}/${relFile.split(path.sep).join('/')}`,
         raw_en: fs.existsSync(enFile)
-          ? `${RAW_BASE}/${inst.en}/${relFile.split(path.sep).join('/')}`
+          ? `${rawBase}/${inst.en}/${relFile.split(path.sep).join('/')}`
           : '',
       });
     }
@@ -166,15 +187,40 @@ function build() {
   return entries;
 }
 
-const entries = build();
-const out = {
-  site: SITE,
-  spec: 'aiwiki-index-v1',
-  count: entries.length,
-  entries,
-};
-fs.mkdirSync(path.dirname(OUT_FILE), { recursive: true });
-fs.writeFileSync(OUT_FILE, JSON.stringify(out, null, 2) + '\n');
-console.log(
-  `✓ static/api/index.json 生成：共 ${entries.length} 条（entry ${entries.filter((e) => e.kind === 'entry').length} / page ${entries.filter((e) => e.kind === 'page').length}）`,
-);
+function buildIndex({ sourceCommit = process.env.GITHUB_SHA || '' } = {}) {
+  const hash = crypto.createHash('sha256');
+  for (const inst of INSTANCES) {
+    for (const dir of [inst.src, inst.en]) {
+      for (const file of collect(path.join(REPO, dir)).sort()) {
+        hash.update(path.relative(REPO, file)).update('\0').update(fs.readFileSync(file)).update('\0');
+      }
+    }
+  }
+  const entries = build({ sourceCommit });
+  return {
+    site: SITE,
+    spec: 'aiwiki-index-v2',
+    source_revision: `sha256:${hash.digest('hex')}`,
+    source_commit: sourceCommit || null,
+    count: entries.length,
+    entries,
+  };
+}
+
+function toLegacyIndex(index) {
+  return {
+    ...index,
+    spec: 'aiwiki-index-v1',
+    entries: index.entries.map((entry) => ({ ...entry, canonical_id: entry.id, id: entry.legacy_id })),
+  };
+}
+
+if (require.main === module) {
+  const out = buildIndex();
+  fs.mkdirSync(path.dirname(OUT_FILE), { recursive: true });
+  fs.writeFileSync(V2_OUT_FILE, JSON.stringify(out, null, 2) + '\n');
+  fs.writeFileSync(OUT_FILE, JSON.stringify(toLegacyIndex(out), null, 2) + '\n');
+  console.log(`✓ MCP v2 索引与兼容 v1 索引生成：共 ${out.count} 条（entry ${out.entries.filter((e) => e.kind === 'entry').length} / page ${out.entries.filter((e) => e.kind === 'page').length}）`);
+}
+
+module.exports = { build, buildIndex, toLegacyIndex, summaryOf, summaryOfEn, frontmatter, scalar, list, collect, INSTANCES };

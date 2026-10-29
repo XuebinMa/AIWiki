@@ -60,5 +60,11 @@ jobs:
       - name: 手写计数一致性（core-20 / CLAUDE.md 现状 vs 实际条目数）
         run: npm run check:counts
 
+      - name: 内容交付（真实索引、双语摘要/来源/元数据、机制索引覆盖）
+        run: npm run check:content
+
+      - name: MCP 回归（含真实内容索引与跨主题取文）
+        run: npm run test:mcp
+
       - name: 构建（两 locale；连带校验 MDX / import / 死内链）
         run: npm run build

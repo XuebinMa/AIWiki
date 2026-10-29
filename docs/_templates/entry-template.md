@@ -10,6 +10,9 @@ evidence: 经验观察            # 证据类型，取 sources 里最强一类�
 tags: [上下文管理]            # 检索用标签
 sources:                      # 出处，至少一条可核查链接；没有可靠来源的内容不要写
   - { title: "来源标题", url: "https://..." }
+verified_at: "YYYY-MM-DD"     # 实际核验日期，填完占位；不是创建日期
+source_version: "受测产品 / 规范 / 论文版本"
+review_triggers: [来源修订, 适用行为变化]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';

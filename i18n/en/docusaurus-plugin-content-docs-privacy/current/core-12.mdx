@@ -3,12 +3,15 @@ title: "The essential 12"
 slug: core-12
 sidebar_position: 0.5
 sidebar_label: The essential 12
-description: If you only read 12 entries, read these — the high-priority picks from all 44, ranked by "engineers hit it earliest + the false security costs the most."
+description: If you only read 12 entries, read these — the high-priority picks from the full collection, ranked by "engineers hit it earliest + the false security costs the most."
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: [source_revision, evidence_or_threat_model_change]
 ---
 
 # The essential 12
 
-All [44 entries](./map.mdx) too many, and no idea where to start? Read these 12 first.
+Too many [entries in the catalog](./map.mdx), and no idea where to start? Read these 12 first.
 
 **How they were picked** (stated up front, so this doesn't become a subjective list): take the `severity: high` entries first, then rough-rank along two axes — **engineers building LLM features hit it earliest**, and **its false security costs the most** (once data crosses the boundary, it doesn't come back). Three entries are severity "medium" but belong to the governance and formal-defense basics you'll get wrong in your very first project if you skip them (data boundary, machine unlearning, DP) — they made the cut too. Finish these 12 and you've dodged the most common, most expensive privacy false-security beliefs.
 
@@ -32,7 +35,7 @@ To understand **why** these leaks happen, go to the [Mechanism index](./mechanis
 
 - [A single instruction hidden in content can drive me to send private context out through a tool — zero-click exfiltration has hit mainstream products.](./04-rag-agents/agent-tool-exfiltration.mdx)
 - [System prompts / conversation context / tool results are not secrets — they can be coaxed out.](./03-conversational-llms/context-surface-privacy.mdx)
-- [My "thinking" isn't private — the more I reason, the more leaks.](./03-conversational-llms/reasoning-trace-leakage.mdx)
+- [Visible reasoning text can expose sensitive data — distinguish raw traces, summaries, and hidden reasoning, then audit actual exposure paths.](./03-conversational-llms/reasoning-trace-leakage.mdx)
 
 ## Formal guarantees, used correctly
 

@@ -1,65 +1,50 @@
 ---
-title: Claude Code 权限配置模板：安全默认的 deny / ask / allow
+title: "Claude Code 权限配置模板：交互审批起点"
 slug: permissions-config
 sidebar_position: 1
 tags: [模板, 权限, 安全]
+verified_at: 2026-10-29
+source_version: "Claude Code permissions and sandbox documentation 2026-10-29"
+review_after: 2026-11-29
+review_triggers: [vendor_documentation_change, permission_or_runtime_change]
+sources:
+  - { title: "Configure permissions (Claude Code)", url: "https://code.claude.com/docs/en/permissions" }
+  - { title: "Configure the sandboxed Bash tool (Claude Code)", url: "https://code.claude.com/docs/en/sandboxing" }
 ---
 
-> 一句话摘要：一份可直接粘进 `settings.json` 的 `permissions` 块——`deny` 钉死绝不能碰的操作，`ask` 把写入 / 推送 / 装依赖卡在确认上，`allow` 放行高频只读操作。复制进项目的 `.claude/settings.json`，再按你的技术栈删改几行即可。
+> 一句话摘要：这份模板是 Claude Code 的交互审批起点。它拦截匹配到的工具调用；文件与网络是否真正隔离，还要检查沙箱、凭据和 MCP 的边界。复制前先确认当前权限模式，别把命令清单当成完整安全边界。
+
+## 模板本体
 
 ```json
 {
   "permissions": {
     "deny": [
-      "Bash(rm -rf:*)",
-      "Bash(sudo:*)",
-      "Bash(dropdb:*)",
-      "Bash(dropdb)",
-      "Bash(curl:*)",
-      "Bash(wget:*)",
-      "Bash(nc:*)",
-      "Bash(ssh:*)",
-      "Bash(git push --force:*)",
-      "Bash(git push -f:*)",
-      "Read(./.env)",
-      "Read(./.env.*)",
-      "Read(./**/.env)",
-      "Read(./secrets/**)",
-      "Read(./**/*.pem)",
-      "Read(./**/id_rsa)",
-      "Read(./**/*credentials*)"
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(secrets/**)",
+      "Bash(rm *)",
+      "Bash(sudo *)",
+      "Bash(dropdb *)"
     ],
     "ask": [
-      "Write",
       "Edit",
-      "Bash(git commit:*)",
-      "Bash(git push:*)",
-      "Bash(git reset --hard:*)",
-      "Bash(npm install:*)",
-      "Bash(npm i:*)",
-      "Bash(pnpm add:*)",
-      "Bash(yarn add:*)",
-      "Bash(pip install:*)",
-      "Bash(npx:*)",
-      "Bash(docker:*)",
-      "Bash(make:*)"
+      "Write",
+      "Bash(git branch *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git reset *)",
+      "Bash(npm *)",
+      "Bash(pnpm *)",
+      "Bash(npx *)"
     ],
     "allow": [
       "Read",
       "Glob",
       "Grep",
-      "Bash(ls:*)",
-      "Bash(cat:*)",
       "Bash(pwd)",
       "Bash(git status)",
-      "Bash(git status:*)",
-      "Bash(git diff:*)",
-      "Bash(git log:*)",
-      "Bash(git branch:*)",
-      "Bash(git show:*)",
-      "Bash(npm run test:*)",
-      "Bash(npm run lint:*)",
-      "Bash(npm run build:*)"
+      "Bash(git diff)"
     ]
   }
 }
@@ -67,43 +52,38 @@ tags: [模板, 权限, 安全]
 
 ## 怎么用
 
-放进**项目根**的 `.claude/settings.json`（跟队友共享、进版本库），或个人级的 `~/.claude/settings.json`。三类规则按 **`deny` → `ask` → `allow`** 顺序匹配——先撞上哪条算哪条，所以红线永远盖过放行。
+放进项目的 `.claude/settings.json`，或按当前官方文档调整为个人配置。匹配时 `deny` 优先于 `ask`，`ask` 优先于 `allow`；最终行为还受权限模式、托管策略和沙箱设置影响。
 
-**`deny`：钉死绝不能碰的操作。** 这一档不是「问一下」，是「根本不让发生」。
-
-- `rm -rf` / `sudo` / `dropdb` —— 一旦执行就不可逆。我可能把相对路径误判成根目录、把测试库当成生产库，钉死它们是为了在我出错的那一刻没有「手滑」的空间。
-- `curl` / `wget` / `nc` / `ssh` —— 切断对外通信这条腿。我读你的文件，文件里可能藏着不是你写的指令（间接提示注入）；只要我同时能接触私有数据、读不可信内容、又能对外发请求，攻击者就有机会借我的手把数据送出去。拆掉对外通信，这条链就断了。
-- `git push --force` —— 覆盖远程历史、可能抹掉别人的提交，归到不可逆那一类。
-- 读 `.env` / `secrets/**` / 私钥 / 凭据文件 —— 不是不让改，是**根本不读进上下文**。读进来就可能被我顺手写进日志、贴进报错、或在注入场景下外传。源头堵住最干净。
-
-**`ask`：把有副作用的操作卡在确认上。** 写文件、改文件、提交、推送、装依赖、跑容器——这些保留一次人工确认，正是你那道「最后复核」。装依赖单列是因为它是供应链入口：我可能幻觉出一个不存在的包名，而那个名字恰好被人抢注了恶意包（slopsquatting）。`npx` 会直接拉远程代码执行，归进同一档。
-
-**`allow`：放行高频只读操作。** 只读、无副作用、你不会想逐次点确认的——读文件、搜代码、看 `git` 状态与 diff、跑测试 / lint / build。把它们放出来，确认弹窗才会只在真正要紧时出现，不至于让你陷入「无脑点同意」的确认疲劳。
-
-**按你的栈改三处：**
-
-1. 把 `npm run` 那几行换成你项目真实的脚本名（`pytest`、`cargo test`、`go build`…）。
-2. 包管理器只留你在用的那个（用 `pnpm` 就删掉 `npm i` / `yarn add` 那几行）。
-3. 有额外的危险 CLI（自家部署脚本、`terraform apply`、`kubectl delete`…）就补进 `deny` 或 `ask`。
-
-要无人值守跑（跳过这些确认），别在主力机器上裸跑——放进隔离沙箱 / 一次性容器，让环境替你兜住爆炸半径。完整的权衡见[《一上来就把所有权限都给我》](../00-setup-collaboration/over-permissioning.mdx)。
-
+- **先核查命令会做什么。** `git branch` 既能列分支，也能删除或重置分支，所以这里整类保留确认。`npm test`、lint、build 都能执行仓库脚本、读凭据或联网；审过脚本及其依赖后，再按任务决定是否预批准。
+- **拒绝规则有覆盖范围。** `Bash(rm *)` 拦截匹配形式，不能保证涵盖程序的其他路径、shell 包装或间接子进程；`Read` 规则也不包住任意脚本的文件访问。命令拒绝清单不能代替 OS 级隔离。
+- **单独限制数据与出口。** 敏感文件不要挂载或注入凭据；网络出口在覆盖相应进程的环境层限制。Claude Code 的内置 shell 沙箱不覆盖 MCP、hooks 或内置文件/网页工具，见[沙箱隔离](../00-setup-collaboration/sandbox-filesystem-isolation.mdx)与[网络出口控制](../00-setup-collaboration/network-egress-control.mdx)。
+- **确认边界真的生效。** 用不含真实秘密的测试文件，检查普通读取、受保护路径、分支删除和未批准脚本分别如何处理。只检查配置能解析还不够。
 
 ## 适用边界
 
 ### 适合什么时候用
 
-- 团队共享的项目，想要一份带安全默认的 `permissions` 起点。
-- 半自动协作：你愿意为写入 / 推送 / 装依赖保留一次人工确认。
+- 愿意对写入、版本控制变更和仓库脚本保留交互审批的本地协作。
+- 团队需要一份可裁剪、可验证的权限配置起点。
 
 ### 不适合什么时候用
 
-- 要无人值守批量跑——该靠隔离沙箱 / 一次性容器兜住爆炸半径，而不是靠这份 `ask` 清单。
-- 你的技术栈与示例差异很大时（先按下面替换，别直接套用）。
+- 把它直接当作无人值守执行或阻断外泄的完整策略。
+- 把这一份 Claude Code 配置原样用于其他工具或不同权限模式。
 
 ### 使用前请替换
 
-- 把 `npm run` 那几行换成项目真实脚本名（`pytest`、`cargo test`…）。
-- 包管理器只留你在用的那个，删掉其余。
-- 把你自己的危险 CLI（`terraform apply`、`kubectl delete`、自家部署脚本）补进 `deny` 或 `ask`。
-- 核对 `.env` / `secrets` / 私钥的路径与你仓库实际结构一致。
+- 换成仓库实际的敏感路径、包管理器与命令；审查已有 allow 规则。
+- 核查沙箱读写范围、环境变量、网络、MCP 与 hooks 各自覆盖哪些进程。
+- 对照当前官方规则语法和权限模式执行上述无敏感数据的验证。
+
+## 版本说明
+
+:::note 2026-10-29 核查
+这是审批规则示例，不保证穷尽危险动作。规则匹配、模式优先级与沙箱范围会变化，以实际安装版本的官方文档和验证结果为准。
+:::
+
+## 延伸阅读与出处
+
+- [Configure permissions](https://code.claude.com/docs/en/permissions)
+- [Configure the sandboxed Bash tool](https://code.claude.com/docs/en/sandboxing)

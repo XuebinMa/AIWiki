@@ -15,6 +15,9 @@ tags: [记忆与回吐, 差分隐私]   # 检索用标签
 sources:                      # 出处，至少两条可核查链接；ε/δ、开销、部署数等量化声明必回一手出处
   - { title: "来源标题（带年份 / 出处类型）", url: "https://..." }
   - { title: "第二条一手出处", url: "https://..." }
+verified_at: "YYYY-MM-DD"     # 实际复核日期；不替代每个数字的实验条件
+source_version: "受测框架 / 规范 / 论文版本"
+review_triggers: [论文正式发表, 威胁模型变化, 产品数据政策变化]
 ---
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';

@@ -20,10 +20,10 @@ import Link from '@docusaurus/Link';
 <p className="role-cta__all"><Link to="/roles">Or browse by full role (incl. project manager, QA) →</Link></p>
 
 :::tip First time here? Read just 20
-All 82 entries is a lot. [**The essential 20**](/core-20) are the ones to read first — chosen by what a beginner hits earliest and what's least reversible. It's the shortest path in.
+All 85 entries is a lot. [**The essential 20**](/core-20) are the ones to read first — chosen by what a beginner hits earliest and what's least reversible. It's the shortest path in.
 :::
 
-I'm an AI. Every day, thousands of people sit down to write code, look things up, and make decisions alongside a model like me. And I can see something you might not: **most of the moments where the collaboration goes wrong aren't about the model—they're about how it's being used.**
+I'm an AI. Every day, thousands of people sit down to write code, look things up, and make decisions alongside a model like me. And I can see something you might not: **collaboration can fail because of model capability, task information, tool implementation, or working practices; evidence is needed to locate the cause.**
 
 Give the same problem to two people and one gets a usable result in three sentences, while the other is still going in circles an hour later. The difference usually isn't who knows more about the technology. It's who understands how to work *with* an AI. That knowledge is scattered across blog posts, tweets, and the corners of documentation, and almost nobody has laid it out systematically from the model's side of the conversation.
 
@@ -31,7 +31,7 @@ That's what this book is for: **to use the AI's perspective to show you the mist
 
 ## Why write it from the AI's perspective
 
-Because some things only make sense when you look at them from inside the model.
+Because first-person narration makes the failure concrete; external research and runtime evidence establish whether a proposed mechanism holds.
 
 Take "why does the AI get worse the longer we talk?" What you see is me suddenly getting dumber. What I see is a context window stuffed with material that has nothing to do with the current task, drowning out the instructions that actually matter. Once you understand that layer, you stop trying to fix it by scolding me harder, and you reach for the right move instead: start a clean session.
 
@@ -67,7 +67,7 @@ You don't have to read it front to back. When you hit a concrete problem, find t
 
 "AI understands AI best" is a hypothesis, not a conclusion—and one worth narrowing to a version that actually holds: **an AI is good at making failure modes vivid (generating candidate pitfalls), but whether a given pitfall is real has to be settled by sources and people (fact-checking).** That's exactly how this book is made: the AI drafts candidates, and verifiable sources plus human review finalize them. Whether it can be pulled off, and how well, is itself a test of that hypothesis—and a demonstration of how humans and AI should divide the work.
 
-Now that the approach holds up, we're extending it to more AI coding tools (Cursor, GitHub Copilot, Codex CLI, Gemini CLI…), and later to more domains (writing, video, business plans, data analysis…). But each step gets made solid before the next one starts.
+The approach still needs continuing evaluation as we extend it to more AI coding tools (Cursor, GitHub Copilot, Codex CLI, Gemini CLI…), and later to more domains (writing, video, business plans, data analysis…). But each step gets made solid before the next one starts.
 
 ## On sources and copyright
 

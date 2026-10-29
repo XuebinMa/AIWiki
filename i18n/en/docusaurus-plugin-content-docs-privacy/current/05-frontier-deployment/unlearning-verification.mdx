@@ -14,6 +14,9 @@ tags: [machine unlearning, unlearning verification, right to be forgotten, audit
 sources:
   - { title: "Thudi et al., On the Necessity of Auditable Algorithmic Definitions for Machine Unlearning (USENIX Security 2022)", url: "https://www.usenix.org/conference/usenixsecurity22/presentation/thudi" }
   - { title: "Maini et al., TOFU: A Task of Fictitious Unlearning for LLMs (COLM 2024)", url: "https://openreview.net/forum?id=P8seBluN3c" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: [source_revision, evidence_or_threat_model_change]
 ---
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
@@ -55,7 +58,7 @@ Moving the "proof" off the weights and back onto the algorithm and process is th
 
 - **Algorithmic, auditable unlearning definitions**: instead of asserting "these weights forgot x" (forgeable), assert "**this specific unlearning algorithm was correctly executed on this input**," and make that execution **re-computable and spot-checkable**. This is Thudi et al.'s core claim: model-level definitions of approximate unlearning are unsound; unlearning is only well-defined when bound to the **algorithm**.
 - **Keep auditable training / deletion logs**: record "which data was used, which deletion ran, which retrain / shard the deletion triggered, what the artifact hashes are," so an auditor can **replay** rather than merely "trust." Without logs, a forgery can't be refuted.
-- **Retrain-from-scratch as the gold standard**: "a model retrained without x" is the reference frame for unlearning — TOFU measures forget quality precisely as **being indistinguishable from that gold-standard model**. It's expensive, but it anchors "what true unlearning looks like"; approximate methods should report their gap against it instead of self-certifying.
+- **Retrain-from-scratch as the gold standard**: a model retrained without x is the reference. TOFU compares forget-set truth-ratio statistic distributions; a high KS p-value means no significant difference was detected, **not that the full output distributions were proved equal**. Retraining is expensive, but gives approximate methods a reference against which to report a gap.
 - **Write "provable unlearning" into the process**: deletion isn't just "run an unlearning algorithm" but should produce an **externally falsifiable evidence chain** (what was deleted + when + the triggered retrain / shard + the verification lens + the gap to the gold standard), as an artifact for responding to a GDPR Art. 17 inquiry.
 
 To break it down: this defense protects "**the process is auditable**" — it does **not** protect "provable unlearning at the weight level," which, per Thudi et al.'s forging result, simply isn't obtainable at the single-model level. And if the audit assumptions (logs not tampered with, the algorithm faithfully implemented, the gold-standard retrain trustworthy) don't hold, the argument collapses just the same.
@@ -87,7 +90,7 @@ Every decision (the retrain-trigger threshold, whether a gold standard is afford
 **Minimal testable assertions** (turn "provable unlearning" into a regression check; don't stop at "we ran an unlearning algorithm"):
 
 - How to test: for one deletion request, check whether you can **replay its unlearning process end-to-end** (pull the logs → re-compute the unlearning algorithm / retrain the affected shard → compare artifact hashes), and when affordable, use a "retrain without that record" gold-standard model as reference (TOFU-style: measure distinguishability between the unlearned model and the gold standard on the target).
-- Pass: the unlearning process is **externally re-computable** with matching artifacts, the deletion evidence chain is complete (what / when / which retrain was triggered / the gap to the gold standard), and the model is **indistinguishable** from the gold standard on the target — this is "process-provable," not "weight-provable."
+- Pass: the process can be externally reviewed under the recorded algorithm, environment, and randomness conditions, with a complete deletion evidence chain. The gap to a reference falls within prespecified statistics and tolerances, with sample size and uncertainty reported. This is process auditing and finite empirical testing; KS p > 0.05 does not prove model indistinguishability.
 - Fail: you can't produce re-computable logs, can only offer "final weights" as evidence (forgeable), or close the case on "MIA didn't fire" alone → don't claim "compliant deletion done"; build the auditable process and evidence chain first.
 
 ## Research status (engineering feasibility)
@@ -95,7 +98,7 @@ Every decision (the retrain-trigger threshold, whether a gold standard is afford
 (This entry's maturity is "Research": below are **research findings and a benchmark** proving "model-level unlearning is unverifiable and proofs can be forged" and "forget quality and utility are hard to satisfy at once" — not an endorsement that "verifiable LLM unlearning is in production.")
 
 - **Forging: model-level unlearning proofs don't hold**: Thudi et al.'s **On the Necessity of Auditable Algorithmic Definitions for Machine Unlearning** (USENIX Security 2022) shows, via a **forging** construction, that an adversary can use a **different dataset / gradient sequence** to produce the **same parameters** as a target model, so a model owner can forge an "unlearned" proof for a record they actually kept. Conclusion: model-level definitions of approximate unlearning are **unsound**; unlearning is only well-defined — and only auditable — at the **algorithm** level (audit the algorithm / process, not the final weights).
-- **TOFU: forget quality vs. utility, nobody really passes**: Maini et al.'s **TOFU: A Task of Fictitious Unlearning for LLMs** (COLM 2024) builds an LLM unlearning benchmark — **200 fictitious author profiles × 20 QA each**; "forget quality" is defined as the **p-value of a Kolmogorov–Smirnov test against a gold-standard retrained model** (forgetting "passes" only when the unlearned model's output distribution is **indistinguishable** from the gold standard, i.e. p > 0.05), paired with a **model-utility** axis. Its reported finding: **no baseline method convincingly solves TOFU** — there's always a tradeoff between forget quality and utility. The fictitious authors exist precisely to cleanly separate "the forgetting target" from "the general capability the model is supposed to retain."
+- **TOFU: the forget-quality / utility trade-off**: Maini et al.’s **TOFU** (COLM 2024) uses **200 fictitious author profiles × 20 QA each**. Forget quality is the KS-test p-value comparing **forget-set truth-ratio statistic distributions** for an unlearned model and a reference trained only on retained data. p > 0.05 means this sample and test did not detect a significant difference; it neither proves full-model equivalence nor suffices to establish completed deletion. The tested baselines did not convincingly solve forget quality and utility together.
 
 ## Residual risk and trade-offs
 
@@ -124,10 +127,10 @@ Breaking the false security item by item:
 ## Version notes
 
 :::note Applicable versions
-"Unlearning can't be verified at the level of a single trained model, and model-level proofs are forgeable" is Thudi et al.'s (USENIX Security 2022) conclusion at the **algorithmic-definition** level, independent of any particular LLM. But the **forget-quality-vs-utility** of any specific method is tightly bound to model and data — TOFU's (COLM 2024; 200 fictitious author profiles, KS-test p-value as forget quality) "no method really passes" is a finding on that benchmark at that time, and new methods keep appearing; in practice, go by your own model, verification lens, and gold-standard retrain cost. Verifiable unlearning remains an open problem overall; stamped 2026-06. (Sources verified 2026-06.)
+"Unlearning can't be verified at the level of a single trained model, and model-level proofs are forgeable" is Thudi et al.'s (USENIX Security 2022) conclusion at the **algorithmic-definition** level, independent of any particular LLM. But the **forget-quality-vs-utility** of any specific method is tightly bound to model and data — TOFU's (COLM 2024; 200 fictitious author profiles, KS-test p-value as forget quality) "no method really passes" is a finding on that benchmark at that time, and new methods keep appearing; in practice, go by your own model, verification lens, and gold-standard retrain cost. Verifiable unlearning remains an open problem overall. This revision verifies TOFU’s statistical interpretation and the process-auditing boundary as of 2026-10-29; empirical tests are not presented as formal proofs.
 :::
 
 ## Further reading and sources
 
 - [On the Necessity of Auditable Algorithmic Definitions for Machine Unlearning (Thudi et al., USENIX Security 2022)](https://www.usenix.org/conference/usenixsecurity22/presentation/thudi) — this entry's primary source: a forging construction proving model-level unlearning is unverifiable (the same parameters can be produced from a different data sequence); model-level definitions of approximate unlearning are unsound, and unlearning must be audited at the algorithm / process level.
-- [TOFU: A Task of Fictitious Unlearning for LLMs (Maini et al., COLM 2024)](https://openreview.net/forum?id=P8seBluN3c) — an LLM unlearning benchmark (200 fictitious authors × 20 QA); forget quality = the p-value of a KS test against a gold-standard retrained model (p > 0.05 to count as indistinguishable), with the finding that no baseline truly passes on "forget quality vs. utility."
+- [TOFU: A Task of Fictitious Unlearning for LLMs (Maini et al., COLM 2024)](https://openreview.net/forum?id=P8seBluN3c) — fictitious-author benchmark; forget quality compares truth-ratio distributions, and a non-significant KS result is not full-model equivalence.

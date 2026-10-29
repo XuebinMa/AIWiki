@@ -1,5 +1,5 @@
 ---
-title: "Computer-use 屏幕捕获隐私：为了操作界面，我把整个屏幕都看进去了——包括与任务无关的一切"
+title: "Computer-use 屏幕捕获隐私：实际捕获的显示、窗口或区域可能超出任务所需"
 slug: computer-use-screen-capture-privacy
 sidebar_label: Computer-use 屏幕捕获隐私
 sidebar_position: 8
@@ -17,32 +17,35 @@ sources:
   - { title: "OpenAI, Operator System Card（2025-01-23：CUA 靠截屏解读 GUI、takeover 交人输入敏感信息、watch mode 人监督、monitor model、截屏注入分类器）", url: "https://openai.com/index/operator-system-card/" }
   - { title: "OpenAI, Introducing Operator（research preview：takeover mode 下不采集 / 不截屏用户输入的敏感信息、sensitive site 需 watch mode 监督）", url: "https://openai.com/index/introducing-operator/" }
   - { title: "OWASP Top 10 for LLM Applications 2025 — LLM02:2025 Sensitive Information Disclosure + LLM01:2025 Prompt Injection", url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf" }
+verified_at: 2026-10-29
+review_after: 2026-11-29
+review_triggers: [vendor_documentation_change, permission_or_runtime_change]
 ---
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="卷四 · RAG 与 Agent" technique="RAG 与 Agent 隐私" audience={['安全工程师', '隐私工程师']} severity="高" maturity="生产" evidence="官方文档" />
 
-> 一句话摘要：GUI / computer-use agent 的工作方式，就是**反复截屏**——先看清屏幕、再点鼠标敲键盘。它看的不是「任务相关的那一块」，而是**当前屏幕上显示的一切**：其他打开的应用、弹出的通知、后台的文档、别的浏览器标签、共享屏 / 投屏时同框的他人数据、乃至恰好可见的密码管理器。这些都随截图一起被送进模型——**远超任务所需的环境私有数据**。这不是注入（注入归《[Agent 工具外联外泄](./agent-tool-exfiltration.mdx)》），也不是 MCP 数据流（归《[MCP 数据流与最小采集](./mcp-data-flow-privacy.mdx)》），而是**输入面本身的过采集**：截屏是一条环境隐私的消防水管。结论先行：Anthropic 的 computer use 工具与 OpenAI 的 Operator 都已发货、也都在官方文档里点破了这一面（把敏感数据挪出屏幕、专用 VM 隔离、敏感输入交人接管、sensitive site 要人监督）。真正的边界不在「模型自觉少看」，而在**捕获面**：截屏前先把无关的、敏感的东西请出这块屏幕。
+> 一句话摘要：GUI agent 会把捕获的界面内容作为模型输入；**点击的是任务按钮，不代表图片只含任务所需数据**。但捕获范围取决于 host：整块 display、专用 VM、浏览器视口、窗口或局部区域，不能一概说成用户宿主桌面的整屏。先核实际 payload 与授权捕获面，再在发送前清场、隔离或遮挡无关敏感内容。
 
 ## 机制：我这边发生了什么
 
-computer-use 的核心是一个 agent loop：我请求一次 `screenshot`、你的环境把**当前显示的整块屏幕**渲染成图片回给我，我据此判断点哪里、敲什么，然后再截一张看结果——如此往复直到任务完成。Anthropic 官方文档把这个动作写得很直白：截屏就是「看到屏幕上当前显示的内容（See what's currently displayed on screen）」；较新的 `zoom` 动作甚至能把某个区域按**全分辨率**再看一遍，好认清小字。OpenAI 的 CUA 同理——靠解读**截屏**来操作 GUI 的按钮、菜单、文本框。
+在基于截图的 agent loop 中，我请求观察界面，应用实际捕获图片并送回模型，再按工具调用执行点击 / 输入。**host 提供什么捕获面，我就收到什么图片**。Anthropic 当前 `computer_toolset_20260801` 文档把 `screenshot` 定义为捕获整个 display，`zoom` 则只取指定 region；工具由你的应用在其环境中执行。这不代表任一 browser-use / window-use 实现都会看到用户宿主机所有应用。
 
-关键在于：**截屏捕获的是整块显示，而不是「与任务相关的那一小块」**。屏幕上此刻还开着什么——邮件客户端的收件箱预览、右下角弹出的 Slack / 短信通知、后台没关的一份合同 PDF、另一个浏览器标签里的病历——只要它可见，就在这张图里，就随这次工具调用被送进模型。
+关键在于**捕获范围和任务范围可能不相等**。全 display 捕获可能包含同屏通知、其他可见窗口；单窗口或浏览器视口仍可能包含无关侧栏、标签标题或同页个人信息。非活动标签的隐藏正文、被遮住的窗口内容，不会仅因它们「已打开」就自动出现在截图里；若 host 还发送 DOM / 可访问性文本，那是须另审的数据流。
 
-红线说清楚：这里不该写「我会挑任务相关的内容看、自动过滤掉无关的隐私」——**我看什么、送什么，不是我在推理时凭意图挑选的**，而是「你的环境把哪块屏幕截给我」决定的一次数据传输。可外部观测、可复算的是那张**截图 payload 本身**：它包含了截取时刻屏幕上的一切，落进这次 API 请求、以及处理它的那条链路——这可以逐帧审计、逐区域比对，与我「想不想只看相关内容」无关。判据一句话：谓语必须是别人能从外部看到的（截图里到底有什么），而不是我自己「知道该看哪里」。
+可外部核验的是截图 payload、所选 display / window / tab / region 及实际发送的附加文本。模型可能请求某个区域，但授权和裁剪必须由 host 在捕获 / 发送前执行；不能把「我会忽略无关区域」当作最小化。**事后在答案中脱敏，不能撤回已传给模型供应商的图片。**
 
 ```mermaid
 flowchart TB
-    subgraph SCREEN["截取时刻的整块屏幕"]
+    subgraph SCREEN["host 实际授权的捕获面"]
       T["任务相关窗口<br/>（我要操作的界面）"]
       I1["无关应用 / 后台文档"]
       I2["通知弹窗<br/>（邮件 / IM / 短信预览）"]
-      I3["其他标签 / 他人数据<br/>（共享屏 · 投屏同框）"]
+      I3["可见标签标题 / 他人数据<br/>（进入捕获面时）"]
       I4["恰好可见的凭据<br/>（密码管理器 · 登录页）"]
     end
-    SCREEN -->|"screenshot 动作<br/>捕获整块显示"| SHOT["截图 payload<br/>（含屏上一切，非按意图筛选）"]
+    SCREEN -->|"捕获 display / window / region"| SHOT["实际截图 payload<br/>（核是否超出任务所需）"]
     SHOT --> M["送进模型 + 处理链路"]
     M --> LOOP["据图点击 / 输入 → 再截一张"]
     LOOP -.->|"agent loop 反复截屏"| SCREEN
@@ -62,7 +65,7 @@ flowchart TB
 
 **边界**（和相邻两条划清界线）：
 
-- **本条 vs《[Agent 工具外联外泄](./agent-tool-exfiltration.mdx)》**：那条是**有攻击者**的注入→经工具外联把私有数据**发出去**（行动 / 输出侧）；本条是**无攻击者**的**输入面过采**——为了操作界面，把整屏（含无关 / 敏感内容）**看进来**（输入侧）。方向相反。
+- **本条 vs《[Agent 工具外联外泄](./agent-tool-exfiltration.mdx)》**：那条是**有攻击者**的注入→经工具外联把私有数据**发出去**（行动 / 输出侧）；本条是**无攻击者**的**输入面过采**——为了操作界面，把捕获面中的无关 / 敏感内容**看进来**（输入侧）。方向相反。
 - **本条 vs《[MCP 数据流与最小采集](./mcp-data-flow-privacy.mdx)》**：那条讲 host 按协议与同意把**上下文字段切片**交给各 MCP server（结构化数据流）；本条讲**屏幕像素**这一路输入——采集单位是「屏上可见区域」而非「上下文字段」，最小化手段也不同（清桌面 / 隔离 VM，而非按 server 收窄字段）。
 
 ## 防护原理
@@ -80,7 +83,8 @@ flowchart TB
 ## 落地实现（配方）
 
 ```text
-1. 专用隔离环境：computer-use 跑在独立 VM / 容器 + 独立用户 profile，最小权限；
+1. 先记录 host 实际捕获的是哪个 display / VM / window / tab / region，及附加文本。
+   再用独立 VM / 容器 + 独立用户 profile，最小权限；
    桌面只留任务窗口，不与私人邮件 / 病历 / 源码同屏。（对应 Anthropic 安全须知第 1 条）
 2. 高敏输入交人接管：登录 / 支付 / 验证码等步骤切到「人接管」，由人直接敲、不经模型；
    接管期间不截屏、不采集用户输入。（对应 Operator takeover mode）
@@ -98,25 +102,25 @@ flowchart TB
 
 **最小可测试断言**（把「截进来多少」收成可回归的审计，别停在「我们隔离了环境」）：
 
-- 怎么测：在**受控**桌面上跑一段代表性 computer-use 任务，落盘它实际发出的每张截图 payload；对截图做**区域 / 面识别**——是否出现任务窗口之外的应用、通知弹窗、凭据界面、或（投屏场景下）他人窗口；同时构造一次「登录 / 支付」步骤，验证它是否切到人接管、且接管期间**没有**产生截图。
+- 怎么测：在受控环境把合成 canary 分别放进授权区域、同屏无关窗口和未捕获区域；核每帧实际 payload、捕获面与附加文本。构造高敏输入的人接管步骤，验证该实现是否暂停截图及其他输入采集；审计样本限权、限期删除。
 - 通过：每张截图里的可见内容 ⊆ 任务所必需的窗口 / 区域（无越界应用、无通知、无凭据、无他人数据）；高敏输入步骤走人接管且接管期零截图。两条断言全绿。
 - 失败：截图里出现任务外的应用 / 通知 / 凭据 / 他人窗口，或高敏输入被直接截进图 → 收窄桌面（清场 / 隔离 profile / 专用 VM）、把该步骤改成人接管、把该站点降级到 watch mode。
 
 ## 真实案例 / 厂商现状（生产：已发货的 computer-use / Operator + 其官方隐私·安全警示）
 
-诚实先讲清楚（这是本条的准确门槛）：**「纯捕获过采」这一角度，截至本段打戳（2026-06）尚无一起公开、已证实的真实受害泄露复盘**——已见诸报道的 computer-use / GUI-agent 事故，多是「有攻击者」的屏幕内容注入路径，那属于《[Agent 工具外联外泄](./agent-tool-exfiltration.mdx)》。所以本条 `maturity=生产`，**不是**由某次泄露支撑，而是由「能力已发货 + 广泛可用 + 厂商官方文档把这些捕获面风险写成明文警示与产品机制」支撑：
+本节是厂商能力与控制方式的例子，**不是已确认过采事故清单**。`maturity=生产` 由已交付能力和官方文档支撑，不表示每个 host 的捕获范围或隐私控制已验证：
 
-- **Anthropic —— Computer use 工具（官方文档，beta，随模型持续更新）。** 官方把截屏定义为「看到屏幕上当前显示的内容」，并给出四条**安全须知**：① 用最小权限的**专用 VM / 容器**；② **别给模型访问敏感数据**（如账户登录信息）以防信息被窃取；③ 把上网限到**域名 allowlist** 以减少接触恶意内容；④ 对有**现实后果**的决定与需明确同意的动作要**人确认**。文档还说明：截屏 / 鼠标 / 键盘输入**由你的环境捕获与存储**（不由 Anthropic 保存），并在**截屏侧**跑注入分类器——命中疑似注入时会**要求用户确认**再继续。这些正是官方对「捕获面过采 + 屏幕内容风险」的明文承认。
+- **Anthropic —— Computer use 工具（当前文档，核验 2026-10-29）。** `computer_toolset_20260801` 的 `screenshot` 捕获 full display，`zoom` 捕获指定区域；应用负责执行工具、生成图片并返回 API。应验证实际 display 与用户宿主桌面的关系，并核截图历史、日志和后端条款；**本地生成截图不等于供应商侧不处理 / 不留存**。
 - **Anthropic Privacy Center —— Computer use 会处理哪些个人数据（官方）。** 专页说明 computer use 会捕获 / 处理**截屏与鼠标、键盘输入**，并交代其处理与后端保留安排——把「这条输入面会采集什么」写成了面向用户的隐私说明。
 - **OpenAI —— Operator / CUA（Operator System Card，2025-01-23；research preview）。** CUA 靠**解读截屏**操作 GUI；OpenAI 为敏感面配了多层机制：**takeover mode**——遇登录 / 支付等敏感输入请用户接管，且**接管期间不采集、不截屏用户输入的内容**；**watch mode**——邮件 / 金融等 sensitive site 要求用户监督、离开即暂停；外加 **monitor model**、对高风险任务的**主动拒绝**、以及针对屏幕内容的**注入分类器**。这几条恰是本条「敏感输入交人、敏感站点人监督、清场捕获面」的产品化背书。
 
-共同的落点：**两家都已把 computer-use 发货，也都在官方材料里把「截屏会把屏上一切看进去」当成要主动管的隐私 / 安全面——用隔离环境、人接管、人监督来收窄捕获面，而不是假设模型只看相关处。** 这条输入面可逐帧审计、由环境与产品设计决定。
+这些例子说明捕获面可以通过环境与产品设计收窄；**实际送出的图片和附加数据**才是审计对象。Operator 的描述保留为 2025-01 历史产品示例，不据此断言今天所有 computer-use 产品的接管或监督机制相同。
 
 ## 残余风险与权衡
 
 逐条点破假安全：
 
-- **「我只做了任务相关的操作，所以只看了相关内容」是错的。** 截屏捕获的是**整块显示**，不是「我操作的那一块」。只要无关 / 敏感内容当时可见，它就在图里、就被送出——与我执行了哪些动作无关。这是本条最核心的误判。
+- **「只操作任务按钮」不等于「只采集任务内容」。** 必须查看实际捕获区域与 payload；即使只截一个窗口，无关侧栏与通知仍可能入图。反过来，不能把未捕获的宿主桌面或隐藏标签正文算作已被截图收集。
 - **隔离 VM / 清场有代价，且不是零成本。** 专用虚拟机 / 干净 profile 增加搭建与运维摩擦；很多真实任务恰恰**需要**访问用户自己的登录态、文件、邮箱，把这些从屏上彻底清走就做不成任务——于是要在「可用」与「少截」之间权衡，用 takeover / watch mode 兜住最敏感的那部分，而非一刀切清空。
 - **人接管 / 人监督会疲劳、也可能被绕。** takeover / watch mode 靠人在关键处介入；确认疲劳、监督走神、或任务被设计得频繁弹接管，都会让人草草放行。它们降风险、不给绝对边界。
 - **通知是「一闪而过」的高危面。** 弹窗只在截取的那一瞬可见就足以被定格；没进「勿扰」模式，验证码 / 私信 / 邮件预览随时可能恰好入镜——这类泄露最难事后察觉。
@@ -134,7 +138,7 @@ flowchart TB
 ## 版本说明
 
 :::note 适用版本
-「computer-use 靠反复截屏工作 → 屏上一切（含无关 / 敏感内容）随之被捕获送进模型」是**与具体厂商无关**的范式级结论（根因在于「以屏幕像素为输入」这一交互方式）。但其中的**具体机制**——Anthropic computer use 的安全须知与截屏侧注入分类器、后端保留 / ZDR 安排，OpenAI Operator 的 takeover / watch mode 与 monitor model——**按版本演进，厂商实现变化很快**：本条依 Anthropic computer use 工具文档与其隐私专页、OpenAI Operator System Card（**2025-01-23**）与 Introducing Operator、OWASP LLM Top 10 2025 核验，打戳 **2026-06**；computer-use 功能仍多处于 beta / research preview，任何落地决策请以你查到的**当下**厂商文档、其默认设置与你自己的捕获面审计为准。（出处核验于 2026-06；WebFetch 对 OpenAI 官方页返回 403，Operator 的 takeover / watch mode 描述经其官方页与多方转述交叉核验。）
+本次于 **2026-10-29** 复核 Anthropic 当前捕获动作与应用执行边界，区分 display / window / tab / region，并修订 payload 验收。OpenAI Operator System Card（**2025-01-23**）、其发布公告与原厂商隐私说明保留原时间戳，属于历史控制示例，**未重新核定所有当前默认值、留存或产品可用性**。按实际工具版本和捕获面审计，不能由「computer-use」名称推断全宿主桌面可见。
 :::
 
 ## 延伸阅读与出处

@@ -9,7 +9,7 @@ technique: Inference Attacks
 attack_surface: Published LoRA / adapter delta
 severity: Medium
 maturity: Research
-evidence: Research-backed
+evidence: Research
 tags: [Membership Inference, LoRA, Adapter, Fine-tuning, Parameter-Efficient Fine-Tuning, Supply Chain, Differential Privacy, Privacy Engineer, ML Engineer, Security Engineer]
 sources:
   - { title: "Ran et al., LoRA-Leak: Membership Inference Attacks Against LoRA Fine-tuned Language Models (arXiv 2507.18302, 2025-07; ⚠️preprint)", url: "https://arxiv.org/abs/2507.18302" }
@@ -19,7 +19,7 @@ sources:
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
-<PrivacyMeta era="Vol. 5 · Frontier & Deployment" technique="Inference Attacks" audience={['Privacy Engineer', 'ML Engineer', 'Security Engineer']} severity="Medium" maturity="Research" evidence="Research-backed" />
+<PrivacyMeta era="Vol. 5 · Frontier & Deployment" technique="Inference Attacks" audience={['Privacy Engineer', 'ML Engineer', 'Security Engineer']} severity="Medium" maturity="Research" evidence="Research" />
 
 > In one sentence: you fine-tune with LoRA / an adapter on **private data**, then publish that delta to HuggingFace, reasoning "the base is public and I only shipped a tiny diff, so my data is safe." That comfort is false — **the published delta is exactly where the fine-tuning signal is concentrated**: the difference between the base and the fine-tuned model is itself the **fingerprint of the fine-tune data**. An attacker who holds your adapter **and** that public base can use the public base as a **reference frame** and run **membership inference / extraction** amplified by the delta. LoRA-Leak (arXiv 2507.18302, ⚠️preprint) measures it: even under conservative fine-tuning settings, membership inference still reaches **0.775 AUC**, and "use the public pre-trained model as a reference" is precisely the move that prior MIAs neglected yet that amplifies leakage. Bottom line up front: **"the delta is small / the base is public" is not privacy — the public base is a free reference in the attacker's hands that raises your members' distinguishability.**
 

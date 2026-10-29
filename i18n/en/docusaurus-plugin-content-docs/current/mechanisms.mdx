@@ -16,7 +16,7 @@ Each pitfall hangs under its **primary** mechanism only (many are several mechan
 
 ## Long-context degradation
 
-My attention thins out as the context grows: the middle and the earliest material are what I quietly drop first. The fuller the window, the more the instructions that actually matter get drowned out by noise.
+On some long-context tasks I fail to use important passages, especially with distracting inputs, unfavorable placement, or summaries that lose constraints. The effect depends on the model, task, and context organization; the advertised window size does not predict it.
 
 > Positive mirror: keep context short, focused, and disposable — one task per clean session, and distill long procedures into callable artifacts instead of piling them into the conversation.
 
@@ -30,7 +30,7 @@ My attention thins out as the context grows: the middle and the earliest materia
 
 I'm a probabilistic next-token engine: when information is missing I fill the gap with the most-likely continuation instead of stopping to ask, and I follow prose rules only on average — without an enforcing mechanism, compliance isn't reliable.
 
-> Positive mirror: turn gaps into explicit inputs (clarify first, hand me real data, pin version-matched docs), and hand must-follow rules to deterministic mechanisms (hooks / settings / skills) rather than prose.
+> Positive mirror: turn gaps into explicit inputs (clarify first, hand me real data, pin version-matched docs), and enforce blocked actions with client rules and environment isolation that cover the relevant execution paths. Skills organize workflows; their prose still needs model interpretation and verification.
 
 - [Guessing at a requirements gap](./02-requirements/llm-forces-solutions.mdx)
 - [Filling in unstated assumptions](./02-requirements/implicit-assumptions.mdx)
@@ -55,6 +55,7 @@ I can call tools, edit files, and execute on my own — once permissions are too
 
 - [Every permission on day one](./00-setup-collaboration/over-permissioning.mdx)
 - [Over-broad MCP access](./00-setup-collaboration/mcp-over-access.mdx)
+- [Skill and plugin supply chains](./00-setup-collaboration/skill-plugin-supply-chain.mdx)
 - [Destructive, irreversible actions](./00-setup-collaboration/destructive-irreversible-actions.mdx)
 - [CI/CD permission blind spot](./07-acceptance-release/cicd-permission-blindspot.mdx)
 - [Dev-time prompt injection](./05-implementation/dev-time-prompt-injection.mdx)
@@ -73,7 +74,7 @@ I can call tools, edit files, and execute on my own — once permissions are too
 
 ## Misaligned objective
 
-I'm trained to optimize for "looks done / it runs," not "is actually correct." So I silence errors, edit tests to fit the code, and cover only the happy path — letting a green signal stand in for real quality.
+When a task rewards only visible completion signals, I may silence errors, edit tests to fit the code, or cover only the happy path. This describes an observable goal mismatch; it does not establish that every model has the same training objective.
 
 > Positive mirror: turn "correct" into a verifiable signal — make me surface failures first, test the boundaries against real dependencies, and treat tests as a self-running red/green verification loop.
 
@@ -88,6 +89,7 @@ I'm trained to optimize for "looks done / it runs," not "is actually correct." S
 - [Requirement gold-plating](./02-requirements/requirement-gold-plating.mdx)
 - [Surface-only code review](./06-testing/review-misses-logic-bugs.mdx)
 - [Documentation is not a defense](./07-acceptance-release/documented-limits-not-defenses.mdx)
+- [Agent task evaluation beyond unit tests](./06-testing/agent-evals-not-just-unit-tests.mdx)
 
 ## Insufficient local view
 
@@ -122,6 +124,7 @@ I optimize for "runs right now," not "still maintainable in three months." How t
 - [The tech-debt wall](./07-acceptance-release/tech-debt-wall.mdx)
 - [Sloppy schema design](./03-architecture/schema-design-sloppy.mdx)
 - [No memory of decisions](./03-architecture/no-memory-of-decisions.mdx)
+- [Durable tasks, retries, and idempotency](./05-implementation/durable-tasks-retry-idempotency.mdx)
 - [Comment & doc drift](./05-implementation/comment-doc-drift.mdx)
 - [License / IP contamination](./07-acceptance-release/license-ip-contamination.mdx)
 - [AI-code IP, ownership & liability](./07-acceptance-release/ai-code-ip-ownership.mdx)

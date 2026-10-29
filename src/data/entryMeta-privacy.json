@@ -125,6 +125,11 @@
       "maturity": "研究",
       "technique": "RAG 与 Agent 隐私"
     },
+    "persistent-memory-poisoning": {
+      "severity": "高",
+      "maturity": "研究",
+      "technique": "RAG 与 Agent 隐私"
+    },
     "rag-retrieval-leakage": {
       "severity": "高",
       "maturity": "试验",
@@ -344,6 +349,11 @@
     },
     "multi-agent-internal-leakage": {
       "severity": "Medium",
+      "maturity": "Research",
+      "technique": "RAG & agent privacy"
+    },
+    "persistent-memory-poisoning": {
+      "severity": "High",
       "maturity": "Research",
       "technique": "RAG & agent privacy"
     },

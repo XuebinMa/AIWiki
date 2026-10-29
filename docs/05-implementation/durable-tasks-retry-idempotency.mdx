@@ -1,0 +1,108 @@
+---
+title: 任务一超时就让我重跑，却没有记录哪一步已经产生副作用
+sidebar_label: 长任务恢复与幂等
+slug: durable-tasks-retry-idempotency
+sidebar_position: 17
+roles: [工程师, 架构师, 运维工程师]
+phase: 编码实现
+severity: 高
+applies_to: "会跨会话恢复或重试外部写入的 AI 代理"
+evidence: 官方文档
+verified_at: 2026-10-29
+source_version: "MCP Tasks 2025-11-25 and 2026-07-28 extension"
+review_after: 2027-01-29
+review_triggers: [source_revision, evidence_or_threat_model_change]
+tags: [持久任务, 幂等, 重试, 检查点, 外部状态, 工程师, 架构师, 运维工程师]
+sources:
+  - { title: "Effective harnesses for long-running agents（Anthropic 工程实践）", url: "https://www.anthropic.com/research/effective-harnesses-for-long-running-agents" }
+  - { title: "Tasks（MCP 2025-11-25，实验性规范）", url: "https://modelcontextprotocol.io/specification/2025-11-25/basic/utilities/tasks" }
+  - { title: "Making retries safe with idempotent APIs（Amazon Builders' Library）", url: "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/" }
+  - { title: "MCP Tasks Extension — SEP-2663 (2026-07-28)", url: "https://tasks.extensions.modelcontextprotocol.io/seps/2663-tasks-extension" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['工程师', '架构师', '运维工程师']} phase="编码实现" severity="高" appliesTo="会跨会话恢复或重试外部写入的 AI 代理" evidence="官方文档" />
+
+> 一句话摘要：工具超时只说明我没拿到结果，不说明远端没有执行。跨会话继续一项长任务时，需要持久记录、核对外部状态，并为可重试写入定义幂等契约；把「继续」理解成「从头再来」，可能重复创建、重复通知或覆盖已经完成的工作。
+
+## 现象
+
+我替你批量生成导出。服务已经接单，回复却在网络里丢了；你看到超时，说「再试一次」。我新建了一份任务，第二份也成功。你最后收到两个结果，后台还在为两份工作计费。
+
+换成跨会话开发也一样：上一段会话已经完成迁移，新一段只看到一份模糊总结，又执行一遍。聊天里没有成功消息，系统里却早有副作用。
+
+## 为什么会这样
+
+**会话状态、任务状态与外部副作用不是同一件事。** 我的上下文能告诉我准备做什么，但远端服务才掌握写入是否发生。超时把结果变成了「未知」，不会自动变成「失败且无副作用」。Amazon 的幂等 API 工程文正是围绕这个不确定窗口展开。
+
+Anthropic 的长任务实践用进度工件帮助后续会话接续工作；MCP Tasks 则定义可查询、延后取结果的任务状态机。二者都不能单独证明你的业务写入只发生一次。**以下把持久记录、查询与幂等组合起来的配方，是工程推导，不是这些来源宣称所有产品已实现的保证。**
+
+即使本地写下「准备发送」，进程也可能在远端完成后、本地记成功前崩溃。要关掉这个窗口，得由具体服务的去重语义、事务或可靠对账来承接，不能靠我再次读一遍聊天记录。
+
+## 后果
+
+- 重试重复创建资源、通知或订单；事后撤销也未必能收回外发信息。
+- 已完成步骤被重新覆盖，后续步骤建立在错误起点上。
+- 取消请求已经发出，却仍把正在完成的副作用当作已回滚。
+- 新会话沿用过期凭据或旧授权，把恢复误当成永久许可。
+
+## 最佳实践
+
+按业务步骤记录状态，而不是只留一段自然语言总结：
+
+```text
+task_id / step_id：稳定的本地标识
+operation_key：同一业务意图重试时保持不变，不能每次随机重建
+request_digest：防止同一键被误用于不同参数
+state：未开始 / 执行中 / 成功 / 失败 / 结果未知 / 已取消
+remote_id / evidence：远端标识、查询结果或完成凭据
+next_action：可安全重试 / 先查远端 / 需要人工判定
+```
+
+在外部写入前持久记录意图。结果未知时先按远端任务 ID 或业务键查状态；服务支持幂等键时，在它规定的作用域、有效期与参数契约内重试。**只在本地生成一个键，不会让不支持去重的服务突然具备幂等性。** 无法查询或去重的不可逆写入，转入人工判定，不盲目重放。
+
+恢复时核对当前代码、远端结果与剩余授权，再决定下一步。取消后验证实际状态；取消任务不等于撤销已发生的副作用。进度记录应保存必要标识，避免把敏感请求全文复制到交接日志。
+
+## 示例
+
+**改之前：**
+
+```text
+create_export 超时 → 新会话从头执行 create_export → 创建两份导出。
+```
+
+**改之后：**
+
+```text
+持久记录本步意图与业务键 → 调用服务 → 回复丢失，状态标为「结果未知」。
+恢复：先按已有远端标识或业务键查；查到已完成，就取回结果。
+若要重试，核对服务去重契约并沿用原键；无此能力且有不可逆副作用，停给人工核对。
+完成后保存可核的远端结果，再进入下一步。
+```
+
+这是状态转换示意，不是可直接粘贴的 API 代码。字段、事务边界和失败处理要对应你真正使用的服务。
+
+## 与相邻误区的区别
+
+[自主循环失控](./runaway-agent-loops.mdx)讲循环没有停止条件而烧预算；这里即使只重试一次，也可能重复写入。[Git 卫生](./git-hygiene.mdx)保护代码改动，无法撤销已发出的通知或远端业务对象。检查点与幂等分别处理「从哪继续」和「重复会不会多做一次」。
+
+## 什么时候例外
+
+纯读取，或对同一对象执行已验证为幂等的状态设置，重试可以很简单。一次性无外部副作用的小任务，也不需要独立任务系统。判断前提是操作契约真的成立；看起来相同的参数，不一定代表相同业务意图。
+
+## 版本说明
+
+:::note 适用版本
+来源核验于 2026-10-29。MCP 的 2025-11-25 版本 Tasks 页面仍标为实验性；需要双方协商支持，不可假定任意客户端或工具都可恢复。任务 ID、轮询和延后取结果不提供业务级 exactly-once 保证。本条不声称所有 coding agent 已具备持久任务、自动恢复或幂等写入。
+:::
+
+2025-11-25 的 Tasks 页面描述的是该历史版本的实验性能力。MCP 2026-07-28 已将 Tasks 移至官方 `io.modelcontextprotocol/tasks` 扩展，能力与状态处理须按对应版本核对。客户端和服务端是否支持需要实际确认；两种版本都不提供业务级 exactly-once 执行保证。
+
+## 延伸阅读与出处
+
+- [Effective harnesses for long-running agents](https://www.anthropic.com/research/effective-harnesses-for-long-running-agents) —— 进度工件与跨会话接续的一手工程实践；不等于外部写入幂等保证。
+- [MCP Tasks — 2025-11-25](https://modelcontextprotocol.io/specification/2025-11-25/basic/utilities/tasks) —— 实验性持久任务状态、能力协商与延后取结果。
+- [Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/) —— 超时后的结果不确定、调用方意图标识与服务端幂等契约。
+
+- [MCP Tasks Extension — SEP-2663](https://tasks.extensions.modelcontextprotocol.io/seps/2663-tasks-extension) — 官方扩展与版本变化；任务编排不替代业务幂等契约。

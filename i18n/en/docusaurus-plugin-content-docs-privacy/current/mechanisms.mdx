@@ -3,14 +3,14 @@ title: "Leak-mechanism index: why it leaks"
 slug: mechanisms
 sidebar_label: Mechanism index
 sidebar_position: 9
-description: "Browse all 44 entries by leak root cause — complementary to the Privacy map's technique-board axis: boards answer \"which technique,\" this page answers \"why it leaks.\" Understand the mechanism and mitigations stop being a checklist to memorize and become common sense you can derive."
+description: "Browse all 45 entries by leak root cause — complementary to the Privacy map's technique-board axis: boards answer \"which technique,\" this page answers \"why it leaks.\" Understand the mechanism and mitigations stop being a checklist to memorize and become common sense you can derive."
 ---
 
 # Leak-mechanism index: why it leaks
 
 The [Privacy map](./map.mdx) lets you query by **technique board** (which technique) and by **threat matrix** (which leak surface worries you); this page adds a third query axis: by **leak root cause** (why it leaks).
 
-Grouping the 44 entries by root cause, you'll see that seemingly unrelated attacks share roots: training-data extraction and PII regurgitation are the same "memorization entered the weights"; gradient inversion and embedding inversion are the same "derived artifacts are still data." Once you understand the root cause, the mitigations stop being a checklist to memorize and become common sense you can derive — which is also why each entry's "residual risk" can mostly be read straight off its root cause.
+Grouping the 45 entries by root cause, you'll see that seemingly unrelated attacks share roots: training-data extraction and PII regurgitation are the same "memorization entered the weights"; gradient inversion and embedding inversion are the same "derived artifacts are still data." Once you understand the root cause, the mitigations stop being a checklist to memorize and become common sense you can derive — which is also why each entry's "residual risk" can mostly be read straight off its root cause.
 
 Each entry hangs **only under its primary mechanism** (many entries stack several mechanisms; we take the dominant one). The eight mechanisms roughly follow the data's journey: into training → inferred back out → into derived artifacts → into context → across infrastructure → through agents' hands → into whose custody → under whose terms.
 
@@ -61,9 +61,9 @@ Things processed out of raw data — gradients, intermediate activations, embedd
 
 ## 4 · Context and output channels are plaintext surfaces
 
-Whatever goes into the context window (system prompt, conversation history, tool results, few-shot examples) is plaintext to the model and can be coaxed out by end users; and output isn't just the "answer" channel — reasoning traces carry the intermediate thinking out, and computer-use screenshots pull the whole screen in. "Internal / ephemeral" doesn't mean "private."
+Whatever goes into the context window (system prompt, conversation history, tool results, few-shot examples) is plaintext to the model and can be coaxed out by end users; and output isn't just the "answer" channel — some endpoints expose a raw reasoning trace or summary, while computer-use sends images from the authorized display, window, tab, or region to the model. "Internal / ephemeral" doesn't mean "private."
 
-> Positive mirror: don't put secrets in context — the boundary belongs in backend auth and permission-scoped retrieval, not "tell the model not to say it"; treat thought traces and screen captures as leak-capable output surfaces and redact them the same.
+> Positive mirror: don't put secrets in context — the boundary belongs in backend auth and permission-scoped retrieval, not "tell the model not to say it"; check whether raw traces, summaries, and logs are accessible at the endpoint; minimize capture scope before collection, inspect screenshots before transmission, and redact exposed outputs as needed.
 
 - [Context-surface privacy](./03-conversational-llms/context-surface-privacy.mdx)
 - [Reasoning-trace leakage](./03-conversational-llms/reasoning-trace-leakage.mdx)
@@ -82,14 +82,15 @@ Once multi-tenant shared storage and caches (retrieval stores, session memory, K
 
 ## 6 · Agents carry data across the boundary
 
-Agents read external content, call tools, and connect to third-party services — injected instructions hidden in untrusted content can drive them to exfiltrate private context through tools; in multi-agent collaboration, private data flows along internal channels and leaks more than external outputs do; and every MCP server you attach widens "who gets my context." The carriage is active and at scale — that's why it's weightier than passive leakage.
+Agents read external content, call tools, and connect to third-party services — injected instructions hidden in untrusted content can drive them to exfiltrate private context through tools; in multi-agent collaboration, private data also flows along internal channels; violations depend on task purpose and recipient authorization; and every MCP server you attach widens "who gets my context." The carriage is active and at scale — that's why it's weightier than passive leakage.
 
-> Positive mirror: close off egress at the tool / rendering layer, not the instruction layer; run integrations under data minimization and audit subprocessors; redact internal channels too; run an injection-exfiltration benchmark before release.
+> Positive mirror: close off egress at the tool / rendering layer, not the instruction layer; run integrations under data minimization and audit subprocessors; check purpose and authorization for internal sharing too; audit out-of-scope acquisition, internal sharing, and injection exfiltration before release.
 
 - [Agent tool exfiltration](./04-rag-agents/agent-tool-exfiltration.mdx)
 - [MCP data flow & minimization](./04-rag-agents/mcp-data-flow-privacy.mdx)
 - [Multi-agent internal-channel leakage](./04-rag-agents/multi-agent-internal-leakage.mdx)
-- [Agent privacy benchmark (AgentDojo)](./04-rag-agents/agent-privacy-benchmark.mdx)
+- [Agent privacy evaluation](./04-rag-agents/agent-privacy-benchmark.mdx)
+- [Persistent memory poisoning](./04-rag-agents/persistent-memory-poisoning.mdx)
 
 ## 7 · Plaintext is exposed to the infrastructure operator
 

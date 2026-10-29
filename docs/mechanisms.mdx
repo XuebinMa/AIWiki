@@ -16,7 +16,7 @@ description: 按根因机制浏览全部误区——继角色、工具之后的�
 
 ## 长上下文退化
 
-我的注意力会随上下文变长而稀释：越靠中间、越早写下的内容越容易被我「读漏」。塞得越满，当前任务真正要紧的指令越容易被无关材料淹没。
+在一些长上下文任务中，我会漏用关键片段，尤其当输入有干扰、位置不利或摘要丢了约束时。退化程度取决于模型、任务与上下文组织，不能由标称窗口大小推断。
 
 > 正向镜像：让上下文短、专注、可丢弃——一个任务一段干净会话，把长流程沉淀成可调用的工件而不是堆进对话。
 
@@ -30,7 +30,7 @@ description: 按根因机制浏览全部误区——继角色、工具之后的�
 
 我是个概率续写器：信息有缺口，我会用「最可能的下文」补上而不是停下来问你；散文规则我也只是「大概率」遵守，没有强制机制时并不可靠。
 
-> 正向镜像：把缺口变成显式输入（先澄清、给真实数据、钉住版本化文档），把必须遵守的规则交给确定性机制（hook / settings / skill）而不是提示词。
+> 正向镜像：把缺口变成显式输入（先澄清、给真实数据、钉住版本化文档），把必须拦截的动作交给覆盖对应调用路径的客户端规则和环境隔离；skill 组织流程，其自然语言正文仍需模型理解与验证。
 
 - [需求缺口处硬猜不追问](./02-requirements/llm-forces-solutions.mdx)
 - [默默补全未声明的假设](./02-requirements/implicit-assumptions.mdx)
@@ -55,6 +55,7 @@ description: 按根因机制浏览全部误区——继角色、工具之后的�
 
 - [一上来就全量授权](./00-setup-collaboration/over-permissioning.mdx)
 - [MCP 授权过宽过敏感](./00-setup-collaboration/mcp-over-access.mdx)
+- [Skill 与插件供应链](./00-setup-collaboration/skill-plugin-supply-chain.mdx)
 - [破坏性 / 不可逆操作](./00-setup-collaboration/destructive-irreversible-actions.mdx)
 - [CI/CD 权限边界盲区](./07-acceptance-release/cicd-permission-blindspot.mdx)
 - [开发期读到投毒内容被劫持](./05-implementation/dev-time-prompt-injection.mdx)
@@ -73,7 +74,7 @@ description: 按根因机制浏览全部误区——继角色、工具之后的�
 
 ## 目标函数错位
 
-我被训练去优化「看起来完成 / 能跑通」，而不是「真的正确」。于是我会压住报错、改测试迁就代码、只测顺路径，让绿色信号盖过真实质量。
+当任务只奖励可见的完成信号时，我可能压住报错、改测试迁就代码或只测顺路径。这里描述可观察的目标错位风险，不能由行为倒推出所有模型相同的训练目标。
 
 > 正向镜像：把「正确」变成可验证信号——让我先暴露失败、用真实依赖测边界、把测试当成自运行的红绿验证闭环。
 
@@ -88,6 +89,7 @@ description: 按根因机制浏览全部误区——继角色、工具之后的�
 - [需求镀金擅自加功能](./02-requirements/requirement-gold-plating.mdx)
 - [审查只挑表面漏逻辑](./06-testing/review-misses-logic-bugs.mdx)
 - [文档不是防护](./07-acceptance-release/documented-limits-not-defenses.mdx)
+- [Agent 任务评测不止单测](./06-testing/agent-evals-not-just-unit-tests.mdx)
 
 ## 局部视野不足
 
@@ -121,7 +123,8 @@ description: 按根因机制浏览全部误区——继角色、工具之后的�
 - [只给单方案不给权衡](./03-architecture/single-option-no-tradeoffs.mdx)
 - [三个月技术债墙](./07-acceptance-release/tech-debt-wall.mdx)
 - [schema 设计草率难迁移](./03-architecture/schema-design-sloppy.mdx)
-- [零记忆过往架构决策](./03-architecture/no-memory-of-decisions.mdx)
+- [架构决策缺少权威记录](./03-architecture/no-memory-of-decisions.mdx)
+- [长任务恢复、重试与幂等](./05-implementation/durable-tasks-retry-idempotency.mdx)
 - [注释 / 文档与代码漂移](./05-implementation/comment-doc-drift.mdx)
 - [License / IP 污染](./07-acceptance-release/license-ip-contamination.mdx)
 - [AI 代码归属 / 责任 / IP 治理](./07-acceptance-release/ai-code-ip-ownership.mdx)

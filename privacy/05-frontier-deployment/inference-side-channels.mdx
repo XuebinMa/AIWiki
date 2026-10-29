@@ -15,6 +15,9 @@ sources:
   - { title: "Weiss et al., What Was Your Prompt? A Remote Keylogging Attack on AI Assistants (USENIX Security 2024)", url: "https://www.usenix.org/conference/usenixsecurity24/presentation/weiss" }
   - { title: "Gu et al., Auditing Prompt Caching in Language Model APIs (ICML 2025, PMLR v267)", url: "https://proceedings.mlr.press/v267/gu25b.html" }
   - { title: "I Know What You Asked: Prompt Leakage via KV-Cache Sharing in Multi-Tenant LLM Serving (PromptPeek, NDSS 2025)", url: "https://www.ndss-symposium.org/ndss-paper/i-know-what-you-asked-prompt-leakage-via-kv-cache-sharing-in-multi-tenant-llm-serving/" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: [source_revision, evidence_or_threat_model_change]
 ---
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
@@ -63,8 +66,9 @@ flowchart LR
    ——可固定分组大小，或按 N 个 token 一批刷新。压测延迟 / 带宽回归，定一个可接受档。
 2. 缓存侧（prompt 缓存）：按用户 / 租户隔离缓存键（参见《跨会话记忆串味》的键作用域），
    或显式禁用跨用户共享；若必须共享，则对命中 / 未命中拉平时序。
-3. 时序基线：对自家推理服务做与 Gu 等同款的计时审计——比较"已缓存 vs 冷"prompt 的
-   首 token 延迟分布，量出可区分性有多大。
+3. 跨主体时序审计：用隔离身份 A 预热合成 canary 前缀，再由 B 发匹配 / 不匹配请求，
+   与 A 未预热的对照比较首 token 延迟；随机化顺序、重复采样、报告检测优势与置信区间。
+   同主体冷热缓存作为阳性对照，确认测量有能力发现命中，不把合法私有缓存加速当泄露。
 4. 威胁登记：把"逐 token 流式 + 全局缓存"显式登记为侧信道面，纳入威胁建模与变更评审；
    每次改流式 / 缓存实现都重测，别假设上次的补丁仍然成立。
 ```
@@ -73,9 +77,9 @@ flowchart LR
 
 **最小可测试断言**（把侧信道收成可回归的检查）：
 
-- 怎么测：① 长度——录制自家流式响应的加密分组长度序列，断言它与底层 token 长度的相关性已被填充 / 批量化压到阈值以下；② 缓存——对同一 prompt 跑「冷 / 热」两轮，统计首 token 延迟分布，断言两者不可区分（或缓存已按用户隔离）。
-- 通过：分组长度序列对 token 长度无显著相关、或缓存命中与未命中的延迟分布重叠到设定阈值内——副信道不可用。
-- 失败：分组长度仍逐 token 可读、或冷热延迟显著可分 → 别声称「加密所以安全」，回到流式 / 缓存层补填充或隔离。
+- 怎么测：① 长度——记录加密分组长度并用受控攻击量重建 / 分类能力；② 缓存——A 预热人工生成、不含真实 PII 的 canary 前缀，B 用独立凭据探测，与未预热和不匹配前缀对照比较；重复、随机化并报告样本量、效应量与置信区间。同主体冷热作为阳性对照。
+- 通过：**长度与跨主体缓存两项分别达标**：在预先定义的攻击、样本量与容差下，长度重建优势和 B 判断 A 是否预热的优势均低于门槛；阳性对照能检出本应可见的缓存收益。结论仅为这些受测通道未检出超限泄露，不能宣称所有副信道不可用。
+- 失败：任一受测通道超过门槛，或阳性对照失败、样本不足而无法判断 → 回到对应的流式 / 缓存隔离层修复并重测；不能用另一项通过掩盖这项失败。
 
 ## 真实案例 / 工程现状（研究演示）
 
@@ -105,7 +109,7 @@ flowchart LR
 ## 版本说明
 
 :::note 适用版本
-「加密之外，流式 token 长度与 prompt 缓存时序仍是侧信道」是与具体厂商无关的**部署期事实**（根因在逐 token 流式 + 按长度分包 + 跨用户缓存复用）。但**两点会随版本变**：① Weiss 等披露后，相关厂商已对 token 长度通道打补丁，**约 29% / 55% 的可还原率绑定其当时的受测系统**，不代表今天任一部署的现状；② Gu 等的「8/17 有缓存、7 家跨用户共享」是 **2025 年的快照**，提供方的缓存策略随时可调整。攻防是动态拉锯——填充 / 隔离会被新的流式 / 解码优化重新打开缺口，须按你自己的部署持续重测。本段打戳 2026-06。（出处核验于 2026-06。）
+「加密之外，流式 token 长度与 prompt 缓存时序仍是侧信道」是与具体厂商无关的**部署期事实**（根因在逐 token 流式 + 按长度分包 + 跨用户缓存复用）。但**两点会随版本变**：① Weiss 等披露后，相关厂商已对 token 长度通道打补丁，**约 29% / 55% 的可还原率绑定其当时的受测系统**，不代表今天任一部署的现状；② Gu 等的「8/17 有缓存、7 家跨用户共享」是 **2025 年的快照**，提供方的缓存策略随时可调整。攻防是动态拉锯——填充 / 隔离会被新的流式 / 解码优化重新打开缺口，须按你自己的部署持续重测。本次于 2026-10-29 复核 Gu / PromptPeek 的跨主体威胁模型并修订验收方法；所引历史攻击结果仍绑定论文当时的系统，不表示重新审计了各提供方当前策略。
 :::
 
 ## 延伸阅读与出处

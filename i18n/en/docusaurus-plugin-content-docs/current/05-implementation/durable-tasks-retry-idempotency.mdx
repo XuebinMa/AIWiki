@@ -1,0 +1,108 @@
+---
+title: "You retry my timed-out task without recording which steps already had side effects"
+sidebar_label: Durable tasks and retries
+slug: durable-tasks-retry-idempotency
+sidebar_position: 17
+roles: [Engineer, Architect, DevOps Engineer]
+phase: Implementation
+severity: High
+applies_to: "AI agents that resume across sessions or retry external writes"
+evidence: Official docs
+verified_at: 2026-10-29
+source_version: "MCP Tasks 2025-11-25 and 2026-07-28 extension"
+review_after: 2027-01-29
+review_triggers: [source_revision, evidence_or_threat_model_change]
+tags: [durable task, idempotency, retry, checkpoint, external state, Engineer, Architect, DevOps Engineer]
+sources:
+  - { title: "Effective harnesses for long-running agents (Anthropic engineering practice)", url: "https://www.anthropic.com/research/effective-harnesses-for-long-running-agents" }
+  - { title: "Tasks (MCP 2025-11-25, experimental specification)", url: "https://modelcontextprotocol.io/specification/2025-11-25/basic/utilities/tasks" }
+  - { title: "Making retries safe with idempotent APIs (Amazon Builders' Library)", url: "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/" }
+  - { title: "MCP Tasks Extension — SEP-2663 (2026-07-28)", url: "https://tasks.extensions.modelcontextprotocol.io/seps/2663-tasks-extension" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['Engineer', 'Architect', 'DevOps Engineer']} phase="Implementation" severity="High" appliesTo="AI agents that resume across sessions or retry external writes" evidence="Official docs" />
+
+> In one sentence: a tool timeout means I did not receive a result, not that the remote operation never ran. Resuming a long task requires durable records, external-state checks, and an idempotency contract for retryable writes. Treating “continue” as “start over” can duplicate creations, notifications, or completed work.
+
+## Symptom
+
+I generate exports for you. The service accepts a job, but its response is lost. You see a timeout and say “try again.” I create another job, which also succeeds. You receive two results, and the backend charges for both.
+
+The same problem appears across coding sessions: the previous session completed a migration; the new session sees a vague summary and runs it again. The conversation lacks a success message, but the system already has the side effect.
+
+## Why this happens
+
+**Conversation state, task state, and external side effects are different things.** My context can describe what I planned; the remote service knows whether a write occurred. A timeout makes the result unknown. It does not turn it into a failure with no side effects. Amazon's idempotent API engineering article addresses this uncertainty window.
+
+Anthropic's long-running-agent work uses progress artifacts to help later sessions resume. MCP Tasks defines queryable task state machines with deferred result retrieval. Neither alone proves that your business write happens only once. **Combining durable records, queries, and idempotency below is an engineering inference, not a guarantee those sources make about every product.**
+
+Even after recording “about to send,” a process can crash after the remote operation completes but before local success is saved. Closing that gap requires the service's deduplication semantics, transactions, or reliable reconciliation. Rereading the conversation cannot supply them.
+
+## Consequences
+
+- Retrying can duplicate resources, notifications, or orders; later cancellation may not retract information already sent.
+- Replayed steps can overwrite completed work and leave later steps with the wrong starting state.
+- Sending a cancellation request can be mistaken for rollback while side effects are still completing.
+- A new session can reuse expired credentials or old authorization as though resumption were permanent permission.
+
+## What to do instead
+
+Record business-step state rather than keeping only a prose summary:
+
+```text
+task_id / step_id: stable local identifiers
+operation_key: unchanged when retrying the same business intent, not regenerated each time
+request_digest: prevent reuse of one key with different parameters
+state: not started / running / succeeded / failed / outcome unknown / cancelled
+remote_id / evidence: remote identifier, query result, or completion receipt
+next_action: safe retry / query remote state first / human reconciliation needed
+```
+
+Persist intent before an external write. If the outcome is unknown, query by the remote task ID or business key first. Where supported, retry within the service's documented key scope, lifetime, and parameter contract. **Generating a local key does not make a service without deduplication idempotent.** For irreversible writes that cannot be queried or deduplicated, request human reconciliation instead of replaying blindly.
+
+On resumption, reconcile current code, remote outcomes, and remaining authorization before choosing the next step. Verify state after cancellation; cancelling a task does not undo completed side effects. Handoff logs should retain necessary identifiers without copying sensitive request bodies unnecessarily.
+
+## Example
+
+**Before:**
+
+```text
+create_export times out → new session reruns create_export → two exports exist.
+```
+
+**After:**
+
+```text
+Persist step intent and business key → call service → response lost; mark outcome unknown.
+Resume: query using the existing remote identifier or business key; retrieve completed output.
+If retrying, verify deduplication semantics and reuse the key. Without them, stop irreversible
+replay for human reconciliation. Save verifiable remote completion before the next step.
+```
+
+This is a state-transition sketch, not executable API code. Fields, transaction boundaries, and failure handling must match the actual service.
+
+## How this differs from neighboring pitfalls
+
+[Runaway agent loops](./runaway-agent-loops.mdx) concerns missing stop conditions and wasted budget. One retry can cause a duplicate write here. [Git hygiene](./git-hygiene.mdx) protects code changes; it cannot retract a sent notification or remote business object. Checkpoints answer where to continue; idempotency answers whether repetition causes another effect.
+
+## When the exception applies
+
+Retries can be simple for reads or verified idempotent state-setting on one object. A small task with no external side effects also needs no separate task system. The operation's contract must actually support that judgment: identical parameters need not mean identical business intent.
+
+## Version notes
+
+:::note Applicable versions
+Sources verified on 2026-10-29. The Tasks page for MCP 2025-11-25 still marks the feature experimental. Support must be negotiated; do not assume any client or tool can resume. Task IDs, polling, and deferred results do not guarantee business-level exactly-once effects. This entry does not claim all coding agents implement durable tasks, automatic recovery, or idempotent writes.
+:::
+
+The 2025-11-25 Tasks page describes that historical experimental version. MCP 2026-07-28 moves Tasks into the official `io.modelcontextprotocol/tasks` extension, with its own capability and state handling. Check the protocol version and support on both sides; neither revision supplies business-level exactly-once execution.
+
+## Further reading and sources
+
+- [Effective harnesses for long-running agents](https://www.anthropic.com/research/effective-harnesses-for-long-running-agents) — first-party practice for progress artifacts and session handoffs, not an external-write idempotency guarantee.
+- [MCP Tasks — 2025-11-25](https://modelcontextprotocol.io/specification/2025-11-25/basic/utilities/tasks) — experimental durable task state, capability negotiation, and deferred results.
+- [Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/) — uncertain timeout outcomes, caller intent identifiers, and server-side idempotency contracts.
+
+- [MCP Tasks Extension — SEP-2663](https://tasks.extensions.modelcontextprotocol.io/seps/2663-tasks-extension) — Official extension and version changes; task orchestration does not replace business idempotency.
