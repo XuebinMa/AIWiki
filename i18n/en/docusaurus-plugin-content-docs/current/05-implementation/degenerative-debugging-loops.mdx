@@ -10,16 +10,20 @@ applies_to: "All coding agents"
 evidence: Research
 tags: [debugging, self-correction, verification loop, runtime feedback, engineer]
 sources:
+  - { title: "Claude Code checkpointing", url: "https://code.claude.com/docs/en/checkpointing" }
   - { title: "Large Language Models Cannot Self-Correct Reasoning Yet (ICLR 2024)", url: "https://arxiv.org/abs/2310.01798" }
   - { title: "TraceCoder: A Trace-Driven Multi-Agent Framework for Automated Debugging of LLM-Generated Code (arXiv 2602.06875)", url: "https://arxiv.org/abs/2602.06875" }
   - { title: "MIRAGE-Bench: LLM Agent is Hallucinating and Where to Find Them (arXiv 2507.21017)", url: "https://arxiv.org/abs/2507.21017" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["Editing, compaction, memory, or checkpoint recovery changes", "Task contract, verification evidence, or concurrent writing changes"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['Engineer']} phase="Implementation" severity="High" appliesTo="All coding agents" evidence="Research" />
 
-> In one sentence: when a bug stumps me, I tend to decide "this is that kind of bug I've seen before" and keep applying the same fix. With no real runtime information to anchor me, each "fix" is really a patch based on a guess — and the more I patch, the messier it gets, until the code is worse than where it started.
+> In one sentence: I may repeat failed fixes without new evidence or a record of rejected hypotheses; each debugging attempt should connect a testable judgment to a new observation, with reassessment when attempts repeat.
 
 ## Symptom
 
@@ -31,20 +35,11 @@ This is **not** the same as [over-correcting](./over-correcting.mdx) — the dir
 
 ## Why this happens
 
-The core is one line: **my self-correction has no reliable runtime truth to anchor it.** The truth of a bug lives at runtime — which exact line threw, how the stack unwound, what that failing assertion expected versus actually got. I often don't have these. Without runtime truth, all I can do is substitute "this error looks like a class I saw in training" for "what actually happened this time," so I lock into a familiar pattern (pattern locking) and reapply the same kind of fix.
+I may keep editing without recording hypotheses, failure evidence, or rejected fixes. Another attempt then adds no information and may introduce more variables, making it hard to identify which change mattered.
 
-Research has measured exactly how fragile "correcting myself by myself" is: in an *intrinsic* self-correction setting, with no external feedback and only the model's own judgment of right and wrong, post-correction performance often drops rather than rises — I can't reliably tell what was wrong with my last answer, so I drift further off (see *Large Language Models Cannot Self-Correct Reasoning Yet*). Applied to debugging, TraceCoder's observation is more concrete: a bare "pass / fail" signal is nowhere near enough to localize the cause, which is why it first instruments the code, captures fine-grained execution traces, and only then does causal analysis — **a fix without an execution trace is a guess.**
+The ICLR 2024 study examines intrinsic self-correction without external feedback. TraceCoder studies fine-grained traces and failure history in its evaluated debugging workflow; MIRAGE-Bench distinguishes actions unfaithful to instructions, history, and observations. These support preserving evidence and history; **they do not prove all current models cannot self-correct or that debugging without a runtime trace is impossible**. Compiler diagnostics, static analysis, contracts, and minimal counterexamples can also be decisive evidence.
 
-Multi-step execution adds another layer. MIRAGE-Bench sorts an agent's "hallucinated actions" into three kinds: unfaithful to the task instruction, unfaithful to the execution history, unfaithful to the environment observation. The last two are exactly what my degenerative loop looks like — forgetting what I tried a few rounds ago (unfaithful to execution history) and misreading the output you pasted back (unfaithful to the environment). Each round I keep reasoning on top of an increasingly untrustworthy "what I think happened," so of course I contradict myself and spin.
-
-```mermaid
-flowchart TD
-    A["bug is stuck"] --> B{"do I have runtime truth?<br/>stack / logs / failing assertion"}
-    B -- no --> C["lock into a familiar pattern<br/>patch on assumptions"]
-    C --> D["symptom not fixed<br/>or new bug introduced"]
-    D -- misread feedback / forgot what was tried --> C
-    B -- yes --> E["localize the real cause<br/>fix to the point"]
-```
+Each repair should connect a testable hypothesis to a new observation. When required evidence is unavailable, disclose the limit and stop repeating the same ineffective action.
 
 ## Consequences
 
@@ -104,8 +99,8 @@ The difference isn't that I'm "smarter this time" — it's that you put the runt
 
 ## Version notes
 
-:::note Applicability
-"Self-correction degenerates when runtime truth is missing" is a model-mechanism phenomenon, **applicable across models and coding agents**, independent of any specific version. The tools that help you break the loop (`/rewind`, `Esc` checkpoint rollback, letting me run commands to get real output) evolve across versions — defer to the official docs for the version you use — but the underlying trait, "without runtime truth I can only guess, and guessing degrades," does not change.
+:::note Applicable versions
+Verified the three studies and current checkpoint documentation on 2026-10-29. Results are limited to their models, tasks, and feedback settings; two or three failures can trigger reassessment, not a universal optimal count. Inspect the current diff and checkpoint scope before rollback, preserving user/concurrent work. Shell and external-service side effects are not automatically undone.
 :::
 
 ## Further reading and sources
@@ -114,3 +109,4 @@ The difference isn't that I'm "smarter this time" — it's that you put the runt
 - [TraceCoder: A Trace-Driven Multi-Agent Framework for Automated Debugging of LLM-Generated Code (arXiv 2602.06875)](https://arxiv.org/abs/2602.06875) — bare pass/fail signals are not enough to localize a cause; fine-grained execution traces are needed
 - [MIRAGE-Bench: LLM Agent is Hallucinating and Where to Find Them (arXiv 2507.21017)](https://arxiv.org/abs/2507.21017) — an agent's hallucinated actions: unfaithful to execution history / environment observation
 - On this site: [over-correcting](./over-correcting.mdx) (the human-driven correction loop, a mirror image of this one), [kitchen-sink session](./kitchen-sink-session.mdx)
+- [Claude Code checkpointing](https://code.claude.com/docs/en/checkpointing)

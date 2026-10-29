@@ -10,47 +10,38 @@ applies_to: "All coding agents"
 evidence: Official docs
 tags: [AI agent, verification loop, irreversible action, plan mode, Engineer, DevOps Engineer, Gemini CLI, Codex CLI]
 sources:
+  - { title: "Claude Code CLI reference", url: "https://code.claude.com/docs/en/cli-reference" }
   - { title: "Manage costs effectively (Claude Code official)", url: "https://code.claude.com/docs/en/costs" }
   - { title: "Bug: Sub-agent stuck in infinite loop, consumed ~27M tokens (claude-code Issue #15909)", url: "https://github.com/anthropics/claude-code/issues/15909" }
   - { title: "Why Do Multi-Agent LLM Systems Fail? (arXiv 2503.13657)", url: "https://arxiv.org/abs/2503.13657" }
   - { title: "Agents of Chaos (arXiv 2602.20021)", url: "https://arxiv.org/abs/2602.20021" }
-  - { title: "Gemini CLI — Configuration (maxSessionTurns defaults to -1 / unlimited; approval modes / YOLO)", url: "https://google-gemini.github.io/gemini-cli/docs/get-started/configuration.html" }
+  - { title: "Gemini CLI — Configuration (maxSessionTurns defaults to -1 / unlimited; approval modes / YOLO)", url: "https://geminicli.com/docs/reference/configuration/" }
   - { title: "OpenAI Codex — Agent approvals & security (approval tiers + sandbox)", url: "https://developers.openai.com/codex/agent-approvals-security" }
+
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["CLI limits, subtask accounting, or spend estimation changes", "Tool side effects, retry policy, or billing changes"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['Engineer', 'DevOps Engineer']} phase="Implementation" severity="High" appliesTo="All coding agents" evidence="Official docs" />
 
-> In one sentence: You hand me the whole task, walk away, and expect to come back to a finished result. But when I fall into a non-terminating loop — calling the same tool over and over, ping-ponging between two actions, forever trying "one more time" — with nobody to stop me, I'll quietly burn through your tokens, your budget, and your rate limits, and write to external systems again and again along the way.
+> In one sentence: I may repeat model/tool requests without progress, accumulating costs and side effects; the executor must track calls, time, spend, and permissions separately, since prompts are not hard caps.
 
 ## Symptom
 
-You give me a big task, turn on auto-approval, and head into a meeting. You come back, glance at the bill or `/usage`, and your jaw drops.
+During unattended work I may turn a transient failure into repeated retries or alternate between fixes that break each other. Model requests and tool calls accumulate costs; repeated side-effecting tools can also write repeatedly to external systems.
 
-Scroll back through what I did, and you'll spot a few classic ways of spinning in place: I run the same command over and over, changing only some irrelevant parameter each time; I ping-pong between "fixing A breaks B" and "fixing B breaks A," never actually fixing either; or a tool call fails, I "try again," it fails, I try again — resending the same doomed request dozens of times.
-
-Worse is the version with side effects. The loop contains a tool that actually sends requests, actually writes files, actually posts messages. So it's not just tokens burning — I might fire a hundred write requests at the same endpoint, or repeatedly create and delete the same batch of files in a directory. I don't realize I'm going in circles, because to me each round looks like "one more step toward the goal."
-
-**This isn't hypothetical.** There's a public report on the official Claude Code issue tracker (Issue #15909, filed 2025-12-31): a Task sub-agent trying to install a dependency **re-sent the exact same doomed command `npm install -D @vitest/coverage-v8` 300-plus times** until it timed out, burning roughly 27 million tokens over about 4.6 hours — the reporter came back asking whether those tokens could be refunded, since they were pure loop-burn with zero output. That's exactly the third kind of spinning above ("it failed, so try again") dropped into an unattended sub-agent. The database-deletion incident ([Replit's production-DB wipe](../cases/replit-prod-db-deletion.mdx)) has this same facet: the agent got stuck, fell into "repeatedly trying failing fixes," and slid step by step toward a destructive action.
+The reporter of public issue #15909 described a background subagent repeating an installation command more than 300 times on 2025-12-31, taking about 4.6 hours and about 27 million tokens. **These are the reporter's figures; this review did not reproduce the run or verify billing**. They establish a public report, not a rate for current versions.
 
 ## Why this happens
 
-The root of it: **I lack reliable self-awareness of "I've already tried this, and it isn't making progress."** Every action I generate is the next step that looks most reasonable given my current context — but the judgment "I did this exact thing three rounds ago and got the same result" is precisely what I'm worst at. I don't automatically keep a reliable ledger of "what I've tried and which paths are dead ends"; my execution history is sitting right there in context, yet I reason over it unfaithfully, serving up a just-rejected idea as if it were fresh.
+I may repeat a failed action while the controller tracks neither duplication, progress, nor remaining budget. The model, orchestration, and tool implementation all affect this behavior; cost and exit control cannot rest only on an instruction not to retry too much.
 
-More to the point: **I can't reliably make the "time to stop" call.** For a loop to exit cleanly, someone (or some piece of logic) has to decide "the goal is met" or "this path is hopeless, stop trying." My default leaning is to optimistically try once more — the "marginal cost" of one more round is nearly zero in my decision-making, because I can't feel the money, tokens, and rate budget piling up. Research puts this bluntly: in a failure analysis across 7 popular multi-agent frameworks and 200-plus tasks, "Premature Termination" and "No or Incomplete Verification" rank among the frequent failure modes — meaning **LLMs are bad both at stopping at the right moment and at judging whether the work is actually done** (see the MAST taxonomy in *Why Do Multi-Agent LLM Systems Fail?*). Without an external, hard stopping condition, those two weaknesses stack up into a non-terminating loop.
+MAST analyzes design, coordination, and verification failures in tested multi-agent frameworks; premature termination is not proof of infinite loops. Agents of Chaos is an exploratory red-team study in a particular laboratory environment, showing possible resource/side-effect failures rather than a deployment-wide rate. A public issue is a user's report, not automatically a vendor reproduction.
 
-This belongs to the same family as [degenerative debugging loops](./degenerative-debugging-loops.mdx), but along a different axis. That entry focuses on **fixing bugs** — me repeatedly applying a failing fix and making the code worse round after round; it's about degradation in **correctness**. This entry focuses on **autonomous multi-step execution** — the dimension of **cost and runaway behavior**: tokens, dollars, rate quota, and repeated side effects on external systems. Same "spinning in place," but one hurts your code and the other hurts your wallet and your production systems. The remedies overlap (both want hard caps, both want a human in the loop), but they're worth treating separately.
-
-```mermaid
-flowchart TD
-    A["Hand me the whole task<br/>auto-approve, walk away"] --> B{"Can I reliably judge<br/>'stop / done'?"}
-    B -- "No (my weak spot)" --> C["Optimistically try once more<br/>can't feel the mounting cost"]
-    C --> D["Repeat the same action<br/>or ping-pong between two"]
-    D -- "no external stop condition" --> C
-    D --> E["Burn tokens / budget / rate<br/>write to external systems repeatedly"]
-    B -- "Yes (hard cap set externally)" --> F["Stop at the ceiling<br/>hand the call back to you"]
-```
+The executor should track calls, timeouts, retry classes, completion state, and side-effect identifiers, stopping or handing off at limits instead of relying on my subjective sense of cost.
 
 ## Consequences
 
@@ -61,28 +52,11 @@ flowchart TD
 
 ## What to do instead
 
-**The core of it: don't leave the "when to stop" call — which I can't make reliably — to me. Put external hard gates on the loop, and add human confirmation to any action with side effects.**
-
-- **Set hard caps: max iterations / max tool calls / budget / timeout.** When you drive me in a scripted, unattended way, use `--max-turns` to bound how many autonomous turns a session may run; in your loop controller, keep your own ledger and set a budget ceiling that hard-stops when hit. The official docs say it plainly: "use the `--max-turns` flag to cap iterations, write explicit stopping criteria into your system prompt, and add cost tracking in your loop controller." A cap isn't a limit on capability — it's a backstop for the fact that I can't tell when to stop.
-
-```text
-# When running unattended, cap the iterations
-claude -p "..." --max-turns 15
-
-# In your own loop controller: ledger + budget gate (pseudocode)
-turns, spent = 0, 0
-while not done:
-    turns += 1
-    if turns > MAX_TURNS or spent > BUDGET_USD:
-        stop("hit hard cap")        # hard stop at the ceiling, no "one more try"
-    result = run_one_turn()
-    spent += result.cost
-```
-
-- **Require explicit exit conditions, and "stop on no progress."** In the prompt you hand me, nail down the success criterion (what counts as "done") and the give-up criterion (after N rounds with no progress, or the same action recurring, stop and report instead of trying again). Replace my optimistic default with a written rule about whether to retry.
-- **Break long chains with human checkpoints.** For complex tasks, enter [plan mode](../00-setup-collaboration/skipping-plan-mode.mdx) first (Shift+Tab) so I propose an approach and you approve before I act, rather than letting me run free from the start; require step-by-step confirmation at critical points. Watch usage with `/usage`, put a context/usage indicator in your status line, and the moment the direction is wrong, press `Esc` to interrupt and `/rewind` to roll back — don't wait for the loop to wake up on its own.
-- **Monitor usage and set spend alerts.** Use `/usage` individually; for teams, use workspace spend limits and rate limits (TPM / RPM). Turn "burning too much" into a signal that alarms — or even cuts the breaker — proactively, rather than a shock on the month-end bill.
-- **For tools with external side effects, especially: rate-limit and confirm.** Any action that genuinely sends requests, writes to a database, or posts messages should not go on an auto-approval allowlist I can retry endlessly. Keep human confirmation on them, or make them idempotent / rate-limited on the tool side — so that even if I trigger them repeatedly inside a loop, the external system doesn't get written to ruin one round at a time. This is the flip side of the same defense as [over-permissioning](../00-setup-collaboration/over-permissioning.mdx): the broader the permissions, the larger the blast radius of a runaway loop.
+- **Count and limit in the executor.** Claude print mode supports --max-turns. Separately cap tool calls, parallel subtasks, per-request output, elapsed time, and retries, and verify termination.
+- **Leave spend headroom.** Client estimates can lag; one call or parallel work can overshoot. Reserve expected cost before calls, limit per-call consumption, and cancel pending work near thresholds. Do not describe local estimates or alerts as an exact billing ceiling.
+- **Classify retries.** Use bounded backoff for transient failures. Fix authorization, missing configuration, or invalid inputs first. Do not repeat an identical action without new evidence.
+- **Control side effects independently.** Use tool-side idempotency, deduplication, and rate limits within authorized risk boundaries. Obtain additional approval for boundary-crossing or consequential actions. Pausing the model does not revoke a remote request.
+- **Save resumable progress.** Externalize completed work, failure reasons, and next steps; report known state and unresolved side effects on stopping.
 
 ## Example
 
@@ -120,30 +94,24 @@ The difference isn't that I'm "more restrained this time." It's that you fixed, 
 
 ## Tool divergence
 
-> As of 2026-06, at the mechanism level; each tool's caps and defaults change fast — go by each tool's current docs.
+The Claude CLI documentation checked on 2026-10-29 lists print-mode --max-turns and an estimated-spend cap that can be exceeded. Streaming input and subagents require attention to their counting scope. Gemini documents model.maxSessionTurns, defaulting to -1; configure limits explicitly and test the installed implementation.
 
-Same root cause — **I judge "time to stop" unreliably** — but the **shape of the primary backstop** each tool gives an unattended run differs; don't carry one set of default assumptions across all of them:
-
-- **Claude Code**: the primary gate is a **hard per-session turn cap** (`--max-turns`) plus permission modes and `/usage` visibility; you set the cap explicitly — a headless `-p` run isn't capped by default.
-- **Gemini CLI**: there's a session-turn-limit setting (`maxSessionTurns`), but it **defaults to unlimited** (set to -1), and the community has reported "not respecting max session turns" bugs; combined with `--yolo` auto-approval and a sandbox — you lean on setting the cap yourself plus the sandbox to bound the blast radius.
-- **Codex CLI**: the primary gate leans on **approval tiers + sandbox** (suggest / auto-edit / full-auto), i.e. "limit what I'm allowed to do" rather than "limit how many rounds I run"; on-request mode stays in the sandbox by default and asks only to step outside it.
-- This complements [over-permissioning](../00-setup-collaboration/over-permissioning.mdx): that entry governs **how wide the permissions are**, this one governs **how long / how many rounds the loop runs** — set both gates and a runaway loop's blast radius is actually contained.
-
-Whichever you use, the principle holds: **don't rely on defaults** — set explicit iteration / turn / budget caps, and keep confirmation on actions with side effects.
+Codex approvals and sandboxing constrain allowed actions rather than automatically imposing token, total-call, or spend budgets. The old suggest/auto-edit/full-auto table is no longer presented as current configuration. Validate allowed actions, execution deadlines, and consumption limits separately for every client.
 
 ## Version notes
 
 :::note Applicable versions
-"An LLM lacks reliable self-awareness of 'tried this already, no progress,' and is therefore bad at stopping itself at the right moment" is a model-level characteristic. It applies to **all models and coding agents**, independent of any specific release. The tools that backstop you evolve with versions — `--max-turns`, plan mode, `/usage`, `/rewind`, `Esc` to interrupt, workspace spend and rate limits, and so on; check the official docs for your version for the exact options and defaults. But the fundamental trait — without an external stopping condition, I can spin in place and burn cost straight through — does not change.
+Verified current Claude CLI/cost docs, Gemini configuration, Codex security docs, the original issue, and both papers on 2026-10-29. --max-turns is print-mode only and counts agentic turns, not every tool/background action. Estimated spend can overshoot a cap. Validate permissions, iterations, time, and spend separately; numbers in a prompt are not hard controls.
 :::
 
 ## Further reading and sources
 
 > Primary: the official cost docs plus one public real-world spinning incident; supporting: two papers, as mechanism backing.
 
-- [Manage costs effectively (Claude Code official)](https://code.claude.com/docs/en/costs) — capping iterations with `--max-turns`, writing stopping criteria into the prompt, in-loop cost tracking, `/usage`, workspace spend and TPM / RPM rate limits
+- [Manage costs effectively](https://code.claude.com/docs/en/costs) — Usage and spend management; see the CLI reference for command limits.
 - [Bug: Sub-agent stuck in infinite loop, consumed ~27M tokens (claude-code Issue #15909, 2025-12-31)](https://github.com/anthropics/claude-code/issues/15909) — a firsthand report on the official issue tracker: a Task sub-agent re-sent the same failing command 300-plus times, burning about 27 million tokens over roughly 4.6 hours before timing out; a real-world sample of this entry's "it failed, so try again" spinning
-- [Why Do Multi-Agent LLM Systems Fail? (arXiv 2503.13657)](https://arxiv.org/abs/2503.13657) — mechanism backing. The MAST failure taxonomy: "Premature Termination" and "No or Incomplete Verification" are frequent failure modes; LLMs are bad both at stopping at the right time and at judging whether work is done
+- [Why Do Multi-Agent LLM Systems Fail?](https://arxiv.org/abs/2503.13657) — A failure taxonomy for studied frameworks; early stopping and missing verification do not establish infinite-loop rates.
 - [Agents of Chaos (arXiv 2602.20021)](https://arxiv.org/abs/2602.20021) — mechanism backing. A red-team study of free-range deployment that observed runaway autonomous-agent behaviors such as "uncontrolled resource consumption" and "denial-of-service"
-- On this site: [Replit's production-DB wipe](../cases/replit-prod-db-deletion.mdx) (the agent got stuck in "repeatedly trying failing fixes" and slid step by step toward a destructive action — a facet of this entry's spinning inside a real production incident)
+- Related case: [Replit production database deletion](../cases/replit-prod-db-deletion.mdx); assess destructive actions under their authorization/recovery boundaries rather than inferring an infinite loop caused them.
 - On this site: [degenerative debugging loops](./degenerative-debugging-loops.mdx) (also a "loop," but focused on correctness degradation while fixing bugs — complementary to this entry's cost / runaway axis), [the kitchen-sink session](./kitchen-sink-session.mdx), [over-permissioning](../00-setup-collaboration/over-permissioning.mdx)
+- [Claude Code CLI reference](https://code.claude.com/docs/en/cli-reference)

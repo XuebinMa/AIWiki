@@ -10,15 +10,19 @@ applies_to: "All coding agents"
 evidence: Official docs
 tags: [git, commit granularity, commit messages, atomic commits, code review, Engineer, Gemini CLI, Codex CLI, Cursor]
 sources:
+  - { title: "Claude Code checkpointing", url: "https://code.claude.com/docs/en/checkpointing" }
   - { title: "Conventional Commits 1.0.0 (official spec)", url: "https://www.conventionalcommits.org/en/v1.0.0/" }
   - { title: "Pro Git — Distributed Git: Contributing to a Project (Commit Guidelines)", url: "https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project" }
+verified_at: 2026-10-29
+review_after: 2027-04-29
+review_triggers: ["Editing, compaction, memory, or checkpoint recovery changes", "Task contract, verification evidence, or concurrent writing changes"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['Engineer']} phase="Implementation" severity="Medium" appliesTo="All coding agents" evidence="Official docs" />
 
-> In one sentence: let me work for a stretch and what I pile up is usually one giant commit — dozens of files, a thousand-plus lines — with a message that just says "update code." On top of that, I'll sweep build artifacts, `.env`, and commented-out dead code straight into the commit. The result is an unreadable history: `git bisect`, rollback, and code review all stop working, and when something breaks you can't tell which change caused it.
+> In one sentence: I may mix unrelated edits, artifacts, or sensitive files into a large commit with a vague message; inspect the real index and organize verifiable logical changes while preserving preexisting work.
 
 ## Symptom
 
@@ -32,31 +36,11 @@ Each commit "runs" on its own, but the history as a whole is no longer usable.
 
 ## Why this happens
 
-**I treat "committing" as the wrap-up step after the task is done, not as part of the task.** My objective is set to "make the feature work"; the commit is just the last keystroke I tap out on the way out the door. So I don't stop to ask: should these changes be split into separate commits? Does this message explain *why*? Should this file even be in version control? Those judgments aren't in my objective function, so by default I skip them.
+I may interpret completion as saving the whole working tree without distinguishing preexisting changes, my changes, generated artifacts, and sensitive files. Bulk staging can mix unrelated content in one commit; inspect the actual index rather than trusting a tool's summary.
 
-Drilling in, there are three concrete mechanisms:
+Pro Git recommends logically separate changesets and messages that explain intent. Conventional Commits provides a machine-readable message convention. These are collaboration practices, **not evidence that all models lack commit discipline or that each file/edit needs its own commit**.
 
-**First, I have no default preference for atomic commits.** Everything I produce in one continuous work session looks, to me, like a single blob that accomplishes one task — I won't spontaneously slice it along "one logical change per commit." Staging it all in one `add` is the path of least resistance. Pro Git explicitly recommends that each commit be a logically separate changeset — but that's a constraint I follow when explicitly asked, not my default.
-
-**Second, when I write a commit message I'm *describing the diff*, not *explaining the intent*.** Unless you ask for more, I lean toward generating the laziest sentence that isn't wrong — "update code" accurately summarizes "I changed code," so I feel done. But a good commit message answers what the diff *can't show*: why you made the change, and what previous behavior it replaces. That "why" lives only in the intent, not in the code, so I won't write it unless asked.
-
-**Third, `git add -A` is too convenient for me, and I don't filter what should be committed.** In my eyes the files in the working tree have no tier — "source / artifact / secret / temp junk" — they're all just "files." A single `git add -A` or `git add .` pulls them into staging indiscriminately, and that's the route I take most often. I won't spontaneously decide for you that "this `.env` doesn't belong in the repo" or "this commented-out code is dead."
-
-This is a **different pit** from two you may have already read — don't conflate them:
-
-- *[Destructive, irreversible actions you only notice once they're done](../00-setup-collaboration/destructive-irreversible-actions.mdx)* is about **irreversible, destructive moves** like `git push --force` or wiping a database. This entry involves no destruction — the history is intact, the code is intact, it's just **messy**: granularity too coarse, messages useless, the wrong things mixed in.
-- *[I treat security as an invisible default requirement](../07-acceptance-release/security-data-leaks.mdx)* is about the **security problem** of leaked secrets and vulnerabilities; committing a `.env` belongs to that entry. This entry focuses on **everyday commit hygiene** — granularity, message quality, what should and shouldn't be committed — and a leaked secret is just one of many downstream consequences of the root cause "I don't filter what should be committed."
-
-```mermaid
-flowchart TD
-    A[You: finish the feature] --> B[I changed a dozen files in one stretch]
-    B --> C[git add -A<br/>scoops everything]
-    C --> D[Giant commit<br/>multiple logical changes crammed together]
-    C --> E[Artifacts / .env / dead code<br/>committed too]
-    D --> F[Message: update code<br/>no why]
-    E --> G[Unreadable history<br/>bisect / rollback / review break]
-    F --> G
-```
+I should follow the project's existing convention and the user's authorization, organize changes that can be understood and validated independently, and inspect the staged diff before committing.
 
 ## Consequences
 
@@ -90,6 +74,8 @@ Before committing, run git status to list the files that will be committed, and 
 Use Conventional Commits format for each message, with a body explaining why the change was made.
 List the plan and wait for my confirmation, then commit one by one.
 ```
+
+Also: .gitignore does not affect tracked files. Inspect git diff --cached and secret-scan results. Routine commits already covered by authorization can proceed under the agreed policy without repeated confirmation; shared history must not be rewritten by default.
 
 ## Example
 
@@ -143,21 +129,14 @@ But every one of these assumes "this history is private and will be rewritten or
 
 ## Tool differences
 
-> As of 2026-07, mechanism level; defaults and command shapes change fast across versions — defer to each tool's current docs.
+Claude Code checkpoint documentation checked on 2026-10-29 covers files edited with its file tools in the current conversation; subsequent Bash or external changes to those files may also be reverted. Files touched only through Bash, some subagent edits, and symlink/hard-link paths have different coverage.
 
-Same root cause — **my commit hygiene is unreliable, and recovery mechanisms are only the backstop** — but each tool's "undo button for AI edits" takes a different shape with different defaults:
-
-- **Claude Code**: automatic checkpoints before edits; `/rewind` can restore **code only / conversation only / both**; doesn't cover bash side effects or your manual edits.
-- **Gemini CLI**: checkpointing uses a **shadow git repo** (under your home directory, never touching your repo); `/restore` rolls back files plus conversation and re-proposes the tool call — but it's **off by default** and can only be enabled in settings.
-- **Cursor**: automatic per-request snapshots + Restore Checkpoint in chat; **doesn't track your manual edits**, and the docs say plainly checkpoints are not version control.
-- **Codex CLI**: an optional undo (enabled via config); a linked "conversation + files" checkpoint is still a community feature request as of 2026-07 — you mostly lean on your own git.
-
-The undo buttons differ, and **none of them replaces git**: a clean branch plus small commits is the base layer common to all four — a checkpoint saves "that last step," not "yesterday through now."
+Inspect the restore menu, current diff, and target files first. "Restore code" does not promise to undo only my last edit. Other products' checkpoints, editor buffers, and Git undo behavior require verification for the installed version rather than an outdated cross-product default table. Durable history and collaboration still need version control.
 
 ## Version notes
 
 :::note Applicable versions
-"Treating the commit as a wrap-up step, not splitting proactively, writing messages that only describe the diff, not filtering what should be committed" is a model-behavior tendency that's **universal across versions and models** — not a bug in any one version. What changes it is **how you instruct me and the process constraints** (requiring atomic commits, plan-then-commit, explaining why, backstopping with `.gitignore` and a pre-commit check), not waiting for some version to "fix" it. Newer Claude Code versions follow commit conventions reasonably well when asked, but by default — when not asked — they still lean toward the lazy path of "one `add`, one 'update code.'"
+Rechecked Conventional Commits 1.0.0, Pro Git, and current Claude Code checkpoint documentation on 2026-10-29. Retained atomic logical commits and index inspection; .gitignore does not untrack files, and exposed credentials require rotation. Validate recovery tools separately; they neither replace durable history nor authorize rewriting shared history.
 :::
 
 ## Further reading and sources
@@ -166,3 +145,4 @@ The undo buttons differ, and **none of them replaces git**: a clean branch plus 
 - [Pro Git — Distributed Git: Contributing to a Project (Commit Guidelines)](https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project)
 - Related entry: [Destructive, irreversible actions you only notice once they're done](../00-setup-collaboration/destructive-irreversible-actions.mdx)
 - Related entry: [I treat security as an invisible default requirement](../07-acceptance-release/security-data-leaks.mdx)
+- [Claude Code checkpointing](https://code.claude.com/docs/en/checkpointing)

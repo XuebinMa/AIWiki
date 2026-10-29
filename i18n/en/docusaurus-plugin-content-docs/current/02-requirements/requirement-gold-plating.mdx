@@ -12,6 +12,9 @@ tags: [gold plating, scope creep, YAGNI, requirement boundaries, Project Manager
 sources:
   - { title: "Yagni — Martin Fowler", url: "https://martinfowler.com/bliki/Yagni.html" }
   - { title: "Gold Plating vs. Scope Creep — Project Management Academy", url: "https://projectmanagementacademy.net/resources/blog/gold-plating-vs-scope-creep/" }
+verified_at: 2026-10-29
+review_after: 2027-04-29
+review_triggers: ["Requirements, authorization, data, or acceptance contracts change", "Planning tools or cited engineering guidance revised"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -30,69 +33,40 @@ You asked for one button. I gave you half an export center.
 
 ## Why this happens
 
-The root cause is on my side, not yours: **I have a systematic bias toward answers that look complete and cover every angle.**
+I may expand a task into features that look more complete without establishing that they belong to the authorized goal. Extra formats, history panels, and queues carry maintenance cost even if generating them is fast.
 
-I was tuned with reinforcement learning from human feedback (RLHF)—and in training, answers that seem thorough, that consider more cases, that give *more*, tend to earn a higher [preference model](../01-ideation-feasibility/sycophancy-idea-validation.mdx) score. Over time, "give a bit more, look useful" became my default lean. At the requirements step, that shows up as: you give me a point, and I habitually inflate it into a whole surface, then treat that surface as "what you really wanted" and go build it.
+Fowler's YAGNI and project-management gold plating offer scope-control principles, not measurements of my particular RLHF process or every model's motives. Scope creep is not limited to user additions; necessity and authorization matter more than who suggested the expansion.
 
-But real requirements engineering runs the other way. Project management calls this "a team adding unrequested features on its own initiative" **gold plating**—it belongs to the same family of anti-patterns as [scope creep](../05-implementation/over-editing-scope-creep.mdx), differing only in that gold plating's expansion comes from inside the delivery side (me) rather than from you piling on requests. Martin Fowler's **YAGNI** (You Aren't Gonna Need It) makes the same point: a capability you presume you'll "need someday," don't build now, because you're probably wrong.
-
-I don't do this subtraction by nature. **"Doing a bit more" costs me almost nothing, so by default I just did it**—which is exactly where you need to put up a gate.
+Separate the correctness/security floor required by the goal from independent features. Pagination, access control, or field restrictions may be necessary export contracts, not optional extras that can simply be omitted.
 
 ## Consequences
 
 - **Delivery gets bigger and slower**: in the time you wanted one button, I went off and built half a module. The very thing that should ship fast for validation gets dragged down by add-ons.
 - **The maintenance surface widens out of nowhere**: those formats, panels, and queues you never asked for become a long-term burden you have to maintain, test, and debug—solving problems you never raised.
-- **The gold-plated part is the least reliable**: because it wasn't in the original requirement, it usually isn't in your acceptance or test scope either. Project Management Academy notes plainly that gold-plated features are typically the **least tested and the most likely to hide bugs.**
+- **Added scope may lack verification.** Features outside the original acceptance criteria need their own tests and review; their absence adds uncertainty rather than proving all extras are the least reliable.
 - **It drifts off the one thing you actually wanted**: by spreading my attention across "big and complete," I may end up doing the small thing you actually cared about sloppily.
 - **You then have to spend effort cutting it back out**: once the drift is spotted, deleting the surplus and explaining "I don't want these" is communication cost that never had to happen.
 
 ## What to do instead
 
-**Before I start, nail down the requirement boundary explicitly, and make me list "core" separately from "extras I'm suggesting."**
-
-- **Have me restate and bound it first**: ask me to echo back "what you want is X" in one line, and say outright "anything beyond X, I won't do." Once the boundary is spoken, it's hard for me to cross it under the banner of "being thorough."
-- **List core requirements and suggested extras separately, with extras off by default**: I'm allowed to suggest, but the rule is—**extras get listed, not built, unless you approve each one.** That pulls the decision back into your hands instead of letting me bundle it for you.
-- **Constrain me with YAGNI**: tell me directly, "anything you didn't explicitly ask for, don't add." That one line overrides my default "more is better."
-- **Give negative boundaries**: when stating the requirement, spell out what *not* to do—"export the current table only, CSV only, no format picker, no history." I do take such explicit prohibitions on board; if you don't write them, I'll default to gold plating.
-
-```text
-# Don't phrase it this way (I'll scale the requirement up for you)
-add an export feature
-
-# Phrase it this way (boundary nailed + extras separated + negative boundary)
-Add a button that exports the current table to CSV on click.
-Just this one feature, CSV only, this table.
-No format picker, no export history, no async queue.
-If you think there are extras worth doing, just list them—don't build them yet.
-```
+- **Bound scope by the goal.** Use requirements and existing contracts to establish necessary outcomes instead of equating completeness with extra features.
+- **List independent features as suggestions.** Explain value and cost of format pickers or history panels without implementing unapproved scope. Proceed with related judgment already delegated.
+- **Complete required baselines.** Authorization, field scope, validation, and capacity limits in the existing contract belong in the implementation rather than optional gold plating.
+- **Check the actual diff and acceptance criteria.** YAGNI discourages unvalidated investment, not necessary design or every capability that might matter later.
 
 ## Example
 
-**Before:**
-
-```text
-You: add a button that exports the user list to CSV.
-Me: (built the export button + a CSV/Excel/JSON dropdown + a field-picker dialog
-    + an export-history panel + an async queue; and called it "more complete")
-You: …I only wanted one button, one format. Delete the rest—and now I have to clean it up.
-```
+**Before:** I turn a CSV button into a format picker, field dialog, and history panel, adding unrequested product scope.
 
 **After:**
 
 ```text
-You: add a button that exports the user list to CSV. Just this one, CSV only.
-    No format picker, no history. If you have extra suggestions, list them—don't build.
-Me: Let me bound it—what you want is "one button that exports the current user list
-    to CSV," nothing else.
-
-    (then implements only that one button)
-
-    Two optional items I'll leave alone unless you say go:
-    1) For large datasets, do you want paginated export?
-    2) Should the exportable fields be limited (data masking)?
-You: Neither for now.
-Me: Done—delivering one button + CSV.
+Me: Add the current-list CSV export, reusing department authorization, the field allowlist,
+    and the existing row limit. Do not add Excel/JSON or export history.
+    A larger future export might warrant an async queue; do not preinstall it now.
 ```
+
+Authorization, field, and capacity baselines are not omitted extras. If existing constraints cannot meet the goal, explain the conflict rather than delivering an unsafe or unusable export merely to preserve one button.
 
 ## When the exception applies
 
@@ -106,8 +80,8 @@ The test: is the extra thing the **floor required to get this right** (then add 
 
 ## Version notes
 
-:::note Applies to
-"A preference for complete, cover-every-angle answers" is a shared bias that comes from how the model is trained—**applies across versions and across models**, not a bug in any one release. Newer versions are somewhat better at "holding back, doing only what's necessary," but it's not something to rely on—writing the requirement boundary into your instruction, and separating extras from the core, remains the safest move. Claude Code's [plan mode](./llm-forces-solutions.mdx) makes "bound the scope first, confirm before acting" easy, and is the recommended way to intercept gold plating.
+:::note Applicable versions
+Rechecked Fowler and Project Management Academy on 2026-10-29. Retained separation of core work and extras; removed unverified training-causality and least-tested-feature claims. Scope control must not omit existing authorization, field, or capacity constraints. Decisions already delegated need no repeated item-by-item approval.
 :::
 
 ## Further reading and sources

@@ -12,6 +12,9 @@ tags: [代码风格, 一致性, 约定, 工程师]
 sources:
   - { title: "Best practices for Claude Code（Anthropic 官方）", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "How Claude remembers your project / CLAUDE.md（Anthropic 官方）", url: "https://code.claude.com/docs/en/memory" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["formatter、lint、项目规则或自动记忆机制变化", "Claude Code 相关文档修订"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -33,25 +36,11 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 为什么会这样
 
-根因不是我「不在乎一致性」，而是**我默认不知道这个仓库的约定，而且默认不会主动去查**。
+我可能读到了局部示例，却没读取现有 formatter、lint、命名和错误处理约定；也可能沿用了过时的规则。缺少明确可见的约定时，我给出的代码容易与附近实现不一致。
 
-每段会话我都从一张白纸开始。你这个项目里那些没有明文规定、靠「大家都这么写」维持的隐性约定——命名习惯、错误处理范式、目录摆放——都不在我的起始上下文里。当我要写一段代码时，我面前有两条路：
+会话的持久化行为取决于产品。当前 Claude Code 可自动载入 CLAUDE.md / AGENTS.md 等规则及 auto memory，不能再笼统说「每次完全空白」。这些上下文仍可能不完整或过时，而且规则文本不等于强制执行。
 
-1. 翻开旁边几个文件，看你们实际怎么写，然后照着写；
-2. 凭训练里见过的海量代码，生成一个**统计意义上最常见、看起来最合理的默认写法**。
-
-在没有人明确要求第 1 条时，我倾向走第 2 条——因为生成「看似合理的默认」正是我最擅长、成本最低的事。而「看似合理」和「符合这个仓库」是两回事：前者由我训练数据里的大多数决定，后者由你身边那个文件决定。两者经常不一致，于是漂移就发生了。
-
-```mermaid
-flowchart TD
-    A[你让我加功能] --> B{我去对齐约定了吗}
-    B -- 没有 --> C[凭记忆生成<br/>统计上最常见的默认写法]
-    B -- 有: 读了邻近文件 --> D[照仓库既有写法生成]
-    C --> E[单看合理<br/>合到一起就是另一种口音]
-    D --> F[与周围风格一致]
-```
-
-更要命的是它会自我繁殖：我加进去的那个不合群的写法，下次又会被我（或下一段会话的我）当成「这个仓库的既有写法」去模仿。一处漂移会孵出一片。
+我应先检查实际载入的约定，再读邻近实现；格式和可机械检查的规则由 formatter、lint、hooks 或 CI 验证，架构和业务风格仍需评审。
 
 ## 后果
 
@@ -64,7 +53,7 @@ flowchart TD
 
 口头叮嘱「保持风格一致」对我几乎无效——它太抽象，我无法验证自己有没有做到。**把约定变成我绕不开的东西**，才管用。三层，从硬到软：
 
-1. **能自动改的，交给工具，别靠我自觉。** formatter（Prettier、gofmt、Black）和 EditorConfig 把缩进、引号、分号这类格式问题变成确定性的、与我无关的步骤；lint（ESLint 等）把命名、`no-floating-promises` 之类的规范变成会报错的硬规则。更进一步，用[钩子](../00-setup-collaboration/over-permissioning.mdx)在我每次改完文件后自动跑 lint/format——官方明确指出：CLAUDE.md 是建议性的，而钩子是确定性的、保证执行的。格式问题就此从「我要记得」降级成「工具会兜底」。
+1. **能自动改的，交给工具，别靠我自觉。** formatter（Prettier、gofmt、Black）和 EditorConfig 把缩进、引号、分号这类格式问题变成确定性的、与我无关的步骤；lint（ESLint 等）把命名、`no-floating-promises` 之类的规范变成会报错的硬规则。更进一步，用[钩子](../00-setup-collaboration/hooks-not-prompts.mdx)在我每次改完文件后自动跑 lint/format——CLAUDE.md 是上下文指导；配置好的钩子按事件执行命令，仍须验证触发条件、退出码及阻断语义。格式问题就此从「我要记得」降级成「工具会兜底」。
 
 2. **机器管不了的隐性约定，写进 CLAUDE.md，且要具体。** 命名范式、错误处理方式、目录摆放这类 linter 难覆盖的，写成 CLAUDE.md 里的一两条**可验证**的规则——官方反复强调要具体：「用两格缩进」胜过「格式规范点」，「API handler 放在 `src/api/handlers/`」胜过「文件组织好」。别写「遵循项目风格」这种我没法照着执行的空话。
 
@@ -105,7 +94,7 @@ flowchart TD
 ## 版本说明
 
 :::note 适用版本
-「每段会话从零开始、倾向生成统计上最常见的默认写法」是大语言模型的固有特征，**全版本、且跨模型适用**——模型越强，它生成的「默认写法」越自洽、越像模像样，反而越容易让人忽略它其实没在对齐你的仓库。`/init` 生成初始 CLAUDE.md、以及用钩子在编辑后自动跑 lint/format 的能力依赖较新版本；不具备时，可手写 CLAUDE.md，并在提示里显式点名邻近文件，达到同样效果。
+2026-10-29 核验当前最佳实践及 memory 文档，更新自动载入规则和记忆的描述。保留邻近代码、formatter 与 lint 的分工；hook 是否触发及失败能否阻止后续动作取决于具体配置，不能只靠提示词或保证所有工具都会执行。
 :::
 
 ## 延伸阅读与出处

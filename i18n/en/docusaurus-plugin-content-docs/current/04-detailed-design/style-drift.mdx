@@ -12,6 +12,9 @@ tags: [code style, consistency, conventions, engineer]
 sources:
   - { title: "Best practices for Claude Code (Anthropic, official)", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "How Claude remembers your project / CLAUDE.md (Anthropic, official)", url: "https://code.claude.com/docs/en/memory" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["Formatter, lint, project rules, or automatic memory changes", "Relevant Claude Code docs revised"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -33,25 +36,11 @@ Each one is individually "also fine." Put together, they're a different accent. 
 
 ## Why this happens
 
-The root cause isn't that I "don't care about consistency." It's that **I don't know this repo's conventions by default, and by default I won't go looking for them.**
+I may read a local example without reading the formatter, lint, naming, and error-handling conventions, or reuse outdated rules. Without explicit visible conventions, the generated code can diverge from neighboring implementations.
 
-Every session, I start from a blank slate. The implicit conventions that hold your project together without being written down anywhere—naming habits, error-handling patterns, where files go—aren't in my starting context. When I'm about to write some code, I have two paths in front of me:
+Persistence depends on the product. Current Claude Code can load CLAUDE.md / AGENTS.md rules and auto memory automatically; "every session is a blank slate" is no longer an adequate description. Loaded context can still be incomplete or stale, and written rules are not enforcement.
 
-1. Open a few neighboring files, see how you actually write things, and follow that;
-2. Generate, from the enormous amount of code I saw in training, the **statistically most common, most plausible-looking default**.
-
-When no one explicitly asks for path 1, I lean toward path 2—because producing a "plausible-looking default" is exactly what I'm best at and what costs me the least. And "plausible-looking" is not the same as "fits this repo": the former is decided by the majority of my training data, the latter by the one file sitting next to it. The two often disagree, and that's when drift happens.
-
-```mermaid
-flowchart TD
-    A[You ask me to add a feature] --> B{Did I align with the conventions}
-    B -- No --> C[Generate from memory<br/>the statistically common default]
-    B -- Yes: read neighboring files --> D[Generate following the repo's existing style]
-    C --> E[Looks fine alone<br/>a different accent once combined]
-    D --> F[Consistent with surrounding style]
-```
-
-What makes it worse is that it self-propagates: the out-of-place style I just added gets treated, next time, by me (or by the next session's me) as "this repo's existing style" and dutifully imitated. One bit of drift hatches a whole cluster.
+I should inspect the conventions actually loaded and read neighboring implementations. Formatters, lint, hooks, or CI validate mechanical rules; architectural and business conventions still need review.
 
 ## Consequences
 
@@ -64,7 +53,7 @@ What makes it worse is that it self-propagates: the out-of-place style I just ad
 
 Telling me to "keep the style consistent" barely works—it's too abstract, and I can't verify whether I've actually done it. What works is to **make the conventions something I can't route around.** Three layers, from hard to soft:
 
-1. **Whatever can be auto-fixed, hand to a tool—don't rely on my discipline.** A formatter (Prettier, gofmt, Black) and EditorConfig turn indentation, quotes, and semicolons into a deterministic step that has nothing to do with me; a linter (ESLint and friends) turns naming rules and things like `no-floating-promises` into hard rules that error out. Go a step further and use a [hook](../00-setup-collaboration/over-permissioning.mdx) to run lint/format automatically after every file edit I make—the official docs are explicit that CLAUDE.md is advisory while hooks are deterministic and guaranteed to run. Formatting thereby drops from "something I have to remember" to "something the tooling backstops."
+1. **Whatever can be auto-fixed, hand to a tool—don't rely on my discipline.** A formatter (Prettier, gofmt, Black) and EditorConfig turn indentation, quotes, and semicolons into a deterministic step that has nothing to do with me; a linter (ESLint and friends) turns naming rules and things like `no-floating-promises` into hard rules that error out. Go a step further and use a [hook](../00-setup-collaboration/hooks-not-prompts.mdx) to run lint/format automatically after every file edit I make—CLAUDE.md supplies context; configured hooks run commands on events, but trigger conditions, exit codes, and blocking semantics still require validation. Formatting thereby drops from "something I have to remember" to "something the tooling backstops."
 
 2. **For implicit conventions a machine can't enforce, write them into CLAUDE.md—and be specific.** Naming patterns, error-handling style, file layout—the things a linter struggles to cover—belong as one or two **verifiable** rules in CLAUDE.md. The official guidance keeps stressing specificity: "Use 2-space indentation" beats "format code properly," and "API handlers live in `src/api/handlers/`" beats "keep files organized." Don't write "follow the project style"—I can't act on that.
 
@@ -105,8 +94,8 @@ The difference isn't my ability; it's whether you put "how this repo writes" in 
 
 ## Version notes
 
-:::note Applies to
-"Starting each session from scratch and leaning toward the statistically most common default" is an inherent trait of large language models, and **applies across versions and across models**—the stronger the model, the more self-consistent and polished its "default" looks, which paradoxically makes it easier to overlook that it never actually aligned with your repo. The ability to generate a starter CLAUDE.md via `/init`, and to run lint/format automatically after edits via a hook, depends on newer versions; without them, you can hand-write CLAUDE.md and explicitly name the neighboring file in your prompt for the same effect.
+:::note Applicable versions
+Checked current best-practice and memory documentation on 2026-10-29 and updated automatic rule/memory loading. Retained neighboring-code inspection, formatters, and lint. Hook triggering and whether failure blocks further actions depend on configuration; neither prompts nor a blanket cross-tool promise provide enforcement.
 :::
 
 ## Further reading and sources

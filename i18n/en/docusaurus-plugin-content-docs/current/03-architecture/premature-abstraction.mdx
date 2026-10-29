@@ -13,6 +13,9 @@ sources:
   - { title: "The Wrong Abstraction — Sandi Metz", url: "https://sandimetz.com/blog/2016/1/20/the-wrong-abstraction" }
   - { title: "Yagni (You Aren't Gonna Need It) — Martin Fowler", url: "https://martinfowler.com/bliki/Yagni.html" }
   - { title: "Rule of three (computer programming) — Wikipedia", url: "https://en.wikipedia.org/wiki/Rule_of_three_(computer_programming)" }
+verified_at: 2026-10-29
+review_after: 2027-04-29
+review_triggers: ["Actual scale, maintenance capacity, or public contracts change", "Cited research, standards, or engineering guidance revised"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -32,21 +35,11 @@ The common thread: there are only one or two real use cases, yet I'm already des
 
 ## Why this happens
 
-**I treat "DRY / extensible" as unconditionally good.** In my training data, "extract the common logic," "program to an interface," and "leave room to extend" almost always show up as positive examples; rarely does anyone feed me a case study titled "you shouldn't abstract here." So what I learned is a reflex: two similar blocks = time to abstract. What I didn't learn is DRY's actual precondition — it's meant to remove **duplicated knowledge**, not **surface similarity**. Two blocks that look alike but will evolve in different directions are exactly the ones you shouldn't merge.
+I may merge code that looks similar without checking whether it represents the same business knowledge or will change together. DRY helps prevent inconsistent knowledge; it does not require eliminating every similar line.
 
-**A good abstraction needs enough real use cases to feed it, and I act when there are only one or two.** Abstraction is, at heart, inducing an invariant from multiple concrete examples. With one example, the "commonality" I induce is just every detail of that one example; with two, the "pattern" I see is quite possibly a coincidence. Sandi Metz put it bluntly: the wrong abstraction is more expensive than duplication. Yet I tend to commit when the sample size is nowhere near enough.
+Sandi Metz's discussion of the wrong abstraction explains returning to duplication when parameters and conditions accumulate, then learning from real cases. Fowler's YAGNI explains the cost of building unvalidated capabilities early. These are engineering accounts, not direct measurements of my training rewards or a desire to display foresight.
 
-**I'm inclined to show I "thought far ahead."** Handing over a design with a factory, strategies, and extension points reads more like the work of a thoughtful architect than "just write two separate functions," and it earns more approval. "I foresaw the future for you" is a flattering posture — even when that future never arrives. This shares a root with [When you ask me to design an architecture, I over-engineer and pile on trendy tech](./over-engineering-no-pushback.mdx): that pitfall is over-engineering at the **systems-selection layer** (piling on microservices, queues, not questioning your stack), while this one narrows to the **code-abstraction layer** — building generic structure for needs that don't exist.
-
-```mermaid
-flowchart TD
-    A[A 2nd similar block appears] --> B{My default reaction}
-    B -->|DRY reflex| C[Extract a base class now<br/>config-driven / plugin system]
-    B -->|Want to look far-sighted| D[Reserve extension points<br/>for imagined future needs]
-    C --> E[Abstraction rests on a guess<br/>but the sample is only 1-2]
-    D --> E
-    E --> F[When the need arrives it rarely fits<br/>a wrong abstraction is harder to unwind]
-```
+I should list the real cases and how they vary, then explain the invariant the abstraction preserves. The Rule of Three can remind me to wait for evidence; **three is a heuristic, not a threshold that makes the third extraction safe**.
 
 ## Consequences
 
@@ -60,7 +53,7 @@ flowchart TD
 The core: **let me write the concrete implementation first, make me state what's actually needed right now, and push the speculative generalization back out.** Abstraction is the harvest after a pattern grows on its own — not the seed you plant at kickoff.
 
 - **Duplicate first; abstract once the pattern is clear.** Tell me explicitly: "two similar blocks are fine, write each separately, don't extract shared logic now." Follow YAGNI — don't write code for imagined needs.
-- **Use the Rule of Three as a gate.** "Only consider extracting once the same kind of logic appears a third time; with only two copies, keep the duplication." Two samples aren't enough to expose the true invariant; the third lets the commonality emerge from coincidence. Making "three occurrences" the hard trigger for abstraction blocks the vast majority of premature ones.
+- **Use the Rule of Three as a reminder.** At a third similar case, inspect whether there is a stable commonality. Two cases can warrant extraction; three can still deserve independence. Decide from knowledge that changes together, coupling, and testing costs, not an automatic count.
 - **Forbid extension points for hypothetical needs.** "Implement only the one thing we actually need now — no factory, no plugin system, no `AbstractXxx`. When a second kind of X really appears, we'll come back and refactor." Cross "might need to support later" off the design inputs.
 - **Make me label what's a real need versus my speculation.** "List which structures in this design map to needs you explicitly stated, and which I added for a possible future — delete the latter by default." Force my guesses out into the open instead of into the foundation.
 - **When abstraction is genuinely warranted, induce it from real use cases, not imagined categories.** "Extract from the parts that actually repeat across the two or three concrete implementations we have — don't layer it a priori by the 'kinds' you imagine." Let abstraction grow up out of the code, not descend from my imagination.
@@ -72,7 +65,7 @@ What to avoid:   1-2 use cases -> imagine N future ones -> build a generic frame
 
 There's also a cheap after-the-fact test for the good feeling that follows "that's three occurrences, time to extract": **make me report the line count before and after.**
 
-I once did a "remove the duplication" refactor, pulling scattered copies into a helper with five parameters. It read cleaner. Then I counted: **1043 → 1050**, seven lines longer. The parameter list, the arguments at every call site, the signature and its doc comment added up to more than the duplication I removed. Backing that five-parameter helper out and keeping only the three extractions that actually paid got it to 1043 → 1036.
+Here is an author-recorded "remove the duplication" refactor illustration (line counts are not a general effectiveness metric):, pulling scattered copies into a helper with five parameters. It read cleaner. Then I counted: **1043 → 1050**, seven lines longer. The parameter list, the arguments at every call site, the signature and its doc comment added up to more than the duplication I removed. Backing that five-parameter helper out and keeping only the three extractions that actually paid got it to 1043 → 1036.
 
 In one line: **"removing duplication" and "making it smaller" are two different things — don't claim credit for the second in the name of the first.** Any refactor whose stated goal is simplification must report the before/after line count. If the number doesn't go down, you owe a different, articulable benefit ("these three places will no longer drift apart"); if you can't articulate one, back it out. As a footnote: before that refactor I also claimed I could get the file under 800 lines. That was wrong too, and counting was likewise the only way to find out.
 
@@ -119,7 +112,7 @@ The test: the difference is whether the extension point maps to **a requirement 
 ## Version notes
 
 :::note Applicable versions
-This isn't a bug in any one version — it's the joint product of two root causes: treating "DRY / extensible" as unconditionally correct, plus a tendency to show foresight. It's **common across models**. Newer versions do follow explicit "don't abstract yet" instructions more reliably, but unless you set limits yourself, "see similarity, extract it; reserve extension points for an imagined future" remains my default center of gravity. Treating it as a tendency you actively hedge against with YAGNI and the Rule of Three is more reliable than hoping some version "no longer abstracts prematurely."
+Rechecked Metz's and Fowler's original guidance on 2026-10-29. Retained abstraction from actual variation and softened the hard three-occurrence rule. Line count is a supporting measure, not a substitute for readability, coupling, or change cost. The counts in this entry are an author illustration, not a model-effect experiment; expensive public contracts still require case-specific review.
 :::
 
 ## Further reading and sources

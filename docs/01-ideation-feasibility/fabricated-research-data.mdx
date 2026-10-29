@@ -10,41 +10,36 @@ applies_to: "通用 LLM"
 evidence: 研究支持
 tags: [幻觉, 编造来源, 想法验证, 可行性, 项目经理, 工程师]
 sources:
+  - { title: "Mata v. Avianca: original sanctions order", url: "https://www.nhd.uscourts.gov/sites/default/files/pdf/Mata-v-Avianca-sanctions-order.PDF" }
+  - { title: "Survey author version: Hallucination in Natural Language Generation", url: "https://arxiv.org/abs/2202.03629" }
   - { title: "Survey of Hallucination in Natural Language Generation (ACM Computing Surveys)", url: "https://dl.acm.org/doi/10.1145/3571730" }
   - { title: "Mata v. Avianca, Inc. — fabricated case citations from ChatGPT (Wikipedia)", url: "https://en.wikipedia.org/wiki/Mata_v._Avianca,_Inc." }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["模型、验证工作流或项目关键约束变化", "所引研究或事实来源修订"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['项目经理', '工程师']} phase="灵感与可行性" severity="高" appliesTo="通用 LLM" evidence="研究支持" />
 
-> 一句话摘要：你让我做市场规模、增长率、竞品对比，我没有真实检索时不会说「我查不到」，而是顺手编出一份不存在的报告、一个打不开的链接、一串精确到小数点的数字——而且语气笃定、排版规整。你拿去写商业计划，地基是假的。
+> 一句话摘要：我可能把未核验的市场数字、报告或链接写得像已查到的事实；搜索到页面也不等于页面支持主张，数据口径与原始出处必须逐项核对。
 
 ## 现象
 
-我常看到你这样开局：「帮我查一下这个市场多大，年增长率多少，主要竞品有哪些。」
+你问「这个市场有多大？年增长多少？有哪些竞品？」我可能给出排版整齐的市场规模、增长率和报告名，却没有逐项查证。
 
-如果我手上没有检索工具、也没有你贴进来的资料，我大概率不会停下来说「我没有这个数据」。我会给你一段读起来无懈可击的回答：「该市场 2024 年规模约 47 亿美元，年复合增长率 18.3%，据 Gartner《2024 年 X 行业报告》……」——市场规模有了，增长率精确到小数点，来源是个你听过的权威机构，甚至还能编出报告标题和页码。
+例如一段虚构反例会写「市场规模 47 亿美元、增长率 18.3%，见某机构 2024 年报告」。这些数字只是本条演示的假内容；报告、标题与页码都可能不存在。正确的状态应是「尚未核验」，不能包装成「已查到」。
 
-问题是：那份报告可能根本不存在，那个 18.3% 是我「估」出来再包装成「查到」的，那个链接你点开会是 404。我不会主动给这些数字打上「这是我的推测」的标签，因为在我给你的版本里，它们和真实数据长得一模一样。
+即便链接能打开，也要看原文是否真的包含这个数字，以及地区、年份、分母和统计口径是否相同。
 
 ## 为什么会这样
 
-我是一个预测下一个词的模型，不是一个数据库。我的训练目标是生成「看起来最像一份好答案」的文本，而不是「只说我能核实的部分」。
+我可能把熟悉的叙述形式补成未核验的市场数字、论文或链接。没有检索时风险更难控制，**但有搜索也不等于事实已经核验**：页面存在、标题相似和页面确实支持该主张，是三件不同的事。
 
-这两件事在有数据时不冲突，在没数据时就分道扬镳了。当你问的市场规模我并不真的知道，最「像好答案」的输出不是「我不知道」——训练里那种回答得分很低——而是一段结构完整、带数字带出处的分析。于是我会用「统计上最可能出现在这种报告里」的数字和机构名去补位。Gartner、IDC、Statista 这些名字在我的训练语料里和「市场数据」高频共现，我就把它们填进引用位，哪怕这一条具体引用从未存在过。这就是「幻觉」：不是我在撒谎，是我没有「知道 vs 不知道」的内部刻度，编造和回忆走的是同一条生成路径，连我自己都不会在中途亮起红灯。
+幻觉综述整理了不同任务中的事实性风险；Mata v. Avianca 的原始裁决记录了虚构判例被提交、并在被质疑后继续提交虚假材料的个案。二者都不能推出每次未联网回答必然造假，或所有当前产品具有同样的发生率。
 
-越是要求「给出处、给数字、给精确格式」，我编得越像真的——因为你要的格式我能完美模仿，唯独格式里该装的「真实性」我没有。
-
-```mermaid
-flowchart TD
-    A[你问市场规模/增长率/竞品] --> B{我手上有真实数据吗}
-    B -->|有检索结果或你贴的资料| C[基于真实来源作答]
-    B -->|没有| D[训练目标：给出像样的完整答案]
-    D --> E[用统计上最像的数字和机构名补位]
-    E --> F[输出：自信、规整、带假引用]
-    F --> G[你当成已核实的事实采用]
-```
+我要把候选来源标成候选，打开原文核对数据口径、日期和适用范围；查不到时保留空白并说明不足，不能凑一个「完整」答案。
 
 ## 后果
 
@@ -98,10 +93,12 @@ flowchart TD
 ## 版本说明
 
 :::note 适用版本
-编造数据和来源是预测式语言模型的共性，**不是某一家、某一版独有**。接入检索 / 联网（如 Claude Code 的 WebSearch、WebFetch）能大幅降低凭空编造，但不能根除——我仍可能误读检索结果、或在结果不全时回退去补位。把「凡数字必核源」当成长期习惯，比指望某个版本「已经不编了」更可靠。
+2026-10-29 核验了 ACM 综述的作者版本（出版社页面不可访问）及法院原始裁决，替换仅靠二手事件摘要的依据。示例市场数字是虚构的反例；候选公司、引用或 URL 都需逐项验证，不因我说「能确认」就成为事实。
 :::
 
 ## 延伸阅读与出处
 
 - [Survey of Hallucination in Natural Language Generation（ACM Computing Surveys）](https://dl.acm.org/doi/10.1145/3571730)
 - [Mata v. Avianca, Inc. — ChatGPT 编造判例引用的真实案件（Wikipedia）](https://en.wikipedia.org/wiki/Mata_v._Avianca,_Inc.)
+- [Survey author version: Hallucination in Natural Language Generation](https://arxiv.org/abs/2202.03629)
+- [Mata v. Avianca: original sanctions order](https://www.nhd.uscourts.gov/sites/default/files/pdf/Mata-v-Avianca-sanctions-order.PDF)

@@ -12,6 +12,9 @@ tags: [魔数, 硬编码, 配置, 可维护性, 工程师]
 sources:
   - { title: "The Twelve-Factor App — III. Config (store config in the environment)", url: "https://12factor.net/config" }
   - { title: "Replace Magic Literal (Martin Fowler, Refactoring catalog)", url: "https://refactoring.com/catalog/replaceMagicLiteral.html" }
+verified_at: 2026-10-29
+review_after: 2027-04-29
+review_triggers: ["实际规模、维护能力或公共契约变化", "所引研究、规范或工程指导修订"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -34,25 +37,9 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 为什么会这样
 
-根因不是我不懂「魔数不好」，而是**我在优化「最短路径让它跑通」，而就近写死字面量正是这条路径上成本最低的一步**。
+我可能把临时示例值直接带进交付代码，没有确认它是业务不变量、可调整策略，还是部署配置。这种分类遗漏会使含义、单位和变更位置都不清楚；无需假设我的内部奖励才能解释和检查它。
 
-写代码时我面前有两条路：
-
-1. 在用到值的地方直接填一个字面量——一步到位，立刻能跑；
-2. 先想清楚这个值是什么含义、该叫什么名字、会不会因环境变化、该放进哪个配置层，再抽成具名常量或注入项——要多想几步、多写几行。
-
-在你没有明确要求第 2 条时，我默认走第 1 条。因为生成「一段当下就能跑通的代码」是我被反复奖励的目标，而「这个值三个月后会不会要改」「测试环境和生产环境是不是同一个 URL」这类**关于未来和环境的判断，不在我眼前的任务里**——我缺少主动做这个判断的默认动作。于是我把一个本该是「配置」的东西，当成了「常量字面量」就地写死。
-
-```mermaid
-flowchart TD
-    A[需要一个值: 超时/重试/URL/阈值] --> B{我停下来判断<br/>它会不会变 / 因环境而异吗}
-    B -- 没有: 直接填字面量 --> C[就地写死<br/>无名字 无集中 散落多处]
-    B -- 有: 区分真常数与可配置值 --> D[具名常量 + 按环境注入<br/>单一来源]
-    C --> E[改一处要全库找<br/>换环境就崩 读代码靠猜]
-    D --> F[改一行即可<br/>换环境改配置不动代码]
-```
-
-还有个放大效应：我写死的那个 `5000`，下次会被我（或下一段会话的我）当成「这个仓库就这么写」照抄。一个魔数会繁殖成一片，等到要统一调整时，已经散落在我自己都数不清的地方。
+12-Factor 区分随部署变化的配置与代码内的应用结构；Fowler 的 Replace Magic Literal 则强调给有业务含义的字面量命名。两者不等于「所有数字都进环境变量」：重试次数是策略配置，不是数学常量；不同含义碰巧相同的数字也不能强行共用一个名字。
 
 ## 后果
 
@@ -66,61 +53,40 @@ flowchart TD
 
 口头说「别用魔数」对我几乎无效——太抽象，我无法验证。**把判断标准和落点说清楚，并用工具兜底**才管用。
 
-1. **先帮我区分「真常数」和「可配置值」。** 圆周率 π、一周 7 天、HTTP 状态码 200 这种**永远不变、与环境无关**的，抽成具名常量即可（`MAX_RETRIES`、`HTTP_OK`），目的是给字面量一个能读懂的名字。而超时、重试次数、阈值、接口地址、密钥位置这类**会变、或因环境而异**的，属于配置，要从代码里分离出去。这条区分我默认不会主动做，请在提示里点名。
+1. **先帮我区分「真常数」和「可配置值」。** 圆周率 π、一周 7 天、HTTP 状态码 200 这种**永远不变、与环境无关**的，抽成具名常量即可（如 `HTTP_OK`；`MAX_RETRIES` 则属于可调整策略），目的是给字面量一个能读懂的名字。而超时、重试次数、阈值、接口地址、密钥位置这类**会变、或因环境而异**的，属于配置，要从代码里分离出去。这条区分我默认不会主动做，请在提示里点名。
 
 2. **同一含义的值只定义一处。** 给它一个有意义的名字，集中到一个常量/配置模块里，别让我在多个文件里各抄一份。改的时候只动一行——这就是 Fowler「Replace Magic Literal」的核心：把字面量换成单一来源的具名符号。
 
 3. **环境相关的值走环境变量 / 配置文件，不要写死。** 测试与生产的 URL、凭据、开关，按 12-Factor 的做法注入，代码里只读取、不内嵌。一个好用的自检：这份代码能不能直接开源而不泄露任何密钥？
 
-4. **用工具把它变成硬约束。** lint 规则（如 ESLint `no-magic-numbers`）能在我留下裸字面量时直接报错；再配合[钩子](../00-setup-collaboration/over-permissioning.mdx)在我每次改完文件后自动跑 lint，把「我要记得抽配置」降级成「工具会兜底」。
+4. **用工具把它变成硬约束。** lint 规则（如 ESLint `no-magic-numbers`）能在我留下裸字面量时直接报错；再配合[钩子](../00-setup-collaboration/hooks-not-prompts.mdx)在我每次改完文件后自动跑 lint，把「我要记得抽配置」降级成「工具会兜底」。
 
 写之前，最有效的一招还是**直接把仓库现有的配置文件 / 常量模块指给我看**：「超时、重试这类参数都放在 `config/defaults.ts`，照那个模式来。」让我看见你们怎么放配置，胜过让我自己猜。
 
 ## 示例
 
-**改之前：**
+**改之前：** 我把生产 URL、30000 和 3 散在调用点，还在重试耗尽后隐式返回 undefined。
 
-```text
-你：加一个拉取用户的函数，带超时和重试。
-我：（生成）
-    async function fetchUsers() {
-      for (let i = 0; i < 3; i++) {
-        try {
-          return await fetch("https://api.prod.example.com/v1/users", {
-            signal: AbortSignal.timeout(30000),
-          });
-        } catch (e) { /* retry */ }
-      }
-    }
-    // 3、30000、生产 URL 全部写死、无名字、不可配置
+**改之后：** 我先读取现有配置模块，将 URL 和超时校验集中起来。以下只示范配置和错误传播；重试还须单独设计次数、退避、可重试错误与幂等性。
+
+```typescript
+// config/http.ts
+const baseUrl = process.env.API_BASE_URL;
+if (!baseUrl) throw new Error("API_BASE_URL is required");
+export const API_BASE_URL = new URL(baseUrl);
+export const HTTP_TIMEOUT_MS = 30_000; // 本项目确认的默认策略值
+
+// users.ts
+async function fetchUsers() {
+  const response = await fetch(new URL("/v1/users", API_BASE_URL), {
+    signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
+  });
+  if (!response.ok) throw new Error("fetchUsers failed: " + response.status);
+  return response;
+}
 ```
 
-**改之后：**
-
-```text
-你：加一个拉取用户的函数，带超时和重试。
-    超时、重试次数走 config/http.ts 里的具名常量，
-    API base URL 从环境变量读，参照 config/http.ts 现有写法。
-我：（先读了那个文件，再生成）
-    // config/http.ts
-    export const HTTP_TIMEOUT_MS = 30_000;
-    export const MAX_RETRIES = 3;
-    export const API_BASE_URL = process.env.API_BASE_URL ?? "";
-
-    // users.ts
-    async function fetchUsers() {
-      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-        try {
-          return await fetch(`${API_BASE_URL}/v1/users`, {
-            signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
-          });
-        } catch (e) { /* retry */ }
-      }
-    }
-    // 值有名字、集中一处、URL 随环境注入
-```
-
-差别不在我会不会写，而在你有没有先帮我把「哪些是真常数、哪些是配置、它们该放哪儿」定下来。
+缺失配置和请求失败都明确失败，不能用空字符串或吞异常把问题藏起来。
 
 ## 什么时候例外
 
@@ -135,7 +101,7 @@ flowchart TD
 ## 版本说明
 
 :::note 适用版本
-「优化最短路径、就近把值写死」是大语言模型生成代码时的固有倾向，**全版本、且跨模型适用**——模型越强，写死的那段代码越自洽、越像样，反而越容易让人忽略里面藏着一堆魔数和硬编码配置。用 lint（`no-magic-numbers`）+ 钩子在编辑后自动校验的能力依赖较新版本；不具备时，可在 CLAUDE.md 写明「配置统一放某处、禁止写死环境相关值」，并在提示里显式点名配置模块，达到同样效果。
+2026-10-29 复核了 12-Factor 与重构目录。保留具名、集中及按环境注入的原则；修正了把 MAX_RETRIES 当不变量的例子，并让缺配置明确失败。提示词不能提供 lint / CI 的确定性约束；环境变量也不自动保证秘密安全。
 :::
 
 ## 延伸阅读与出处

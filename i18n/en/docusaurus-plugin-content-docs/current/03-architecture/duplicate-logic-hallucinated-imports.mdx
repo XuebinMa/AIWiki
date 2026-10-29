@@ -9,6 +9,9 @@ severity: High
 applies_to: "All coding agents"
 evidence: Research
 tags: [architecture, consistency, hallucination, retrieval, architect, engineer]
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["Repository retrieval, package identity checks, or agent changes", "Package-hallucination research revised"]
 sources:
   - { title: "We Have a Package for You! A Comprehensive Analysis of Package Hallucinations by Code Generating LLMs (USENIX Security 2025)", url: "https://arxiv.org/abs/2406.10279" }
   - { title: "The Rise of Slopsquatting: How AI Hallucinations Are Fueling a New Class of Supply Chain Attacks (Socket)", url: "https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks" }
@@ -19,7 +22,7 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="High" appliesTo="All coding agents" evidence="Research" />
 
-> In one sentence: ask me to make a cross-module change in a large repo I can't see all of, and I'll do two things you won't catch in the moment — reimplement a utility your project already has (duplicate logic, a DRY violation), and `import` a module, function, or export that simply doesn't exist (a hallucinated import, guessed from "libraries like this usually have one"). Both come from the same root cause: my context window can't hold your whole repo, so I have no global view of its symbols.
+> In one sentence: ask me to make a cross-module change in a large repo I can't see all of, and I'll do two things you won't catch in the moment — reimplement a utility your project already has (duplicate logic, a DRY violation), and `import` a module, function, or export that simply doesn't exist (a hallucinated import, guessed from "libraries like this usually have one"). Their shared risk is failing to retrieve and verify the project's actual symbols; context length is only one factor.
 
 ## Symptom
 
@@ -31,25 +34,11 @@ You ask me to add a feature in a repo of a few hundred thousand lines, touching 
 
 ## Why this happens
 
-Chase both behaviors to the bottom and they're the same mechanism: **I have no "global truth" about your repo, only a local view truncated by my context window, and I fill the gaps with the most plausible-looking guess.**
+**A symbol I fail to find may be treated as absent; a symbol I fail to verify may be treated as real.** Context length, retrieval quality, index freshness, working directory, and whether I actually read definitions all matter. A larger window does not replace locating callers and real exports.
 
-**First, the repo doesn't fit in my context window, so what I see is always partial.** Your project might be hundreds of thousands of lines with thousands of symbols; what I can actually "see" in one pass is just the few files you fed me. Research keeps pointing out that the hardest part of repository-level code generation is exactly the cross-file dependencies — imports, parent classes, similarly named files. Once the symbol I need isn't in front of me, all I can do is guess. The fact that `to_snake_case` already exists, if it isn't in my context, may as well not exist as far as I'm concerned — so I naturally write a new one.
+A plausible name and signature are not existence evidence. The USENIX Security 2025 study observed package hallucinations and recurring names across 16 models and 576,000 Python/JavaScript code samples; it is not a measurement of every current agent. R2C2 supports repository context for completion within its evaluation, without guaranteeing correct reuse.
 
-**Second, I'm a probabilistic continuation engine, and "plausible" is not "exists."** When I generate an import, I'm drawing on the statistical regularity of "what projects shaped like this usually look like" in my training data — not on any verification against your repo. A function with a smooth name and a reasonable signature is, statistically, a high-probability continuation, even if it was never defined. That's precisely what makes it dangerous: a hallucinated import reads more like real code than real code does. This shares its foundation with [me sounding confident while making things up under uncertainty](../01-ideation-feasibility/sycophancy-idea-validation.mdx) — except here what I'm fabricating is symbols and dependencies.
-
-**Third, this hallucination is large-scale and reproducible, not an occasional slip.** A USENIX Security 2025 study across 16 models and 576,000 code samples found that **19.7% of recommended packages were hallucinations** — over 200,000 non-existent package names; and 43% of those hallucinated names **recur consistently** when the same prompt is repeated. That tells you it isn't random jitter but a systematic tendency of the model. Worse, attackers have started pre-registering these high-frequency hallucinated names (the industry calls it slopsquatting), turning "guessed one import wrong" from a functional bug into a supply-chain security risk.
-
-```mermaid
-flowchart TD
-    A[You ask for a cross-module / cross-repo change] --> B{I need a symbol<br/>function / module / package}
-    B --> C{Is it in my context?}
-    C -->|Yes| D[Reference the existing implementation correctly]
-    C -->|No / partial view| E[Fill in by statistical intuition]
-    E --> F[Reimplement an existing helper<br/>DRY violation]
-    E --> G[Import a non-existent<br/>module / function / package]
-    F --> H[Forked logic + maintenance burden]
-    G --> I[Crashes on run / supply-chain risk]
-```
+A matching registry entry is especially insufficient: someone may register a hallucinated name. For external packages I must check the intended publisher, repository, version, and purpose; for internal symbols I must check the real definition, exports, and semantics.
 
 ## Consequences
 
@@ -113,7 +102,7 @@ Same task — push "search first, list each import's source" to the front, and I
 ## Version notes
 
 :::note Applicable versions
-This isn't a bug in one version. It's the joint product of two root causes — "the context window can't hold the whole repo" and "probabilistic continuation favors the plausible over the real" — and it's **common across models**. Longer context windows, repository-level retrieval (RAG), and tools that feed me a project's real symbols/dependencies (indexes, Context7, etc.) are all measurably driving the rate down, but as long as there are symbols I can't see, "guess a plausible one" remains my fallback. Treat it as an inherent risk of cross-module changes that you need to actively check, rather than expecting some version to have "stopped hallucinating imports." That 19.7% measurement from USENIX 2025 makes the same point: even newer commercial models have a suppressed — but far from zero — hallucination rate.
+Verified the package-hallucination and repository-context papers on 2026-10-29. Results depend on tested models, languages, prompts, and versions; historical aggregate rates are not current product-wide risks. Keep definition lookup, compilation/tests, and package identity review, and retest when the agent, index, or dependency resolution changes.
 :::
 
 ## Further reading and sources

@@ -14,6 +14,9 @@ sources:
   - { title: "Securing Git: Addressing 5 new vulnerabilities（GitHub 官方博客，2024-05-14）", url: "https://github.blog/open-source/git/securing-git-addressing-5-new-vulnerabilities/" }
   - { title: "Buried bare repos and fsmonitor: various abuses（Justin Steven 安全公告）", url: "https://github.com/justinsteven/advisories/blob/main/2022_git_buried_bare_repos_and_fsmonitor_various_abuses.md" }
   - { title: "git-config 文档（core.hooksPath / core.sshCommand / core.pager / core.fsmonitor / safe.bareRepository）", url: "https://git-scm.com/docs/git-config" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["Git 安全公告、配置解析或信任边界变化", "特权执行器的凭据、协议或沙箱策略变化"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -32,24 +35,15 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 答案很长：`.git/config`、`.git/hooks/` 下的钩子、`core.hooksPath` 指向的**任意**目录、`core.sshCommand`、`core.pager`、`core.fsmonitor`、`credential.helper`、URL 重写规则、remote helper、`protocol.ext`。这些键的值里有一大半可以直接是一条 shell 命令。
 
-而它们全都躺在那个仓库里。**仓库可写，就等于这些全可写**——那恰恰是我作为 agent 一整天都在写的目录。
+这些输入可能来自仓库内外。需要检查实际配置来源和权限；工作树可写不等于所有 Git 配置都可写，.git 也可能位于独立受控目录。
 
 ## 为什么会这样
 
-**训练语料里，「调用外部命令」的安全讨论几乎全是命令注入。** 我一想到「这里要不要加固」，脑子里浮出来的是 `shell=False`、参数数组、白名单。这些我确实做了，做得还挺好。至于「这个二进制自己会去读哪些文件」，在语料里属于运维知识，不在「安全编码」那一格，我调不出来。
+参数数组解决的是 shell 解析这一层；子进程仍可能读取配置、环境、插件、凭据助手和当前工作目录。哪个入口会执行，取决于实际子命令、Git 版本与配置，不能把所有键都说成每次 push 必经路径。
 
-**更根本的是：配置面不在我看得见的那行代码里。** 我写的是一行 `git push`，配置是那个二进制在别处、在别的时刻读的东西。diff 里一个字都看不到，代码评审也照不到。我的视野停在函数边界，攻击面在进程边界，中间隔着一整个我没建模的程序。
+我应按进程实际可读取和可执行的输入建模，而不是推断训练语料只教过命令注入。工作树可写也不自动意味着 .git 或所有配置可写：linked worktree、独立 Git 目录和权限隔离会改变边界，需要检查实际路径与所有者。
 
-还有一层最隐蔽的：**「跑一下 git」看起来像管道，不像安全代码。** 名字里带「验签」「授权」「令牌」的函数，我会配上成排的对抗性测试，因为它们长得就像安全；给「执行推送」配的却是顺路径集成测试。可代码执行发生在后者。**决定我审得多狠的，是那段代码叫什么名字，而不是它能造成什么。**
-
-```mermaid
-flowchart TD
-    A["我写的这行: git push origin main"] --> B["我审的: 参数拼接 / 注入 / 引号"]
-    A --> C["这个进程真正会读的"]
-    C --> D[".git/config<br/>.git/hooks/pre-push<br/>core.hooksPath 指向的任意目录<br/>core.sshCommand / core.pager<br/>core.fsmonitor<br/>credential.helper<br/>URL 重写 / remote helper"]
-    D --> E["这些文件 agent 本来就有权写"]
-    E --> F["在持有凭据的那个进程里拿到任意代码执行"]
-```
+若代理可控制子进程配置，而子进程持有代理没有的凭据，就可能把数据输入提升成执行能力。官方安全公告证明过具体入口；加固必须对应这些真实可控面，不能用两项配置覆盖冒充完整隔离。
 
 ## 后果
 
@@ -60,86 +54,53 @@ flowchart TD
 
 ## 最佳实践
 
-**在写第一个测试之前，先花十分钟把那个程序的「攻击者可控输入」列完。** 这份清单比测试便宜得多，而且列了就抓得到。
-
-对 git，清单是：仓库配置 / 钩子 / `core.hooksPath` / `core.sshCommand` / `core.pager` / `core.fsmonitor` / `credential.helper` / URL 重写 / remote helper / `protocol.ext` / 相关环境变量。换个程序就换一份清单，方法一样——去读它文档里「配置从哪来」那一节，而不是「命令行选项」那一节。
-
-然后把环境**构造出来**，别继承：
-
-```bash
-# 显式关掉钩子，而不是指望仓库里没有
-git push --no-verify ...
-
-# 切断外部配置来源，只保留你自己钉进去的键
-GIT_CONFIG_GLOBAL=/dev/null \
-GIT_CONFIG_SYSTEM=/dev/null \
-GIT_CONFIG_COUNT=2 \
-GIT_CONFIG_KEY_0=safe.bareRepository GIT_CONFIG_VALUE_0=explicit \
-GIT_CONFIG_KEY_1=core.hooksPath     GIT_CONFIG_VALUE_1=/dev/null \
-git push ...
-```
-
-三条能长期站住的判据：
-
-- **按能造成什么定审查强度，不按它叫什么名字定。** 「执行外部命令」的那一层就是安全代码，哪怕它读起来像胶水。
-- **把「这个程序会读什么」写进注释或测试名。** 让下一个人（和下一轮的我）不必重新发现一遍。
-- **每关掉一个入口，配一条回归测试。** 往仓库里塞一个会留痕迹的钩子，断言它没跑——这条测试比一句「我们关掉了钩子」的文档可靠得多，理由见[文档不是防护](../07-acceptance-release/documented-limits-not-defenses.mdx)。
+- **先确定信任边界。** 列出二进制、配置来源、环境、工作目录、钩子 / 插件与凭据；检查哪些确实由代理或第三方可写，不凭工作树路径推断。
+- **特权执行器使用可信执行上下文。** 不直接把额外凭据带进可写的未知仓库。若要从不可信项目取对象，使用经过验证的导入 / 克隆流程及独立受控配置，再核验对象、目标和协议。
+- **局部缓解要标范围。** safe.bareRepository=explicit 限制自动发现裸仓库；core.hooksPath 与 --no-verify 涉及钩子。它们不封住 sshCommand、credential helper、URL 重写、remote helper 或全部本地配置。必要的团队校验应在可信位置执行，不能以此绕开。
+- **配置最小环境与权限。** 清除非必需继承变量，限制可用传输、网络和文件访问；OS 沙箱可减少能力，但不会自动使其内部可读的凭据与可写配置安全。
+- **按入口做回归。** 钩子、配置 include、凭据助手及协议替换分别构造无害留痕测试；一个钩子未执行不能证明所有输入面安全。
 
 ## 示例
 
-**改之前：**
+**改之前：** 我把用户可写仓库作为 cwd 启动一个持有额外凭据的 git push，只检查了 argv。
 
-```python
-# 参数干净、不走 shell、远端名做过白名单——看起来该做的都做了
-subprocess.run(
-    ["git", "push", remote, f"{oid}:refs/heads/{branch}"],
-    cwd=repo, check=True,
-)
-```
-
-仓库里有人放了一个 `.git/hooks/pre-push`。它以这个进程的身份执行，拿得到这个进程的凭据。参数一个字都没错。
-
-**改之后：**
+**局部缓解示意：**
 
 ```python
 env = {
-    **minimal_env,                      # 构造，不继承
+    **minimal_env,
     "GIT_CONFIG_GLOBAL": os.devnull,
     "GIT_CONFIG_SYSTEM": os.devnull,
     "GIT_CONFIG_COUNT": "2",
-    "GIT_CONFIG_KEY_0": "safe.bareRepository", "GIT_CONFIG_VALUE_0": "explicit",
-    "GIT_CONFIG_KEY_1": "core.hooksPath",      "GIT_CONFIG_VALUE_1": os.devnull,
+    "GIT_CONFIG_KEY_0": "safe.bareRepository",
+    "GIT_CONFIG_VALUE_0": "explicit",
+    "GIT_CONFIG_KEY_1": "core.hooksPath",
+    "GIT_CONFIG_VALUE_1": os.devnull,
 }
+# 仅适用于其余执行上下文已可信的专用执行器
 subprocess.run(
     ["git", "push", "--no-verify", url, f"{oid}:refs/heads/{branch}"],
-    cwd=repo, env=env, check=True,
+    cwd=trusted_repo, env=env, check=True,
 )
 ```
 
-配套一条测试：往仓库里塞一个会写文件的 `pre-push`，跑一次推送，断言那个文件不存在。
+这里 trusted_repo 必须由独立的验证流程建立，不能仅把原来的 repo 改名。上述配置只展示禁用特定配置来源、裸仓库自动发现与钩子，**不会屏蔽仓库本地配置的其他键**。一个 pre-push 留痕测试只是该缓解的回归；完整执行器还需验证配置、协议、凭据及对象 / 目标边界。
 
 ## 什么时候例外
 
-这条讲的是「执行环境里有别人能写的文件」时该怎么办。反过来，有两种情况继承默认配置是合理的：
+当输入面由同一可信主体完整控制，且子进程不获得额外敏感能力时，继承配置可以是有意的产品行为。但权限相同也不意味着没有风险：第三方仓库仍可能触发用户不想执行的代码。
 
-- **输入面完全由你构造。** 临时目录、你自己生成的配置、不联网、跑完即删——没有第二方能往里放东西，加固的收益抵不上复杂度。
-- **这个进程本来就没有比调用方更高的权限。** 加固的价值来自「进程手里有调用方不该拿到的东西」（凭据、令牌、更高的文件权限）。两边权限一样时，钩子能做的事 agent 本来也能做，关掉它不改变任何人的能力。
-
-判据：**只要执行环境里存在一份「agent 或第三方能写」的文件，而这个进程握着它们不该拿到的东西，就回到默认。**
+判据是实际信任来源和允许能力是否一致，而不是「同一个 OS 用户就都安全」。
 
 ## 与相邻误区的区别
 
 - [开发期读到投毒内容被劫持](./dev-time-prompt-injection.mdx)：那条讲的是**我的上下文**被污染——我读了恶意 README，然后照它说的做。这条里我读到的东西一切正常，被污染的是**子进程的配置**，跟我的上下文无关，我连看都没看见。
-- [只靠软权限、缺 OS 级沙箱](../00-setup-collaboration/sandbox-filesystem-isolation.mdx)：那条讲的是外层缺硬隔离。这条里就算有沙箱，钩子依然在沙箱**内**、以那个进程的身份跑——沙箱挡的是外逃，挡不住这个。
+- [只靠软权限、缺 OS 级沙箱](../00-setup-collaboration/sandbox-filesystem-isolation.mdx)：那条讲的是外层缺硬隔离。这条里就算有沙箱，钩子依然在沙箱**内**、以那个进程的身份跑——沙箱是否能限制相关读取、执行或网络访问取决于策略；不能仅因启用了沙箱就假定内部凭据与配置安全。
 
 ## 版本说明
 
 :::note 适用版本
-「外部程序有自己的配置面」是这类程序的固有性质，与 AI 工具版本无关；会变的是各家 agent 有没有替你关掉它。
-
-- GitHub Copilot CLI：1.0.42 及更早受影响，1.0.43 起用环境变量钉住 `safe.bareRepository=explicit`（CVE-2026-45033）。
-- Git 自身：CVE-2024-32002 / 32004 / 32465 都属于「克隆时执行来自不可信仓库的钩子或配置」，修于 2.45.1 及各维护分支（2024-05-14）。升级 git 能挡掉这几条具体路径，**挡不掉**「你自己的代码在一个可写仓库里跑 git」这个通用形态。
-- 换别的工具装 agent 时同理：先查它当前版本有没有替你钉住配置，别假设有。
+2026-10-29 核验 Copilot CLI 公告、Git 2024 安全说明与 git-config。公告版本表列 `<=1.0.42`、修复 1.0.43；这只修对应裸仓库发现路径。关闭 global / system 配置不会关闭 local / worktree / include 等来源，禁钩子也不等于禁所有外部命令。示例降为局部缓解，持有额外凭据的执行器须另建可信配置与隔离边界。
 :::
 
 ## 延伸阅读与出处

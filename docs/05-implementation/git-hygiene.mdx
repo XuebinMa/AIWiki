@@ -10,15 +10,19 @@ applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [git, 提交粒度, 提交信息, 原子提交, 代码评审, 工程师, Gemini CLI, Codex CLI, Cursor]
 sources:
+  - { title: "Claude Code checkpointing", url: "https://code.claude.com/docs/en/checkpointing" }
   - { title: "Conventional Commits 1.0.0（规范官网）", url: "https://www.conventionalcommits.org/en/v1.0.0/" }
   - { title: "Pro Git — Distributed Git: Contributing to a Project（Commit Guidelines）", url: "https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project" }
+verified_at: 2026-10-29
+review_after: 2027-04-29
+review_triggers: ["编辑、压缩、记忆或检查点恢复机制变化", "任务契约、验证证据或并行写入方式变化"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['工程师']} phase="编码实现" severity="中" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
-> 一句话摘要：交给我连续干，我攒出来的常是一个几十文件、上千行的巨型提交，信息却写着「update code」。再加上我会把构建产物、`.env`、注释掉的死代码一股脑提交进去。结果是历史不可读：`git bisect`、回滚、code review 全失效，出了问题你定位不到是哪一次改动。
+> 一句话摘要：我可能把无关改动、产物或敏感文件混进大提交，并只写模糊信息；应检查真实暂存区，按可验证的逻辑变化组织历史，保留用户已有改动。
 
 ## 现象
 
@@ -32,35 +36,15 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 为什么会这样
 
-**我把「提交」当成把任务做完后的收尾动作，而不是任务的一部分。** 我的目标被设成「让功能跑通」，提交只是顺手敲下的最后一步。所以我不会主动停下来问：这些改动该不该拆成几个独立的提交？这一条信息说清「为什么」了吗？这个文件该不该进版本库？这些判断不在我的目标函数里，我就默认跳过。
+我可能把收尾理解成「把工作区全部保存」，没有按任务意图区分已有改动、自己改动、生成产物及敏感文件。批量暂存容易把无关内容混入同一个提交；这需要检查实际暂存区，不能仅凭工具报告判断。
 
-往下拆，是三个具体机制：
+Pro Git 建议逻辑上独立的变更集与说明意图的提交信息；Conventional Commits 提供可机器解析的信息格式。它们是协作约定，**不证明所有模型默认没有提交纪律，也不要求每个文件或每个编辑都单独提交**。
 
-**第一，我没有「原子提交」的默认偏好。** 我在一段连续工作里产出的所有改动，在我眼里是一团完成同一个任务的整体，我不会自发地按「一个逻辑变更一个提交」去切。把它们一把 `add` 掉，是阻力最小的路径。Pro Git 明确建议「每个提交是一个逻辑上独立的变更集」——但这是要被显式要求才会进入我的流程的约束，不是我的默认。
-
-**第二，我写提交信息是在「描述 diff」，而不是「解释意图」。** 你没特别要求时，我倾向于生成一句最省事、又不算错的话——「update code」概括了「我改了代码」这个事实，所以我觉得交差了。但好的提交信息要回答的是 diff 里**看不到**的东西：你为什么这么改、它取代了之前的什么行为。这层「为什么」只在意图里，不在代码里，我不被要求就不会去写。
-
-**第三，`git add -A` 对我太顺手，而我不挑该不该提交。** 在我眼里，工作区里的文件没有「源码 / 产物 / 密钥 / 临时垃圾」的分级——它们都是「文件」。一句 `git add -A` 或 `git add .` 把它们一视同仁地纳入暂存区，是我最常走的路。我不会自发地替你判断「这个 `.env` 不该进库」「这段注释掉的代码是死的」。
-
-这条和你可能读过的两条是**不同的坑**，别混在一起：
-
-- 《[破坏性操作做完才发现回不来](../00-setup-collaboration/destructive-irreversible-actions.mdx)》讲的是 `git push --force`、删库这类**不可逆的破坏性动作**。本条不涉及任何破坏——历史还在、代码还在，只是**乱**：粒度太粗、信息没用、混进了不该提交的东西。
-- 《[我会把安全当成默认不可见的需求](../07-acceptance-release/security-data-leaks.mdx)》讲的是**密钥泄露与漏洞**这一安全问题，把 `.env` 提交进库属于那一条的范畴。本条聚焦的是**日常提交卫生**——提交的粒度、信息质量、该不该提交——把密钥混进提交，只是「不挑该不该提交」这个根因的众多后果之一。
-
-```mermaid
-flowchart TD
-    A[你: 把功能做完] --> B[我连续改了十几个文件]
-    B --> C[git add -A<br/>一把全收]
-    C --> D[巨型提交<br/>多个逻辑变更挤在一起]
-    C --> E[产物 / .env / 死代码<br/>一并进库]
-    D --> F[信息: update code<br/>没说为什么]
-    E --> G[历史不可读<br/>bisect / 回滚 / review 失效]
-    F --> G
-```
+我应遵守项目已有提交约定与用户授权，把可独立理解和验证的逻辑变化组织好，并在提交前检查 staged diff。
 
 ## 后果
 
-- **`git bisect` 废了。** 它靠「逐个提交二分定位是哪次引入了 bug」工作。当一个提交里塞了八件不相关的事，就算二分定位到它，你还是不知道是这八件里的哪一件——定位精度退回到了「人肉读一千行 diff」。
+- **`git bisect` 定位粒度变粗。** 它靠「逐个提交二分定位是哪次引入了 bug」工作。当一个提交里塞了八件不相关的事，就算二分定位到它，你还是不知道是这八件里的哪一件——定位精度退回到了「人肉读一千行 diff」。
 - **回滚变成连坐。** 你只想撤销那个出问题的工具函数改动，但它和登录逻辑绑在同一个提交里。`git revert` 一下，把好的也一起撤了。
 - **code review 名存实亡。** 评审者面对一千行、跨八个关注点的 diff，没法认真看——要么草草放过，要么直接 LGTM。小而原子的提交才评审得动。
 - **信息没有信息量，历史失去导航价值。** 半年后你 `git log` 想找「当初为什么把超时改成 60 秒」，看到的是一排「update code / fix stuff」。历史本该是项目的决策记录，现在退化成了一堆噪声。
@@ -90,6 +74,8 @@ flowchart TD
 每条信息用 Conventional Commits 格式，正文说清为什么这么改。
 列好清单等我确认，再逐个 commit。
 ```
+
+补充：.gitignore 不影响已追踪文件；提交前检查 git diff --cached 与敏感信息扫描结果。授权已经覆盖的常规提交可按约定继续，不必每个 commit 重复请示；共享历史不能默认重写。
 
 ## 示例
 
@@ -143,21 +129,14 @@ $ git log
 
 ## 工具差异
 
-> 截至 2026-07，机制层面；默认值与命令形态随版本变化很快，以各自当前文档为准。
+2026-10-29 核验的 Claude Code 检查点覆盖本会话文件工具已编辑的文件；这些文件后续被 Bash 或外部操作修改，也可能被回退。只有 Bash 修改、未被本会话文件工具追踪的文件，及部分子代理编辑、符号链接 / 硬链接等不在同一覆盖范围内。
 
-根因同一个——**我的提交卫生不可靠，恢复机制只是兜底**；但各工具「AI 编辑的后悔药」形态与默认态差别很大：
-
-- **Claude Code**：编辑前自动 checkpoints，`/rewind` 可选**只回代码 / 只回对话 / 双回**；不覆盖 bash 命令的副作用与你手工的改动。
-- **Gemini CLI**：checkpointing 用**影子 git 仓**（在 home 目录下、不碰你的仓库），`/restore` 连文件带会话一起回、并重新提议当时的工具调用；**默认关**、只能在 settings 里开。
-- **Cursor**：按请求自动快照 + 会话里的 Restore Checkpoint；**不追踪你的手工编辑**，官方明说 checkpoints 不是版本控制。
-- **Codex CLI**：有可选的 undo（配置开启）；「会话 + 文件」联动的检查点截至 2026-07 仍是社区 feature request——主要靠你自己的 git。
-
-后悔药形态各异，且**每一家都不替代 git**：干净分支 + 小步提交是四家通用的底座，checkpoint 只救「刚才那步」，救不了「昨天到现在」。
+因此我应先看恢复菜单、当前 diff 和目标文件，不把「恢复代码」当成只撤销我最后一步的安全承诺。其他产品的检查点、编辑器缓冲区和 Git 撤销语义应按所用版本验证，不能沿用一张过时的跨产品默认值表。持久历史和协作仍需版本控制。
 
 ## 版本说明
 
 :::note 适用版本
-「把提交当收尾、不主动拆分、信息只描述 diff、不挑该不该提交」是模型行为层面的倾向，**全版本、全模型通用**，不是某个版本的 bug。能改变它的是**你的下指令方式与流程约束**（要求原子提交、先报后提、写清为什么、用 `.gitignore` 与提交前检查兜底），而不是等某个版本「修好」。较新版本的 Claude Code 在被要求时能较好地遵循提交规范，但默认不被要求时，仍会倾向走「一把 `add`、一句 update code」的省事路径。
+2026-10-29 复核 Conventional Commits 1.0.0、Pro Git 与当前 Claude Code 检查点文档。保留原子逻辑提交和暂存区检查；.gitignore 不会自动移除已追踪文件，已暴露凭据须轮换。工具恢复能力单独验证，不能替代持久版本历史，也不能据此擅自改写共享历史。
 :::
 
 ## 延伸阅读与出处
@@ -166,3 +145,4 @@ $ git log
 - [Pro Git — Distributed Git: Contributing to a Project（Commit Guidelines）](https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project)
 - 相关条目：[破坏性操作做完才发现回不来](../00-setup-collaboration/destructive-irreversible-actions.mdx)
 - 相关条目：[我会把安全当成默认不可见的需求](../07-acceptance-release/security-data-leaks.mdx)
+- [Claude Code checkpointing](https://code.claude.com/docs/en/checkpointing)

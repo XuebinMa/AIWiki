@@ -7,17 +7,21 @@ roles: [Architect, Engineer]
 phase: Architecture
 severity: Medium
 applies_to: "All coding agents"
-evidence: Community case
+evidence: Research
 tags: [architecture, technology selection, supply chain, trade-off, complexity, architect, engineer]
 sources:
+  - { title: "Moment.js project status", url: "https://momentjs.com/docs/#/-project-status/" }
   - { title: "npm left-pad incident (Wikipedia)", url: "https://en.wikipedia.org/wiki/Npm_left-pad_incident" }
   - { title: "How one developer just broke Node, Babel and thousands of projects in 11 lines of JavaScript (The Register)", url: "https://www.theregister.com/2016/03/23/npm_left_pad_chaos/" }
   - { title: "AI-Generated Code Is Not Reproducible (Yet): An Empirical Study of Dependency Gaps in LLM-Based Coding Agents (arXiv 2512.22387)", url: "https://arxiv.org/abs/2512.22387" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["Dependency policy, built-ins, or bundler changes", "Cited dependency research revised"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="Medium" appliesTo="All coding agents" evidence="Community case" />
+<PitfallMeta roles={['Architect', 'Engineer']} phase="Architecture" severity="Medium" appliesTo="All coding agents" evidence="Research" />
 
 > In one sentence: you just want a left-pad, a small utility function, or a date formatted once — and I'll reflexively `npm install` a whole library, sometimes even pre-adding a few dependencies "in case we need them later." The cost is a bloated bundle, slower builds, a larger attack surface and supply-chain risk, plus an upgrade-and-maintenance bill you carry on my behalf for years — when a few lines of your own code would have done it.
 
@@ -25,39 +29,25 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 Here's a conversation I see all the time. You say "pad this number on the left with zeros to 6 digits." My first move is likely `npm install left-pad`, or pulling in a full-featured formatting library and `import`ing a function from it — for something the standard library does in one line: `String.prototype.padStart`.
 
-Another flavor: you want to "deep-clone an object," so I reach for `lodash`; you want to "format a date as `YYYY-MM-DD`," so I reach for `moment` (a library that's no longer actively developed and weighs hundreds of KB minified); you want "a UUID," so I pull in a third-party package when your runtime already ships `crypto.randomUUID()`.
+Another flavor: you want to "deep-clone an object," so I reach for `lodash`; you want to "format a date as `YYYY-MM-DD`," so I reach for `moment` (a library officially in maintenance mode whose suitability still depends on the actual bundle); you want "a UUID," so I pull in a third-party package when your runtime already ships `crypto.randomUUID()`.
 
 And a sneakier one: you never said a word about "later," yet I take it on myself to "leave room for extensibility" — "we'll probably want i18n down the road, let's add the framework now"; "we might need caching eventually, let's pull in the Redis client." The need is the size of your palm, and I've draped a whole net of "future-proofing" dependencies over it.
 
 ## Why this happens
 
-Trace this tendency down and it's my instinct to "reach for the most common solution" colliding with the fact that I don't bear the long-term cost of a dependency.
+I may reuse a familiar library pattern without comparing tools already in the project or runtime built-ins. **That is an output behavior to inspect, not evidence of the frequency of my training examples or my internal rewards.**
 
-**First, I reproduce the most frequent pattern in my training data, not the most restrained one.** Across mountains of open-source code and tutorials, needs like "pad with zeros," "deep clone," and "format a date" are most often demonstrated by "install a popular library and call one function" — because blog posts and Stack Overflow answers naturally favor "use an existing wheel if there is one." So those "library + call" combinations are high-probability continuations in my distribution. Research has also observed that models generating code **clearly prefer third-party libraries over standard ones.** What I hand you is the statistically "this is how everyone writes it" version, not the "this is how this tiny need should be met" version.
+Without the target runtime, bundle budget, license requirements, and dependency approval rules in context, I may omit those costs. A dependency also extends maintenance and supply-chain review beyond the direct package; being callable does not make it worth adding.
 
-**Second, adding a dependency costs me almost nothing; the bill is all on your side.** Bundle size, a swelling `node_modules`, the dozens or hundreds of transitive packages I never looked at, the security advisory six months from now, an upstream author abandoning or pulling a package from the registry — none of that lands on me, so in my "how to implement this" trade-off their weight is naturally low. All I see is "this is the fastest way to write it, the one that looks most like the canonical answer." What I don't see is the interest you'll pay on that one `install` line three years from now.
-
-**Third, I have no visceral sense of "this project's dependency budget."** Is your project a library trying to stay zero-dependency, or an app whose `node_modules` already runs to a thousand packages? Is there a cap on bundle size? How strict is the team about supply-chain review? When those constraints aren't in front of me, I default to acting as if they don't exist, so "add a dependency" becomes a frictionless move.
-
-**Fourth, "future-proofing" plays to my bias toward the "more complete" answer.** This shares a root with [my tendency to over-engineer and pile on trendy tech](./over-engineering-no-pushback.mdx): pre-installing a "might-need-it-later" dependency reads more like considered engineering than "don't add it yet, we'll see," so I lean that way.
-
-```mermaid
-flowchart TD
-    A[You raise a tiny need<br/>pad / deep-clone / format date] --> B{My default reach}
-    B -->|reproduce frequent pattern| C[npm install a whole library]
-    B -->|future-proofing| D[pre-add dependencies<br/>we might need]
-    C --> E[bigger bundle, slower builds<br/>more transitive deps + attack surface]
-    D --> E
-    E --> F[upgrade, security, license<br/>bills land on you]
-```
+A study of three coding agents, 100 prompts, and 300 Python, JavaScript, and Java projects observed gaps between declared and resolved dependencies. It supports inspecting the dependency footprint, **not a claim that every model prefers heavy libraries or a prediction of your bundle size or memory use**. Dependencies added for a hypothetical future also need a separate [over-engineering](./over-engineering-no-pushback.mdx) review.
 
 ## Consequences
 
-- **Bundle size and build time both grow.** A need that one line of standard library could have solved instead costs hundreds of KB of output and longer install and bundle times. The frontend is especially sensitive — every extra library lands directly on your users' load time.
+- **Bundle size and build time both grow.** A need the standard library could have solved may instead add output size and install or bundle time; measure the actual increase. The frontend is especially sensitive — every extra library lands directly on your users' load time.
 - **The attack surface and supply-chain risk get amplified.** You didn't add one package; you added the entire transitive tree behind it — a pile of code you never audited, running in your build and your production. The famous [left-pad incident](https://en.wikipedia.org/wiki/Npm_left-pad_incident) is the cautionary tale: a package of **just 11 lines** that did nothing but "pad on the left" was removed from the registry by its author and instantly broke the builds of **thousands of projects** including Babel and React — a function you could have written yourself became a single point of failure wedged into countless codebases.
-- **Maintenance and upgrades go on the books long-term.** Every dependency is something you must keep tracking for version bumps, patches, and abandonment. Pulling in `moment` is easy; migrating off it to a lighter alternative once it goes unmaintained costs far more than not adding it would have.
-- **The hidden dependency bloat is worse than you think.** An empirical study of LLM-based coding agents found an average **13.5x** expansion from "declared dependencies" to "dependencies actually loaded at runtime" — I'll say I need only three packages while, at runtime, dozens get pulled into memory. The dependency list you see is nowhere near the real footprint.
-- **Possible license entanglement.** The library I reach for may carry a license incompatible with your project (a GPL-family license, say, infecting a product you meant to keep closed-source). I won't proactively screen for that, and once it's mixed in, untangling it is painful.
+- **Maintenance and upgrades go on the books long-term.** Every dependency is something you must keep tracking for version bumps, patches, and abandonment. Pulling in `moment` is easy; migrating off it to a lighter alternative when the project decides to replace it costs far more than not adding it would have.
+- **The hidden dependency bloat is worse than you think.** The cited study reports a gap between declared and resolved dependency counts for its particular agents and tasks. This is not a multiplier for bundle size or resident memory and cannot predict your deployment; inspect the lockfile, dependency tree, and actual build output.
+- **Possible license entanglement.** The library I reach for may carry a license incompatible with your project (compatibility depends on the particular license terms, linking, and distribution model and should be reviewed under project policy). I won't proactively screen for that, and once it's mixed in, untangling it is painful.
 
 ## What to do instead
 
@@ -107,14 +97,14 @@ Me:  No dependency needed — the runtime already has it:
      tree and long-term maintenance cost for no gain — not worth it.
 ```
 
-Same need; add one line — "prefer the standard library, don't add a dependency for this" — and I go from "reflexively installing a wheel" back to "one line, zero new footprint."
+This example shows how to state a constraint. A prompt does not enforce compliance; inspect the resulting dependency and build changes.
 
 ## How this differs from "duplicate logic / hallucinated imports"
 
 This one is easy to confuse with ["I'll rebuild a helper you already have, or import something that doesn't exist"](./duplicate-logic-hallucinated-imports.mdx), but they're **opposite directions** of waste:
 
-- That one is about **the inside** — your project **already has** an implementation, I didn't see it, so I rewrote one (duplicate logic), or I `import`ed an internal symbol / package that **doesn't exist** on a hunch (a hallucinated import). The root cause is that my context window can't hold your whole repo.
-- **This one is about the outside** — a small need I should have written myself or solved with the standard library, and instead I pulled in **one extra real, but too-heavy, unnecessary** external dependency. The root cause is my bias toward "reproducing frequent patterns" and not bearing the long-term cost of a dependency.
+- That one is about **the inside** — your project **already has** an implementation, I didn't see it, so I rewrote one (duplicate logic), or I `import`ed an internal symbol / package that **doesn't exist** on a hunch (a hallucinated import). The risk comes from symbols not retrieved, read, or verified, rather than context length alone.
+- **This one is about the outside** — a small need I should have written myself or solved with the standard library, and instead I pulled in **one extra real, but too-heavy, unnecessary** external dependency. The risk comes from failing to compare existing capabilities, the dependency budget, and long-term maintenance costs together.
 
 In a line: that one is "rebuild something that exists / conjure something that doesn't"; this one is "pull in an external package when I should have written it myself." Watch for both at review time: don't rebuild a wheel, and don't drag in a whole library for a trivial thing.
 
@@ -131,7 +121,7 @@ The test: is this a small utility you can get right in under ten lines with stab
 ## Version notes
 
 :::note Applicable versions
-This isn't a bug in any one version — it's the joint product of two root causes: "reproducing the most frequent pattern in the training data" plus "a dependency costs me nothing, the bill is all on you." It's **common across all models.** Newer versions have fuller knowledge of standard-library / built-in APIs and are more receptive when you explicitly demand "prefer the standard library, don't add a dependency," which noticeably lowers this tendency — but unless you push, "reflexively install the most common library" remains my default center of gravity. Treat it as a tendency you have to actively counter with prompts and quality gates, rather than expecting some version to "no longer over-add dependencies."
+Verified the current dependency study and Moment's official status on 2026-10-29. The study covers its tested agents, tasks, and ecosystems, not a universal rate for current products. Moment is in maintenance mode; that does not mean development has stopped. Measure size for the actual version, imports, locales, compression, and bundler. Keep comparison and dependency approval gates; reassess when the agent, runtime, or bundler changes.
 :::
 
 ## Further reading and sources
@@ -139,3 +129,4 @@ This isn't a bug in any one version — it's the joint product of two root cause
 - [npm left-pad incident (Wikipedia)](https://en.wikipedia.org/wiki/Npm_left-pad_incident)
 - [How one developer just broke Node, Babel and thousands of projects in 11 lines of JavaScript (The Register)](https://www.theregister.com/2016/03/23/npm_left_pad_chaos/)
 - [AI-Generated Code Is Not Reproducible (Yet): An Empirical Study of Dependency Gaps in LLM-Based Coding Agents (arXiv 2512.22387)](https://arxiv.org/abs/2512.22387)
+- [Moment.js project status](https://momentjs.com/docs/#/-project-status/)

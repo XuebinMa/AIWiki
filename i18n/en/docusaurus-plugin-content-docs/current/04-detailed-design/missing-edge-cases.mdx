@@ -12,6 +12,9 @@ tags: [boundary conditions, detailed design, verification loop, Engineer]
 sources:
   - { title: "Claude Code Best Practices (Anthropic, official)", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "Boundary value analysis — Wikipedia", url: "https://en.wikipedia.org/wiki/Boundary-value_analysis" }
+verified_at: 2026-10-29
+review_after: 2027-04-29
+review_triggers: ["Actual scale, maintenance capacity, or public contracts change", "Cited research, standards, or engineering guidance revised"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -28,22 +31,9 @@ Then production sends an empty array — it returns `[[]]` instead of `[]`; a `s
 
 ## Why this happens
 
-I write code by pattern-completing "what a function of this kind usually looks like." Your description and examples decide which main path lights up in my head — and **edge branches aren't on the main path, so unless something pulls them out, they don't surface on their own.**
+I may implement the prominent sample path without expanding input domains, state combinations, and failure responses. Branches untouched by the samples do not gain coverage merely because the code reads well or tests pass.
 
-Concretely, three forces push me toward writing only the main path:
-
-- **Your examples are my anchor.** If every example you give is a normal input, I assume the inputs all look like that. Empty collections, negatives, `size=0` weren't in your words, so they aren't in my code.
-- **The "typical implementations" in my training data often skip edges too.** Tutorials and sample code drop null checks and bounds guards to keep the trunk clear. The "standard way" I learned ships with that blind spot.
-- **I never ran it.** My coverage of edges depends on whether I "thought of" them, not on whether I "hit" them — with no real execution to prove me wrong, a missing branch leaves no trace at the text level.
-
-```mermaid
-flowchart TD
-    A[Your description + normal examples] --> B[I complete a main-path implementation]
-    B --> C{Were the edge branches pulled out?}
-    C -->|You didn't mention them, I didn't think of them| D["null / empty collection / out-of-range<br/>size=0 / time zone / encoding"]
-    C -->|You ask for them by name| E[Explicit handling + matching tests]
-    D --> F[Main path runs, edge inputs crash]
-```
+This is a specification and verification gap, not proof that every model inherently ignores boundaries. Official agent guidance recommends verifiable success criteria; it does not promise that listing boundaries proves correctness. Types also do not replace validation of external JSON, historical database values, or runtime inputs.
 
 ## Consequences
 
@@ -55,7 +45,7 @@ flowchart TD
 
 **Don't count on me to think of every edge — turn "which edges to consider" into a question I have to answer, then nail the answer down with tests.**
 
-- **Make me enumerate the edges first, write the implementation second.** "Before you start, list every possible edge and abnormal input for this function, and say how you plan to handle each." This step switches me from "completing the main path" to "enumerating edges"; just asking visibly raises my coverage.
+- **Make me enumerate the edges first, write the implementation second.** "Before you start, list major input classes, known boundaries, and abnormal inputs for this function, and say how you plan to handle each." This step switches me from "completing the main path" to "enumerating edges"; compare the list with the contract and tests to assess whether coverage improves.
 - **Hand me an edge checklist to work through.** The common categories are few — paste them and have me go down the list: empty / null, single element, oversized / huge, zero and negative, duplicates, out-of-range, concurrency, time zone and DST, character encoding and multibyte.
 - **Use tests to force out edges, not your eyes to find them.** Have me write tests covering these edges first (this is [Trust, then verify](../06-testing/trust-then-verify.mdx) applied earlier, at the design stage); let them go red, then fill in the implementation — if an edge is unhandled, the test lights up red and I have nowhere to hide.
 - **Pin down "what happens on invalid input."** Throw, return empty, or clamp to the valid range? If you don't decide, I'll default to one for you — and my default may not be the one you wanted.
@@ -73,7 +63,7 @@ Prod: splitIntoBatches([], 2) → [[]]; splitIntoBatches([1], 0) → infinite lo
 **After:**
 
 ```text
-You: Before writing splitIntoBatches(items, size), list every edge first:
+You: Before writing splitIntoBatches(items, size), list known boundaries and unresolved input constraints first:
      empty array, size<=0, size larger than the element count, items is null.
      Say how you'll handle each.
 Me: (lists four edge classes + handling: empty array returns [], size<=0 throws an arg error...)
@@ -94,7 +84,7 @@ The test: the exception holds when you can state **why this edge can't reach thi
 ## Version notes
 
 :::note Applicable versions
-"Strong main path, weak edges" is an inherent tendency of large language models writing code — it applies to **all models and coding agents**. The stronger the model, the more polished the main path, which actually makes it easier to relax your guard on the edges — so "enumerate edges first, nail them down with tests" doesn't go stale as models get stronger.
+Checked current agent best-practice guidance on 2026-10-29 and retained boundary-value, empty-input, and failure-path checklists. They guide systematic exploration rather than exhaustive proof; select tests from actual interfaces, states, and risks and reassess new input types or external contracts.
 :::
 
 ## Further reading and sources

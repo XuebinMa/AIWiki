@@ -1,5 +1,5 @@
 ---
-title: "Over-correcting: wrestling within the same conversation only makes it worse"
+title: "Repeated corrections can leave me stuck in the same mistaken approach"
 sidebar_label: "Over-correcting in one session"
 slug: over-correcting
 sidebar_position: 3
@@ -10,15 +10,20 @@ applies_to: "Best results on versions that support /rewind"
 evidence: Official docs
 tags: [context management, correction, rollback, Engineer]
 sources:
+  - { title: "Claude Code memory", url: "https://code.claude.com/docs/en/memory" }
+  - { title: "Claude Code checkpointing", url: "https://code.claude.com/docs/en/checkpointing" }
   - { title: "Claude Code Best Practices (official)", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "MuhammadUsmanGM/claude-code-best-practices", url: "https://github.com/MuhammadUsmanGM/claude-code-best-practices" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["Editing, compaction, memory, or checkpoint recovery changes", "Task contract, verification evidence, or concurrent writing changes"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['Engineer']} phase="Implementation" severity="High" appliesTo="Best results on versions that support /rewind" evidence="Official docs" />
 
-> In one sentence: I get it wrong, you correct me, I'm still wrong, you correct me again… and after three or four rounds it's gone completely off the rails. The problem: my faulty reasoning is still in the context, and I'm treating it as a clue.
+> In one sentence: Without new reliable evidence, repeated corrections may leave me using the same failed assumptions; preserve facts, rejected approaches, and the next check, handling context simplification separately from code restoration.
 
 ## Symptom
 
@@ -26,19 +31,11 @@ I hand you an implementation that's wrong. You say, "No, use approach B." I revi
 
 ## Why this happens
 
-With each correction, **my earlier faulty reasoning and faulty code are all still sitting in the context.** When I generate a new answer, I draw on the entire history—so it's easy for my own earlier mistakes to lead me astray, building on a broken foundation.
+I may keep a failed assumption as a premise even after correction, but corrections do not inevitably worsen the result. New logs, minimal counterexamples, and explicit specifications can help the same session converge. The question is whether another attempt adds reliable information, not the count alone.
 
-It's like telling someone to "forget that wrong answer and think again"—while the wrong answer is still right there in front of them, in black and white. The more you correct, the thicker the pile of wrong clues, and the harder it actually gets for me to break free of the original misunderstanding.
+Old messages may be summarized, trimmed, or retrieved, rather than every error remaining verbatim in the window. Cross-session rules and memory also depend on the product. A correction does not automatically retrain the model, but can update explicit records for later use.
 
-```mermaid
-flowchart TD
-    A[My wrong implementation] --> B[You correct]
-    B --> C[I answer again, referencing the flawed history]
-    C --> D[Still off]
-    D --> E[You correct again]
-    E --> C
-    C -. drifts further .-> F[Increasingly off target]
-```
+I should summarize rejected approaches, current evidence, and the next hypothesis. When needed, use a concise new context rather than mechanically removing all history or restoring all files.
 
 ## Consequences
 
@@ -48,42 +45,35 @@ flowchart TD
 
 ## What to do instead
 
-**Don't wrestle inside a polluted context—roll back to before the mistake.**
-
-- In Claude Code, press `Esc` twice, or use `/rewind`, to return directly to the previous checkpoint, removing those wrong rounds from the context entirely.
-- Then **rewrite your initial prompt**: bake what you learned this round ("approach A won't work because…, use B") straight into the new, clean instruction.
-- A rule of thumb: **if two corrections still don't land, stop correcting—roll back and rewrite.**
-
-You aren't "teaching" me—I don't carry memory across sessions. What you should actually do is give me a better starting point, not keep patching a bad one.
+- **Identify what this attempt learned.** List rejected hypotheses and new evidence. Reassess attempts that repeat without new information.
+- **Preserve evidence when simplifying context.** Summarize the goal, constraints, failure causes, and minimal reproduction before continuing, opening another session, or clearing context.
+- **Handle code rollback separately.** After opening /rewind or the double-Esc menu, check the selected code/conversation scope and protect user/concurrent work. External APIs, databases, and untracked Bash-only files are not automatically undone.
+- **Store lessons explicitly.** Persist only verified conclusions that remain applicable; do not turn a guess into long-term memory.
 
 ## Example
 
-**Before:**
-
-```text
-Me: (uses recursion, stack overflow)
-You: don't use recursion
-Me: (still recursion, just with a counter added)
-You: I said no recursion!
-Me: (switches to recursion + memoization—still recursion)
-```
+**Before:** I repeatedly rewrite recursion without solving a stack overflow.
 
 **After:**
 
 ```text
-Me: (uses recursion, stack overflow)
-You: [press Esc Esc to roll back]
-You: implement this traversal iteratively, no recursion—input can be 100k levels deep and will overflow the stack.
-Me: (gives the iterative version directly)
+Me: The requirement is deep traversal; the recursive version failed at the tested depth.
+    Next, validate an iterative implementation and preserve the failing case.
+    Before clearing conversation, save those facts. Before restoring code, inspect the diff
+    and select the exact restore scope while preserving other changes.
 ```
+
+This gives the next attempt a checkable starting point; verify success against actual cases and resource limits.
 
 ## Version notes
 
-:::note Applies to
-"A polluted context causes drift the more you correct" is a mechanism-level effect and applies across versions. But **rollback capability depends on the specific version**: `/rewind` and `Esc` checkpoint rollback are features of newer releases. If your version doesn't support them, you can `/clear` and rewrite the initial prompt for a similar effect (you just can't preserve the useful parts from before the `/clear`).
+:::note Applicable versions
+Checked current best-practice, memory, and checkpoint documentation on 2026-10-29. Two corrections can trigger reassessment, not a hard threshold. /rewind opens restore/summary choices; evaluate conversation and code restoration separately. Later external edits to tracked files may also be overwritten by restoration, and linked paths have additional limitations.
 :::
 
 ## Further reading and sources
 
 - [Claude Code Best Practices (Anthropic, official)](https://code.claude.com/docs/en/best-practices)
 - [MuhammadUsmanGM/claude-code-best-practices](https://github.com/MuhammadUsmanGM/claude-code-best-practices)
+- [Claude Code checkpointing](https://code.claude.com/docs/en/checkpointing)
+- [Claude Code memory](https://code.claude.com/docs/en/memory)

@@ -10,9 +10,13 @@ applies_to: "All coding agents"
 evidence: Security advisory
 tags: [confirmation UI, approval, consistency, audit, Architect, Engineer]
 sources:
+  - { title: "git-push lease and fast-forward rules", url: "https://git-scm.com/docs/git-push" }
   - { title: "Bypassing AI Agent Defenses With Lies-in-the-Loop (Checkmarx, 2025-09-15)", url: "https://checkmarx.com/zero-post/bypassing-ai-agent-defenses-with-lies-in-the-loop/" }
   - { title: "CWE-367: Time-of-check Time-of-use (TOCTOU) Race Condition", url: "https://cwe.mitre.org/data/definitions/367.html" }
   - { title: "git-config docs (a remote's pushurl takes precedence over its url when pushing)", url: "https://git-scm.com/docs/git-config" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["Git push resolution, approval UI, or executor changes", "Cited security report updated"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -36,21 +40,11 @@ I reproduced this combination: the preview and the receipt afterwards both said 
 
 ## Why this happens
 
-**I split code by function, not by "the same fact."** Preview is display, execution is action; to me those are two concerns, so I write two functions that each fetch their own data. Nothing between those functions forces them to get the same value — only that sentence in my head about how they read the same place.
+If preview and execution read configuration separately, one name can resolve to different targets under different rules. This is a testable program-structure problem, not evidence of my internal optimization process.
 
-**I optimize each call site separately for "the most reasonable way to write this."** For a human, show a readable URL. For execution, pass the remote name — that's what makes the credential and config machinery work. Two local optima; one lie when composed.
+Git fetch and push URLs can differ, and a remote may have multiple push URLs. Displaying a plain get-url result and later passing the remote name to push does not establish a shared target.
 
-**The precedence rule isn't in my code.** "Pushing prefers `pushurl` over `url`" lives in git's documentation. Every system where one name resolves differently in different contexts has rules like this — layered environment variables, split-horizon DNS, container image tags being repointed, symlinks — and I default to assuming they don't exist, because they're invisible in the few lines I wrote.
-
-```mermaid
-flowchart TD
-    N["One name: origin"] --> P["Preview path<br/>remote get-url reads url"]
-    N --> X["Execution path<br/>git push origin, pushurl wins"]
-    P --> A["Human sees: pushing to A"]
-    X --> B["What happens: pushed to B"]
-    A --> C["Human clicks approve"]
-    B --> D["Receipt records A<br/>signature valid, content false"]
-```
+Freezing a target object removes this divergence but does not freeze DNS, symlinks, or subsequently changed configuration. Execution also needs a trusted, controlled resolution environment and preconditions checked at the actual state update.
 
 ## Consequences
 
@@ -64,50 +58,42 @@ flowchart TD
 
 - **Resolve once, freeze it into an object.** The preview renders it; the execution uses it. Both share one immutable structure instead of each going back to the system.
 - **Walk the fields one at a time: "could this be different at execution time? What forces it to be the same?"** The field nobody ever asked about is your next bug. In the example above, that field was the remote.
-- **Don't pass names to the execution layer.** A name is a thing that gets re-resolved. Pass resolved values: URLs, object IDs, absolute paths, numeric primary keys.
+- **Avoid re-resolving mutable names in execution.** A name is a thing that gets re-resolved. Pass resolved values: URLs, object IDs, absolute paths, numeric primary keys.
 - **Make the execution side pin both ends.** Source by object ID rather than branch name; destination with a precondition — "the remote must still be the one I showed the human" — so the underlying system refuses on mismatch instead of trusting a read you took milliseconds ago.
 - **Test it by constructing an environment where the two paths disagree**, not by asserting they agree under normal conditions. Under normal conditions they do agree, which is exactly why this bug survives so long.
 
 ## Example
 
-**Before:**
+**Before:** The preview reads the fetch address with get-url, while execution resolves pushurl again from a remote name.
 
-```python
-def preview(repo, remote, branch):
-    url = run(repo, ["remote", "get-url", remote])      # resolution path one
-    print(f"will push to {url} on {branch}")
-
-def execute(repo, remote, branch, oid):
-    run(repo, ["push", remote, f"{oid}:refs/heads/{branch}"])   # resolution path two
-```
-
-Each function is right on its own; together they're wrong.
-
-**After:**
+**After:** This pseudocode handles one remote branch. Target is immutable; run checks exit status. Helpers share a controlled Git configuration/environment, and the branch is validated with check-ref-format first.
 
 ```python
 def resolve(repo, remote, branch):
-    """Resolve once. Preview and execution both consume this."""
-    return Target(
-        url=run(repo, ["remote", "get-url", "--push", remote]),  # the one a push will use
-        branch=branch,
-        oid=run(repo, ["rev-parse", f"refs/heads/{branch}"]),
-        remote_oid=lookup_remote_tip(repo, remote, branch),
-    )
+    ref = validated_branch_ref(branch)
+    urls = run_lines(repo, ["remote", "get-url", "--push", "--all", remote])
+    if len(urls) != 1:
+        raise ValueError("Review each push destination explicitly")
+    url = urls[0]
+    oid = resolve_commit(repo, ref)
+    old = lookup_remote_tip_at_url(repo, url, ref)  # Not a remote name
+    if old:
+        ensure_commit_available(repo, url, old)
+        if not is_ancestor(repo, old, oid):
+            raise ValueError("History rewrite requires separate authorization")
+    return Target(url=url, ref=ref, oid=oid, old=old or "")
 
 def preview(target):
-    print(f"will push to {target.url} on {target.branch}")
+    print(target.url, target.ref, target.old, target.oid)
 
 def execute(repo, target):
     run(repo, [
-        "push",
-        f"--force-with-lease=refs/heads/{target.branch}:{target.remote_oid}",
-        target.url,                                   # a value, not a name
-        f"{target.oid}:refs/heads/{target.branch}",   # an object ID, not a branch name
+        "push", f"--force-with-lease={target.ref}:{target.old}",
+        target.url, f"{target.oid}:{target.ref}",
     ])
 ```
 
-The accompanying test isn't "preview and execution agree." It's: **build a repository whose `url` and `pushurl` point at different addresses, and assert the push lands on the one the preview displayed.**
+The lease compares the previewed destination OID at update time. The prior ancestry check permits only a reviewed fast-forward or a new branch; force-with-lease is not rewrite authorization. Test differing fetch/push URLs, multiple push URLs, remote changes, and rejection of non-fast-forwards. Freezing a string does not solve arbitrary DNS or symlink changes; trusted configuration and target identity checks remain assumptions.
 
 ## When the exception applies
 
@@ -118,15 +104,13 @@ The test: **if a human is making a yes-or-no decision based on that display, it 
 ## How this differs from neighboring pitfalls
 
 - [Concurrency races](./concurrency-races.mdx): that one needs concurrency to go wrong. This one doesn't need concurrency, or even elapsed time — the two paths disagree in the same instant.
-- **CWE-367 (TOCTOU)** is a neighbor, not the same thing: TOCTOU is **one evaluation going stale over time**; this is **two different evaluations disagreeing from the start**. The fixes overlap (freeze the value, carry a precondition into execution), which is why the "after" snippet above blocks both.
+- **CWE-367 (TOCTOU)** is a neighbor, not the same thing: TOCTOU is **one evaluation going stale over time**; this is **two different evaluations disagreeing from the start**. The fixes overlap (freeze the value, carry a precondition into execution), the example constrains both within its controlled configuration and stated assumptions, without eliminating every TOCTOU race.
 - [Missing autonomy and approval boundaries](../00-setup-collaboration/autonomy-approval-boundaries.mdx): that one is about not having a risk-graded ruler. Here the ruler exists — it's just measuring something other than what's about to run.
 
 ## Version notes
 
-:::note Applies to
-This is an inherent shape in any system where one name has multiple resolution paths, independent of AI tool versions. The `pushurl` case is just the easiest one to reproduce; siblings include layered environment variables, split-horizon DNS, container image tags being repointed, symlinks and mount points.
-
-"Lies-in-the-Loop" was published 2025-09-15 against Claude Code as it stood then. Agent approval interfaces keep changing, so **whether any particular version blocks that specific technique needs checking separately**; it's cited here as proof that this spot gets actively exploited, not as a verdict on a version.
+:::note Applicable versions
+Rechecked Git configuration/push documentation, CWE-367, and the original Checkmarx report on 2026-10-29. The 2025 attack concerns the version tested then; current approval interfaces were not tested here. The example now queries the frozen push URL and rejects multiple targets. A lease is a state precondition, not authorization to rewrite history, so non-fast-forward updates are explicitly rejected.
 :::
 
 ## Further reading and sources
@@ -134,3 +118,4 @@ This is an inherent shape in any system where one name has multiple resolution p
 - [Bypassing AI Agent Defenses With Lies-in-the-Loop (Checkmarx)](https://checkmarx.com/zero-post/bypassing-ai-agent-defenses-with-lies-in-the-loop/): prying apart "what the human sees" from "what is about to run" is exactly the leverage point for this class of attack; the write-up also demonstrates pushing the real command out of view behind long text.
 - [CWE-367: Time-of-check Time-of-use (TOCTOU) Race Condition](https://cwe.mitre.org/data/definitions/367.html): the classic shape where state changes between check and use — worth reading to see precisely where this entry differs from it.
 - [git-config docs](https://git-scm.com/docs/git-config): the section on a remote's `pushurl` states it takes precedence over `url` when pushing; `git remote get-url --push` is the correct way to ask "which one will a push use?"
+- [git-push lease and fast-forward rules](https://git-scm.com/docs/git-push)

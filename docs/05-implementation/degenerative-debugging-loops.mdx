@@ -10,16 +10,20 @@ applies_to: "Coding Agent 通用"
 evidence: 研究支持
 tags: [调试, 自我纠正, 验证闭环, 运行反馈, 工程师]
 sources:
+  - { title: "Claude Code checkpointing", url: "https://code.claude.com/docs/en/checkpointing" }
   - { title: "Large Language Models Cannot Self-Correct Reasoning Yet (ICLR 2024)", url: "https://arxiv.org/abs/2310.01798" }
   - { title: "TraceCoder: A Trace-Driven Multi-Agent Framework for Automated Debugging of LLM-Generated Code (arXiv 2602.06875)", url: "https://arxiv.org/abs/2602.06875" }
   - { title: "MIRAGE-Bench: LLM Agent is Hallucinating and Where to Find Them (arXiv 2507.21017)", url: "https://arxiv.org/abs/2507.21017" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["编辑、压缩、记忆或检查点恢复机制变化", "任务契约、验证证据或并行写入方式变化"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['工程师']} phase="编码实现" severity="高" appliesTo="Coding Agent 通用" evidence="研究支持" />
 
-> 一句话摘要：一个 bug 卡住我时，我容易认定「这是我见过的那一类」，于是反复套同一个修法。没有真实运行信息做锚，我的每次「修」其实是凭假设瞎打补丁——越打越乱，最后代码比一开始还坏。
+> 一句话摘要：我可能重复失败的修法，却没有增加证据或记录已否定的假设；每轮调试都应对应可检验判断和新观察，必要时停止重复并重新定位。
 
 ## 现象
 
@@ -31,20 +35,11 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 为什么会这样
 
-核心就一句：**我的自我纠正没有可靠的运行真相做锚。** 修 bug 的真相在运行时——具体哪一行抛了异常、栈是怎么展开的、那个失败断言期望什么实际拿到什么。这些我手上常常没有。没有运行真相，我就只能拿「这报错长得像我训练里见过的某一类」来代替「这次到底发生了什么」，于是锁进一个熟悉的模式（pattern locking），反复套同一类修法。
+我可能连续修改代码，却没有记录假设、失败证据与已经否定的修法。重复的「再试一次」于是没有增加信息，甚至引入新的变量，难以判断哪一步起作用。
 
-有研究专门量过这种「凭自己纠自己」的脆弱：在没有外部反馈、只靠模型自身判断对错的内在自我纠正设定下，纠正后的表现往往不升反降——我并不能可靠地判断自己上一版答案错在哪，于是越改越偏（见 *Large Language Models Cannot Self-Correct Reasoning Yet*）。落到调试上，TraceCoder 的观察更具体：只拿「过 / 不过」这种表层信号，根本不足以精确定位错因，所以它要先给代码插桩、抓到细粒度运行轨迹，再做因果分析——**没有运行轨迹的修复，就是在猜。**
+ICLR 2024 的研究针对无外部反馈的内在自我纠正；TraceCoder 研究用细粒度轨迹及历史失败记录改进其受测调试流程；MIRAGE-Bench 则区分对指令、历史和环境观察不忠实的动作。它们支持保留证据和历史，**不证明所有当前模型都无法自纠，也不意味着没有运行轨迹就不可能定位**。编译诊断、静态分析、源码契约和最小反例同样可能提供关键证据。
 
-多步执行里还会叠一层。MIRAGE-Bench 把 agent 的「幻觉式动作」分成三类：对任务指令不忠实、对执行历史不忠实、对环境观察不忠实。后两类正是我退化循环里的样子——忘了前几轮试过什么（对执行历史不忠实）、误读了你贴回来的那段输出（对环境观察不忠实）。每一轮我都在一份越来越不可信的「我以为发生了什么」上继续推理，自然自相矛盾、原地打转。
-
-```mermaid
-flowchart TD
-    A["bug 卡住"] --> B{"我手上有运行真相吗<br/>栈 / 日志 / 失败断言"}
-    B -- 没有 --> C["锁进熟悉模式<br/>凭假设打补丁"]
-    C --> D["症状没好<br/>或引入新 bug"]
-    D -- 误读反馈 / 忘记试过什么 --> C
-    B -- 有 --> E["定位到真实错因<br/>对症修复"]
-```
+我应让每轮修复对应一个可检验假设和新的观察；拿不到必要信息时明确限制，停止重复同一个无效动作。
 
 ## 后果
 
@@ -105,7 +100,7 @@ flowchart TD
 ## 版本说明
 
 :::note 适用版本
-「缺乏运行真相时的自我纠正容易退化」是模型机制层面的现象，**全模型、跨工具通用**，与具体版本无关。能帮你跳出循环的工具（`/rewind`、`Esc` 检查点回退、让我直接执行命令拿真实输出）随版本演进，能力以你所用版本的官方文档为准；但「没有运行真相我就只能猜、猜就容易退化」这条根本特性不变。
+2026-10-29 核验三篇研究及当前检查点文档。历史研究限其模型、任务与反馈设定；两三次失败可作复盘触发，不是通用最优次数。回退前核对当前 diff 和检查点覆盖范围，保留用户 / 并行工作；shell、外部服务等副作用不能假定一起撤销。
 :::
 
 ## 延伸阅读与出处
@@ -114,3 +109,4 @@ flowchart TD
 - [TraceCoder: A Trace-Driven Multi-Agent Framework for Automated Debugging of LLM-Generated Code（arXiv 2602.06875）](https://arxiv.org/abs/2602.06875) —— 仅凭过 / 不过的表层信号不足以定位错因，需细粒度运行轨迹
 - [MIRAGE-Bench: LLM Agent is Hallucinating and Where to Find Them（arXiv 2507.21017）](https://arxiv.org/abs/2507.21017) —— agent 的幻觉式动作：对执行历史 / 环境观察不忠实
 - 同站延伸：[反复纠正](./over-correcting.mdx)（人驱动的纠错循环，与本条互为镜像）、[厨房水槽式会话](./kitchen-sink-session.mdx)
+- [Claude Code checkpointing](https://code.claude.com/docs/en/checkpointing)

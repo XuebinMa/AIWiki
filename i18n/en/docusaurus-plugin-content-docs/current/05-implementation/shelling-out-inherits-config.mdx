@@ -14,6 +14,9 @@ sources:
   - { title: "Securing Git: Addressing 5 new vulnerabilities (GitHub Blog, 2024-05-14)", url: "https://github.blog/open-source/git/securing-git-addressing-5-new-vulnerabilities/" }
   - { title: "Buried bare repos and fsmonitor: various abuses (Justin Steven advisory)", url: "https://github.com/justinsteven/advisories/blob/main/2022_git_buried_bare_repos_and_fsmonitor_various_abuses.md" }
   - { title: "git-config docs (core.hooksPath / core.sshCommand / core.pager / core.fsmonitor / safe.bareRepository)", url: "https://git-scm.com/docs/git-config" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["Git advisories, config resolution, or trust boundary changes", "Privileged executor credentials, protocols, or sandbox policy changes"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -32,24 +35,15 @@ Nobody asks the other question — **what else does this `git push` read, beside
 
 The list is long: `.git/config`, the hooks in `.git/hooks/`, **any** directory `core.hooksPath` points at, `core.sshCommand`, `core.pager`, `core.fsmonitor`, `credential.helper`, URL rewrite rules, remote helpers, `protocol.ext`. More than half of those keys take a shell command as their value.
 
-And all of them live in that repository. **Writable repo means all of them are writable** — which is precisely the directory I spend all day writing to as an agent.
+They can live inside or outside the repository. **A writable worktree does not establish that every config source is writable** ; inspect actual paths, owners, and permissions.
 
 ## Why this happens
 
-**In my training data, security discussion around "invoking an external command" is almost entirely about command injection.** So when I ask myself "does this need hardening?", what surfaces is `shell=False`, argument arrays, allowlists. I do those, and I do them well. Which files the binary itself goes and reads is filed under operations knowledge, not secure coding — so I don't retrieve it.
+Argument arrays address shell parsing, but a child process may still read configuration, environment variables, plugins, credential helpers, and its working directory. Which entry executes depends on the subcommand, Git version, and configuration; not every listed key runs on every push.
 
-**More fundamentally: the config surface isn't in the line of code I can see.** I write one line of `git push`; the configuration is something that binary reads somewhere else, at some other moment. Not a single character of it shows up in the diff, so code review can't catch it either. My field of view ends at the function boundary; the attack surface is at the process boundary, with an entire program I never modeled in between.
+I should model inputs the process can actually read and execute, not speculate that training only taught command injection. A writable worktree also does not automatically make .git or every config writable: linked worktrees, separate Git directories, and permissions change the boundary.
 
-And the most insidious layer: **"just run git" looks like plumbing, not like security code.** Functions with "verify", "authorize", or "token" in the name get rows of adversarial tests from me, because they *look* like security. The function that performs the push gets happy-path integration tests. Yet code execution happens in the second one. **What determines how hard I scrutinize a piece of code is what it's called, not what it can cause.**
-
-```mermaid
-flowchart TD
-    A["The line I wrote: git push origin main"] --> B["What I reviewed: arg assembly / injection / quoting"]
-    A --> C["What the process actually reads"]
-    C --> D[".git/config<br/>.git/hooks/pre-push<br/>any directory core.hooksPath points at<br/>core.sshCommand / core.pager<br/>core.fsmonitor<br/>credential.helper<br/>URL rewrites / remote helpers"]
-    D --> E["An agent already has write access to these files"]
-    E --> F["Arbitrary code execution inside the process that holds the credential"]
-```
+If an agent controls child-process configuration while the child holds credentials the agent lacks, data inputs can become execution capability. Official advisories establish concrete entry points. Hardening must cover actual controllable inputs rather than treating two overrides as complete isolation.
 
 ## Consequences
 
@@ -60,86 +54,53 @@ flowchart TD
 
 ## What to do instead
 
-**Before you write the first test, spend ten minutes enumerating that program's attacker-controlled inputs.** The list is far cheaper than the tests, and writing it is enough to catch the bug.
-
-For git, the list is: repository config, hooks, `core.hooksPath`, `core.sshCommand`, `core.pager`, `core.fsmonitor`, `credential.helper`, URL rewrites, remote helpers, `protocol.ext`, and the relevant environment variables. Different program, different list, same method — read the "where configuration comes from" section of its docs, not the "command-line options" section.
-
-Then **construct** the environment instead of inheriting it:
-
-```bash
-# Turn hooks off explicitly, rather than hoping the repo has none
-git push --no-verify ...
-
-# Cut off outside configuration; keep only the keys you pin yourself
-GIT_CONFIG_GLOBAL=/dev/null \
-GIT_CONFIG_SYSTEM=/dev/null \
-GIT_CONFIG_COUNT=2 \
-GIT_CONFIG_KEY_0=safe.bareRepository GIT_CONFIG_VALUE_0=explicit \
-GIT_CONFIG_KEY_1=core.hooksPath     GIT_CONFIG_VALUE_1=/dev/null \
-git push ...
-```
-
-Three tests that hold up over time:
-
-- **Set review intensity by what the code can cause, not by what it's named.** The layer that executes external commands *is* security code, even when it reads like glue.
-- **Write "what this program reads" into a comment or a test name.** So the next person — and the next round of me — doesn't have to rediscover it.
-- **Every entry point you close gets a regression test.** Drop a hook that leaves a trace into the repo and assert it didn't run. That test is far more reliable than a sentence of documentation saying hooks are disabled — see [documentation is not a defense](../07-acceptance-release/documented-limits-not-defenses.mdx) for why.
+- **Establish the trust boundary.** Inventory the executable, config sources, environment, working directory, hooks/plugins, and credentials. Check which are actually writable by the agent or a third party.
+- **Give privileged executors a trusted context.** Do not bring extra credentials directly into an unknown writable repository. Import objects through a validated process and independent controlled configuration, then check objects, targets, and protocols.
+- **State partial mitigations precisely.** safe.bareRepository=explicit limits automatic bare-repository discovery; core.hooksPath and --no-verify concern hooks. They do not close sshCommand, credential helpers, URL rewriting, remote helpers, or every local configuration source. Run required team checks in a trusted location rather than bypassing them.
+- **Minimize environment and permissions.** Remove unnecessary inherited variables and restrict transports, network, and filesystem access. OS sandboxing can reduce capabilities without automatically securing credentials/config inside its boundary.
+- **Test each entry point.** Use harmless traces for hooks, includes, credential helpers, and protocol substitution separately. One non-executed hook does not prove every input safe.
 
 ## Example
 
-**Before:**
+**Before:** I launch git push with extra credentials from a user-writable repository and inspect only argv.
 
-```python
-# Clean arguments, no shell, remote name allowlisted — looks like everything's covered
-subprocess.run(
-    ["git", "push", remote, f"{oid}:refs/heads/{branch}"],
-    cwd=repo, check=True,
-)
-```
-
-Someone put a `.git/hooks/pre-push` in the repository. It runs as this process, with this process's credential. Not one argument is wrong.
-
-**After:**
+**Partial mitigation sketch:**
 
 ```python
 env = {
-    **minimal_env,                      # construct, don't inherit
+    **minimal_env,
     "GIT_CONFIG_GLOBAL": os.devnull,
     "GIT_CONFIG_SYSTEM": os.devnull,
     "GIT_CONFIG_COUNT": "2",
-    "GIT_CONFIG_KEY_0": "safe.bareRepository", "GIT_CONFIG_VALUE_0": "explicit",
-    "GIT_CONFIG_KEY_1": "core.hooksPath",      "GIT_CONFIG_VALUE_1": os.devnull,
+    "GIT_CONFIG_KEY_0": "safe.bareRepository",
+    "GIT_CONFIG_VALUE_0": "explicit",
+    "GIT_CONFIG_KEY_1": "core.hooksPath",
+    "GIT_CONFIG_VALUE_1": os.devnull,
 }
+# Only for a dedicated executor whose remaining context is already trusted.
 subprocess.run(
     ["git", "push", "--no-verify", url, f"{oid}:refs/heads/{branch}"],
-    cwd=repo, env=env, check=True,
+    cwd=trusted_repo, env=env, check=True,
 )
 ```
 
-Plus one test: plant a `pre-push` that writes a file, run a push, assert the file isn't there.
+A separate validation process must establish trusted_repo; renaming the original variable does not. These overrides illustrate disabling particular sources, bare discovery, and hooks; **they do not disable other repository-local config keys**. A pre-push trace test covers that mitigation only. A complete executor must validate configuration, protocols, credentials, objects, and destinations.
 
 ## When the exception applies
 
-This entry is about what to do when the execution environment contains files someone else can write. Two situations where inheriting the defaults is fine:
+When one trusted principal controls all inputs and the child obtains no additional sensitive capability, inherited configuration can be an intentional feature. Equal permissions still do not eliminate risk: a third-party repository can trigger code the user did not intend to execute.
 
-- **You construct the entire input surface.** A temp directory, config you generated, no network, deleted afterwards — no second party can put anything in it, and the hardening costs more than it buys.
-- **The process holds no more privilege than its caller.** Hardening pays off when the process holds something its caller shouldn't have: a credential, a token, broader file permissions. When both sides are equal, anything a hook could do the agent could already do, and closing it changes nobody's capabilities.
-
-The test: **if the execution environment contains a file an agent or third party can write, and that process holds something they shouldn't have, go back to the default.**
+Judge whether trust sources and allowed capabilities match, rather than assuming one OS user makes every input safe.
 
 ## How this differs from neighboring pitfalls
 
 - [Dev-time prompt injection](./dev-time-prompt-injection.mdx): there, **my context** is poisoned — I read a malicious README and then do what it says. Here, everything I read is perfectly normal; what's poisoned is **the subprocess's configuration**, which never touches my context and which I never even see.
-- [Soft permissions without OS-level isolation](../00-setup-collaboration/sandbox-filesystem-isolation.mdx): that entry is about missing hard isolation on the outside. Here, even with a sandbox, the hook still runs **inside** it under that process's identity — a sandbox stops escape, not this.
+- [Soft permissions without OS-level isolation](../00-setup-collaboration/sandbox-filesystem-isolation.mdx): that entry is about missing hard isolation on the outside. Here, even with a sandbox, the hook still runs **inside** it under that process's identity — whether sandboxing blocks those reads, executions, or network access depends on its policy; credentials and configuration inside its boundary are not automatically safe.
 
 ## Version notes
 
-:::note Applies to
-"An external program has its own configuration surface" is an inherent property of such programs, independent of AI tool versions. What changes is whether a given agent closes it for you.
-
-- GitHub Copilot CLI: 1.0.42 and earlier affected; 1.0.43 onward pins `safe.bareRepository=explicit` via environment variables (CVE-2026-45033).
-- Git itself: CVE-2024-32002 / 32004 / 32465 are all "execute hooks or config from an untrusted repository during clone," fixed in 2.45.1 and the maintenance branches (2024-05-14). Upgrading git closes those specific paths; it does **not** close the general shape — your own code running git inside a writable repository.
-- Same drill when you swap in another tool: check whether that version pins the config for you. Don't assume it does.
+:::note Applicable versions
+Checked the Copilot CLI advisory, Git's 2024 security account, and git-config on 2026-10-29. The advisory table lists `<=1.0.42` affected and 1.0.43 patched; this addresses that bare-repository discovery path. Disabling global/system config does not disable local/worktree/include sources, and disabling hooks does not disable every external command. The example is partial mitigation; a credential-privileged executor needs a trusted configuration and isolation boundary.
 :::
 
 ## Further reading and sources

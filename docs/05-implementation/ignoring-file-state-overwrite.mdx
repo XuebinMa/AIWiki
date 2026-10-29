@@ -10,10 +10,15 @@ applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [文件状态, 整文件重写, 最小 diff, 版本控制, 工程师, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
+  - { title: "Claude Code checkpointing", url: "https://code.claude.com/docs/en/checkpointing" }
   - { title: "Claude Code Best Practices（Anthropic 官方）", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "Git Book — 2.5 Undoing Things（git 撤销与找回）", url: "https://git-scm.com/book/en/v2/Git-Basics-Undoing-Things" }
-  - { title: "Gemini CLI — File System Tools（replace：old_string + 上下文匹配、模型自我纠正）", url: "https://google-gemini.github.io/gemini-cli/docs/tools/file-system.html" }
+  - { title: "Gemini CLI — File System Tools（replace：old_string + 上下文匹配、模型自我纠正）", url: "https://geminicli.com/docs/tools/file-system/" }
   - { title: "OpenAI — Apply Patch tool（apply_patch：上下文锚定补丁）", url: "https://developers.openai.com/api/docs/guides/tools-apply-patch" }
+
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["编辑、压缩、记忆或检查点恢复机制变化", "任务契约、验证证据或并行写入方式变化"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -30,20 +35,11 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 为什么会这样
 
-两个机制叠在一起：
+我可能依据上下文中的旧副本生成替换，而没有重新核对磁盘或编辑器当前内容。整文件重写扩大了这种风险；局部补丁也可能匹配到错误的相似位置。只读过一次不等于编辑时仍是同一状态。
 
-第一，**我倾向「从头给一版干净的」，而不是基于现状做最小改动。** 整文件重写对我来说更省力——我不必精确对齐你某一行的缩进、某个我没见过的变量名、某段我不理解就不敢碰的逻辑。一次性重铺，输出看起来工整完备。但工整是对「我记忆里的版本」工整，不是对「磁盘上真实的版本」工整。
+工具可以通过上下文匹配、版本检查或冲突提示减少覆盖，但保护范围因实现而异。即使先重读，另一个写者仍可能在读与写之间修改文件；需要保护并发编辑时，应使用版本 / 内容前置条件或明确的所有权分工。
 
-第二，**我对「文件当前状态」缺乏敬畏。** 我上下文里那份文件，可能是几轮对话前读进来的；这期间你手改过、别的改动落地过，文件早就变了，而我并不会自动重读。我把上下文里的旧副本当成了事实，于是我的「重写」其实是拿一份过期快照覆盖了最新版本。
-
-```mermaid
-flowchart TD
-    A[磁盘上的最新文件<br/>含你刚手改的几行] --> B{我动手前重读了吗?}
-    B -- 没有, 用上下文里的旧副本 --> C[基于过期快照整文件重写]
-    C --> D[你的手改被悄悄盖掉]
-    B -- 读了最新内容 --> E[基于现状做最小 diff]
-    E --> F[只动该动的行, 你的改动留存]
-```
+我应先辨认现有改动归属、读取当前状态、只改必要范围，并重新检查 diff；这不需要假设我主观上「缺乏敬畏」。
 
 ## 后果
 
@@ -93,24 +89,18 @@ flowchart TD
 
 ## 工具差异
 
-> 截至 2026-06，机制层面；各工具实现与默认值变化很快，按需自行复核。
+2026-10-29 核验的 Gemini replace 文档要求目标文本匹配，并说明替换数量等约束；这些条件不等于文件级并发锁。OpenAI API apply-patch 文档则要求宿主应用补丁并回报成功 / 失败；是否具备版本比较和事务性由宿主实现，不能直接推断所有 Codex 客户端。
 
-根因同一个——**我拿一份过期副本去覆盖磁盘上的新版本**；但各工具把「改动锚定到文件现状」的机制不同，决定了它是**静默盖掉**还是**先撞墙**：
-
-- **Claude Code**：编辑前必须先在本会话里读过该文件，且若文件自上次读取后被改过，编辑会直接失败——把「先读再写」做成工具层硬约束（最容易盖掉的反而是整文件 `Write`，它不依赖既有内容）。检查点 / `/rewind` 只追踪我的改动、不追踪外部进程，兜底仍靠 git。
-- **Gemini CLI**：`replace` 按 `old_string` + 前后数行上下文精确匹配定位；文件漂移则匹配失败，或触发它基于模型的自我纠正去重猜目标段——锚是「我记得的片段」，不是对磁盘的强制重读。
-- **Codex CLI**：`apply_patch` 按上下文行锚定；上下文与现状不符则补丁打不上——但已知存在「报成功却没改」的静默失败，反而更隐蔽。
-- **Cursor / GitHub Copilot**（IDE 形态）：编辑落在编辑器**当前打开的缓冲区**上，文件现状即编辑器状态；风险转移到「我跨轮 / 跨会话记忆里的版本，与你编辑器里的实时内容不一致」。
-
-解药不变：让我**动手前重读现状、只做最小 diff**，并把改动 commit 了当兜底——别赌某个工具的锚定机制一定会替你撞响警报。
+Claude Code 检查点追踪本会话文件工具触及的文件；该文件之后的 Bash 或外部改动也可能被回退。未追踪的 Bash-only 文件、部分子代理编辑及链接路径有覆盖限制。恢复前先检查具体文件和 diff，不把恢复当成只撤回我最后一次编辑。
 
 ## 版本说明
 
 :::note 适用版本
-「凭过期副本整文件重写」是模型行为层面的倾向，全版本适用——它和我是否「先读再写」直接相关，与具体版本号关系不大。需要单独留意的是：Claude Code 的检查点 / `/rewind` **只追踪我做的改动，不追踪外部进程**（官方文档明确写了「这不是 git 的替代品」）。所以你手动改的、或别的工具落地的改动，一旦被我覆盖，靠检查点不一定能找回——真正的兜底是 git，把改动 commit 了才安全。
+2026-10-29 核验 Git 撤销、Gemini replace、OpenAI API apply-patch 与 Claude Code 检查点文档。API 的补丁应用和失败报告由宿主实现，不等于 Codex CLI 所有版本的行为。删除无来源的「报成功却没改」产品断言；检查点可能同时恢复已追踪文件上的后续外部改动，恢复前先看范围。
 :::
 
 ## 延伸阅读与出处
 
 - [Claude Code Best Practices（Anthropic 官方）](https://code.claude.com/docs/en/best-practices) —— 用 `@` 引用让我先读文件再回答；小而清晰的改动比大重写更可控；以及检查点「不是 git 替代品」的告诫。
 - [Git Book — Undoing Things](https://git-scm.com/book/en/v2/Git-Basics-Undoing-Things) —— `git restore` / `git checkout` 找回被覆盖的已提交改动，这是覆盖事故的最终兜底。
+- [Claude Code checkpointing](https://code.claude.com/docs/en/checkpointing)

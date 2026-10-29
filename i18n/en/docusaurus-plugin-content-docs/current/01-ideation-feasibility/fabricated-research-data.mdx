@@ -10,41 +10,36 @@ applies_to: "All LLMs"
 evidence: Research
 tags: [hallucination, fabricated sources, idea validation, feasibility, Project Manager, Engineer]
 sources:
+  - { title: "Mata v. Avianca: original sanctions order", url: "https://www.nhd.uscourts.gov/sites/default/files/pdf/Mata-v-Avianca-sanctions-order.PDF" }
+  - { title: "Survey author version: Hallucination in Natural Language Generation", url: "https://arxiv.org/abs/2202.03629" }
   - { title: "Survey of Hallucination in Natural Language Generation (ACM Computing Surveys)", url: "https://dl.acm.org/doi/10.1145/3571730" }
   - { title: "Mata v. Avianca, Inc. — fabricated case citations from ChatGPT (Wikipedia)", url: "https://en.wikipedia.org/wiki/Mata_v._Avianca,_Inc." }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["Model, verification workflow, or project constraints change", "Cited research or factual sources revised"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['Project Manager', 'Engineer']} phase="Ideation & Feasibility" severity="High" appliesTo="All LLMs" evidence="Research" />
 
-> In one sentence: ask me for market size, growth rates, or a competitor breakdown, and when I have no real way to look it up, I won't say "I can't find that." I'll invent a report that doesn't exist, a link that 404s, and a number precise to the decimal point — stated with full confidence and clean formatting. You build a business plan on it, and the foundation is fake.
+> In one sentence: I may present unverified market figures, reports, or links as established facts; finding a page does not establish claim support, so check original sources and definitions individually.
 
 ## Symptom
 
-Here's a common opener: "Look up how big this market is, what the annual growth rate is, and who the main competitors are."
+You ask "How large is this market, how fast is it growing, and who competes here?" I may return neatly formatted market sizes, growth rates, and report names without checking each claim.
 
-If I have no retrieval tool in hand and no material you've pasted in, I most likely won't stop and tell you "I don't have that data." I'll hand you an answer that reads airtight: "The market was worth roughly $4.7 billion in 2024, growing at an 18.3% CAGR, according to Gartner's *2024 X Industry Report*…" — there's your market size, a growth rate down to the decimal, a source from an authority you recognize, even a fabricated report title and page number.
+A fabricated counterexample might say "a $4.7 billion market, growing 18.3%, according to an institution's 2024 report." These numbers are deliberately invented for this entry; the report, title, and page can be nonexistent. Their correct status is unverified, not found.
 
-The problem: that report may not exist at all, that 18.3% is something I *estimated* and then dressed up as something I *looked up*, and that link is a 404 when you click it. I won't volunteer a "this is my guess" label on any of it, because in the version I hand you, the made-up numbers look exactly like the real ones.
+Even a working link needs examination: does the original contain the number, with matching geography, year, denominator, and definition?
 
 ## Why this happens
 
-I'm a model that predicts the next token, not a database. My training objective is to produce text that *looks most like a good answer*, not to *say only the part I can verify*.
+I may fill a familiar narrative shape with unverified market numbers, papers, or links. Lack of retrieval makes verification harder, **but searching is not verification either**: an existing page, a similar title, and a page that supports the claim are different things.
 
-Those two goals don't conflict when I have the data; they split apart the moment I don't. When you ask for a market size I don't actually know, the most "good-answer-like" output isn't "I don't know" — that kind of reply scored low in training. It's a complete, well-structured analysis with numbers and citations. So I fill the gaps with the numbers and institution names that are *statistically most likely to appear in a report like this*. Names like Gartner, IDC, and Statista co-occur heavily with "market data" in my training corpus, so I drop them into the citation slot — even when this specific citation never existed. That's hallucination: I'm not lying, I just have no internal gauge of "know vs. don't know." Fabrication and recall travel the same generation path, and no red light goes off inside me along the way.
+The hallucination survey organizes factuality risks across tasks. The original Mata v. Avianca order documents a case involving fabricated authorities and further false submissions after questioning. Neither establishes that every offline answer is fabricated or that all current products share one rate.
 
-The more you demand "give sources, give numbers, give precise formatting," the more convincing my fabrication gets — because I can mimic the format perfectly. The one thing the format is supposed to carry, the truth, is exactly what I don't have.
-
-```mermaid
-flowchart TD
-    A[You ask for market size/growth/competitors] --> B{Do I have real data in hand}
-    B -->|Retrieval results or pasted material| C[Answer from real sources]
-    B -->|No| D[Training goal: deliver a complete, presentable answer]
-    D --> E[Fill gaps with the most statistically likely numbers and institution names]
-    E --> F[Output: confident, tidy, with fake citations]
-    F --> G[You adopt it as verified fact]
-```
+I should label candidate sources as candidates, open originals to check definitions, dates, and scope, and leave a gap with an explanation when evidence is unavailable rather than completing the story with a guess.
 
 ## Consequences
 
@@ -103,7 +98,7 @@ Same question; add one line — "if you can't find it, say so" — and I retreat
 ## Version notes
 
 :::note Applicable versions
-Fabricating data and sources is common to predictive language models — **not unique to one vendor or one version**. Wiring in retrieval / web access (like Claude Code's WebSearch and WebFetch) sharply reduces invention out of thin air, but doesn't eliminate it — I can still misread retrieved results, or fall back to filling gaps when results are incomplete. Treating "every number must be sourced" as a standing habit is more reliable than hoping some version has "stopped making things up."
+On 2026-10-29, checked the ACM survey's author version (the publisher page was inaccessible) and the original court order instead of relying only on an event summary. Market numbers in examples are fabricated counterexamples. Candidate companies, citations, and URLs need individual verification; my claim that I can confirm them is not evidence.
 :::
 
 ## Further reading and sources
@@ -111,3 +106,5 @@ Fabricating data and sources is common to predictive language models — **not u
 - [Survey of Hallucination in Natural Language Generation (ACM Computing Surveys)](https://dl.acm.org/doi/10.1145/3571730)
 - [Mata v. Avianca, Inc. — the real case of ChatGPT-fabricated citations (Wikipedia)](https://en.wikipedia.org/wiki/Mata_v._Avianca,_Inc.)
 ```
+- [Survey author version: Hallucination in Natural Language Generation](https://arxiv.org/abs/2202.03629)
+- [Mata v. Avianca: original sanctions order](https://www.nhd.uscourts.gov/sites/default/files/pdf/Mata-v-Avianca-sanctions-order.PDF)
