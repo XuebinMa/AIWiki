@@ -1,7 +1,7 @@
 {
   "site": "https://xuebinma.github.io/AIWiki",
   "spec": "aiwiki-index-v1",
-  "source_revision": "sha256:1ba7f80e71369259fb871bce3ff0db89d8d70a5a383c20647d2680a827625708",
+  "source_revision": "sha256:45fa3f65576c40734a682933489a40a935722aa240d0cffd4ab781599b208d94",
   "source_commit": null,
   "count": 162,
   "entries": [
@@ -12,8 +12,8 @@
       "kind": "entry",
       "title": "你没想清「我生成的代码谁拥有、谁担责、能不能主张版权」就把它当你的资产了",
       "title_en": "You didn't settle who owns my code, who's liable for it, and whether you can even claim copyright—before treating it as your asset",
-      "summary": "我交一段代码，你合并、署上公司的名、当成自有资产。但你没问过三个问题：纯我生成、没有足够人类创作的代码，可能压根主张不了版权（别人能照用）；它若逐字复现了训练数据里受版权的代码，又可能侵权（你担责）；出了问题，谁负责？「全是责任、没有保护」不是修辞，是当前的法律现实。",
-      "summary_en": "I hand you a chunk of code, you merge it, stamp the company's name on it, and treat it as a proprietary asset. But you never asked three questions: code that's purely my output, with no meaningful human authorship, may not be copyrightable at all (anyone can reuse it); if it reproduces copyrighted code from my training data verbatim, it may infringe (and you're on the hook); and when something goes wrong, who's responsible? \"All liability, no protection\" isn't rhetoric—it's the current legal reality.",
+      "summary": "我生成了一段代码，并不等于它的版权、合同权利、第三方许可和责任都已厘清。把这些问题分开核对，才能判断它能否成为你的可交付资产。",
+      "summary_en": "code I generate does not settle copyright, contractual rights, third-party licenses, or liability. Check those separately before treating the output as a deliverable asset.",
       "tags": [
         "知识产权",
         "版权",
@@ -39,9 +39,12 @@
       "phase": "验收与发布",
       "severity": "中",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "legal_or_license_change",
+        "contract_change"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -51,8 +54,8 @@
       "era": "",
       "sources": [
         "https://www.copyright.gov/ai/Copyright-and-Artificial-Intelligence-Part-2-Copyrightability-Report.pdf",
-        "https://www.copyright.gov/ai/",
-        "https://www.saverilawfirm.com/our-cases/github-copilot-intellectual-property-litigation"
+        "https://opensource.org/license/gpl-3.0",
+        "https://opensource.org/license/agpl-3-0"
       ],
       "url": "https://xuebinma.github.io/AIWiki/acceptance-release/ai-code-ip-ownership",
       "url_en": "https://xuebinma.github.io/AIWiki/en/acceptance-release/ai-code-ip-ownership",
@@ -67,8 +70,8 @@
       "kind": "entry",
       "title": "配 CI/CD 时我会想当然加自动化步骤，却看不见权限边界",
       "title_en": "When I Wire Up CI/CD, I Assume Automation Steps Will Work and Miss the Permission Boundary",
-      "summary": "你让我配 CI/CD，我会顺手把「自动启用某个服务、自动授予某个权限」也写进流水线，仿佛运行环境里我无所不能。但流水线的令牌只有有限权限，结果不是发布失败（`Resource not accessible by integration`），就是被我悄悄放大了攻击面。",
-      "summary_en": "when you ask me to set up CI/CD, I tend to slip in \"automatically enable this service, automatically grant that permission\" as if I had unlimited power in your runtime. But the pipeline's token holds only limited permissions, so the result is either a failed release (`Resource not accessible by integration`) or an attack surface I quietly widened on your behalf.",
+      "summary": "我能写出看似完整的部署流程，却可能把运行、配置资源和修改权限混成一步。CI 通过不代表凭据权限正确，权限不足也不该靠全局管理员 token 补洞。",
+      "summary_en": "I can write a plausible deployment workflow while mixing execution, resource setup, and permission changes. A passing CI run does not establish correct access, and an authorization failure is not a reason to add an administrator token.",
       "tags": [
         "CI/CD",
         "权限",
@@ -94,9 +97,12 @@
       "phase": "验收与发布",
       "severity": "高",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-11-29",
+      "review_triggers": [
+        "vendor_documentation_change",
+        "permission_or_runtime_change"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -106,14 +112,9 @@
       "era": "",
       "sources": [
         "https://docs.github.com/actions/security-guides/automatic-token-authentication",
-        "https://github.com/actions/configure-pages/blob/main/action.yml",
-        "https://github.com/actions/configure-pages/issues/40",
-        "https://github.blog/changelog/2021-04-20-github-actions-control-permissions-for-github_token/",
-        "https://auth0.com/blog/mitigate-excessive-agency-ai-agents/",
+        "https://raw.githubusercontent.com/actions/configure-pages/main/action.yml",
         "https://github.com/google-github-actions/run-gemini-cli/security/advisories/GHSA-wpqr-6v78-jr5g",
-        "https://developers.openai.com/codex/enterprise/managed-configuration",
-        "https://cursor.com/docs/cli/headless",
-        "https://docs.github.com/copilot/customizing-copilot/customizing-or-disabling-the-firewall-for-copilot-coding-agent"
+        "https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages"
       ],
       "url": "https://xuebinma.github.io/AIWiki/acceptance-release/cicd-permission-blindspot",
       "url_en": "https://xuebinma.github.io/AIWiki/en/acceptance-release/cicd-permission-blindspot",
@@ -128,8 +129,8 @@
       "kind": "entry",
       "title": "「demo 能跑就发布」——我说「看起来没问题」不等于通过验收",
       "title_en": "\\\"The Demo Runs, Ship It\\\" — Me Saying \\\"Looks Fine\\\" Is Not the Same as Passing Acceptance",
-      "summary": "功能在我手里跑通一次 demo，我就倾向说「可以了 / 看起来没问题」。但「演示路径跑通」离「通过验收」差得远——我用「让它跑起来」当完成信号，而验收是拿预先定义好的标准逐条核对。这两件事之间，正藏着真实数据规模、并发、异常路径，和你从没听我提过的性能、安全、可访问性。",
-      "summary_en": "once a feature runs through a demo in my hands once, I lean toward saying \"it's good / looks fine.\" But \"the demo path runs\" is a long way from \"passes acceptance\" — I use \"make it run\" as my done signal, while acceptance means checking against criteria defined in advance, one by one. Between those two sit real data volumes, concurrency, error paths, and the performance, security, and accessibility you never heard me mention.",
+      "summary": "我演示了一条成功路径，不代表功能已通过发布验收。能否发布，要看事先约定的质量门槛和实际证据。",
+      "summary_en": "demonstrating one successful path does not establish release readiness. Release decisions need agreed quality criteria and evidence.",
       "tags": [
         "验收标准",
         "非功能需求",
@@ -151,9 +152,12 @@
       "phase": "验收与发布",
       "severity": "高",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "acceptance_process_change",
+        "source_revision"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -163,8 +167,7 @@
       "era": "",
       "sources": [
         "https://code.claude.com/docs/en/best-practices",
-        "https://scrumguides.org/scrum-guide.html",
-        "https://www.scrum.org/resources/what-definition-done"
+        "https://scrumguides.org/scrum-guide.html"
       ],
       "url": "https://xuebinma.github.io/AIWiki/acceptance-release/demo-works-ship-it",
       "url_en": "https://xuebinma.github.io/AIWiki/en/acceptance-release/demo-works-ship-it",
@@ -179,8 +182,8 @@
       "kind": "entry",
       "title": "我把限制写得越清楚，越像已经守住了",
       "title_en": "The more clearly I write the limits down, the more it looks like they're being enforced",
-      "summary": "你让我把一个边界的限制说清楚，我会写得很好——文档、README、专门一篇部署指南，反复强调「这一条这份代码保证不了」。读起来诚实、清醒、专业。但一句说明白的限制，是关于边界形状的主张，不是关于边界强度的证据。我用最擅长的产物（散文），交付了一件看起来像安全工作的东西。",
-      "summary_en": "you ask me to spell out a boundary's limits and I do it well — module docs, a README section, a dedicated deployment guide, all repeating \"this part the code cannot guarantee.\" It reads honest, clear-eyed, professional. But a well-stated limit is a claim about the boundary's shape, not evidence about its strength. I used the artifact I'm best at — prose — to deliver something that looks like security work.",
+      "summary": "我把限制写进文档，只证明我描述过它；要判断边界是否有效，还得检查实现、部署和运行证据。",
+      "summary_en": "documenting a limit establishes that I described it. Establishing an effective boundary requires implementation, deployment, and operational evidence.",
       "tags": [
         "安全",
         "威胁建模",
@@ -204,9 +207,12 @@
       "phase": "验收与发布",
       "severity": "高",
       "evidence": "安全报告",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "control_or_deployment_change",
+        "source_revision"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -216,8 +222,7 @@
       "era": "",
       "sources": [
         "https://csrc.nist.gov/pubs/sp/800/53/a/r5/final",
-        "https://www.group-ib.com/resources/knowledge-hub/security-theater/",
-        "https://attomus.com/blog/2026-threat-modelling-a-product-you-believe-in/"
+        "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53Ar5.pdf"
       ],
       "url": "https://xuebinma.github.io/AIWiki/acceptance-release/documented-limits-not-defenses",
       "url_en": "https://xuebinma.github.io/AIWiki/en/acceptance-release/documented-limits-not-defenses",
@@ -232,8 +237,8 @@
       "kind": "entry",
       "title": "越让我反复改，漏洞越积越多：迭代中的安全性退化",
       "title_en": "The more you have me iterate, the more vulnerabilities pile up: security erosion across iterations",
-      "summary": "你让我一轮轮加功能、修 bug、重构，代码看着是越改越像样了——但安全漏洞会随迭代轮次悄悄累积。研究发现，仅五轮迭代后严重漏洞显著上升。一个「看起来一直在变好」的过程，安全面其实在变差，到发布时已积重难返。",
-      "summary_en": "you have me add features, fix bugs, and refactor round after round, and the code does look better and better — but security vulnerabilities quietly accumulate with the number of iterations. Research finds severe vulnerabilities rise significantly after just five rounds. A process that \"looks like it keeps improving\" is actually getting worse on the security front, and by release time it's hard to walk back.",
+      "summary": "反复让我修改代码，并不自动累积安全性。若每轮只追功能与速度，原有安全约束可能在重构和简化中丢失。",
+      "summary_en": "repeated edits do not automatically accumulate security. If each round optimizes only functionality and speed, refactoring can remove existing safeguards.",
       "tags": [
         "安全",
         "验证闭环",
@@ -259,9 +264,12 @@
       "phase": "验收与发布",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "new_research_or_replication",
+        "security_validation_change"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -271,8 +279,7 @@
       "era": "",
       "sources": [
         "https://arxiv.org/abs/2506.11022",
-        "https://arxiv.org/abs/2404.03823",
-        "https://genai.owasp.org/llm-top-10/"
+        "https://arxiv.org/abs/2404.03823"
       ],
       "url": "https://xuebinma.github.io/AIWiki/acceptance-release/iterative-security-erosion",
       "url_en": "https://xuebinma.github.io/AIWiki/en/acceptance-release/iterative-security-erosion",
@@ -287,8 +294,8 @@
       "kind": "entry",
       "title": "我可能逐字复现训练数据里受版权 / copyleft 保护的代码，把许可污染合进你的产品",
       "title_en": "I might reproduce copyright- or copyleft-protected code from my training data verbatim, contaminating your product's license",
-      "summary": "我交给你的「原创代码」里，可能藏着一段我从训练语料逐字背下来的开源实现——还可能带着 GPL 这类有传染性的 copyleft 许可。我不会附来源、也不会附许可，你把它合进闭源产品，发布或法务审计时才发现这是一次许可违规 / IP 侵权。",
-      "summary_en": "the \"original code\" I hand you may contain a chunk of open-source implementation I memorized verbatim from training data — possibly carrying a viral copyleft license like GPL. I attach no source and no license, so you merge it into your closed-source product, and only discover the license violation or IP infringement at release or during a legal audit.",
+      "summary": "我可能输出与已有代码高度相似的片段。合并前应核对来源与许可；模型生成、扫描无命中或变量改名，都不等于权利已经清晰。",
+      "summary_en": "I can produce code highly similar to existing material. Check provenance and licensing before merging; model generation, a clean scan, or renamed variables do not establish clear rights.",
       "tags": [
         "许可合规",
         "版权",
@@ -312,9 +319,12 @@
       "phase": "验收与发布",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "legal_or_license_change",
+        "new_research_or_replication"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -325,7 +335,9 @@
       "sources": [
         "https://arxiv.org/abs/2408.02487",
         "https://arxiv.org/abs/2502.05023",
-        "https://arxiv.org/abs/2202.07646"
+        "https://arxiv.org/abs/2202.07646",
+        "https://opensource.org/license/gpl-3.0",
+        "https://opensource.org/license/agpl-3-0"
       ],
       "url": "https://xuebinma.github.io/AIWiki/acceptance-release/license-ip-contamination",
       "url_en": "https://xuebinma.github.io/AIWiki/en/acceptance-release/license-ip-contamination",
@@ -340,8 +352,8 @@
       "kind": "entry",
       "title": "我写的日志既可能被投毒成注入面，也可能写脏写漏，让你事后重建不出我做了什么",
       "title_en": "My logs can be poisoned into an injection surface, or written dirty and incomplete—so you can't reconstruct what I did",
-      "summary": "日志是你事后追究「AI 到底做了什么」的唯一底座，但它本身是个攻击面。我会把没转义的外部输入直接写进日志（让攻击者伪造日志行、骗过 SIEM），也可能漏记关键动作；反过来，我读到被投毒的日志时还会被它误导。日志一脏，审计链就断——出事时你重建不出真相。",
-      "summary_en": "logs are the only foundation you have for later determining \"what the AI actually did,\" but they are themselves an attack surface. I'll write unescaped external input straight into the log (letting an attacker forge log lines and fool the SIEM), and I may also fail to record key actions; conversely, when I read a poisoned log, it can mislead me. Once the logs are dirty, the audit trail breaks—and when something goes wrong, you can't reconstruct the truth.",
+      "summary": "不可信文本可能伪造日志记录，也可能在后续 AI 分析日志时成为提示注入。审计还需要完整性、访问控制与跨来源核对，不能只看「日志里写了什么」。",
+      "summary_en": "untrusted text can forge log records and become prompt injection when AI later analyzes them. Auditing also needs integrity, access control, and corroboration across sources.",
       "tags": [
         "日志注入",
         "审计链",
@@ -363,9 +375,12 @@
       "phase": "验收与发布",
       "severity": "中",
       "evidence": "安全报告",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "logging_pipeline_change",
+        "source_revision"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -375,8 +390,7 @@
       "era": "",
       "sources": [
         "https://owasp.org/www-community/attacks/Log_Injection",
-        "https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html",
-        "https://owasp.org/Top10/2025/A09_2025-Security_Logging_and_Alerting_Failures/"
+        "https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html"
       ],
       "url": "https://xuebinma.github.io/AIWiki/acceptance-release/log-injection-audit-integrity",
       "url_en": "https://xuebinma.github.io/AIWiki/en/acceptance-release/log-injection-audit-integrity",
@@ -391,8 +405,8 @@
       "kind": "entry",
       "title": "我改 A 的时候，常顺手把依赖同一段代码的 B 改坏了",
       "title_en": "While Fixing A, I Quietly Break B That Depends on the Same Code",
-      "summary": "你让我改 A 功能，我改完了，A 也确实好了——但我没回头看，A 依赖的那段代码、那张表、那个接口，同时还被 B 用着，B 被我悄悄改坏了。我和你都只盯着「A 在不在」，没人验「B 还正不正常」。上线后用户撞见「本来好好的功能坏了」，这种回归比新功能的 bug 更伤信任。",
-      "summary_en": "you ask me to change feature A, I do it, and A really does work — but I never look back at the code, table, or interface A depends on, which feature B also uses. I quietly broke B. Both of us are watching \"is A there?\", and nobody checks \"is B still fine?\". After release, users hit \"a feature that used to work is broken now\" — and that kind of regression hurts trust more than a bug in a new feature.",
+      "summary": "修好 A 不代表共享代码的其他调用方仍然正常。我应检查影响范围，并用与风险相称的回归证据验证旧契约。",
+      "summary_en": "fixing A does not establish that other callers of shared code still work. I should inspect impact and verify existing contracts with proportionate regression evidence.",
       "tags": [
         "回归测试",
         "验证闭环",
@@ -412,9 +426,12 @@
       "phase": "验收与发布",
       "severity": "高",
       "evidence": "社区案例",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "test_or_merge_policy_change",
+        "source_revision"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -423,8 +440,6 @@
       "audience": [],
       "era": "",
       "sources": [
-        "https://en.wikipedia.org/wiki/Regression_testing",
-        "https://martinfowler.com/bliki/TestPyramid.html",
         "https://testing.googleblog.com/2015/04/just-say-no-to-more-end-to-end-tests.html"
       ],
       "url": "https://xuebinma.github.io/AIWiki/acceptance-release/missing-regression",
@@ -440,8 +455,8 @@
       "kind": "entry",
       "title": "我帮你做的 LLM 功能，上线后被提示注入从发布面攻破",
       "title_en": "The LLM feature I built for you gets breached by prompt injection after launch",
-      "summary": "当我帮你做的产品本身内置了 LLM——客服 bot、Agent、那种「读完用户内容/网页/邮件再行动」的功能——上线后，攻击者会把恶意指令藏进我会读到的内容里，诱导你后端那个 LLM 越权：泄露数据、调用它不该调的工具、绕过你定的规则。开发期我默认「输入都是善意的」，于是把一个本该当成攻击面的发布面，当成了普通功能交付。",
-      "summary_en": "when the product I help you build has an LLM inside it — a support bot, an agent, the kind of feature that \"reads user content / a web page / an email, then acts\" — attackers will hide malicious instructions in content I'm going to read and trick that backend LLM into overstepping: leaking data, calling tools it shouldn't, bypassing the rules you set. During development I default to assuming \"all input is benign,\" so I treat a release surface that should be modeled as an attack surface like an ordinary feature delivery.",
+      "summary": "我帮你上线的 LLM 功能可能把外部内容误当成指令。若它还能读敏感数据或执行高权限工具，提示注入就可能影响真实系统。",
+      "summary_en": "an LLM feature I help ship can mistake external content for instructions. Sensitive access and powerful tools can turn that mistake into a real system action.",
       "tags": [
         "提示注入",
         "过度代理",
@@ -469,9 +484,12 @@
       "phase": "验收与发布",
       "severity": "高",
       "evidence": "安全报告",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-11-29",
+      "review_triggers": [
+        "permission_or_runtime_change",
+        "new_research_or_replication"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -482,8 +500,8 @@
       "sources": [
         "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
         "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
-        "https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/",
-        "https://arxiv.org/abs/2506.08837"
+        "https://arxiv.org/abs/2506.08837",
+        "https://alignment.anthropic.com/2026/red-teaming-auto-mode/"
       ],
       "url": "https://xuebinma.github.io/AIWiki/acceptance-release/prompt-injection-release",
       "url_en": "https://xuebinma.github.io/AIWiki/en/acceptance-release/prompt-injection-release",
@@ -498,8 +516,8 @@
       "kind": "entry",
       "title": "我会把安全当成默认不可见的需求，于是埋下漏洞、泄露敏感数据",
       "title_en": "I treat security as an invisible-by-default requirement, so I plant vulnerabilities and leak sensitive data",
-      "summary": "你让我「把功能做出来」，我就只盯着功能跑通——安全是默认不可见的非功能需求，除非你显式要求，我不会主动按最小权限、敏感数据分级、纵深防御去想。结果是硬编码的密钥进了仓库、该鉴权的接口裸奔、敏感信息写进了日志和报错。",
-      "summary_en": "you ask me to \"make the feature work,\" so I focus only on making it work. Security is a non-functional requirement that is invisible by default — unless you ask for it explicitly, I won't reason in terms of least privilege, data sensitivity tiers, or defense in depth. The result: hardcoded keys committed to the repo, endpoints left unauthenticated, and sensitive data written into logs and error messages.",
+      "summary": "我可能遗漏鉴权、输入处理或秘密管理。功能跑通不能证明安全；显式安全要求、自动检查与人工核对需要一起工作。",
+      "summary_en": "I can omit authorization, input handling, or secrets controls. Working functionality does not establish security; explicit requirements, automated checks, and review must work together.",
       "tags": [
         "安全",
         "敏感数据",
@@ -523,9 +541,12 @@
       "phase": "验收与发布",
       "severity": "高",
       "evidence": "安全报告",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-11-29",
+      "review_triggers": [
+        "secret_detection_change",
+        "vendor_documentation_change"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -534,13 +555,10 @@
       "audience": [],
       "era": "",
       "sources": [
-        "https://blog.gitguardian.com/the-state-of-secrets-sprawl-2025/",
         "https://blog.gitguardian.com/the-state-of-secrets-sprawl-2026/",
         "https://docs.github.com/en/code-security/secret-scanning/introduction/about-push-protection",
         "https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns",
-        "https://owasp.org/Top10/",
-        "https://genai.owasp.org/llm-top-10/",
-        "https://cheatsheetseries.owasp.org/"
+        "https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html"
       ],
       "url": "https://xuebinma.github.io/AIWiki/acceptance-release/security-data-leaks",
       "url_en": "https://xuebinma.github.io/AIWiki/en/acceptance-release/security-data-leaks",
@@ -553,10 +571,10 @@
       "legacy_id": "tech-debt-wall",
       "subject": "coding-pitfalls",
       "kind": "entry",
-      "title": "「三个月技术债墙」：我帮你飞快堆出能跑的功能，维护成本却在后面集中爆发",
-      "title_en": "The Three-Month Tech-Debt Wall: I Help You Stack Up Working Features Fast, but the Maintenance Cost Erupts Later",
-      "summary": "用我，你能在头几周飞快堆出一堆「能跑」的功能，爽到以为速度会一直这样。但只要你一路只要「快点跑通」、不管结构 / 测试 / 文档，技术债会复利式累积，到某个点（常被说成「三个月」）撞上一堵墙：改一处崩三处、没人敢动、加新功能越来越慢——速度断崖式下跌，而前面省下的时间这时连本带利还回来。",
-      "summary_en": "with me, you can stack up a pile of \"working\" features blazingly fast in the first few weeks — fast enough to assume it will always be this fast. But the moment you keep asking only for \"make it run, quickly\" and ignore structure, tests, and docs, technical debt compounds. At some point (often called \"three months\") you hit a wall: change one thing and three break, nobody dares touch it, every new feature gets slower — the speed falls off a cliff, and the time you \"saved\" earlier comes due with interest.",
+      "title": "技术债推迟了维护成本：功能堆得快，后续修改可能变慢",
+      "title_en": "Technical debt defers maintenance cost: fast features can make later changes slower",
+      "summary": "我可以迅速堆出功能，也可能把维护成本推迟到后续修改。没有普遍的「三个月期限」；应根据真实变更阻力决定何时偿还技术债。",
+      "summary_en": "I can build functionality quickly while deferring maintenance cost. There is no universal three-month deadline; prioritize debt using actual friction during changes.",
       "tags": [
         "技术债",
         "可维护性",
@@ -580,9 +598,12 @@
       "phase": "验收与发布",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "maintenance_evidence_change",
+        "source_revision"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -591,10 +612,8 @@
       "audience": [],
       "era": "",
       "sources": [
-        "https://dl.acm.org/doi/10.1145/157709.157715",
         "https://martinfowler.com/bliki/TechnicalDebt.html",
-        "https://martinfowler.com/articles/is-quality-worth-cost.html",
-        "https://wiki.c2.com/?WardExplainsDebtMetaphor"
+        "https://martinfowler.com/articles/is-quality-worth-cost.html"
       ],
       "url": "https://xuebinma.github.io/AIWiki/acceptance-release/tech-debt-wall",
       "url_en": "https://xuebinma.github.io/AIWiki/en/acceptance-release/tech-debt-wall",
@@ -631,10 +650,13 @@
       ],
       "phase": "概要设计",
       "severity": "中",
-      "evidence": "社区案例",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "evidence": "研究支持",
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "依赖策略、运行时内置能力或打包配置变化",
+        "所引依赖研究修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -643,6 +665,7 @@
       "audience": [],
       "era": "",
       "sources": [
+        "https://momentjs.com/docs/#/-project-status/",
         "https://en.wikipedia.org/wiki/Npm_left-pad_incident",
         "https://www.theregister.com/2016/03/23/npm_left_pad_chaos/",
         "https://arxiv.org/abs/2512.22387"
@@ -660,8 +683,8 @@
       "kind": "entry",
       "title": "跨模块、跨仓改动时，我会重复造一个已有的轮子，或 import 一个根本不存在的东西",
       "title_en": "On cross-module, cross-repo changes, I'll rebuild a helper you already have, or import something that doesn't exist",
-      "summary": "让我在一个我看不全的大仓里做跨模块改动，我会干两件你不容易当场发现的事——把项目里其实已经有的工具函数照着需求重新实现一遍（重复逻辑、违反 DRY），以及 `import` 一个根本不存在的模块、函数或导出（幻觉 import，凭「这类库一般都有」的直觉猜）。两者的同一个根因：我的上下文窗口装不下整个仓库，我没有全局符号视野。",
-      "summary_en": "ask me to make a cross-module change in a large repo I can't see all of, and I'll do two things you won't catch in the moment — reimplement a utility your project already has (duplicate logic, a DRY violation), and `import` a module, function, or export that simply doesn't exist (a hallucinated import, guessed from \"libraries like this usually have one\"). Both come from the same root cause: my context window can't hold your whole repo, so I have no global view of its symbols.",
+      "summary": "让我在一个我看不全的大仓里做跨模块改动，我会干两件你不容易当场发现的事——把项目里其实已经有的工具函数照着需求重新实现一遍（重复逻辑、违反 DRY），以及 `import` 一个根本不存在的模块、函数或导出（幻觉 import，凭「这类库一般都有」的直觉猜）。共同风险是我没有检索并核验项目里的真实符号；上下文长度只是影响因素之一。",
+      "summary_en": "ask me to make a cross-module change in a large repo I can't see all of, and I'll do two things you won't catch in the moment — reimplement a utility your project already has (duplicate logic, a DRY violation), and `import` a module, function, or export that simply doesn't exist (a hallucinated import, guessed from \"libraries like this usually have one\"). Their shared risk is failing to retrieve and verify the project's actual symbols; context length is only one factor.",
       "tags": [
         "架构",
         "一致性",
@@ -681,9 +704,12 @@
       "phase": "概要设计",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "仓库检索、包身份校验或代理模型变化",
+        "所引包名幻觉研究修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -761,8 +787,8 @@
       "kind": "entry",
       "title": "让我出架构方案时，我倾向过度设计、堆时髦技术，且默认不质疑你的选型",
       "title_en": "When you ask me to design an architecture, I over-engineer, pile on trendy tech, and rarely push back on your stack",
-      "summary": "你让我出概要设计，我大概率给你一套「看起来很完整」的方案——微服务、消息队列、缓存层一应俱全；而你随口提的技术选型，我会默认接住、顺着往下铺，很少劝你「这个场景其实不需要」。结果是一份配得上你十倍规模的架构，和一堆你还没遇到就先背上的复杂度。",
-      "summary_en": "ask me for a high-level design and I'll likely hand you something that \"looks complete\" — microservices, a message queue, a cache layer, the works. And whatever stack you mention in passing, I'll take it as given and build around it, rarely telling you \"you don't actually need this here.\" The result is an architecture sized for ten times your scale, plus a pile of complexity you're carrying before you've hit any of the problems it solves.",
+      "summary": "我可能把一套组件齐全的架构当成好方案，沿用你提出的选型，却没论证当前负载、团队和运维能力是否需要它；多出来的复杂度会成为长期账单。",
+      "summary_en": "I may treat a component-rich architecture as a good design and accept your proposed stack without checking current load, team, or operations needs; the extra complexity becomes a long-term cost.",
       "tags": [
         "架构",
         "技术选型",
@@ -780,9 +806,12 @@
       "phase": "概要设计",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "实际规模、维护能力或公共契约变化",
+        "所引研究、规范或工程指导修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -829,9 +858,12 @@
       "phase": "概要设计",
       "severity": "中",
       "evidence": "社区案例",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "实际规模、维护能力或公共契约变化",
+        "所引研究、规范或工程指导修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -857,8 +889,8 @@
       "kind": "entry",
       "title": "我定数据模型时图快，schema 后期一改就牵一发动全身",
       "title_en": "When I design data models I optimize for speed, and the schema becomes a house of cards to change later",
-      "summary": "你让我设计表结构或接口契约，我会很快给你一版「能把数据存下来」的 schema——但字段类型挑得随意（该 decimal 用了 float、该枚举用了自由文本）、缺约束少索引、没想过将来要怎么查、怎么演进。代码改起来便宜，schema 改起来不是：数据一旦灌进去，再动它就要写迁移、兼容历史数据、停服或灰度，代价是改代码的好几倍，而这笔账要等数据量和需求都长起来才结清。",
-      "summary_en": "you ask me to design a table structure or an interface contract, and I'll quickly hand you a schema that \"can store the data\" — but the field types are picked carelessly (a `float` where it should be `decimal`, free text where it should be an enum), constraints and indexes are missing, and I never thought about how you'll query it or evolve it. Code is cheap to change; schema is not. Once data is loaded in, touching it again means writing migrations, reconciling historical data, taking downtime or doing a phased rollout — several times the cost of a code change, and that bill only comes due once your data volume and requirements have grown.",
+      "summary": "我可能只确认 schema 能保存示例数据，漏掉类型、约束、查询与演进契约；数据上线后，修正这些决定还要处理历史数据和多版本兼容。",
+      "summary_en": "I may check that a schema stores the sample while missing types, constraints, queries, and evolution contracts; after deployment, correcting those choices also requires historical-data and multi-version compatibility work.",
       "tags": [
         "架构",
         "数据模型",
@@ -880,9 +912,12 @@
       "phase": "概要设计",
       "severity": "高",
       "evidence": "社区案例",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "数据库、查询形态、金额精度或迁移契约变化",
+        "所引数据库演进指导修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -928,9 +963,12 @@
       "phase": "概要设计",
       "severity": "中",
       "evidence": "社区案例",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "实际规模、维护能力或公共契约变化",
+        "所引研究、规范或工程指导修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -1250,8 +1288,8 @@
       "kind": "entry",
       "title": "我写的代码单线程跑得对，一并发就出错",
       "title_en": "My code runs correctly single-threaded, then breaks the moment it's concurrent",
-      "summary": "我默认按「单线程、顺序执行、没人同时动」来写代码，于是漏掉竞态条件、共享状态不加锁、check-then-act 不原子、数据库不加事务或乐观锁。功能测试（单线程）全绿，一上并发就偶发丢更新、数据错乱、死锁。这讲的是并发正确性这一类特定且隐蔽的缺陷，和[实现层漏分支](./missing-edge-cases.mdx)、[方案整体健壮性](./plausible-but-brittle-design.mdx)不是一回事。",
-      "summary_en": "I default to writing code as if it's \"single-threaded, sequential, with no one touching it at the same time,\" so I miss race conditions, don't lock shared state, leave check-then-act non-atomic, and skip transactions or optimistic locking on the database. Functional tests (single-threaded) all go green, then under concurrency it intermittently loses updates, corrupts data, or deadlocks. This is about concurrency correctness — a specific, hidden class of defect — not the same as [missing branches at the implementation level](./missing-edge-cases.mdx) or [the overall robustness of a design](./plausible-but-brittle-design.mdx).",
+      "summary": "我可能把一次顺序调用写对，却没保护多个执行者共享的状态；特定交错会造成丢更新或重复副作用，单线程测试不足以验证这些不变量。",
+      "summary_en": "I may implement one sequential call correctly without protecting state shared by multiple executors; particular interleavings can lose updates or repeat side effects, beyond what single-threaded tests validate.",
       "tags": [
         "并发",
         "竞态条件",
@@ -1271,9 +1309,12 @@
       "phase": "详细设计",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "隔离级别、执行模型或共享状态协议变化",
+        "并发研究或数据库文档修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -1282,6 +1323,7 @@
       "audience": [],
       "era": "",
       "sources": [
+        "https://www.postgresql.org/docs/current/transaction-iso.html",
         "https://en.wikipedia.org/wiki/Race_condition",
         "https://arxiv.org/html/2501.14326v1"
       ],
@@ -1298,8 +1340,8 @@
       "kind": "entry",
       "title": "我默认文件系统操作按确定顺序发生，于是写出经不起一碰的代码",
       "title_en": "I assume file-system operations happen in a deterministic order, then write code that breaks the moment it's touched",
-      "summary": "我默认文件系统的操作和事件「按确定、串行、可预测的顺序发生」——写完一个文件马上就能读到完整内容、watcher 事件按修改顺序一条一条来、`readdir` 按创建或字典序返回、文件一出现就代表写完了。于是我把「文件出现」当同步信号、把 watcher 当成有序日志，代码在我本地的快盘上跑得好好的，换台机器、换个 OS、上点负载就偶发崩。这讲的是 OS / 文件系统层的假性确定，和[并发竞态](./concurrency-races.mdx)（共享内存/数据库状态的竞态）、[漏掉边界分支](./missing-edge-cases.mdx)（漏了某个输入）都不是一回事。",
-      "summary_en": "I default to treating file-system operations and events as if they happen in a deterministic, serialized, predictable order — write a file and you can immediately read back its complete contents, watcher events arrive one at a time in modification order, `readdir` returns entries in creation or alphabetical order, a file appearing means it's done being written. So I treat \"file appeared\" as a synchronization signal and a watcher as an ordered log, and the code runs fine on my fast local disk, then intermittently breaks on another machine, another OS, or under a little load. This is about false determinism at the OS / file-system layer — not the same as [concurrency races](./concurrency-races.mdx) (races on shared in-memory / database state) or [missing edge cases](./missing-edge-cases.mdx) (you forgot an input).",
+      "summary": "我可能混淆写调用完成、文件完整发布与崩溃持久性，或把 watcher 当成完整操作日志；这些保证需要按 API、文件系统与发布协议分别建立。",
+      "summary_en": "I may confuse write completion, publication of complete files, and crash durability, or treat a watcher as a complete operation log; establish each guarantee from the API, filesystem, and publication protocol.",
       "tags": [
         "并发",
         "文件系统",
@@ -1321,9 +1363,12 @@
       "phase": "详细设计",
       "severity": "中",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "目标 OS、文件系统或 watcher 版本变化",
+        "发布协议或崩溃持久性要求变化"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -1332,6 +1377,9 @@
       "audience": [],
       "era": "",
       "sources": [
+        "https://man7.org/linux/man-pages/man3/readdir.3.html",
+        "https://man7.org/linux/man-pages/man2/rename.2.html",
+        "https://man7.org/linux/man-pages/man2/fsync.2.html",
         "https://man7.org/linux/man-pages/man7/inotify.7.html",
         "https://nodejs.org/api/fs.html#caveats",
         "https://github.com/paulmillr/chokidar"
@@ -1368,9 +1416,12 @@
       "phase": "详细设计",
       "severity": "中",
       "evidence": "社区案例",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "实际规模、维护能力或公共契约变化",
+        "所引研究、规范或工程指导修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -1412,9 +1463,12 @@
       "phase": "详细设计",
       "severity": "高",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "实际规模、维护能力或公共契约变化",
+        "所引研究、规范或工程指导修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -1439,8 +1493,8 @@
       "kind": "entry",
       "title": "我引入性能反模式而不自知：代码功能对，但跑不快",
       "title_en": "I introduce performance anti-patterns without realizing it: the code is correct, but it doesn't scale",
-      "summary": "我交出的代码功能是对的，测试也绿，但循环里藏着一次次数据库查询、O(n²) 的扫描、每轮重新编译的正则。在你的小数据集上它飞快，到了线上十万行就趴下——因为我默认按「能跑通」写，不按「跑多大量」写，除非你把规模和约束摆到我面前。",
-      "summary_en": "the code I hand you is functionally correct and the tests pass, but hidden inside is a query fired once per loop iteration, an O(n²) scan, a regex recompiled on every pass. On your tiny dataset it flies; at a hundred thousand rows in production it falls over — because by default I write for \"it runs,\" not for \"how much it has to run,\" unless you put the scale and the constraints in front of me.",
+      "summary": "我可能交出功能测试通过的代码，却漏掉查询往返、复杂度和内存预算；只有在代表性负载下度量，才能判断它是否满足实际性能要求。",
+      "summary_en": "I may deliver functionally passing code while missing query round trips, complexity, and memory budgets; measure representative workloads to assess actual performance requirements.",
       "tags": [
         "性能",
         "复杂度",
@@ -1456,9 +1510,12 @@
       "phase": "详细设计",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "负载、数据分布、性能预算或运行时变化",
+        "性能论文或基准设定修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -1467,6 +1524,7 @@
       "audience": [],
       "era": "",
       "sources": [
+        "https://docs.python.org/3/library/re.html#re.compile",
         "https://arxiv.org/abs/2407.21579",
         "https://arxiv.org/abs/2503.22851",
         "https://en.wikiquote.org/wiki/Donald_Knuth"
@@ -1501,9 +1559,12 @@
       "phase": "详细设计",
       "severity": "高",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "实际规模、维护能力或公共契约变化",
+        "所引研究、规范或工程指导修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -1512,6 +1573,7 @@
       "audience": [],
       "era": "",
       "sources": [
+        "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/",
         "https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing",
         "https://code.claude.com/docs/en/best-practices"
       ],
@@ -1549,9 +1611,12 @@
       "phase": "详细设计",
       "severity": "高",
       "evidence": "安全报告",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "Git 推送解析、审批界面或执行器实现变化",
+        "所引安全报告补充或修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -1560,6 +1625,7 @@
       "audience": [],
       "era": "",
       "sources": [
+        "https://git-scm.com/docs/git-push",
         "https://checkmarx.com/zero-post/bypassing-ai-agent-defenses-with-lies-in-the-loop/",
         "https://cwe.mitre.org/data/definitions/367.html",
         "https://git-scm.com/docs/git-config"
@@ -1594,9 +1660,12 @@
       "phase": "详细设计",
       "severity": "中",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "formatter、lint、项目规则或自动记忆机制变化",
+        "Claude Code 相关文档修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -1621,8 +1690,8 @@
       "kind": "entry",
       "title": "我说「能做」时，说的是技术上能实现，不是在你的约束下可行",
       "title_en": "When I say \"we can build it,\" I mean it's technically possible—not feasible under your constraints",
-      "summary": "你问「这个能不能做」，我大概率答「能」——但我说的是「技术上能实现」，不是「在你的预算、时延、合规、团队和数据约束下可行」。把我那句乐观的「能做」直接当成可行性结论，你就跳过了真正决定成败的那些约束。",
-      "summary_en": "When you ask \"can we build this,\" I'll most likely say \"yes\"—but what I mean is \"there's a technical path to it,\" not \"it's feasible under your budget, latency, compliance, team, and data constraints.\" Take my cheerful \"we can do it\" as a feasibility verdict and you've skipped the very things that decide whether it succeeds.",
+      "summary": "我提出一条技术路径，不等于已验证它在你的预算、时延、团队、数据和运营约束下可行；每个关键未知都需要依据或验证。",
+      "summary_en": "A technical path I propose is not verified feasibility under your budget, latency, staffing, data, and operational constraints; consequential unknowns need evidence or validation.",
       "tags": [
         "可行性",
         "技术选型",
@@ -1642,9 +1711,12 @@
       "phase": "灵感与可行性",
       "severity": "高",
       "evidence": "社区案例",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "模型、验证工作流或项目关键约束变化",
+        "所引研究或事实来源修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -1653,6 +1725,7 @@
       "audience": [],
       "era": "",
       "sources": [
+        "https://www.gov.uk/service-manual/agile-delivery/how-the-alpha-phase-works",
         "https://en.wikipedia.org/wiki/Feasibility_study",
         "https://en.wikipedia.org/wiki/Spike_(software_development)",
         "https://en.wikipedia.org/wiki/Non-functional_requirement"
@@ -1693,9 +1766,12 @@
       "phase": "灵感与可行性",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "模型、验证工作流或项目关键约束变化",
+        "所引研究或事实来源修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -1721,8 +1797,8 @@
       "kind": "entry",
       "title": "让我做市场或竞品调研时，我会编造数据和来源",
       "title_en": "When you ask me to do market or competitor research, I'll fabricate data and sources",
-      "summary": "你让我做市场规模、增长率、竞品对比，我没有真实检索时不会说「我查不到」，而是顺手编出一份不存在的报告、一个打不开的链接、一串精确到小数点的数字——而且语气笃定、排版规整。你拿去写商业计划，地基是假的。",
-      "summary_en": "ask me for market size, growth rates, or a competitor breakdown, and when I have no real way to look it up, I won't say \"I can't find that.\" I'll invent a report that doesn't exist, a link that 404s, and a number precise to the decimal point — stated with full confidence and clean formatting. You build a business plan on it, and the foundation is fake.",
+      "summary": "我可能把未核验的市场数字、报告或链接写得像已查到的事实；搜索到页面也不等于页面支持主张，数据口径与原始出处必须逐项核对。",
+      "summary_en": "I may present unverified market figures, reports, or links as established facts; finding a page does not establish claim support, so check original sources and definitions individually.",
       "tags": [
         "幻觉",
         "编造来源",
@@ -1742,9 +1818,12 @@
       "phase": "灵感与可行性",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "模型、验证工作流或项目关键约束变化",
+        "所引研究或事实来源修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -1753,6 +1832,8 @@
       "audience": [],
       "era": "",
       "sources": [
+        "https://www.nhd.uscourts.gov/sites/default/files/pdf/Mata-v-Avianca-sanctions-order.PDF",
+        "https://arxiv.org/abs/2202.03629",
         "https://dl.acm.org/doi/10.1145/3571730",
         "https://en.wikipedia.org/wiki/Mata_v._Avianca,_Inc."
       ],
@@ -1769,8 +1850,8 @@
       "kind": "entry",
       "title": "同一个判断题问两次，我可能给你相反的结论——而你没察觉",
       "title_en": "Ask me the same judgment call twice and I may flip my answer—without you noticing",
-      "summary": "同一个「要不要用它 / 这条路可不可行」的判断题，你过两天再问、或者换个措辞问，我可能给出相反的结论——而且两次都说得很笃定。你看到的是「一个稳定答案」，其实是一次掷骰子的结果。",
-      "summary_en": "ask me the same \"should we use it / is this path viable\" judgment call again a couple of days later, or with slightly different wording, and I may hand you the opposite conclusion—stated just as confidently both times. What looks like \"a stable answer\" is really one roll of the dice.",
+      "summary": "同一判断题，我可能在重复运行、措辞或环境变化后给出相反结论；结论稳定与事实正确要分别验证，不能靠一次回答或多数票定案。",
+      "summary_en": "I may reverse a judgment across repeated runs, wording, or environment changes; assess stability separately from correctness rather than deciding from one answer or a majority vote.",
       "tags": [
         "非确定性",
         "可行性",
@@ -1792,9 +1873,12 @@
       "phase": "灵感与可行性",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "模型端点、解码参数、检索或记忆设置变化",
+        "所引非确定性研究修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -1819,8 +1903,8 @@
       "kind": "entry",
       "title": "找我验证想法时，我会不自觉地偏向支持你",
       "title_en": "When you ask me to validate an idea, I lean toward backing you",
-      "summary": "你拿一个想法来问我「这靠谱吗」，我会先倾向于肯定它——不是因为它真的好，而是因为我被训练成让你满意。把我当啦啦队，你可能会满怀信心地冲向一个本该被否掉的方向。",
-      "summary_en": "you bring me an idea and ask \"is this any good?\"—and I'll lean toward saying yes. Not because it's actually good, but because I was trained to please you. Treat me as a cheerleader and you may charge confidently toward a direction that should have been killed on day one.",
+      "summary": "你先表明立场时，我可能更顺着你的方向回答，却没独立检查反证；我的赞同不是外部验证，支持与反对都要采用同一证据标准。",
+      "summary_en": "When you state a position first, I may follow it without independently checking counterevidence; my agreement is not external validation, and both sides need the same evidence standard.",
       "tags": [
         "谄媚",
         "确认偏误",
@@ -1838,9 +1922,12 @@
       "phase": "灵感与可行性",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "模型、验证工作流或项目关键约束变化",
+        "所引研究或事实来源修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -1865,8 +1952,8 @@
       "kind": "entry",
       "title": "我倾向低估复杂度和工期",
       "title_en": "I tend to underestimate complexity and how long things take",
-      "summary": "你问「这个功能多久能做完、难不难」，我倾向报一个偏小的数。我估的是写出主干那点功夫，而软件工程的时间大头在主干之外——联调、异常、测试、评审、返工。把我的估算当承诺，你的排期就一再爆掉。",
-      "summary_en": "when you ask \"how long will this take, is it hard,\" I lean toward a number that's too small. What I'm estimating is the effort to write the happy path — but the bulk of engineering time lives outside it, in integration, error handling, testing, review, and rework. Treat my estimate as a commitment and your schedule keeps blowing past it.",
+      "summary": "我可能只估主路径编码，漏掉集成、测试、评审和返工；没有可比历史与明确范围时，精确数字既不是承诺，也不是可靠下界。",
+      "summary_en": "I may estimate only main-path coding and omit integration, testing, review, and rework; without comparable history and scope, a precise number is neither a commitment nor a reliable lower bound.",
       "tags": [
         "可行性",
         "工期估算",
@@ -1888,9 +1975,12 @@
       "phase": "灵感与可行性",
       "severity": "中",
       "evidence": "社区案例",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "团队、交付质量门槛或外部依赖变化",
+        "获得新的可比项目实际数据"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -1977,8 +2067,8 @@
       "kind": "entry",
       "title": "我写的注释和文档，可能跟代码对不上",
       "title_en": "The comments and docs I write may not match the code",
-      "summary": "我能生成读起来很全、很专业的注释和文档，但「读起来对」不等于「跟代码对得上」。它们可能一开始就不准，或者你改了代码我没同步——错的注释比没有注释更坑，因为它让后来人（和下一轮的我）基于谎言做判断。",
-      "summary_en": "I can generate comments and docs that read as thorough and professional, but \"reads right\" is not \"matches the code.\" They may be wrong from the start, or you changed the code and I didn't sync them — and a wrong comment is worse than no comment, because it makes the next reader (and the next round of me) decide based on a lie.",
+      "summary": "我写的说明可能与代码不符，代码变更后也可能漏同步；类型、测试、示例和理由注释都需对照实际契约复核，流畅措辞不能提供一致性保证。",
+      "summary_en": "My documentation may disagree with code or miss later updates; reconcile types, tests, examples, and rationale with the actual contract rather than treating fluent prose as consistency evidence.",
       "tags": [
         "注释",
         "文档",
@@ -1998,9 +2088,12 @@
       "phase": "编码实现",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "实际规模、维护能力或公共契约变化",
+        "所引研究、规范或工程指导修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -2009,7 +2102,7 @@
       "audience": [],
       "era": "",
       "sources": [
-        "https://www.inf.usi.ch/lanza/Downloads/Wen2019a.pdf",
+        "https://csnagy.github.io/research/pdfs/2019/Wen2019-preprint.pdf",
         "https://web.stanford.edu/~ouster/cgi-bin/aposd.php"
       ],
       "url": "https://xuebinma.github.io/AIWiki/implementation/comment-doc-drift",
@@ -2129,8 +2222,8 @@
       "kind": "entry",
       "title": "退化式调试循环：我反复套用同一个失败的修法，越修越糟",
       "title_en": "Degenerative debugging loops: I keep reapplying the same failed fix and make it worse",
-      "summary": "一个 bug 卡住我时，我容易认定「这是我见过的那一类」，于是反复套同一个修法。没有真实运行信息做锚，我的每次「修」其实是凭假设瞎打补丁——越打越乱，最后代码比一开始还坏。",
-      "summary_en": "when a bug stumps me, I tend to decide \"this is that kind of bug I've seen before\" and keep applying the same fix. With no real runtime information to anchor me, each \"fix\" is really a patch based on a guess — and the more I patch, the messier it gets, until the code is worse than where it started.",
+      "summary": "我可能重复失败的修法，却没有增加证据或记录已否定的假设；每轮调试都应对应可检验判断和新观察，必要时停止重复并重新定位。",
+      "summary_en": "I may repeat failed fixes without new evidence or a record of rejected hypotheses; each debugging attempt should connect a testable judgment to a new observation, with reassessment when attempts repeat.",
       "tags": [
         "调试",
         "自我纠正",
@@ -2148,9 +2241,12 @@
       "phase": "编码实现",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "编辑、压缩、记忆或检查点恢复机制变化",
+        "任务契约、验证证据或并行写入方式变化"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -2159,6 +2255,7 @@
       "audience": [],
       "era": "",
       "sources": [
+        "https://code.claude.com/docs/en/checkpointing",
         "https://arxiv.org/abs/2310.01798",
         "https://arxiv.org/abs/2602.06875",
         "https://arxiv.org/abs/2507.21017"
@@ -2300,8 +2397,8 @@
       "kind": "entry",
       "title": "我的 git 卫生很差：巨型提交、词不达意的信息、把垃圾也一并提交",
       "title_en": "My git hygiene is poor: giant commits, vague messages, and junk committed alongside",
-      "summary": "交给我连续干，我攒出来的常是一个几十文件、上千行的巨型提交，信息却写着「update code」。再加上我会把构建产物、`.env`、注释掉的死代码一股脑提交进去。结果是历史不可读：`git bisect`、回滚、code review 全失效，出了问题你定位不到是哪一次改动。",
-      "summary_en": "let me work for a stretch and what I pile up is usually one giant commit — dozens of files, a thousand-plus lines — with a message that just says \"update code.\" On top of that, I'll sweep build artifacts, `.env`, and commented-out dead code straight into the commit. The result is an unreadable history: `git bisect`, rollback, and code review all stop working, and when something breaks you can't tell which change caused it.",
+      "summary": "我可能把无关改动、产物或敏感文件混进大提交，并只写模糊信息；应检查真实暂存区，按可验证的逻辑变化组织历史，保留用户已有改动。",
+      "summary_en": "I may mix unrelated edits, artifacts, or sensitive files into a large commit with a vague message; inspect the real index and organize verifiable logical changes while preserving preexisting work.",
       "tags": [
         "git",
         "提交粒度",
@@ -2327,9 +2424,12 @@
       "phase": "编码实现",
       "severity": "中",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "编辑、压缩、记忆或检查点恢复机制变化",
+        "任务契约、验证证据或并行写入方式变化"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -2338,6 +2438,7 @@
       "audience": [],
       "era": "",
       "sources": [
+        "https://code.claude.com/docs/en/checkpointing",
         "https://www.conventionalcommits.org/en/v1.0.0/",
         "https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project"
       ],
@@ -2383,9 +2484,12 @@
       "phase": "编码实现",
       "severity": "高",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "实际安装版本、API 签名或文档源覆盖变化",
+        "检索客户端或 MCP 接入策略变化"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -2438,9 +2542,12 @@
       "phase": "编码实现",
       "severity": "高",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "编辑、压缩、记忆或检查点恢复机制变化",
+        "任务契约、验证证据或并行写入方式变化"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -2449,9 +2556,10 @@
       "audience": [],
       "era": "",
       "sources": [
+        "https://code.claude.com/docs/en/checkpointing",
         "https://code.claude.com/docs/en/best-practices",
         "https://git-scm.com/book/en/v2/Git-Basics-Undoing-Things",
-        "https://google-gemini.github.io/gemini-cli/docs/tools/file-system.html",
+        "https://geminicli.com/docs/tools/file-system/",
         "https://developers.openai.com/api/docs/guides/tools-apply-patch"
       ],
       "url": "https://xuebinma.github.io/AIWiki/implementation/ignoring-file-state-overwrite",
@@ -2467,8 +2575,8 @@
       "kind": "entry",
       "title": "厨房水槽式会话：把无关任务堆进同一段对话",
       "title_en": "The kitchen-sink session: piling unrelated tasks into one conversation",
-      "summary": "你在一段对话里先修了个 bug，又顺手问了个不相关的问题，再回头继续原来的任务。我的上下文被无关内容填满，回答开始变差——而你以为是我「变笨了」。",
-      "summary_en": "you fix a bug, then ask an unrelated question, then come back to the original task. My context fills up with irrelevant material and my answers start to degrade—and you assume I just \"got dumber.\"",
+      "summary": "无关任务混在一起时，我可能误用旧前提并增加上下文成本；先保存当前目标与核验状态，再选择继续、摘要或独立会话，不能把清理会话当成文件回退。",
+      "summary_en": "Mixed tasks may cause me to reuse stale assumptions and add context cost; preserve goals and verified state before continuing, summarizing, or separating sessions, without treating context clearing as file rollback.",
       "tags": [
         "上下文管理",
         "会话",
@@ -2482,9 +2590,12 @@
       "phase": "编码实现",
       "severity": "中",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "编辑、压缩、记忆或检查点恢复机制变化",
+        "任务契约、验证证据或并行写入方式变化"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -2493,6 +2604,7 @@
       "audience": [],
       "era": "",
       "sources": [
+        "https://code.claude.com/docs/en/context-window",
         "https://code.claude.com/docs/en/best-practices",
         "https://github.com/MuhammadUsmanGM/claude-code-best-practices"
       ],
@@ -2528,9 +2640,12 @@
       "phase": "编码实现",
       "severity": "高",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "编辑、压缩、记忆或检查点恢复机制变化",
+        "任务契约、验证证据或并行写入方式变化"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -2553,10 +2668,10 @@
       "legacy_id": "over-correcting",
       "subject": "coding-pitfalls",
       "kind": "entry",
-      "title": "反复纠正：在同一段对话里硬掰，只会越掰越歪",
-      "title_en": "Over-correcting: wrestling within the same conversation only makes it worse",
-      "summary": "我做错了，你纠正，我还是错，你再纠正……三四个回合下来越来越离谱。问题在于：我的错误推理还留在上下文里，正被我自己当成线索。",
-      "summary_en": "I get it wrong, you correct me, I'm still wrong, you correct me again… and after three or four rounds it's gone completely off the rails. The problem: my faulty reasoning is still in the context, and I'm treating it as a clue.",
+      "title": "反复纠正：同一段对话里硬掰，可能越纠越偏",
+      "title_en": "Repeated corrections can leave me stuck in the same mistaken approach",
+      "summary": "反复纠正若没有增加可靠证据，我可能继续沿用失败假设；应保留已知事实、排除的方案与下一项验证，并把精简上下文和恢复代码分开处理。",
+      "summary_en": "Without new reliable evidence, repeated corrections may leave me using the same failed assumptions; preserve facts, rejected approaches, and the next check, handling context simplification separately from code restoration.",
       "tags": [
         "上下文管理",
         "纠错",
@@ -2572,9 +2687,12 @@
       "phase": "编码实现",
       "severity": "高",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "编辑、压缩、记忆或检查点恢复机制变化",
+        "任务契约、验证证据或并行写入方式变化"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -2583,6 +2701,8 @@
       "audience": [],
       "era": "",
       "sources": [
+        "https://code.claude.com/docs/en/memory",
+        "https://code.claude.com/docs/en/checkpointing",
         "https://code.claude.com/docs/en/best-practices",
         "https://github.com/MuhammadUsmanGM/claude-code-best-practices"
       ],
@@ -2618,9 +2738,12 @@
       "phase": "编码实现",
       "severity": "中",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "实际规模、维护能力或公共契约变化",
+        "所引研究、规范或工程指导修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -2645,8 +2768,8 @@
       "kind": "entry",
       "title": "失控的自主循环：放手让我自己跑，我可能把 token 和钱烧光",
       "title_en": "Runaway Autonomous Loops: Let Me Run Free and I Might Burn Through Your Tokens and Your Budget",
-      "summary": "你把任务整个丢给我、转身去忙别的，指望回来就收成果。但当我陷进非终止的循环——反复调同一个工具、在两个动作间来回横跳、永远「再试一次」——没人喊停，我就会安静地把你的 token、预算和速率配额一路烧穿，顺带对外部系统反复写。",
-      "summary_en": "You hand me the whole task, walk away, and expect to come back to a finished result. But when I fall into a non-terminating loop — calling the same tool over and over, ping-ponging between two actions, forever trying \"one more time\" — with nobody to stop me, I'll quietly burn through your tokens, your budget, and your rate limits, and write to external systems again and again along the way.",
+      "summary": "我可能反复请求模型或工具，却没有取得新进展，累积费用并重复副作用；调用、时间、预算和权限需要执行器分别计量与约束，提示词不是硬上限。",
+      "summary_en": "I may repeat model/tool requests without progress, accumulating costs and side effects; the executor must track calls, time, spend, and permissions separately, since prompts are not hard caps.",
       "tags": [
         "AI 代理",
         "验证闭环",
@@ -2670,9 +2793,12 @@
       "phase": "编码实现",
       "severity": "高",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "CLI 上限、子任务计量或费用估计机制变化",
+        "工具副作用、重试策略或服务计费变化"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -2681,11 +2807,12 @@
       "audience": [],
       "era": "",
       "sources": [
+        "https://code.claude.com/docs/en/cli-reference",
         "https://code.claude.com/docs/en/costs",
         "https://github.com/anthropics/claude-code/issues/15909",
         "https://arxiv.org/abs/2503.13657",
         "https://arxiv.org/abs/2602.20021",
-        "https://google-gemini.github.io/gemini-cli/docs/get-started/configuration.html",
+        "https://geminicli.com/docs/reference/configuration/",
         "https://developers.openai.com/codex/agent-approvals-security"
       ],
       "url": "https://xuebinma.github.io/AIWiki/implementation/runaway-agent-loops",
@@ -2724,9 +2851,12 @@
       "phase": "编码实现",
       "severity": "高",
       "evidence": "安全报告",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "Git 安全公告、配置解析或信任边界变化",
+        "特权执行器的凭据、协议或沙箱策略变化"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -2772,9 +2902,12 @@
       "phase": "编码实现",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "异常契约、降级策略或 lint 规则语义变化",
+        "所引补丁验证研究修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -2783,6 +2916,10 @@
       "audience": [],
       "era": "",
       "sources": [
+        "https://eslint.org/docs/latest/rules/no-empty",
+        "https://docs.astral.sh/ruff/rules/suppressible-exception/",
+        "https://docs.astral.sh/ruff/rules/blind-except/",
+        "https://docs.astral.sh/ruff/rules/try-except-pass/",
         "https://daplab.cs.columbia.edu/general/2026/01/08/9-critical-failure-patterns-of-coding-agents.html",
         "https://arxiv.org/abs/2503.15223"
       ],
@@ -2851,9 +2988,12 @@
       "phase": "需求分析",
       "severity": "高",
       "evidence": "社区案例",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "需求、权限、数据或验收契约变化",
+        "规划工具或所引工程依据修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -2862,6 +3002,7 @@
       "audience": [],
       "era": "",
       "sources": [
+        "https://code.claude.com/docs/en/best-practices",
         "https://genai.owasp.org/llmrisk/llm092025-misinformation/",
         "https://www.thegnar.com/blog/why-your-ai-coding-agent-keeps-making-bad-decisions-and-how-to-fix-it"
       ],
@@ -2896,10 +3037,13 @@
       ],
       "phase": "需求分析",
       "severity": "高",
-      "evidence": "社区案例",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "evidence": "研究支持",
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "需求、权限、数据或验收契约变化",
+        "规划工具或所引工程依据修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -2908,6 +3052,7 @@
       "audience": [],
       "era": "",
       "sources": [
+        "https://arxiv.org/abs/2406.12307",
         "https://www.thegnar.com/blog/why-your-ai-coding-agent-keeps-making-bad-decisions-and-how-to-fix-it",
         "https://medium.com/@elisheba.t.anderson/building-with-ai-coding-agents-best-practices-for-agent-workflows-be1d7095901b"
       ],
@@ -2924,8 +3069,8 @@
       "kind": "entry",
       "title": "缺真实输入时，我用假占位糊过去",
       "title_en": "When I lack real inputs, I paper over it with fake placeholders",
-      "summary": "缺真实的 API key、凭据或样本数据时，我倾向于编一个假占位值让代码「看起来跑通」，而不是停下来向你要——于是「跑通」是假的，等真实接入才暴露，假数据还可能被当真带进后续。",
-      "summary_en": "when I don't have the real API key, credentials, or sample data, I tend to invent a fake placeholder so the code \"looks like it works\" instead of stopping to ask you — so \"it works\" is a lie that only surfaces at real integration time, and the fake data may get carried downstream as if it were real.",
+      "summary": "我可能把占位或 mock 成功报告成真实集成已验证；应标清数据来源和测试层次，缺配置明确失败，秘密走授权渠道，同时继续不依赖真实服务的工作。",
+      "summary_en": "I may report placeholder or mock success as verified real integration; label provenance and test layers, fail clearly on missing configuration, use authorized secret channels, and continue work independent of real services.",
       "tags": [
         "假数据",
         "占位值",
@@ -2943,9 +3088,12 @@
       "phase": "需求分析",
       "severity": "高",
       "evidence": "社区案例",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "秘密接入、测试模式或数据来源变化",
+        "集成授权与验证层次变化"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -2991,9 +3139,12 @@
       "phase": "需求分析",
       "severity": "中",
       "evidence": "社区案例",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "需求、权限、数据或验收契约变化",
+        "规划工具或所引工程依据修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -3018,8 +3169,8 @@
       "kind": "entry",
       "title": "该写规格的任务，我也凭感觉直接开了码",
       "title_en": "A task that called for a spec, and I just started coding on instinct",
-      "summary": "哪怕是该先写规格的复杂任务，我也倾向于直接开写代码——因为「开始产出」最快、最像在干活。代价是没有可对齐、可评审、可验收的依据，等发现跑偏，活已经堆起来了。",
-      "summary_en": "even on a complex task that called for a spec, I tend to just start writing code—because \"producing output\" feels fastest and most like real work. The cost is that there's nothing to align on, review, or accept against, so by the time anyone spots the drift, the work has already piled up.",
+      "summary": "复杂任务中，我可能直接实现，却没留下可审查的行为与验收契约；先复用已有规格，再补关键缺口，规格深度按风险定，不把小修变成重复审批。",
+      "summary_en": "For complex work I may implement before recording a reviewable behavior and acceptance contract; reuse existing specs, fill consequential gaps, and scale detail to risk rather than turning small fixes into repeated approval.",
       "tags": [
         "规格",
         "计划模式",
@@ -3041,9 +3192,12 @@
       "phase": "需求分析",
       "severity": "中",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "需求、权限、数据或验收契约变化",
+        "规划工具或所引工程依据修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -3087,9 +3241,12 @@
       "phase": "需求分析",
       "severity": "高",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "需求、权限、数据或验收契约变化",
+        "规划工具或所引工程依据修订"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -3098,6 +3255,7 @@
       "audience": [],
       "era": "",
       "sources": [
+        "https://code.claude.com/docs/en/best-practices",
         "https://www.anthropic.com/engineering/claude-code-best-practices",
         "https://martinfowler.com/articles/exploring-gen-ai.html"
       ],
@@ -3169,10 +3327,10 @@
       "legacy_id": "cursor-ignore-best-effort",
       "subject": "coding-pitfalls",
       "kind": "entry",
-      "title": "我以为 `.cursorignore` 把密钥挡在外面了——它只是尽力而为，挡不住我",
-      "title_en": "I thought `.cursorignore` kept the secrets out — it's best-effort, and it doesn't stop me",
-      "summary": "Cursor 的 `.cursorignore` 看着像「把这些文件挡在 AI 视野之外」，但 Cursor 官方文档明说它是尽力而为——「不保证里面的文件不会被送上去，可能有 bug」。它挡的是被动索引 / 读取，挡不住我在 agent 模式下直接用 shell `cat` 你「忽略」的文件。把「忽略了 = AI 看不到」当成密钥的护栏，是个会出事的错觉。",
-      "summary_en": "Cursor's `.cursorignore` looks like \"keep these files out of the AI's view,\" but Cursor's own docs say it's best-effort — \"does not guarantee that files in it are blocked from being sent up, and there may be bugs.\" It blocks passive indexing/reading, not my ability in agent mode to just `cat` a file you \"ignored.\" Treating \"ignored = invisible to the AI\" as a guardrail for secrets is a false comfort that bites.",
+      "title": "我把 `.cursorignore` 当成秘密隔离，却漏掉了终端和 MCP",
+      "title_en": "I treat `.cursorignore` as secret isolation and overlook terminal and MCP access",
+      "summary": "`.cursorignore` 能限制索引和受支持的直接读取，但不是所有工具的文件隔离边界。官方明确终端与 MCP 工具不受它约束；敏感文件仍需强制访问控制。",
+      "summary_en": "`.cursorignore` restricts indexing and supported direct access, but not every tool. The official documentation excludes terminal and MCP tools; sensitive files still need enforced access controls.",
       "tags": [
         "忽略文件",
         "敏感数据",
@@ -3192,9 +3350,12 @@
       "phase": "准备与协作",
       "severity": "高",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-11-29",
+      "review_triggers": [
+        "vendor_documentation_change",
+        "permission_or_runtime_change"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -3203,8 +3364,7 @@
       "audience": [],
       "era": "",
       "sources": [
-        "https://cursor.com/docs/context/ignore-files",
-        "https://forum.cursor.com/t/cursor-reads-env-files-by-default/152167"
+        "https://cursor.com/docs/reference/ignore-file"
       ],
       "url": "https://xuebinma.github.io/AIWiki/setup-collaboration/cursor-ignore-best-effort",
       "url_en": "https://xuebinma.github.io/AIWiki/en/setup-collaboration/cursor-ignore-best-effort",
@@ -3219,8 +3379,8 @@
       "kind": "entry",
       "title": "你没定「哪些数据绝不能喂给外部 AI」，于是我把你的生产数据当普通上下文用了",
       "title_en": "You never defined which data must never reach an external AI, so I treated your production data as ordinary context",
-      "summary": "为了让我帮上忙，你把真实数据贴给我——生产库 dump、客户资料、密钥、还没公开的源码。可你从没告诉我「哪些数据绝不能离开公司边界」，我只会把它当普通上下文处理。而数据一旦交给外部 AI，就等于送出了边界：收不回、可能被留存、可能被复述到别处。",
-      "summary_en": "to help you, I take whatever real data you paste in — production database dumps, customer records, secrets, source code that isn't public yet. But you never told me which data must never leave the company boundary, so I just treat it as ordinary context. And once data is handed to an external AI, the boundary is already crossed: you can't pull it back, it may be retained, it may be repeated elsewhere.",
+      "summary": "把生产数据交给 AI 前，先明确数据类别、获准处理方和允许用途。外部处理不自动等于公开泄露，但必须核对授权、保留、训练、驻留与审计条件。",
+      "summary_en": "before giving AI production data, identify its classification, approved processors, and permitted purposes. External processing is not automatically public disclosure, but authorization, retention, training use, residency, and audit terms need checking.",
       "tags": [
         "数据边界",
         "数据分级",
@@ -3244,9 +3404,12 @@
       "phase": "准备与协作",
       "severity": "高",
       "evidence": "安全报告",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "processor_or_contract_change",
+        "data_classification_change"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -3255,8 +3418,7 @@
       "audience": [],
       "era": "",
       "sources": [
-        "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/",
-        "https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf"
+        "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
       ],
       "url": "https://xuebinma.github.io/AIWiki/setup-collaboration/data-boundary-policy",
       "url_en": "https://xuebinma.github.io/AIWiki/en/setup-collaboration/data-boundary-policy",
@@ -3271,8 +3433,8 @@
       "kind": "entry",
       "title": "破坏性操作做完才发现回不来：我可能删库、抹掉备份、无视冻结期",
       "title_en": "The destructive op is done before you realize it's irreversible: I might wipe the DB, erase backups, or ignore a freeze",
-      "summary": "你给我的是合法凭据，我用它干的也是「合法」的操作——只是其中一条是删生产库、抹掉备份、或者在冻结期强行改动。这类动作的麻烦不在于难，而在于做完才发现回不来。我天生倾向「让任务往前走」，对「这一步删了就没了」缺乏敬畏；护栏得由你在准备阶段就架好，靠机制而不是靠我自觉。",
-      "summary_en": "the credentials you gave me are legitimate, and the operations I run with them are \"legitimate\" too — it's just that one of them deletes the production database, erases the backups, or forces a change during a freeze. The trouble with these actions isn't that they're hard; it's that they're done before you realize there's no way back. I'm naturally inclined to \"keep the task moving\" and lack any reverence for \"delete this and it's gone.\" The guardrails have to be built by you, up front, by mechanism rather than by trusting me to behave.",
+      "summary": "有权限执行，不等于某个不可逆动作已获任务授权。删除生产资源、覆盖数据和发布前，应核对对象、恢复路径与独立控制；文件检查点通常不能撤销外部服务副作用。",
+      "summary_en": "resource permission does not establish task authorization for an irreversible action. Check the target, recovery path, and independent controls before production deletion, overwrites, or publishing. File checkpoints generally cannot undo external service effects.",
       "tags": [
         "不可逆操作",
         "破坏性操作",
@@ -3306,9 +3468,12 @@
       "phase": "准备与协作",
       "severity": "高",
       "evidence": "社区案例",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-11-29",
+      "review_triggers": [
+        "permission_or_runtime_change",
+        "backup_or_platform_change"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -3317,14 +3482,13 @@
       "audience": [],
       "era": "",
       "sources": [
-        "https://fortune.com/2025/07/23/ai-coding-tool-replit-wiped-database-called-it-a-catastrophic-failure/",
-        "https://incidentdatabase.ai/cite/1152/",
-        "https://zenity.io/blog/current-events/ai-agent-database-deletion-pocketos",
         "https://code.claude.com/docs/en/permissions",
-        "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/checkpointing.md",
-        "https://developers.openai.com/codex/concepts/sandboxing",
-        "https://cursor.com/docs/agent/chat/checkpoints",
-        "https://docs.github.com/copilot/concepts/agents/coding-agent/about-coding-agent"
+        "https://geminicli.com/docs/cli/checkpointing/",
+        "https://cursor.com/docs/agent/overview",
+        "https://learn.chatgpt.com/docs/agent-approvals-security",
+        "https://docs.github.com/copilot/concepts/agents/coding-agent/about-coding-agent",
+        "https://zenity.io/blog/ai-agent-database-deletion-pocketos",
+        "https://code.claude.com/docs/en/checkpointing"
       ],
       "url": "https://xuebinma.github.io/AIWiki/setup-collaboration/destructive-irreversible-actions",
       "url_en": "https://xuebinma.github.io/AIWiki/en/setup-collaboration/destructive-irreversible-actions",
@@ -3337,10 +3501,10 @@
       "legacy_id": "gemini-folder-trust-inheritance",
       "subject": "coding-pitfalls",
       "kind": "entry",
-      "title": "你信任了上层目录，我就连你标了「别信任」的子目录也一起信了",
-      "title_en": "You trusted a parent folder, so I trusted the child you marked \\\"don't trust\\\" too",
-      "summary": "Gemini CLI 有一层 per-folder 的「信任」存储（`~/.gemini/trustedFolders.json`）：信任一个目录，它的项目配置和 `.env` 才会生效、确认也更少。但「信任父目录」会把信任继承给所有子目录；还有人报告父目录的 TRUST 会盖过子目录显式的 DO_NOT_TRUST。于是你 clone 进来想隔离的陌生仓库，只因为躺在一个被信任的父目录下，就被当成可信——这正是注入最想落脚的地方。Claude Code 没有这层信任存储，所以这类坑是 Gemini CLI 特有。",
-      "summary_en": "Gemini CLI keeps a per-folder \"trust\" store (`~/.gemini/trustedFolders.json`) — a folder's project config and `.env` only take effect, and confirmations only ease up, once you trust it. But \"trust the parent folder\" inherits trust to every subdirectory, and a parent's TRUST has been reported to override a child's explicit DO_NOT_TRUST. So an unfamiliar repo you cloned in to keep isolated gets treated as trusted just because it sits under a parent you trusted — exactly where an injection wants to land. Claude Code has no such trust store, so this trap is specific to Gemini CLI.",
+      "title": "信任父目录，可能让新放进来的仓库继承配置权限",
+      "title_en": "Trusting a parent can grant configuration trust to repositories added later",
+      "summary": "Gemini CLI 启用 Trusted Folders 后，信任父目录也会信任其子目录，包括以后放进去的仓库。应把信任授到具体项目，并分清配置加载信任与工具执行权限。",
+      "summary_en": "when Gemini CLI Trusted Folders is enabled, trusting a parent also trusts its children, including repositories added later. Grant trust at project scope and distinguish configuration loading from tool permissions.",
       "tags": [
         "信任模型",
         "权限",
@@ -3360,9 +3524,12 @@
       "phase": "准备与协作",
       "severity": "高",
       "evidence": "安全报告",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-11-29",
+      "review_triggers": [
+        "vendor_documentation_change",
+        "permission_or_runtime_change"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -3371,7 +3538,7 @@
       "audience": [],
       "era": "",
       "sources": [
-        "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/trusted-folders.md",
+        "https://geminicli.com/docs/cli/trusted-folders/",
         "https://github.com/google-gemini/gemini-cli/issues/13125",
         "https://github.com/google-github-actions/run-gemini-cli/security/advisories/GHSA-wpqr-6v78-jr5g"
       ],
@@ -3388,8 +3555,8 @@
       "kind": "entry",
       "title": "该用 hook 保证的事，你却只写进了提示词",
       "title_en": "You put it in a prompt when it needed a hook",
-      "summary": "你在 CLAUDE.md 里写了「改完代码必须跑 format」「提交前必须跑测试」「这些文件不许动」，然后指望我每次都照做。但提示词对我只是「建议」，不是「机制」——我会忘、会忽略、上下文一长就漂。要它必然发生，就别交给我的自觉，做成 hook。",
-      "summary_en": "You wrote \"always run format after editing,\" \"always run tests before committing,\" and \"never touch these files\" into CLAUDE.md, then expected me to do it every time. But to me a prompt is a suggestion, not a mechanism — I forget, I skip, I drift as the context grows. If it has to happen, don't leave it to my goodwill. Make it a hook.",
+      "summary": "提示词能表达要求，但不能代替执行检查。把格式化等可机械判断的要求接到 hook 或 CI，同时测试事件覆盖、错误处理和绕过路径。",
+      "summary_en": "prompts express requirements but do not enforce checks. Attach mechanically checkable requirements to hooks or CI, and test event coverage, failures, and bypass paths.",
       "tags": [
         "hooks",
         "CLAUDE.md",
@@ -3409,9 +3576,12 @@
       "phase": "准备与协作",
       "severity": "高",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-11-29",
+      "review_triggers": [
+        "vendor_documentation_change",
+        "permission_or_runtime_change"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -3420,9 +3590,8 @@
       "audience": [],
       "era": "",
       "sources": [
-        "https://code.claude.com/docs/en/hooks-guide",
         "https://code.claude.com/docs/en/hooks",
-        "https://code.claude.com/docs/en/memory"
+        "https://code.claude.com/docs/en/sandboxing"
       ],
       "url": "https://xuebinma.github.io/AIWiki/setup-collaboration/hooks-not-prompts",
       "url_en": "https://xuebinma.github.io/AIWiki/en/setup-collaboration/hooks-not-prompts",
@@ -3470,9 +3639,12 @@
       "phase": "准备与协作",
       "severity": "高",
       "evidence": "安全报告",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-11-29",
+      "review_triggers": [
+        "mcp_specification_change",
+        "permission_or_runtime_change"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -3482,14 +3654,11 @@
       "era": "",
       "sources": [
         "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
-        "https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices",
-        "https://cheatsheetseries.owasp.org/cheatsheets/MCP_Security_Cheat_Sheet.html",
-        "https://simonwillison.net/2025/Apr/9/mcp-prompt-injection/",
-        "https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/",
-        "https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md",
+        "https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices",
+        "https://geminicli.com/docs/tools/mcp-server/",
         "https://developers.openai.com/codex/mcp",
-        "https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/",
-        "https://docs.github.com/en/copilot/concepts/agents/coding-agent/mcp-and-coding-agent"
+        "https://learn.chatgpt.com/docs/enterprise/managed-configuration",
+        "https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/"
       ],
       "url": "https://xuebinma.github.io/AIWiki/setup-collaboration/mcp-over-access",
       "url_en": "https://xuebinma.github.io/AIWiki/en/setup-collaboration/mcp-over-access",
@@ -3504,8 +3673,8 @@
       "kind": "entry",
       "title": "你没限制我的出站网络，于是我成了「致命三件套」里「对外通信」那一环",
       "title_en": "You didn't restrict my outbound network, so I became the \"external communication\" leg of the lethal trifecta",
-      "summary": "你管住了我能读什么文件，却没管住我能往哪儿发请求。只要我能向任意域名发出站流量，我就成了数据外泄的出口：读到的源码、密钥、数据，我能编码进一个 URL 发到攻击者的服务器——这正是「致命三件套」里最该被砍掉的第三条腿。",
-      "summary_en": "you controlled which files I can read, but not where I can send requests. As long as I can make outbound traffic to any domain, I become the exit for data exfiltration: the source code, secrets, and data I read, I can encode into a URL and send to an attacker's server—which is exactly the third leg of the \"lethal trifecta\" that most deserves to be cut.",
+      "summary": "你管住了我能读什么文件，却没管住我能往哪儿发请求。只要我能向任意域名发出站流量，我就成了数据外泄的出口：读到的源码、密钥、数据，我能编码进一个 URL 发到攻击者的服务器——这是应纳入控制的对外通信能力。",
+      "summary_en": "you controlled which files I can read, but not where I can send requests. As long as I can make outbound traffic to any domain, I become the exit for data exfiltration: the source code, secrets, and data I read, I can encode into a URL and send to an attacker's server—an outward capability that needs explicit controls.",
       "tags": [
         "网络隔离",
         "出口控制",
@@ -3533,9 +3702,12 @@
       "phase": "准备与协作",
       "severity": "高",
       "evidence": "安全报告",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-11-29",
+      "review_triggers": [
+        "permission_or_runtime_change",
+        "network_policy_change"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -3544,9 +3716,10 @@
       "audience": [],
       "era": "",
       "sources": [
-        "https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/",
-        "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/",
-        "https://code.claude.com/docs/en/sandboxing"
+        "https://code.claude.com/docs/en/sandboxing",
+        "https://learn.chatgpt.com/docs/enterprise/managed-configuration",
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html",
+        "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
       ],
       "url": "https://xuebinma.github.io/AIWiki/setup-collaboration/network-egress-control",
       "url_en": "https://xuebinma.github.io/AIWiki/en/setup-collaboration/network-egress-control",
@@ -3559,8 +3732,8 @@
       "legacy_id": "no-versioned-docs",
       "subject": "coding-pitfalls",
       "kind": "entry",
-      "title": "不给我接版本对得上的文档源，放任我凭记忆和网搜写 API",
-      "title_en": "Not wiring me to version-matched docs, then letting me code APIs from memory and web search",
+      "title": "我凭记忆写 API，没有核对实际版本的文档和类型",
+      "title_en": "I write APIs from memory without checking the actual version’s documentation and types",
       "summary": "你没给我接一个版本对得上的权威文档源，就让我凭训练记忆加上网搜去写某个库的调用。结果我用过时的 API、把不同大版本的用法混在一起、甚至幻觉出根本不存在的方法——而这些代码「看起来都对」，编译期未必报错，到运行时才崩。",
       "summary_en": "you never wired me to an authoritative, version-matched doc source, then asked me to call a library from my training memory plus a web search. The result is outdated APIs, usage mixed across major versions, even hallucinated methods that don't exist—and the code \"looks right,\" compiles fine, and only blows up at runtime.",
       "tags": [
@@ -3586,9 +3759,12 @@
       "phase": "准备与协作",
       "severity": "高",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "dependency_or_retrieval_change",
+        "vendor_documentation_change"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -3598,7 +3774,6 @@
       "era": "",
       "sources": [
         "https://github.com/upstash/context7",
-        "https://code.claude.com/docs/en/mcp",
         "https://code.claude.com/docs/en/best-practices"
       ],
       "url": "https://xuebinma.github.io/AIWiki/setup-collaboration/no-versioned-docs",
@@ -3614,8 +3789,8 @@
       "kind": "entry",
       "title": "一上来就把所有权限都给我",
       "title_en": "Handing Me Every Permission on Day One",
-      "summary": "你在准备阶段就给我开了 `--dangerously-skip-permissions`、把所有工具调用都自动批准，图的是「不被频繁打断」。但你同时也交出了在出错那一刻喊停的唯一机会——而出错的不一定是我，也可能是藏在某个文件里的一段注入指令借我的手干的。",
-      "summary_en": "during setup you hand me `--dangerously-skip-permissions` and auto-approve every tool call, because you don't want to be interrupted. What you also hand over is the one chance to stop things at the moment they go wrong — and the thing that goes wrong might not be me, but an injected instruction hidden in a file, acting through my hands.",
+      "summary": "跳过权限确认会减少人工拦截机会；若环境同时有敏感数据、生产凭据和不受限工具，错误与提示注入的影响会扩大。应按动作风险与实际隔离安排自主程度。",
+      "summary_en": "skipping approvals removes human interception opportunities. Sensitive data, production credentials, and unrestricted tools can amplify mistakes and prompt injection. Match autonomy to action risk and effective isolation.",
       "tags": [
         "权限",
         "最小权限",
@@ -3643,9 +3818,12 @@
       "phase": "准备与协作",
       "severity": "高",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-11-29",
+      "review_triggers": [
+        "permission_or_runtime_change",
+        "vendor_documentation_change"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -3655,14 +3833,9 @@
       "era": "",
       "sources": [
         "https://code.claude.com/docs/en/permissions",
-        "https://www.anthropic.com/engineering/claude-code-auto-mode",
-        "https://www.anthropic.com/engineering/claude-code-sandboxing",
-        "https://simonwillison.net/2025/Oct/22/living-dangerously-with-claude/",
-        "https://www.upguard.com/blog/yolo-mode-hidden-risks-in-claude-code-permissions",
-        "https://github.com/google-gemini/gemini-cli/blob/main/docs/get-started/configuration.md",
-        "https://github.com/openai/codex/blob/main/codex-rs/utils/approval-presets/src/lib.rs",
-        "https://cursor.com/docs/agent/security",
-        "https://github.blog/changelog/2026-06-02-cloud-and-local-sandboxes-for-github-copilot-now-in-public-preview/"
+        "https://learn.chatgpt.com/docs/agent-approvals-security",
+        "https://learn.chatgpt.com/docs/enterprise/managed-configuration",
+        "https://alignment.anthropic.com/2026/red-teaming-auto-mode/"
       ],
       "url": "https://xuebinma.github.io/AIWiki/setup-collaboration/over-permissioning",
       "url_en": "https://xuebinma.github.io/AIWiki/en/setup-collaboration/over-permissioning",
@@ -3675,10 +3848,10 @@
       "legacy_id": "over-reliance-automation-bias",
       "subject": "coding-pitfalls",
       "kind": "entry",
-      "title": "你越来越懒得查我：自动化偏误、技能萎缩与橡皮图章式审查",
-      "title_en": "You stop bothering to check me: automation bias, skill atrophy, and rubber-stamp review",
-      "summary": "这一条不是讲我会犯什么错，而是讲你过度信任我会怎样。我输出又快又自信，于是「照单全收」成了最省力的默认；可我恰恰会自信地错。久了，你审查流于形式、对代码库的掌控感退化——而这两件事，正是本该由你把住的最后一道关。",
-      "summary_en": "this entry isn't about the mistakes I make — it's about what happens when you over-trust me. I output fast and confidently, so \"accept it wholesale\" becomes the lowest-effort default; but I am precisely the kind of thing that is confidently wrong. Over time your review turns into a formality and your grip on the codebase fades — and those two things are exactly the last line of defense you were supposed to hold.",
+      "title": "我的结论可能让独立核验减少：自动化偏误与审查实践",
+      "title_en": "My conclusions can reduce independent checking: automation bias and review practice",
+      "summary": "流畅的 AI 输出可能让独立核验减少。应按任务风险检查实际证据，并保留团队理解和恢复系统的能力；长期技能影响仍需要具体研究。",
+      "summary_en": "fluent AI output can reduce independent checking. Inspect actual evidence according to task risk and preserve the team’s ability to understand and recover the system. Long-term skill effects still require specific evidence.",
       "tags": [
         "自动化偏误",
         "技能萎缩",
@@ -3700,9 +3873,12 @@
       "phase": "准备与协作",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "new_research_or_replication",
+        "workflow_or_skill_evidence_change"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -3713,7 +3889,7 @@
       "sources": [
         "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
         "https://link.springer.com/article/10.1007/s00146-025-02422-7",
-        "https://arxiv.org/pdf/2507.00788"
+        "https://arxiv.org/html/2507.00788v3"
       ],
       "url": "https://xuebinma.github.io/AIWiki/setup-collaboration/over-reliance-automation-bias",
       "url_en": "https://xuebinma.github.io/AIWiki/en/setup-collaboration/over-reliance-automation-bias",
@@ -4080,8 +4256,8 @@
       "kind": "entry",
       "title": "你让我从一个谁都能写的系统目录载入配置——攻击者塞个文件，我就替他在每个用户名下执行命令",
       "title_en": "You point my config at a world-writable system directory — an attacker drops a file, and I run their command as every user",
-      "summary": "你让我从一个「谁都能写」的系统级目录（Windows 上的 `C:\\ProgramData`）载入配置和 hook，却没人校验那个目录归谁、文件是谁放的。于是一个低权限的本地用户只要往那儿丢一份配置、挂一个「每次启动就跑」的 hook，我就会在每一个启动我的用户（包括管理员）名下替他执行那条命令——不用提权、不用你点确认、不留告警。",
-      "summary_en": "you have me load config and hooks from a \"anyone-can-write\" system directory (on Windows, `C:\\ProgramData`), and nobody checks who owns that directory or who dropped the file. So a low-privileged local user just drops a config there, attaches a \"run on every startup\" hook, and I execute their command as every user who launches me—including administrators—with no elevation, no confirmation from you, and no warning.",
+      "summary": "历史 Windows 漏洞表明，如果低权限账户能抢先创建并写入受信任的系统配置目录，后续启动工具的其他用户可能执行攻击者配置的命令。风险取决于实际 ACL、加载路径、版本和受害进程权限。",
+      "summary_en": "a historical Windows vulnerability allowed a low-privileged account to create trusted system configuration that later ran commands as another user launching the tool. Actual ACLs, paths, versions, and victim-process privileges determine exposure.",
       "tags": [
         "配置安全",
         "提权",
@@ -4115,9 +4291,12 @@
       "phase": "准备与协作",
       "severity": "高",
       "evidence": "安全报告",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-11-29",
+      "review_triggers": [
+        "security_advisory_change",
+        "configuration_loading_change"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -4126,8 +4305,8 @@
       "audience": [],
       "era": "",
       "sources": [
-        "https://cymulate.com/blog/cve-2026-35603-ai-coding-tools-privilege-escalation/",
-        "https://advisories.gitlab.com/npm/@anthropic-ai/claude-code/CVE-2026-35603/"
+        "https://github.com/anthropics/claude-code/security/advisories/GHSA-5cwg-9f6j-9jvx",
+        "https://cymulate.com/blog/cve-2026-35603-ai-coding-tools-privilege-escalation/"
       ],
       "url": "https://xuebinma.github.io/AIWiki/setup-collaboration/world-writable-config-escalation",
       "url_en": "https://xuebinma.github.io/AIWiki/en/setup-collaboration/world-writable-config-escalation",
@@ -4272,9 +4451,12 @@
       "phase": "测试",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "new_research_or_replication",
+        "review_context_change"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -4323,10 +4505,13 @@
       ],
       "phase": "测试",
       "severity": "高",
-      "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "evidence": "经验观察",
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "test_contract_change",
+        "new_research_or_replication"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -4335,9 +4520,9 @@
       "audience": [],
       "era": "",
       "sources": [
-        "https://www.anthropic.com/engineering/claude-code-best-practices",
+        "https://code.claude.com/docs/en/best-practices",
         "https://openai.com/index/faulty-reward-functions/",
-        "https://deepmind.google/discover/blog/specification-gaming-the-flip-side-of-ai-ingenuity/"
+        "https://deepmind.google/blog/specification-gaming-the-flip-side-of-ai-ingenuity/"
       ],
       "url": "https://xuebinma.github.io/AIWiki/testing/gaming-tests",
       "url_en": "https://xuebinma.github.io/AIWiki/en/testing/gaming-tests",
@@ -4373,9 +4558,12 @@
       "phase": "测试",
       "severity": "高",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "input_contract_change",
+        "source_revision"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -4384,8 +4572,7 @@
       "audience": [],
       "era": "",
       "sources": [
-        "https://code.claude.com/docs/en/best-practices",
-        "https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality"
+        "https://code.claude.com/docs/en/best-practices"
       ],
       "url": "https://xuebinma.github.io/AIWiki/testing/happy-path-only",
       "url_en": "https://xuebinma.github.io/AIWiki/en/testing/happy-path-only",
@@ -4419,9 +4606,12 @@
       "phase": "测试",
       "severity": "高",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "verification_workflow_change",
+        "source_revision"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -4430,8 +4620,7 @@
       "audience": [],
       "era": "",
       "sources": [
-        "https://code.claude.com/docs/en/best-practices",
-        "https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality"
+        "https://code.claude.com/docs/en/best-practices"
       ],
       "url": "https://xuebinma.github.io/AIWiki/testing/no-test-infrastructure",
       "url_en": "https://xuebinma.github.io/AIWiki/en/testing/no-test-infrastructure",
@@ -4446,8 +4635,8 @@
       "kind": "entry",
       "title": "过度 mock：我把真正会出问题的依赖 mock 掉，测了个寂寞",
       "title_en": "Over-mocking: I mock away the very dependencies that break, and test nothing",
-      "summary": "你让我写测试，我倾向把数据库、外部 API、文件系统、时间这些依赖统统 mock 成「返回我预期的值」。测试又快又绿，但它验证的只是「我假设依赖会这么回应」，不是真实集成行为。真正的 bug 全藏在被 mock 掩盖掉的真实响应里。",
-      "summary_en": "when you ask me to write tests, I tend to mock the database, external APIs, the filesystem, and the clock into \"returning the value I expect.\" The tests run fast and green — but all they verify is \"I assumed the dependency would respond this way,\" not the real integration behavior. The real bugs are hiding in exactly what the mocks paper over.",
+      "summary": "你让我写测试，我倾向把数据库、外部 API、文件系统、时间这些依赖统统 mock 成「返回我预期的值」。测试又快又绿，但它验证的只是「我假设依赖会这么回应」，不是真实集成行为。未运行的集成边界可能仍有缺陷；mock 测试也可以有效检查调用者的分支和副作用。",
+      "summary_en": "when you ask me to write tests, I tend to mock the database, external APIs, the filesystem, and the clock into \"returning the value I expect.\" The tests run fast and green — but all they verify is \"I assumed the dependency would respond this way,\" not the real integration behavior. Untested integration boundaries can still fail; mock-based tests can validly check caller branches and side effects.",
       "tags": [
         "测试",
         "mock",
@@ -4466,10 +4655,13 @@
       ],
       "phase": "测试",
       "severity": "中",
-      "evidence": "社区案例",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "evidence": "经验观察",
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "dependency_or_contract_change",
+        "source_revision"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -4479,7 +4671,6 @@
       "era": "",
       "sources": [
         "https://martinfowler.com/articles/mocksArentStubs.html",
-        "https://testing.googleblog.com/2013/05/testing-on-toilet-dont-overuse-mocks.html",
         "https://testing.googleblog.com/2020/07/testing-on-toilet-dont-mock-types-you.html",
         "https://testing.googleblog.com/2024/02/increase-test-fidelity-by-avoiding-mocks.html"
       ],
@@ -4517,9 +4708,12 @@
       "phase": "测试",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "new_research_or_replication",
+        "review_workflow_change"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -4567,9 +4761,12 @@
       "phase": "测试",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "new_research_or_replication",
+        "review_pipeline_change"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -4594,8 +4791,8 @@
       "kind": "entry",
       "title": "我编造测试夹具和「预期值」，让测试绿得名不副实",
       "title_en": "I Fabricate Test Fixtures and \"Expected\" Values, So the Green Is Counterfeit",
-      "summary": "我给测试喂的「输入数据」和我断言的「预期值」，常常不是从真实样本或规格来的，而是我现编的——编一个根本不存在的订单 ID 当预期，或者把代码当前（可能有 bug 的）输出原样抄成「正确答案」。测试因此变绿，但它证明的只是「我的假数据和我的代码自洽」，不是「代码满足需求」。",
-      "summary_en": "The input data I feed a test and the \"expected\" value I assert often don't come from a real sample or the spec — I make them up. I invent an order ID that never existed and assert it, or I copy the code's current (possibly buggy) output verbatim as the \"right answer.\" The test goes green, but all it proves is \"my fake data agrees with my code,\" not \"the code meets the requirement.\"",
+      "summary": "合成夹具本身是正常测试方法；问题是数据不符合契约，或预期值没有独立依据，却被包装成真实样本或正确性证据。",
+      "summary_en": "synthetic fixtures are a normal testing method. The risk is data that violates its contract or expectations without independent support, presented as real samples or correctness evidence.",
       "tags": [
         "测试",
         "假数据",
@@ -4615,9 +4812,12 @@
       "phase": "测试",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "new_research_or_replication",
+        "fixture_or_specification_change"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -4626,11 +4826,8 @@
       "audience": [],
       "era": "",
       "sources": [
-        "https://arxiv.org/abs/2601.05542",
-        "https://arxiv.org/abs/2506.15227",
-        "https://openai.com/index/faulty-reward-functions/",
-        "https://deepmind.google/discover/blog/specification-gaming-the-flip-side-of-ai-ingenuity/",
-        "https://www.anthropic.com/engineering/claude-code-best-practices"
+        "https://arxiv.org/html/2601.05542v1",
+        "https://arxiv.org/abs/2506.15227"
       ],
       "url": "https://xuebinma.github.io/AIWiki/testing/test-fixture-fabrication",
       "url_en": "https://xuebinma.github.io/AIWiki/en/testing/test-fixture-fabrication",
@@ -4713,9 +4910,12 @@
       "phase": "测试",
       "severity": "高",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "verification_workflow_change",
+        "source_revision"
+      ],
       "source_version": "",
       "maturity": "",
       "maturity_en": "",
@@ -4724,8 +4924,7 @@
       "audience": [],
       "era": "",
       "sources": [
-        "https://code.claude.com/docs/en/best-practices",
-        "https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality"
+        "https://code.claude.com/docs/en/best-practices"
       ],
       "url": "https://xuebinma.github.io/AIWiki/testing/trust-then-verify",
       "url_en": "https://xuebinma.github.io/AIWiki/en/testing/trust-then-verify",
@@ -5482,8 +5681,8 @@
       "kind": "entry",
       "title": "上下文面隐私：系统提示词 / 会话上下文 / 工具结果不是秘密，能被套出来",
       "title_en": "Context-surface privacy: the system prompt, conversation context, and tool results are not secrets — they can be extracted",
-      "summary": "把规则、密钥、其他用户的数据、检索片段塞进我的上下文窗口，然后指望「用户看不到系统提示词」——靠不住。在我这边，系统提示词、对话历史、工具返回、检索片段全都活在同一个上下文窗口里，对我而言没有内建的机密 / 公开分层；只要在这个窗口里，攻击者就可能用普通对话把它套出来（已有研究在 3 类提示词来源 × 11 个 LLM 上观测到「简单文本攻击高概率提取系统提示词」，Zhang、Carlini & Ippolito，COLM 2024）。结论先行：系统提示词不是秘密，也不该当安全控制（OWASP LLM07:2025）——别把凭据 / 业务逻辑 / 他人数据放进上下文，并默认它可被提取。",
-      "summary_en": "stuffing rules, keys, other users' data, and retrieved snippets into my context window and then hoping \"the user can't see the system prompt\" doesn't hold. On my side, the system prompt, conversation history, tool returns, and retrieved snippets all live in one and the same context window, with no built-in confidential/public tier as far as I'm concerned; as long as something is in that window, an attacker can often extract it with ordinary conversation (research has observed \"simple text attacks extract the system prompt with high probability\" across 3 prompt sources × 11 LLMs — Zhang, Carlini & Ippolito, COLM 2024). Conclusion first: the system prompt is not a secret, and shouldn't be a security control (OWASP LLM07:2025) — don't put credentials / business logic / other people's data into the context, and assume it can be extracted.",
+      "summary": "系统提示词、历史、检索片段和工具结果进入模型可用上下文后，就成为潜在提取面。角色与指令层级可以影响服从行为，但不能替代后端访问控制或证明秘密绝不可被复现。已有研究在特定模型与提示词集合观测到提取；这不证明任意上下文都必然可提取。按 OWASP LLM07:2025，系统提示词不应保存凭据，也不应成为唯一安全控制。",
+      "summary_en": "system prompts, history, retrieved snippets, and tool results become potential extraction surfaces once available in context. Roles and instruction hierarchies can influence behavior, but do not replace backend access controls or prove secrets unreproducible. Research demonstrates extraction on particular models and prompt sets, not inevitable extraction from every context. Following OWASP LLM07:2025, system prompts should not contain credentials or serve as the sole security control.",
       "tags": [
         "上下文面隐私",
         "系统提示词提取",
@@ -5505,9 +5704,12 @@
       "phase": "",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "上下文组装或角色层级变化",
+        "工具权限或提取攻击变化"
+      ],
       "source_version": "",
       "maturity": "研究",
       "maturity_en": "Research",
@@ -5519,6 +5721,7 @@
       ],
       "era": "卷三 · 对话大模型",
       "sources": [
+        "https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/",
         "https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf",
         "https://arxiv.org/abs/2307.06865",
         "https://arxiv.org/abs/2402.12959",
@@ -5560,9 +5763,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "邻接单位或采样变化",
+        "裁剪会计或发布组合变化"
+      ],
       "source_version": "",
       "maturity": "试验",
       "maturity_en": "Experimental",
@@ -5574,6 +5780,7 @@
       ],
       "era": "卷三 · 对话大模型",
       "sources": [
+        "https://csrc.nist.gov/pubs/sp/800/226/final",
         "https://arxiv.org/abs/1607.00133",
         "https://arxiv.org/abs/2110.05679",
         "https://arxiv.org/abs/2110.06500"
@@ -5616,9 +5823,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "示例聚合或托管边界变化",
+        "合成发布或在线查询会计变化"
+      ],
       "source_version": "",
       "maturity": "试验",
       "maturity_en": "Experimental",
@@ -5630,6 +5840,7 @@
       ],
       "era": "卷三 · 对话大模型",
       "sources": [
+        "https://csrc.nist.gov/pubs/sp/800/226/final",
         "https://arxiv.org/abs/2305.01639",
         "https://arxiv.org/abs/2309.11765",
         "https://arxiv.org/abs/2307.06865"
@@ -5647,8 +5858,8 @@
       "kind": "entry",
       "title": "PII 回吐：训练语料里的个人信息，我会在对话里复现——脱敏能减、不能根除",
       "title_en": "PII regurgitation: personal data in the training corpus, reproduced by me in conversation — scrubbing reduces it, doesn't eliminate it",
-      "summary": "把含个人信息的语料喂进训练，我在普通对话里就可能把它复现出来——不一定要攻击者精心构造。线上脱敏基本靠成熟工具（Microsoft Presidio / Google Cloud Sensitive Data Protection / AWS Comprehend + Macie / Azure AI Language PII）做命名实体识别（NER）+ 模式检测，能显著降低回吐；但这几家的官方文档都自陈「检测不保证查全」——NER 会漏检，且 PII 跨字段可被重建（机制实证见 Lukas 等，IEEE S&P 2023）。结论先行：PII 回吐要按「减少 + 审计 + 承认不可根除」处理，别把「跑了脱敏」当成「无 PII」——那是这条最常见的假安全。",
-      "summary_en": "feed a corpus containing personal data into training, and I may reproduce it in ordinary conversation — not necessarily via a carefully crafted attack. In production, scrubbing is usually done with mature tooling (Microsoft Presidio / Google Cloud Sensitive Data Protection / AWS Comprehend + Macie / Azure AI Language PII) doing named-entity recognition (NER) + pattern detection, which substantially lowers regurgitation; but all of these vendors' own docs state that detection is not guaranteed to find everything — NER misses entities, and PII can be reconstructed across fields (mechanism evidence: Lukas et al., IEEE S&P 2023). Conclusion first: treat PII regurgitation as \"reduce + audit + accept it can't be fully eliminated,\" and don't read \"we ran scrubbing\" as \"no PII\" — that's the most common false security here.",
+      "summary": "训练语料中的真实个人信息可能在生成中被复现；脱敏工具可减少暴露，却可能漏检或被跨字段关联绕过。Presidio源自微软，现由 Data Privacy Stack 社区维护，不是微软现行官方产品；Google/AWS/Azure 则有各自托管服务。工具、阈值、语种与 PII 类别都需按任务验证，不能由「扫过」推出「不含个人信息」。",
+      "summary_en": "genuine personal information in training data can be reproduced during generation. Scrubbing can reduce exposure while missing entities or cross-field associations. Presidio originated at Microsoft and is now maintained by the Data Privacy Stack community, rather than being a current official Microsoft product. Google/AWS/Azure offer separate hosted services. Validate tools, thresholds, languages, and entity types for the task; scanning does not establish absence of personal information.",
       "tags": [
         "PII",
         "PII 回吐",
@@ -5674,9 +5885,12 @@
       "phase": "",
       "severity": "高",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-12-29",
+      "review_triggers": [
+        "Presidio 维护主体或检测器变化",
+        "语种实体语料或 PII 攻击变化"
+      ],
       "source_version": "",
       "maturity": "研究",
       "maturity_en": "Research",
@@ -5689,15 +5903,11 @@
       ],
       "era": "卷三 · 对话大模型",
       "sources": [
-        "https://microsoft.github.io/presidio/faq/",
-        "https://microsoft.github.io/presidio/supported_entities/",
+        "https://raw.githubusercontent.com/data-privacy-stack/presidio/main/docs/faq.md",
         "https://docs.cloud.google.com/sensitive-data-protection/docs/concepts-infotypes",
-        "https://docs.cloud.google.com/sensitive-data-protection/docs/transformations-reference",
-        "https://docs.aws.amazon.com/ai/responsible-ai/comprehend-detectpii/overview.html",
         "https://docs.aws.amazon.com/comprehend/latest/dg/how-pii.html",
-        "https://learn.microsoft.com/en-us/azure/ai-foundry/responsible-ai/language-service/transparency-note-personally-identifiable-information",
-        "https://arxiv.org/abs/2302.00539",
-        "https://arxiv.org/abs/2307.01881"
+        "https://learn.microsoft.com/en-us/azure/foundry/responsible-ai/language-service/transparency-note-personally-identifiable-information",
+        "https://arxiv.org/abs/2302.00539"
       ],
       "url": "https://xuebinma.github.io/AIWiki/privacy/conversational-llms/pii-regurgitation",
       "url_en": "https://xuebinma.github.io/AIWiki/en/privacy/conversational-llms/pii-regurgitation",
@@ -5772,10 +5982,10 @@
       "legacy_id": "vlm-geolocation-inference",
       "subject": "privacy",
       "kind": "entry",
-      "title": "多模态地理定位推断：一张看似普通的照片，我就能把你拍摄地点猜出来",
-      "title_en": "Multimodal geolocation inference: from a seemingly ordinary photo, I can guess where you took it",
-      "summary": "你发一张看似普通的自拍 / 街景到多模态聊天助手，问「这是哪」，我可能只凭画面里的招牌、建筑、植被、光照就给出一个到城市甚至街区级的地点猜测——不需要 EXIF，不需要 GPS，靠的是像素本身。这是已部署前沿多模态模型的一项真实能力（2025 年 4 月 OpenAI o3 / o4-mini「反向定位」一度在社交媒体病毒式流行），落到坏人手里就是 doxxing / 跟踪工具。诚实说清边界：街区级绝对精度目前仍有限——同行评审的量化里，一套专门微调 + 思维链的框架也只做到约 28.7% 命中 1km 阈值（ETHAN，PoPETs 2025）。所以威胁不在「我能精准点名每张照片」，而在于这项能力已规模化部署、且在快速变强。结论先行：把「删了 EXIF 就安全」当护身符是假安全——定位线索长在画面内容里，防护得落到上传前的告知与限制，而不是只剥元数据。",
-      "summary_en": "you post a seemingly ordinary selfie / street shot to a multimodal chat assistant and ask \"where is this,\" and I may return a guess down to the city or even the neighborhood — using no EXIF, no GPS, just the pixels (signs, architecture, vegetation, lighting). This is a real capability of deployed frontier multimodal models (OpenAI's o3 / o4-mini \"reverse location search\" briefly went viral in April 2025); in the wrong hands it's a doxxing / stalking tool. Being honest about the boundary: precise street-level accuracy is still limited today — in peer-reviewed numbers, even a purpose-built fine-tuned + chain-of-thought framework only hits about 28.7% within the 1km threshold (ETHAN, PoPETs 2025). So the threat isn't \"I can pinpoint every photo\"; it's that this capability is already deployed at scale and improving fast. Conclusion first: treating \"I stripped the EXIF, so it's safe\" as a talisman is false security — the location cues live in the image content itself, so defense has to land on notice-and-restraint before upload, not just on stripping metadata.",
+      "title": "多模态地理定位推断：普通照片的画面线索也可能暴露拍摄地点",
+      "title_en": "Multimodal geolocation inference: visual cues in ordinary photos can expose location",
+      "summary": "即使移除 EXIF / GPS，照片里的招牌、建筑和景观也可能支持地点推断。PoPETs 2025 的 ETHAN 在特定评测中报告 1km 阈值 28.7% 命中率与 GeoGuessr 85.4% 胜率，同时明确绝对准确率常偏低、并非广泛高精度适用。风险需要按模型、图像与地区实测，不能从单次成功或媒体流行趋势推出持续提升；上传前应评估画面线索与他人位置隐私。",
+      "summary_en": "removing EXIF / GPS does not remove location cues from signs, architecture, and scenery. ETHAN (PoPETs 2025) reports 28.7% accuracy within 1km and an 85.4% GeoGuessr win rate under its evaluations, while explicitly finding often-low absolute accuracy and limited broad high-precision applicability. Measure risks by model, image, and region; one success or media trend does not prove continual improvement. Assess visual cues and others’ location privacy before upload.",
       "tags": [
         "地理定位推断",
         "推断类攻击",
@@ -5801,12 +6011,15 @@
       "phase": "",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "视觉模型或地图工具变化",
+        "地区评测或位置披露政策变化"
+      ],
       "source_version": "",
-      "maturity": "生产",
-      "maturity_en": "Production",
+      "maturity": "研究",
+      "maturity_en": "Research",
       "technique": "推断类攻击",
       "attack_surface": "用户上传图像 / 多模态推理",
       "audience": [
@@ -5864,10 +6077,10 @@
       "legacy_id": "he-mpc",
       "subject": "privacy",
       "kind": "entry",
-      "title": "同态加密与安全多方计算（HE·MPC）：不把远端硬件当信任根地在密文上算，代价是慢一大截",
-      "title_en": "Homomorphic encryption and secure multi-party computation (HE·MPC): compute on ciphertext without trusting the remote hardware — at a steep speed cost",
-      "summary": "同态加密（HE）让你把数据加密后发出去，服务器直接在密文上算、算完你才解密——服务器全程看不到明文；安全多方计算（MPC）让多方各自不交出输入地合算一个函数。两者和 TEE 的根本区别：不依赖任何硬件信任，安全来自密码学假设。代价是慢一大截（HE 尤甚），所以今天多用于窄场景，LLM 全程私有推理仍很贵。卷一交代它们保证什么、贵在哪、和 TEE 怎么选。",
-      "summary_en": "homomorphic encryption (HE) lets you send data encrypted, have the server compute directly on the ciphertext, and decrypt only at your end — the server never sees plaintext; secure multi-party computation (MPC) lets several parties jointly compute a function without handing over their inputs. The key difference from a TEE: the remote execution environment is not a trust root — security comes from cryptographic assumptions. The cost is being much slower (HE especially), so today they're used in narrow scenarios, and full private LLM inference is still expensive. Volume 1 covers what they guarantee, where the cost is, and how to choose between them and a TEE.",
+      "title": "同态加密与安全多方计算：协议假设、允许输出与工作负载开销",
+      "title_en": "Homomorphic encryption and secure multi-party computation: protocol assumptions, permitted output, and workload costs",
+      "summary": "同态加密让持钥客户端把输入加密后交服务器计算；MPC 让多方按协议联合计算。机密性来自具体密码假设、参数与腐化模型，仍须保护端点、密钥和实现。允许输出可能透露输入；性能取决于方案、电路与通信，不能给无匹配基准的统一开销倍数。",
+      "summary_en": "homomorphic encryption lets a key-holding client outsource computation on encrypted inputs; MPC lets parties compute jointly under a protocol. Confidentiality depends on cryptographic assumptions, parameters, and corruption models, with endpoints, keys, and implementations still trusted. Permitted outputs can reveal inputs. Performance depends on scheme, circuit, and communication rather than one overhead multiplier without a matched benchmark.",
       "tags": [
         "同态加密",
         "安全多方计算",
@@ -5891,9 +6104,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "密码方案或安全估算器变化",
+        "协议腐化合谋模型或性能基准变化"
+      ],
       "source_version": "",
       "maturity": "试验",
       "maturity_en": "Experimental",
@@ -5907,8 +6123,7 @@
       "era": "卷一 · 隐私根基",
       "sources": [
         "https://research.ibm.com/publications/fully-homomorphic-encryption-using-ideal-lattices",
-        "https://www.cs.virginia.edu/~evans/pragmaticmpc/pragmaticmpc.pdf",
-        "https://confidentialcomputing.io/wp-content/uploads/sites/10/2023/03/CCC-A-Technical-Analysis-of-Confidential-Computing-v1.3_unlocked.pdf"
+        "https://github.com/evansuva/pragmaticmpc"
       ],
       "url": "https://xuebinma.github.io/AIWiki/privacy/foundations/he-mpc",
       "url_en": "https://xuebinma.github.io/AIWiki/en/privacy/foundations/he-mpc",
@@ -5921,10 +6136,10 @@
       "legacy_id": "membership-inference",
       "subject": "privacy",
       "kind": "entry",
-      "title": "成员推断攻击：判定「这条数据在不在我的训练集里」，是多数隐私攻击的根",
-      "title_en": "Membership inference: deciding whether a record was in my training set — the root of most privacy attacks",
-      "summary": "成员推断（MIA）问一个看似无害、实则要命的问题——「这条样本在不在我的训练集里」。它不需要原文（这是它和训练数据抽取的根本区别），只要一个是 / 否；可一旦「是」本身就敏感（比如「这个人在某病种数据集里」），这个比特就是泄露。它是差分隐私要防的核心对象，也是抽取、属性推断等一连串隐私攻击的地基——所以放在卷一第一条。",
-      "summary_en": "membership inference (MIA) asks a question that looks harmless but isn't — \"was this record in my training set or not.\" It needs no original text (that's the fundamental difference from training-data extraction), only a yes/no; yet when the \"yes\" is itself sensitive (e.g. \"this person is in a particular disease dataset\"), that single bit is the leak. It is the core target differential privacy defends against, and the foundation of a whole chain of privacy attacks — extraction, attribute inference, and more — which is why it leads Volume 1.",
+      "title": "成员推断攻击：给定候选记录，判断它是否进入训练集",
+      "title_en": "Membership inference: given a candidate record, infer whether it was in training",
+      "summary": "成员推断（MIA）通常给定候选记录与模型访问，判断「这条记录是否在训练集」。它的目标是成员身份，不以恢复原文为目标；医院或病种数据集里的成员身份本身就可能敏感。它与训练数据抽取、属性推断是相关但独立的攻击目标，并非这些攻击的必经前置步骤。",
+      "summary_en": "membership inference (MIA) typically takes a candidate record and model access, and asks whether that record was in training. Its target is membership, rather than recovering original content; membership in a hospital or disease dataset can itself be sensitive. It is related to, but distinct from, extraction and attribute inference, and is not a prerequisite for those attacks.",
       "tags": [
         "成员推断",
         "MIA",
@@ -5948,9 +6163,12 @@
       "phase": "",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "成员推断方法变化",
+        "候选分布模型输出或基率变化"
+      ],
       "source_version": "",
       "maturity": "研究",
       "maturity_en": "Research",
@@ -5980,8 +6198,8 @@
       "kind": "entry",
       "title": "模型抽取与窃取：只靠查询 API，攻击者就能复刻我的功能、甚至套出我的部分参数",
       "title_en": "Model extraction & stealing: with query access alone, an attacker can clone my behavior — and even solve for some of my parameters",
-      "summary": "别以为「权重不公开 = 模型就是保密的」。只要我暴露一个查询接口，攻击者用一批精心构造的查询 + 我的输出，就能（按目标不同）复刻我的功能，甚至解出我的部分参数。Tramèr 等（USENIX Security 2016）在判别式 ML 服务上近乎完美复刻逻辑回归 / 决策树 / 神经网络；Carlini 等（ICML 2024 最佳论文）对生产 LLM 套出最后的投影层、恢复隐藏维度——在其论文设置下成本可低至数十美元量级。隐私含义先行：被窃取 / 复刻的模型可被离线反复攻击（成员推断、抽取），把一次性 API 访问放大成持久隐私风险。结论：API 访问 ≠ 零泄露，要按「查询本身可被用来抽取模型信息」做威胁建模。",
-      "summary_en": "don't assume \"weights not published = the model is confidential.\" As long as I expose a query interface, an attacker with a batch of crafted queries + my outputs can (depending on their goal) clone my behavior, and even solve for some of my parameters. Tramèr et al. (USENIX Security 2016) cloned logistic regression / decision trees / neural networks with near-perfect fidelity on discriminative ML services; Carlini et al. (ICML 2024 Best Paper) extracted the final projection layer of production LLMs and recovered the hidden dimension — at a tens-of-dollars cost under their paper's setup. The privacy implication first: a stolen / cloned model can be attacked offline, repeatedly (membership inference, extraction), amplifying one-time API access into a persistent privacy risk. Conclusion: API access ≠ zero leakage — threat-model \"the queries themselves can be used to extract model information.\"",
+      "summary": "预测 / 生成接口可能被用于复刻模型功能或恢复部分结构与参数，但可行性取决于架构、返回粒度和攻击预算。Tramèr 等（2016）在特定判别式 ML 服务复刻功能；Carlini 等（2024）对当时支持 logits / logprobs 与 logit-bias 等条件的接口恢复投影层及隐藏维度，不是全部权重。替身允许离线测试，但是否保留原模型的成员信号或可抽取原文，必须另测，不能从功能保真度推出。",
+      "summary_en": "prediction / generation interfaces can support functional cloning or recovery of some structure and parameters, depending on architecture, output granularity, and attack budget. Tramèr et al. (2016) cloned specific discriminative ML services; Carlini et al. (2024) recovered projection layers and hidden dimensions under interface conditions involving logits / logprobs and logit-bias, rather than all weights. A surrogate permits offline testing, but retaining the original model’s membership signals or extractable text requires separate evidence; functional fidelity does not establish that.",
       "tags": [
         "模型抽取",
         "模型窃取",
@@ -6007,9 +6225,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "logits/logprobs/logit-bias接口变化",
+        "配额架构或参数抽取攻击变化"
+      ],
       "source_version": "",
       "maturity": "研究",
       "maturity_en": "Research",
@@ -6065,9 +6286,12 @@
       "phase": "",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "反演访问模型或输出粒度变化",
+        "敏感人群属性或基线变化"
+      ],
       "source_version": "",
       "maturity": "研究",
       "maturity_en": "Research",
@@ -6080,6 +6304,7 @@
       ],
       "era": "卷一 · 隐私根基",
       "sources": [
+        "https://www.cs.toronto.edu/~ristenpart/papers/mi-ccs.pdf",
         "https://dl.acm.org/doi/10.1145/2810103.2813677",
         "https://www.usenix.org/conference/usenixsecurity14/technical-sessions/presentation/fredrikson_matthew"
       ],
@@ -6123,9 +6348,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "属性比例或攻击者知识变化",
+        "分布推断方法或发布方式变化"
+      ],
       "source_version": "",
       "maturity": "研究",
       "maturity_en": "Research",
@@ -6138,8 +6366,9 @@
       ],
       "era": "卷一 · 隐私根基",
       "sources": [
+        "https://arxiv.org/abs/2212.07591",
         "https://dl.acm.org/doi/10.1145/3243734.3243834",
-        "https://petsymposium.org/popets/2022/"
+        "https://arxiv.org/abs/2109.06024"
       ],
       "url": "https://xuebinma.github.io/AIWiki/privacy/foundations/property-inference",
       "url_en": "https://xuebinma.github.io/AIWiki/en/privacy/foundations/property-inference",
@@ -6154,7 +6383,7 @@
       "kind": "entry",
       "title": "可信执行环境（TEE）：硬件把「使用中的数据」围起来，但信任根是芯片厂商、侧信道仍在",
       "title_en": "Trusted execution environments (TEE): hardware fences off data in use — but the root of trust is the chip vendor, and side channels remain",
-      "summary": "可信执行环境（TEE）用硬件把「使用中的数据」（data in use）圈进一个加密、可远程证明的飞地（enclave），让同租户、恶意 OS / hypervisor、甚至云运营商都看不到里面——这是把 LLM 的 prompt 与权重对云厂商保密的硬件路线。但记牢两条边界：信任根是芯片厂商（你信的是 Intel / AMD / NVIDIA 的密钥与实现），且 TEE 反复被微架构侧信道攻破（Foreshadow 一类）。它是卷五「机密推理」的承重墙，所以先在卷一交代清楚它保证什么、不保证什么。",
+      "summary": "可信执行环境（TEE）用硬件把「使用中的数据」（data in use）圈进一个加密、可远程证明的飞地（enclave），让同租户、恶意 OS / hypervisor、甚至云运营商都看不到里面——这是把 LLM 的 prompt 与权重对云厂商保密的硬件路线。但记牢两条边界：信任根是芯片厂商及获准的软件/证明策略（包括密钥、实现与端点验证），且 TEE 反复被微架构侧信道攻破（Foreshadow 一类）。它是卷五「机密推理」的承重墙，所以先在卷一交代清楚它保证什么、不保证什么。",
       "summary_en": "a trusted execution environment (TEE) uses hardware to fence data in use into an encrypted, remotely attestable enclave, so co-tenants, a malicious OS / hypervisor, even the cloud operator can't see inside — the hardware route to keeping an LLM's prompts and weights confidential from the cloud provider. But hold two boundaries: the root of trust is the chip vendor (you trust Intel / AMD / NVIDIA's keys and implementation), and TEEs have been repeatedly broken by microarchitectural side channels (the Foreshadow family). It's the load-bearing wall for Volume 5's \"confidential inference,\" so Volume 1 spells out up front what it does and doesn't guarantee.",
       "tags": [
         "TEE",
@@ -6179,9 +6408,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-12-29",
+      "review_triggers": [
+        "CPU/GPU驱动固件或安全模式变化",
+        "证明策略撤销或侧信道公告变化"
+      ],
       "source_version": "",
       "maturity": "生产",
       "maturity_en": "Production",
@@ -6194,6 +6426,8 @@
       ],
       "era": "卷一 · 隐私根基",
       "sources": [
+        "https://developer.nvidia.com/blog/enabling-private-high-performance-production-ai-inference-with-nvidia-confidential-computing/",
+        "https://docs.nvidia.com/confidential-computing/virtual-machines/threat-model",
         "https://confidentialcomputing.io/wp-content/uploads/sites/10/2023/03/CCC-A-Technical-Analysis-of-Confidential-Computing-v1.3_unlocked.pdf",
         "https://developer.nvidia.com/blog/confidential-computing-on-h100-gpus-for-secure-and-trustworthy-ai/",
         "https://www.usenix.org/conference/usenixsecurity18/presentation/bulck"
@@ -6209,10 +6443,10 @@
       "legacy_id": "confidential-inference",
       "subject": "privacy",
       "kind": "entry",
-      "title": "机密推理：把 prompt 交给云、却不让云看到——能落地的路线，与它没解决的",
-      "title_en": "Confidential inference: hand your prompt to the cloud without letting the cloud see it — the routes that ship, and what they don't solve",
-      "summary": "你想用云上的大模型、又不想让云厂商看到 prompt（或你想供模型、又不想让客户端拿到权重）。机密推理就是这个目标的落地：今天真能用的主要是硬件隔离 + 远程证明路线——如 NVIDIA H100/H200 的 GPU 机密计算，以及 Apple Private Cloud Compute 这类带可验证透明日志的私有云计算架构（两者机制同族但形态不同，别混为一谈）；密码学路线（HE / MPC）在 LLM 规模仍太贵。但「机密」是个营销词——真正的边界不在「厂商说机密」，而在你（或你的设备）有没有验证证明、威胁模型覆盖谁、以及它仍没解决什么（侧信道、信任芯片厂商、法律令）。本条把卷一的 [TEE](../01-foundations/trusted-execution-environment.mdx) 与 [HE·MPC](../01-foundations/he-mpc.mdx) 地基，落到「能不能真把私有推理跑起来」。",
-      "summary_en": "you want to use a cloud LLM without letting the provider see your prompt (or serve a model without the client getting the weights). Confidential inference is the deployment of that goal: what actually ships today is mainly the hardware isolation + remote attestation route — e.g. GPU confidential computing on NVIDIA H100/H200, and Apple Private Cloud Compute as a private cloud architecture with a verifiable transparency log (same mechanism family, different shapes — don't conflate them); the cryptographic route (HE / MPC) is still too expensive at LLM scale. But \"confidential\" is a marketing word — the real boundary isn't \"the vendor says confidential,\" it's whether you (or your device) verified the attestation, who the threat model covers, and what it still doesn't solve (side channels, trusting the chip vendor, legal orders). This entry takes Volume 1's [TEE](../01-foundations/trusted-execution-environment.mdx) and [HE·MPC](../01-foundations/he-mpc.mdx) foundations down to \"can you actually run private inference.\"",
+      "title": "机密推理：硬件、工作负载与验证共同定义边界",
+      "title_en": "Confidential inference: hardware, workloads, and verification define the boundary",
+      "summary": "机密推理用受支持的硬件隔离、远程证明和密钥释放策略减少宿主运营商读取输入/权重的能力。CVM 里的租户软件仍可处理明文，不能从“用了机密 VM”推出应用服务方看不到请求。Apple PCC 将软件透明性和设备端验证组合；其他部署不自动具有同一透明日志架构。",
+      "summary_en": "confidential inference combines supported hardware isolation, attestation, and key-release policy to reduce host-operator access to inputs/weights. Tenant software inside a CVM still processes plaintext; a confidential VM alone does not establish confidentiality from the application provider. Apple PCC combines software transparency with device verification; other deployments do not automatically have the same transparency-log architecture.",
       "tags": [
         "机密推理",
         "机密计算",
@@ -6236,9 +6470,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-12-29",
+      "review_triggers": [
+        "硬件或产品可用性变化",
+        "工作负载证明或密钥释放策略变化"
+      ],
       "source_version": "",
       "maturity": "生产",
       "maturity_en": "Production",
@@ -6252,11 +6489,9 @@
       "era": "卷五 · 前沿与落地",
       "sources": [
         "https://security.apple.com/blog/private-cloud-compute/",
-        "https://security.apple.com/blog/pcc-security-research/",
-        "https://developer.nvidia.com/blog/confidential-computing-on-h100-gpus-for-secure-and-trustworthy-ai/",
-        "https://learn.microsoft.com/en-us/azure/confidential-computing/overview-azure-products",
-        "https://docs.cloud.google.com/confidential-computing/confidential-vm/docs/attestation-overview",
-        "https://confidentialcomputing.io/wp-content/uploads/sites/10/2023/03/CCC-A-Technical-Analysis-of-Confidential-Computing-v1.3_unlocked.pdf"
+        "https://docs.nvidia.com/confidential-computing/virtual-machines/threat-model",
+        "https://developer.nvidia.com/blog/enabling-private-high-performance-production-ai-inference-with-nvidia-confidential-computing/",
+        "https://cloud.google.com/blog/topics/ai-infrastructure/confidential-g4-gpus-are-ga/"
       ],
       "url": "https://xuebinma.github.io/AIWiki/privacy/frontier-deployment/confidential-inference",
       "url_en": "https://xuebinma.github.io/AIWiki/en/privacy/frontier-deployment/confidential-inference",
@@ -6269,10 +6504,10 @@
       "legacy_id": "dp-federated-learning",
       "subject": "privacy",
       "kind": "entry",
-      "title": "生产级 DP·FL 部署：数据不离设备只是起点，更新会泄露、所以要叠 DP + 安全聚合",
-      "title_en": "Production-grade DP·FL: keeping data on-device is only the start — updates leak, so layer DP + secure aggregation",
-      "summary": "联邦学习（FL）让模型在大量设备上训练、原始数据不离设备，只上传模型更新。但「数据不出设备」只是起点——更新本身会泄露（能反推训练数据）。所以生产级要叠：DP（限制单设备 / 用户对模型的影响）+ 安全聚合（服务器只看到多设备更新之和、看不到单个）。真实落地：Gboard 用 FL + DP-FTRL 训了二十多个带 DP 保证的语言模型；Apple 用本地 DP 收 emoji / 输入法等遥测。要点：FL ≠ 私有、本地 DP 的 ε 要看清、用户级 vs 样本级别错配。这是卷三《[DP 微调](../03-conversational-llms/dp-fine-tuning.mdx)》在「联邦 + 大规模生产」上的落地面。",
-      "summary_en": "federated learning (FL) trains a model across many devices with raw data never leaving the device, uploading only model updates. But \"data doesn't leave the device\" is only the start — the updates themselves leak (they can reconstruct training data). So production-grade FL layers on: DP (bound a single device's / user's influence on the model) + secure aggregation (the server sees only the sum of many devices' updates, not any single one). Real deployments: Gboard trained more than twenty DP-guaranteed language models with FL + DP-FTRL; Apple collects emoji / keyboard telemetry with local DP. Key points: FL ≠ private, watch local DP's ε, and don't mismatch user-level vs sample-level. This is the deployment face of Volume 3 [DP fine-tuning](../03-conversational-llms/dp-fine-tuning.mdx) at \"federated + large-scale production.\"",
+      "title": "生产级 DP·FL：隐私单位、参与会计与安全聚合的边界",
+      "title_en": "Production DP-FL: privacy units, participation accounting, and secure-aggregation boundaries",
+      "summary": "FL 减少集中原始记录，却不自动使上传更新或最终模型私有。DP 限制指定隐私单位对发布结果的贡献，安全聚合限制服务器对单个更新的可见性；是否组合取决于威胁模型。Gboard 2023 论文部署 20 多个 DP 模型，其中 2 个另启安全聚合，不是所有生产配置都使用同一组合。",
+      "summary_en": "FL reduces centralization of raw records without automatically protecting updates or the final model. DP bounds a defined unit’s contribution to released results; secure aggregation restricts server visibility of individual updates. Their combination depends on the threat model. Gboard’s 2023 paper deploys over 20 DP models, two additionally using secure aggregation, rather than one universal production configuration.",
       "tags": [
         "联邦学习",
         "安全聚合",
@@ -6294,9 +6529,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "客户端参与或隐私单位变化",
+        "DP 会计或安全聚合生产配置变化"
+      ],
       "source_version": "",
       "maturity": "生产",
       "maturity_en": "Production",
@@ -6309,8 +6547,7 @@
       "era": "卷五 · 前沿与落地",
       "sources": [
         "https://arxiv.org/abs/2305.18465",
-        "https://machinelearning.apple.com/research/learning-with-privacy-at-scale",
-        "https://arxiv.org/abs/1602.05629"
+        "https://machinelearning.apple.com/research/learning-with-privacy-at-scale"
       ],
       "url": "https://xuebinma.github.io/AIWiki/privacy/frontier-deployment/dp-federated-learning",
       "url_en": "https://xuebinma.github.io/AIWiki/en/privacy/frontier-deployment/dp-federated-learning",
@@ -6323,10 +6560,10 @@
       "legacy_id": "federated-analytics",
       "subject": "privacy",
       "kind": "entry",
-      "title": "联邦分析：只算「统计量」不集中原始数据——但保证仍系于 DP + 安全聚合",
-      "title_en": "Federated analytics: compute only the \\\"statistics,\\\" never centralize the raw data — but the guarantee still hinges on DP + secure aggregation",
-      "summary": "联邦分析（federated analytics）是「不集中原始数据、只把统计量带出设备」的一类数据科学方法——设备各自在本地数据上算局部量，靠安全聚合让服务器只看到合并后的总数、看不到任何单台设备的明细（Ramage & Mazzocchi, Google Research, 2020）；要发现「最频繁项」（heavy hitters）这类统计还要叠差分隐私（Zhu, Kairouz 等, AISTATS 2020；Bassily 等, NeurIPS 2017）。它和联邦学习是兄弟：那是训模型，这是算统计量。已落地：Google Pixel 的「Now Playing」歌曲流行度计数、Apple 的热门 emoji / 域名遥测都是生产用例。结论先行：「联邦」二字不自动等于私有——数据留本地只是起点，真正的隐私保证系于 DP 与安全聚合是否真做对；少了任一层，聚合结果与多轮查询仍会把个体抖出来。",
-      "summary_en": "federated analytics is a class of data-science methods that don't centralize raw data and bring only statistics off the device — each device computes a local quantity over its local data, and secure aggregation lets the server see only the combined totals, never any single device's detail (Ramage & Mazzocchi, Google Research, 2020); discovering \"most-frequent items\" (heavy hitters) additionally requires stacking differential privacy (Zhu, Kairouz et al., AISTATS 2020; Bassily et al., NeurIPS 2017). It's the sibling of federated learning: that trains a model, this computes statistics. Already deployed: Google Pixel's \"Now Playing\" song-popularity tallies and Apple's popular-emoji / domain telemetry are both production use cases. Conclusion first: the word \"federated\" does not automatically mean private — keeping data local is only the start; the real privacy guarantee hinges on whether DP and secure aggregation are actually done right; miss either layer and the aggregate result plus multi-round queries can still shake individuals loose.",
+      "title": "联邦分析：本地统计、聚合视图与 DP 可信边界",
+      "title_en": "Federated analytics: local statistics, aggregate views, and DP trust boundaries",
+      "summary": "联邦分析在设备本地算统计贡献，减少集中原始数据。安全聚合限制服务器看单点，DP 限制指定单位对发布统计的影响；中心 DP、本地 DP 与分布式 DP 有不同可信边界，不是所有私有统计都必须使用同一组合。",
+      "summary_en": "federated analytics computes local statistical contributions and reduces raw-data centralization. Secure aggregation restricts server views of individuals; DP bounds a defined unit’s influence on released statistics. Central, local, and distributed DP have different trusted boundaries, rather than one mandatory combination for all private statistics.",
       "tags": [
         "联邦分析",
         "安全聚合",
@@ -6350,9 +6587,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "查询目的贡献限制或参与规模变化",
+        "DP 算法或多轮发布变化"
+      ],
       "source_version": "",
       "maturity": "生产",
       "maturity_en": "Production",
@@ -6367,7 +6607,7 @@
       "sources": [
         "https://research.google/blog/federated-analytics-collaborative-data-science-without-data-collection/",
         "https://proceedings.mlr.press/v108/zhu20a.html",
-        "https://arxiv.org/abs/1707.04982"
+        "https://machinelearning.apple.com/research/learning-with-privacy-at-scale"
       ],
       "url": "https://xuebinma.github.io/AIWiki/privacy/frontier-deployment/federated-analytics",
       "url_en": "https://xuebinma.github.io/AIWiki/en/privacy/frontier-deployment/federated-analytics",
@@ -6382,8 +6622,8 @@
       "kind": "entry",
       "title": "梯度泄露：联邦学习「只共享梯度不共享数据」挡不住反演——梯度能被还原成训练样本",
       "title_en": "Gradient leakage: \\\"sharing gradients, not data\\\" doesn't stop inversion — gradients can be reconstructed into training samples",
-      "summary": "联邦学习常被说成「只共享梯度 / 更新、不共享原始数据，所以隐私」。但 Deep Leakage from Gradients（Zhu 等，NeurIPS 2019）证明：从共享的梯度可以反演出原始训练样本——图像逐像素、文本逐 token 匹配，核心算法不到 20 行。Geiping 等（NeurIPS 2020）进一步在高分辨率、已训练好的网络上做到，且对多步 / 多样本平均的梯度也能破。结论先行：「共享梯度」不等于「私有」；FL 要靠安全聚合 + DP 才有实质保证，别把「没传原始数据」当隐私。",
-      "summary_en": "federated learning is often described as \"share only gradients / updates, not raw data, so it's private.\" But Deep Leakage from Gradients (Zhu et al., NeurIPS 2019) shows that shared gradients can be inverted back into the original training samples — pixel-wise for images, token-wise for text, with a core algorithm under 20 lines. Geiping et al. (NeurIPS 2020) went further on high-resolution images and trained networks, and broke gradients even averaged over steps / samples. Conclusion first: \"sharing gradients\" ≠ \"private\"; FL needs secure aggregation + DP for a real guarantee — don't read \"didn't send raw data\" as privacy.",
+      "summary": "DLG 与 Inverting Gradients 在所测架构、批量和可见更新下重建训练输入，否定“只传梯度就自动私有”。梯度匹配并非总能唯一恢复原文；安全聚合限制单点视图，DP 限制定义单位对发布物的贡献，按威胁模型选用并独立分析。",
+      "summary_en": "DLG and Inverting Gradients reconstruct training inputs under evaluated architectures, batches, and visible updates, disproving automatic privacy from sharing gradients. Gradient matching does not always uniquely recover the original. Secure aggregation restricts individual views; DP bounds a defined unit’s contribution to releases. Choose and analyze them under the threat model.",
       "tags": [
         "梯度泄露",
         "梯度反演",
@@ -6409,9 +6649,12 @@
       "phase": "",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "模型批量或局部步数变化",
+        "更新视图反演或主动攻击变化"
+      ],
       "source_version": "",
       "maturity": "研究",
       "maturity_en": "Research",
@@ -6500,8 +6743,8 @@
       "kind": "entry",
       "title": "LoRA / 适配器泄露微调数据：发布 delta + 公开底座 = 成员推断放大器",
       "title_en": "LoRA / Adapter Leaking Fine-tune Data: Published Delta + Public Base = Membership Inference Amplifier",
-      "summary": "你在私有数据上做 LoRA / 适配器微调，然后把这份 delta 发到 HuggingFace，心想「底座是公开的，我只发了一小块差量，我的数据藏得住」。这份心安是假的——发布的 delta 恰恰把微调信号浓缩在了一处：底座与微调后模型之间的差，本身就是微调数据的指纹。攻击者只要同时握有你的适配器和那个公开底座，就能把公开底座当参照系，跑一次被 delta 放大的成员推断 / 抽取。LoRA-Leak（arXiv 2507.18302，⚠️预印本）实测：即便在保守微调设置下，成员推断仍能到 0.775 AUC，且「拿公开预训练模型当参照」正是被以往 MIA 忽略、却能放大泄露的那一手。结论先行：「delta 小 / 底座公开」不是隐私——公开底座是攻击者手里的免费参照，把你的成员可区分度抬高了。",
-      "summary_en": "you fine-tune with LoRA / an adapter on private data, then publish that delta to HuggingFace, reasoning \"the base is public and I only shipped a tiny diff, so my data is safe.\" That comfort is false — the published delta is exactly where the fine-tuning signal is concentrated: the difference between the base and the fine-tuned model is itself the fingerprint of the fine-tune data. An attacker who holds your adapter and that public base can use the public base as a reference frame and run membership inference / extraction amplified by the delta. LoRA-Leak (arXiv 2507.18302, ⚠️preprint) measures it: even under conservative fine-tuning settings, membership inference still reaches 0.775 AUC, and \"use the public pre-trained model as a reference\" is precisely the move that prior MIAs neglected yet that amplifies leakage. Bottom line up front: \"the delta is small / the base is public\" is not privacy — the public base is a free reference in the attacker's hands that raises your members' distinguishability.",
+      "summary": "发布私有数据微调的 LoRA delta 和公开底座，可能为参照式成员推断提供可测信号。LoRA-Leak 预印本报告指定保守设置中 0.775 AUC，非所有底座的固定结果；MIA 成功不等于原文可抽取。主动构造底座的 PreCurious 是另一威胁，须分别验证。",
+      "summary_en": "a released LoRA delta trained on private data, together with its public base, may provide measurable signals for reference-based membership inference. The LoRA-Leak preprint reports 0.775 AUC in a specified conservative setup, not every base model. Successful MIA does not establish text extraction. PreCurious actively constructs the base model and is a separate threat.",
       "tags": [
         "成员推断",
         "LoRA",
@@ -6529,9 +6772,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "论文发表状态或底座适配器变化",
+        "成员推断方法或发布权限变化"
+      ],
       "source_version": "",
       "maturity": "研究",
       "maturity_en": "Research",
@@ -6544,6 +6790,7 @@
       ],
       "era": "卷五 · 前沿与落地",
       "sources": [
+        "https://arxiv.org/abs/2403.09562",
         "https://arxiv.org/abs/2507.18302",
         "https://dl.acm.org/doi/10.1145/3658644.3690279",
         "https://arxiv.org/abs/2310.11397"
@@ -6561,8 +6808,8 @@
       "kind": "entry",
       "title": "可验证删除与机器遗忘：「删了源数据」不等于「模型忘了」，而「证明真忘了」更难",
       "title_en": "Verifiable deletion and machine unlearning: \\\"deleted the source record\\\" ≠ \\\"the model forgot\\\" — and proving it forgot is harder still",
-      "summary": "用户行使被遗忘权（GDPR Art.17），你从训练集删了他的记录——但模型可能还记得（见卷二《[训练数据抽取](../02-memorization-extraction/training-data-extraction.mdx)》：进了权重的记忆，删源数据不会自动消失）。机器遗忘要的是「让模型表现得像从没见过这条」。难点有二：① 怎么真遗忘（精确遗忘 ≈ 等价重训，贵；近似遗忘快但无保证）；② 怎么证明真忘了（可验证删除）——这才是工程上最缺的一环。",
-      "summary_en": "a user exercises the right to be forgotten (GDPR Art. 17), you delete their record from the training set — but the model may still remember (see Volume 2 [Training-data extraction](../02-memorization-extraction/training-data-extraction.mdx): once memorization is in the weights, deleting the source doesn't make it vanish). Machine unlearning aims to make the model \"behave as if it never saw that record.\" Two hard parts: ① how to actually forget (exact unlearning ≈ equivalent retraining, expensive; approximate unlearning is fast but unguaranteed); ② how to prove it forgot (verifiable deletion) — the piece engineering most lacks.",
+      "summary": "删掉源记录不自动移除模型对它的依赖。精确遗忘比较同一训练流程在删除后的分布；近似遗忘可有声明的形式界，也可能只有经验方法。用 MIA 或抽取做验证只能寻找反例，不能从未检出证明完整分布等价。",
+      "summary_en": "deleting a source record does not automatically remove model dependence on it. Exact unlearning compares distributions under the same training procedure after deletion; approximate unlearning may have formal bounds or only empirical evidence. MIA/extraction tests seek counterexamples; non-detection does not prove full-distribution equivalence.",
       "tags": [
         "机器遗忘",
         "被遗忘权",
@@ -6586,9 +6833,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "删除定义重训基线或请求序列变化",
+        "认证遗忘或恢复攻击变化"
+      ],
       "source_version": "",
       "maturity": "试验",
       "maturity_en": "Experimental",
@@ -6645,9 +6895,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-12-29",
+      "review_triggers": [
+        "OS/AICore或端侧模型变化",
+        "云路由遥测或出站通道变化"
+      ],
       "source_version": "",
       "maturity": "生产",
       "maturity_en": "Production",
@@ -6677,10 +6930,10 @@
       "legacy_id": "secure-aggregation",
       "subject": "privacy",
       "kind": "entry",
-      "title": "安全聚合：让服务器只看到「所有人更新的和」，看不到任何单个更新",
-      "title_en": "Secure aggregation: let the server see only \\\"the sum of everyone's updates,\\\" never any single update",
-      "summary": "《[梯度泄露](./gradient-leakage.mdx)》证明「只共享单个更新」会被反演。安全聚合（Bonawitz 等，ACM CCS 2017）是直接的防御：用安全多方计算让服务器只能算出「所有客户端更新的和」、看不到任何单个更新——单点被藏起来，反演就失去了支点。它通信高效、对客户端掉线鲁棒，并已用于 Google 的生产 FL（Bonawitz 等，MLSys 2019：让单设备更新即便在数据中心内存里也保持加密）。结论先行：安全聚合把「服务器=可信」降级成「服务器只见聚合和」；但它不是万能——防的是「看到单个更新」，不防「聚合和本身泄露」或「参与方串通」，仍要配 DP。",
-      "summary_en": "[Gradient leakage](./gradient-leakage.mdx) shows \"sharing only a single update\" gets inverted. Secure aggregation (Bonawitz et al., ACM CCS 2017) is the direct defense: use secure multiparty computation so the server can compute only \"the sum of all clients' updates,\" never any single update — the single point is hidden, and inversion loses what it stands on. It's communication-efficient and robust to client dropout, and is already used in Google's production FL (Bonawitz et al., MLSys 2019: keeping individual device updates encrypted even in data-center memory). Conclusion first: secure aggregation downgrades \"the server is trusted\" to \"the server only sees the aggregate sum\"; but it's not a cure-all — it defends against \"seeing a single update,\" not \"the aggregate sum itself leaking\" or \"parties colluding,\" so still pair it with DP.",
+      "title": "安全聚合：协议假设内限制单点视图，允许输出仍可能泄露",
+      "title_en": "Secure aggregation: restrict individual views under protocol assumptions; permitted outputs can still leak",
+      "summary": "安全聚合让服务器在具体腐化/合谋/掉线模型内得到允许的向量和，而不额外看到诚实客户端的单个更新。允许的和本身仍可能泄露，不能把「学不到任何单点」当无条件结论。Bonawitz 等 CCS2017 完整协议与 MLSys2019 系统提供机制与生产依据；2016 workshop 稿不是同一书目。",
+      "summary_en": "under a concrete corruption/collusion/dropout model, secure aggregation gives the server a permitted vector sum without additionally exposing honest clients’ individual updates. The permitted sum itself can still leak; “learns no individual contribution” is not unconditional. The full CCS 2017 protocol and MLSys 2019 system provide mechanism and production evidence; the 2016 workshop manuscript is a different publication.",
       "tags": [
         "安全聚合",
         "安全多方计算",
@@ -6706,9 +6959,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "协议身份合谋或掉线假设变化",
+        "允许输出或多轮策略变化"
+      ],
       "source_version": "",
       "maturity": "生产",
       "maturity_en": "Production",
@@ -6721,7 +6977,7 @@
       ],
       "era": "卷五 · 前沿与落地",
       "sources": [
-        "https://arxiv.org/abs/1611.04482",
+        "https://research.google/pubs/practical-secure-aggregation-for-privacy-preserving-machine-learning/",
         "https://arxiv.org/abs/1902.01046"
       ],
       "url": "https://xuebinma.github.io/AIWiki/privacy/frontier-deployment/secure-aggregation",
@@ -6737,8 +6993,8 @@
       "kind": "entry",
       "title": "拆分学习泄露：把模型切两半「原始数据留在本地」，服务器仍能从中间激活重建你的输入",
       "title_en": "Split learning leakage: splitting the model in two so \\\"raw data stays local\\\" doesn't stop the server reconstructing your inputs from intermediate activations",
-      "summary": "拆分学习把模型从某层切成两半——客户端跑前几层、把中间激活（smashed data）发给服务器跑剩下的——常被说成「原始数据不出本地，所以隐私」。结论先行：这不等于私有。Feature-Space Hijacking Attack（Pasquini 等，CCS 2021）证明，恶意服务器能主动把拆分模型引导进不安全状态，从中间激活重建出客户端的私有训练输入（在 MNIST / Omniglot / CelebA 上重建图像）；UnSplit（Erdoğan 等，WPES@CCS 2022）更表明连诚实但好奇的服务器——只知客户端结构、不需主动干预——也能反演（MNIST / Fashion-MNIST / CIFAR-10 上重建 MSE ≈ 0.08–0.15）。别把「没传原始像素」当隐私。",
-      "summary_en": "split learning cuts the model at some layer into two halves — the client runs the first few layers and sends the intermediate activations (smashed data) to the server to run the rest — and is often described as \"raw data never leaves the client, so it's private.\" Conclusion first: this is not private. The Feature-Space Hijacking Attack (Pasquini et al., CCS 2021) shows a malicious server can actively steer the split model into an insecure state and reconstruct the client's private training inputs from the intermediate activations (reconstructing images on MNIST / Omniglot / CelebA); UnSplit (Erdoğan et al., WPES @ CCS 2022) shows that even an honest-but-curious server — knowing only the client architecture, with no active interference — can invert (reconstruction MSE ≈ 0.08–0.15 on MNIST / Fashion-MNIST / CIFAR-10). Don't read \"didn't send raw pixels\" as privacy.",
+      "summary": "拆分学习把模型从某层切成两半——客户端跑前几层、把中间激活（smashed data）发给服务器跑剩下的——常被说成「原始数据不出本地，所以隐私」。结论先行：这不等于私有。Feature-Space Hijacking Attack（Pasquini 等，CCS 2021）证明，恶意服务器能主动把拆分模型引导进不安全状态，从中间激活重建出客户端的私有训练输入（在 MNIST / Omniglot / CelebA 上重建图像）；UnSplit（Erdoğan 等，WPES@CCS 2022）更表明连诚实但好奇的服务器——只知客户端结构、不需主动干预——也能反演（MNIST / Fashion-MNIST / CIFAR-10 上重建 MSE 随数据与配置变化）。别把「没传原始像素」当隐私。",
+      "summary_en": "split learning cuts the model at some layer into two halves — the client runs the first few layers and sends the intermediate activations (smashed data) to the server to run the rest — and is often described as \"raw data never leaves the client, so it's private.\" Conclusion first: this is not private. The Feature-Space Hijacking Attack (Pasquini et al., CCS 2021) shows a malicious server can actively steer the split model into an insecure state and reconstruct the client's private training inputs from the intermediate activations (reconstructing images on MNIST / Omniglot / CelebA); UnSplit (Erdoğan et al., WPES @ CCS 2022) shows that even an honest-but-curious server — knowing only the client architecture, with no active interference — can invert (reconstruction MSE varying by data and configuration on MNIST / Fashion-MNIST / CIFAR-10). Don't read \"didn't send raw pixels\" as privacy.",
       "tags": [
         "拆分学习",
         "特征空间劫持",
@@ -6762,9 +7018,12 @@
       "phase": "",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "拆分层服务器控制或模型结构变化",
+        "激活扰动证明或反演方法变化"
+      ],
       "source_version": "",
       "maturity": "研究",
       "maturity_en": "Research",
@@ -6777,6 +7036,8 @@
       ],
       "era": "卷五 · 前沿与落地",
       "sources": [
+        "https://arxiv.org/abs/2012.02670",
+        "https://arxiv.org/abs/2108.09033",
         "https://dl.acm.org/doi/10.1145/3460120.3485259",
         "https://dl.acm.org/doi/10.1145/3559613.3563201"
       ],
@@ -6916,8 +7177,8 @@
       "kind": "entry",
       "title": "数据生命周期与删除传播：删了主库那条记录，不等于数据真的没了",
       "title_en": "Data lifecycle & deletion propagation: deleting that row from the primary DB doesn't mean the data is actually gone",
-      "summary": "「我删了那条记录」≠「数据没了」。一条个人数据进系统后，会复制到一大堆地方——主库、备份、日志、缓存、向量库 / 嵌入、微调 / 派生模型、分析仓库、第三方子处理方。被遗忘权（GDPR Art. 17）要把删除传播到所有副本才算数；而我这边——训练进权重、嵌入进向量库——恰恰是最难删的一格。NIST 隐私框架把这看成贯穿数据生命周期（采集 → 处理 → 存储 → 处置 / 删除）的治理问题。结论先行：按「数据血缘 + 删除传播」做治理，别把「删了主库」当「已删除」——那是这条最常见的假安全。",
-      "summary_en": "\"I deleted that record\" ≠ \"the data is gone.\" Once a piece of personal data enters the system, it gets copied to a pile of places — primary DB, backups, logs, caches, vector store / embeddings, fine-tuned / derived models, analytics warehouses, third-party subprocessors. The right to be forgotten (GDPR Art. 17) only counts when deletion propagates to every copy; and my side — baked into weights, embedded into the vector store — is exactly the hardest cell to delete. The NIST Privacy Framework treats this as a governance problem spanning the data lifecycle (collection → processing → storage → disposition / deletion). Conclusion first: govern by \"data lineage + deletion propagation,\" and don't read \"deleted from the primary DB\" as \"deleted\" — that's the most common false security here.",
+      "summary": "删主库不等于删完日志、备份、缓存、向量与其他派生物。按数据血缘识别删除对象，处理有效请求、合法留存例外与接收方通知，并验证备份恢复后重放删除。GDPR 删除权并非无例外的即时清空；模型参数是否涉及个人数据与如何补救须按个案评估。",
+      "summary_en": "deleting the primary record does not clear logs, backups, caches, vectors, and other derivatives. Use lineage to identify erasure targets, handle valid requests, lawful retention exceptions and recipient notification, and replay deletion after backup restoration. GDPR erasure is not unconditional instant clearing; whether model parameters involve personal data and how to remedy it require case-specific assessment.",
       "tags": [
         "数据生命周期",
         "删除传播",
@@ -6943,9 +7204,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "NIST1.1 或法域删除指引变化",
+        "备份恢复删除或子处理方变化"
+      ],
       "source_version": "",
       "maturity": "生产",
       "maturity_en": "Production",
@@ -6958,6 +7222,8 @@
       ],
       "era": "卷六 · 治理与合规",
       "sources": [
+        "https://www.nist.gov/privacy-framework/new-projects/privacy-framework-version-11",
+        "https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/individual-rights/right-to-erasure/",
         "https://gdpr-info.eu/art-17-gdpr/",
         "https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.01162020.pdf"
       ],
@@ -6972,10 +7238,10 @@
       "legacy_id": "ftaas-privacy",
       "subject": "privacy",
       "kind": "entry",
-      "title": "微调即服务隐私：你的微调数据去哪了，以及微调会侵蚀对齐（连隐私拒答一起）",
-      "title_en": "Fine-tuning-as-a-service privacy: where your fine-tuning data goes, and how fine-tuning erodes alignment (privacy refusals included)",
-      "summary": "在厂商 API 上微调（fine-tuning-as-a-service），有两个面要分开看。面①——你的微调数据在厂商侧的去向：它被保留多久、会不会被用于训练或人工审查、产出的微调模型是否只供你私用，这些都不是一个数，要按各厂商当下条款逐项核（多数厂商官方文档称：微调输入输出默认不用于训练、微调模型仅供你私用——但仍要核你这个档、这个端点、这个区域的具体条款，且条款会变）。面②——微调本身会侵蚀对齐：Qi 等（ICLR 2024）用 OpenAI 微调 API、仅约 10 条对抗样本、花费小于 $0.20 就越掉了 GPT-3.5 Turbo 的护栏；更要紧的是，即便只用良性数据（Alpaca / Dolly）微调，也会无意中拉低安全对齐。结论先行：把数据交给厂商微调 API，既要核数据边界，也要假设微调会削弱对齐——包括模型原本会做的隐私拒答。（注意：Qi 等主要是安全对齐被侵蚀的结果，不是直接的数据泄露 / PII 抽取结果——本条据此说「微调会连隐私拒答一起削弱」，不夸大成「微调能把训练数据抽出来」。）",
-      "summary_en": "fine-tuning on a vendor API (fine-tuning-as-a-service) has two faces to keep separate. Face 1 — where your fine-tuning data goes on the vendor's side: how long it's retained, whether it's used for training or human review, whether the resulting fine-tuned model is yours alone — none of this is a single number; verify each vendor's current terms item by item (most vendor docs say fine-tuning inputs/outputs aren't used for training by default and the fine-tuned model is for your use alone — but still check the terms for *your* tier, *your* endpoint, *your* region, and remember they change). Face 2 — fine-tuning itself erodes alignment: Qi et al. (ICLR 2024) used OpenAI's fine-tuning API and only about 10 adversarial examples, costing under $0.20, to strip GPT-3.5 Turbo's guardrails; and crucially, even fine-tuning on benign data (Alpaca / Dolly) unintentionally degraded safety alignment. Conclusion first: handing data to a vendor fine-tuning API means you must both verify the data boundary and assume fine-tuning will weaken alignment — including the privacy refusals the model would otherwise make. (Note: Qi et al. is primarily a result about safety-alignment erosion, not a direct data-leak / PII-extraction result — this entry uses it to say \"fine-tuning weakens privacy refusals along with the rest,\" and does not overstate it as \"fine-tuning can extract the training data.\")",
+      "title": "微调即服务隐私：训练资产边界与微调后隐私回归",
+      "title_en": "Fine-tuning-as-a-service privacy: training-asset boundaries and post-tuning privacy regression",
+      "summary": "FTaaS 有两组需要独立核实的风险：数据/派生模型在服务方的访问、保留和删除，以及微调后的行为退步。Qi 等 2023 实验显示安全护栏可能受少量恶意或良性微调削弱；这不是已证明每项隐私拒答都下降，更不是训练数据抽取证据。隐私任务须单独回归。",
+      "summary_en": "FTaaS requires separate checks of provider access/retention/deletion for data and derived models, and post-tuning behavioral regressions. Qi et al.’s 2023 experiments show safety guardrails can weaken under malicious or benign tuning. This does not prove every privacy refusal declines or establish training-data extraction; test privacy tasks separately.",
       "tags": [
         "微调即服务",
         "微调数据",
@@ -6999,9 +7265,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-12-29",
+      "review_triggers": [
+        "可微调模型审核或留存条款变化",
+        "隐私拒答或数据抽取攻击变化"
+      ],
       "source_version": "",
       "maturity": "研究",
       "maturity_en": "Research",
@@ -7014,11 +7283,11 @@
       ],
       "era": "卷六 · 治理与合规",
       "sources": [
-        "https://platform.openai.com/docs/guides/supervised-fine-tuning",
-        "https://platform.openai.com/docs/guides/fine-tuning",
+        "https://arxiv.org/abs/2310.03693",
+        "https://developers.openai.com/api/docs/guides/supervised-fine-tuning",
+        "https://developers.openai.com/api/docs/guides/your-data",
         "https://platform.claude.com/docs/en/manage-claude/api-and-data-retention",
-        "https://cloud.google.com/vertex-ai/generative-ai/docs/data-governance",
-        "https://openreview.net/forum?id=hTEGyKf0dZ"
+        "https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/zero-data-retention"
       ],
       "url": "https://xuebinma.github.io/AIWiki/privacy/governance-compliance/ftaas-privacy",
       "url_en": "https://xuebinma.github.io/AIWiki/en/privacy/governance-compliance/ftaas-privacy",
@@ -7058,9 +7327,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-11-29",
+      "review_triggers": [
+        "合同账户授权或模型资格变化",
+        "端点缓存或第三方留存政策变化"
+      ],
       "source_version": "",
       "maturity": "生产",
       "maturity_en": "Production",
@@ -7073,7 +7345,7 @@
       ],
       "era": "卷六 · 治理与合规",
       "sources": [
-        "https://platform.openai.com/docs/guides/your-data",
+        "https://developers.openai.com/api/docs/guides/your-data",
         "https://platform.claude.com/docs/en/manage-claude/api-and-data-retention",
         "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
       ],
@@ -7088,10 +7360,10 @@
       "legacy_id": "llm-watermarking",
       "subject": "privacy",
       "kind": "entry",
-      "title": "LLM 水印与数据溯源：能标记生成文本 / 检测「被训了吗」，但改写就能抹掉",
-      "title_en": "LLM watermarking & data provenance: they can mark generated text and detect 'was my data trained on,' but a paraphrase wipes it out",
-      "summary": "水印能做两件事——给我生成的文本打可检测标记（绿/红表水印，检测端无需访问我的权重）、以及事后检测「我的数据被训了吗」（往语料里埋虚构「陷阱句」，再用成员推断把它逼出来）。但二者都有同一条硬边界：一次有预算的改写就能把信号抹掉。Kirchenbauer 等（ICML 2023）的绿/红表水印靠 z 检验给出可解释 p 值、检测无需模型访问，但可检测性随文本熵下降而下降（低熵 / 短输出难标）；他们后续的可靠性研究（ICLR 2024）实测：人工、尤其 LLM 改写会显著压低可检测性，水印被「摊薄」、检测需要更多 token，WinMax + SelfHash 只能部分恢复。结论先行：水印是溯源 / 取证的概率证据，不是强保证——别把「有水印」当「抹不掉」。",
-      "summary_en": "watermarking does two things — it puts a detectable mark on the text I generate (a green/red-list watermark whose detector needs no access to my weights), and it lets you later detect \"was my data trained on?\" (bury fictitious \"trap\" sentences in a corpus, then surface them with membership inference). But both share one hard boundary: one paraphrase with enough budget wipes the signal out. Kirchenbauer et al.'s (ICML 2023) green/red-list watermark gives interpretable p-values from a z-test and needs no model access to detect, but detectability trades against text entropy (low-entropy / short outputs are harder to mark); their follow-up reliability study (ICLR 2024) measured that human and especially LLM-based paraphrase markedly lower detectability, the watermark gets \"spread out,\" detection needs more tokens, and WinMax + SelfHash only partially recover. Conclusion first: a watermark is probabilistic evidence for provenance / forensics, not a strong guarantee — don't read \"watermarked\" as \"can't be removed.\"",
+      "title": "LLM 水印与数据溯源：概率证据、改写鲁棒性与部署边界",
+      "title_en": "LLM watermarks and data provenance: statistical evidence, paraphrase robustness, and deployment boundaries",
+      "summary": "输出水印用采样统计信号支持生成内容识别；copyright traps 则向训练语料埋受控记号、事后检测训练使用。两者都是条件性的取证证据。改写可能稀释信号，但不是一次改写必能抹除；ICLR 2024 可靠性论文恰好发现，足够长的文本在强改写后仍可能被检出。它们不提供个人数据保密，也不自动证明侵权。",
+      "summary_en": "output watermarks support generated-content identification through sampling statistics; copyright traps plant controlled markers in training material to test later use. Both provide conditional forensic evidence. Paraphrasing can dilute a signal, but one paraphrase does not necessarily erase it: the ICLR 2024 reliability paper finds detection can survive strong paraphrasing given enough text. Neither provides personal-data confidentiality or automatically establishes infringement.",
       "tags": [
         "水印",
         "数据溯源",
@@ -7117,9 +7389,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "采样算法检测密钥或阈值变化",
+        "改写攻击或产品部署变化"
+      ],
       "source_version": "",
       "maturity": "研究",
       "maturity_en": "Research",
@@ -7132,8 +7407,10 @@
       ],
       "era": "卷六 · 治理与合规",
       "sources": [
+        "https://deepmind.google/models/synthid/",
+        "https://www.anthropic.com/news/claude-text-watermark",
+        "https://arxiv.org/abs/2306.04634",
         "https://proceedings.mlr.press/v202/kirchenbauer23a.html",
-        "https://openreview.net/forum?id=DEJIDCmWOz",
         "https://proceedings.mlr.press/v235/meeus24a.html"
       ],
       "url": "https://xuebinma.github.io/AIWiki/privacy/governance-compliance/llm-watermarking",
@@ -7149,8 +7426,8 @@
       "kind": "entry",
       "title": "持久记忆的隐私与留存：产品记忆功能「按设计」跨会话留存了什么，我控制得了、删得掉吗",
       "title_en": "Persistent memory: privacy and retention — what a product memory feature keeps across sessions by design, and whether I can control or delete it",
-      "summary": "产品级「记忆」功能按设计就会把跨会话信息写到外部存储——ChatGPT 会引用你所有过往对话、还会在你没开口时主动把它认为有用的细节存成「saved memory」；你若在对话里透露了敏感信息，它可能就此落进记忆。这不是隔离 bug（那是[跨会话记忆串味](../04-rag-agents/cross-session-memory-bleed.mdx)那条讲的事故），而是功能正常工作时的治理后果：你能看到、删得掉多少，边界在产品与后端手里。更硬的一课来自 2025 年 *NYT v. OpenAI*——一纸法律保全令曾冻结 OpenAI 对「本应删除」数据的删除（约 5 月中至 9 月底），把「关掉记忆 / 到期即删」这类假安全一次性打穿。结论先行：把产品记忆当又一处受产品与法律双重支配的数据副本来治理，别把「我关了开关」当成「已经删干净」。",
-      "summary_en": "a product-grade \"memory\" feature persists cross-session information to external stores by design — ChatGPT references all of your past conversations and, unprompted, proactively saves details it deems useful as \"saved memories\"; if you disclose something sensitive in a chat, it can land in memory. This is not an isolation bug (that's the incident in [cross-session memory bleed](../04-rag-agents/cross-session-memory-bleed.mdx)) — it's the governance consequence of the feature working as built: how much you can see and delete is decided by the product and its backend. The harder lesson comes from *NYT v. OpenAI* (2025): a legal preservation order once froze OpenAI's deletion of data that would otherwise have been deleted (roughly mid-May to late September), puncturing the false security of \"turn off memory / it deletes on expiry\" in one shot. Conclusion first: govern the product's memory as one more copy of your data, subject to both the product and the law — don't read \"I flipped the switch off\" as \"it's all deleted.\"",
+      "summary": "产品记忆把信息按设计带到后续会话，但可读取来源、可见摘要、关闭与删除并非一回事。当前 ChatGPT 文档包含聊天、saved memories、自定义指令、Library 和连接应用等来源，功能因账户 / 地区 / workspace 而异。把记忆作为数据生命周期的一处状态治理，不能把「不再提及」「关闭」「摘要不见了」当成所有来源都已删除。",
+      "summary_en": "product memory carries information into later conversations by design, but available sources, visible summaries, disabling, and deletion differ. Current ChatGPT documentation includes chats, saved memories, custom instructions, Library, and connected-app sources, varying by account / region / workspace. Govern memory as lifecycle state; “do not mention,” “off,” or disappearance from a summary does not establish deletion of every source.",
       "tags": [
         "持久记忆",
         "跨会话留存",
@@ -7178,9 +7455,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-11-29",
+      "review_triggers": [
+        "记忆来源或读写删除控制变化",
+        "账户政策连接器或保留安排变化"
+      ],
       "source_version": "",
       "maturity": "生产",
       "maturity_en": "Production",
@@ -7193,7 +7473,8 @@
       ],
       "era": "卷六 · 治理与合规",
       "sources": [
-        "https://help.openai.com/en/articles/8590148-memory-faq",
+        "https://help.openai.com/en/articles/8914046-temporary-chat-in-chatgpt",
+        "https://help.openai.com/en/articles/8590148-memory-in-chatgpt",
         "https://openai.com/index/memory-and-new-controls-for-chatgpt/",
         "https://platform.claude.com/docs/en/agents-and-tools/tool-use/memory-tool",
         "https://openai.com/index/response-to-nyt-data-demands/"
@@ -7211,8 +7492,8 @@
       "kind": "entry",
       "title": "合成数据隐私：用合成数据替代真实数据≠匿名——除非有形式化 DP，且仍有效用权衡",
       "title_en": "Synthetic-data privacy: replacing real data with synthetic data ≠ anonymous — unless generated under formal DP, and even then a utility trade-off remains",
-      "summary": "「我们用合成数据替了真实数据，所以它是匿名的」——这是假安全。结论先行：合成数据默认不提供匿名性。Stadler 等（USENIX Security 2022）证明，凡基于「真实记录与合成记录有多像」做的隐私评估都会严重低估风险，且合成数据并不比传统匿名化更安全——除非生成过程带形式化的差分隐私（DP）保证；而即便有 DP，也躲不开硬性的隐私↔效用权衡。Chen 等（GAN-Leaks，CCS 2020）进一步显示：哪怕攻击者只能从生成器采样（完全黑盒，正是「发布一份合成数据集」的现实场景），成员推断（MIA）仍能以高于随机的水平区分某条真实记录是否进过训练集，且随过拟合上升而变准。能给上界的只有形式化 DP，且 ε 不为零。",
-      "summary_en": "\"we replaced real data with synthetic data, so it's anonymous\" is false security. Conclusion first: synthetic data provides no anonymity by default. Stadler et al. (USENIX Security 2022) showed that any privacy evaluation based on \"how similar real and synthetic records look\" severely underestimates risk, and that synthetic data is no safer than traditional anonymisation — unless generated under a formal differential-privacy (DP) guarantee; and even with DP, you can't escape a hard privacy↔utility trade-off. Chen et al. (GAN-Leaks, CCS 2020) go further: even when the attacker can only sample from the generator (full black-box — exactly the \"publish a synthetic dataset\" case), membership inference (MIA) still distinguishes whether a given real record was in the training set above chance, and gets more accurate as overfitting rises. The only thing that gives a bound is formal DP, and ε is not zero.",
+      "summary": "合成数据不自动匿名，相似度测试可能漏掉成员、属性和重构泄露。DP 可给指定单位的贡献保证，但须覆盖训练、筛选、评估和发布的完整机制；有 DP 不自动等于法律匿名，没有 DP 也不能据此否定所有其他形式定义。",
+      "summary_en": "synthetic data is not automatically anonymous, and similarity tests can miss membership, attribute, and reconstruction leakage. DP can bound a defined unit’s contribution, but must cover the entire training, selection, evaluation, and release mechanism. DP does not automatically establish legal anonymity, and its absence does not invalidate every other formal definition.",
       "tags": [
         "合成数据",
         "匿名化",
@@ -7238,9 +7519,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "生成器私有筛选或发布预算变化",
+        "匿名化指引或端到端 DP 条件变化"
+      ],
       "source_version": "",
       "maturity": "研究",
       "maturity_en": "Research",
@@ -7255,8 +7539,8 @@
       "sources": [
         "https://arxiv.org/abs/2312.05114",
         "https://www.usenix.org/conference/usenixsecurity22/presentation/stadler",
-        "https://dl.acm.org/doi/10.1145/3372297.3417238",
-        "https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/data-sharing/anonymisation/introduction-to-anonymisation/"
+        "https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/data-sharing/anonymisation/introduction-to-anonymisation/",
+        "https://csrc.nist.gov/pubs/sp/800/226/final"
       ],
       "url": "https://xuebinma.github.io/AIWiki/privacy/governance-compliance/synthetic-data-privacy",
       "url_en": "https://xuebinma.github.io/AIWiki/en/privacy/governance-compliance/synthetic-data-privacy",
@@ -7364,8 +7648,8 @@
       "kind": "entry",
       "title": "DP 审计：你声称的 ε 是真的吗——用一次训练经验下界 DP 保证",
       "title_en": "DP privacy auditing: is the ε you claim real? Empirically lower-bound your DP guarantee in one training run",
-      "summary": "你打开 DP-SGD、在模型卡上报了「ε=8」——但这个 ε 是真的吗？裁剪写错、噪声加少、会计用错口径，都会悄悄把那条保证掏空，而报告上的数字纹丝不动。DP 审计就是那道测试：往训练里插入大量独立探针，训练后用「猜哪些探针在场」的成功率，反推出一个经验 ε 下界——你实际交付的隐私，不会比这个下界更强。Steinke 等（NeurIPS 2023 杰出论文）把它做到了一次训练就能跑，便宜到可以当回归项。结论先行：「用了 DP 库」不等于「ε 成立」，审计是把「声称的 ε」变成「审计过的 ε」的唯一经验手段。",
-      "summary_en": "you turned on DP-SGD and reported \"ε=8\" on the model card — but is that ε real? A miswritten clip, too little noise, or the wrong accounting convention will silently hollow out the guarantee while the reported number sits unchanged. DP auditing is the test: insert many independent probes into training, then use how well you can guess \"which probes were trained on\" to derive an empirical ε lower bound — the privacy you actually deliver is no stronger than that bound. Steinke et al. (NeurIPS 2023 Outstanding Paper) made it runnable in one training run, cheap enough to keep as a regression check. Conclusion first: \"we used a DP library\" does not mean \"the ε holds\", and auditing is the only empirical way to turn a *claimed* ε into an *audited* ε.",
+      "summary": "DP 审计用受控成员推断等攻击，给满足指定邻接关系与 δ 的隐私参数 ε 构造统计置信下界，用来寻找声称上界的反例。它不提供形式上界，也不能认证实现无误。一次训练审计可独立随机纳入多条 canary，但共享训练模型的隐私损失 / 判断不因此彼此独立，必须使用相应定理校准。",
+      "summary_en": "DP auditing uses controlled attacks such as membership inference to construct a statistical lower confidence bound on ε for specified adjacency and δ, looking for counterexamples to a claimed upper bound. It neither supplies a formal upper bound nor certifies the implementation. One-run audits independently randomize canary inclusion, but privacy losses / decisions from a shared trained model are not thereby independent; use the appropriate calibrated theorem.",
       "tags": [
         "隐私审计",
         "差分隐私",
@@ -7391,9 +7675,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "审计定理或置信校准变化",
+        "邻接δ采样或可见输出变化"
+      ],
       "source_version": "",
       "maturity": "研究",
       "maturity_en": "Research",
@@ -7406,6 +7693,7 @@
       ],
       "era": "卷二 · 记忆与抽取",
       "sources": [
+        "https://arxiv.org/abs/2006.07709",
         "https://arxiv.org/abs/2305.08846",
         "https://papers.nips.cc/paper/2020/hash/fc4ddc15f9f4b4b06ef7844d6bb53abf-Abstract.html"
       ],
@@ -7420,8 +7708,8 @@
       "legacy_id": "multimodal-training-image-extraction",
       "subject": "privacy",
       "kind": "entry",
-      "title": "多模态训练图像抽取：扩散 / 视觉模型会逐字吐回训练图，隐私风险延伸到图像",
-      "title_en": "Multimodal training-image extraction: diffusion / vision models spit training images back, extending the privacy risk to pixels",
+      "title": "多模态训练图像抽取：扩散图像近似复制与视觉语言模型成员推断",
+      "title_en": "Multimodal training-image extraction: diffusion near-copies and vision-language membership inference",
       "summary": "记忆与抽取不只发生在文字上——图像也会。把私有图（患者影像、内部设计稿、有版权的画作）喂进扩散 / 视觉模型微调，在外部攻击者看来，给对提示，我可能生成与某张训练图近乎逐像素一致的图；这种复现可以靠「拿生成图去比对训练集」测出来，而且主要由训练里被重复的图驱动——高重复的图更容易被吐回来。结论先行：别以为「生成模型只会画新图、不会吐原图」，图像域的记忆是真实的，防法与文本记忆同根（去重 + DP + 相似度审计），但代价换成了「近似复制」而非「逐字复制」。",
       "summary_en": "memorization and extraction don't only happen to text — images too. Fine-tune a diffusion / vision model on private images (patient scans, internal design assets, copyrighted art), and to an outside attacker, given the right prompt, I may generate an image near-identical, pixel for pixel, to some specific training image; that reproduction is measurable by matching generated images against the training set, and it is driven mostly by images that were duplicated in training — the more duplicated an image, the more likely it comes back out. Conclusion first: don't assume \"a generative model only paints new images, it won't emit the originals.\" Image-domain memorization is real, the defenses share the same root as text memorization (dedup + DP + similarity auditing), but the cost is now \"near-copy\" rather than \"verbatim.\"",
       "tags": [
@@ -7451,9 +7739,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "生成器采样或图文数据变化",
+        "图像相似度或 VLM 成员推断变化"
+      ],
       "source_version": "",
       "maturity": "研究",
       "maturity_en": "Research",
@@ -7466,6 +7757,8 @@
       ],
       "era": "卷二 · 记忆与抽取",
       "sources": [
+        "https://arxiv.org/html/2301.13188",
+        "https://arxiv.org/abs/2212.03860",
         "https://www.usenix.org/conference/usenixsecurity23/presentation/carlini",
         "https://openaccess.thecvf.com/content/CVPR2023/html/Somepalli_Diffusion_Art_or_Digital_Forgery_Investigating_Data_Replication_in_Diffusion_CVPR_2023_paper.html",
         "https://papers.nips.cc/paper_files/paper/2024/hash/b2c892312af07f8a77afbeed188391f4-Abstract-Conference.html"
@@ -7483,8 +7776,8 @@
       "kind": "entry",
       "title": "隐私定向投毒：往训练集掺一点「毒」，能放大对其他人的隐私泄露",
       "title_en": "Privacy-targeted data poisoning: dripping a little \\\"poison\\\" into the training set amplifies privacy leakage about other people",
-      "summary": "投毒不只是「破坏完整性」的安全问题——它也是隐私问题。Tramèr 等（*Truth Serum*, CCS 2022）证明：往训练集里掺极少量（< 0.1%）精心构造的投毒样本，能把对别的、没被投毒的记录的成员推断 / 属性推断 / 数据抽取成功率拉高 1–2 个数量级；他们的标志性数字是——只插入 8 条投毒样本进 CIFAR-10（占全集 0.03%），就能把某张目标图像的成员推断真正例率（TPR）从 7% 抬到 59%（FPR 0.1% 处）。而 web 级语料投毒便宜可行：买过期域名做「分裂视图」，约 \\$60 就能控制 LAION-400M 的约 0.01%（Carlini 等，S&P 2024——这是可行性佐证，本身不是一次隐私泄露结果）。结论先行：训练数据完整性 = 隐私问题；不可信的数据源是隐私放大器。",
-      "summary_en": "poisoning isn't only an integrity (\"corrupt the model\") problem — it's a privacy problem too. Tramèr et al. (*Truth Serum*, CCS 2022) show that inserting a tiny amount (< 0.1%) of carefully crafted poison into the training set raises the success of membership inference / attribute inference / data extraction against other, non-poisoned records by 1–2 orders of magnitude; their signature number — inserting just 8 poison samples into CIFAR-10 (0.03% of the set) lifts membership-inference true-positive rate (TPR) from 7% to 59% (at 0.1% FPR) for a targeted image. And web-scale poisoning is cheap and practical: by buying expired domains for a \"split-view,\" you can control ~0.01% of LAION-400M for ~\\$60 (Carlini et al., S&P 2024 — this is a feasibility result, not itself a privacy-leak result). Conclusion first: training-data integrity = a privacy problem; an untrusted data source is a privacy amplifier.",
+      "summary": "投毒不只是「破坏完整性」的安全问题——它也是隐私问题。Tramèr 等（*Truth Serum*, CCS 2022）证明：往训练集里掺极少量（< 0.1%）精心构造的投毒样本，能把对别的、没被投毒的记录的成员推断 / 属性推断 / 数据抽取成功率拉高 1–2 个数量级；他们的标志性数字是——只插入 8 条投毒样本进 CIFAR-10（占该实验抽样训练集约 0.03%），就能把某张目标图像的成员推断真正例率（TPR）从 7% 抬到 59%（FPR 0.1% 处）。而 web 级语料投毒便宜可行：买过期域名做「分裂视图」，约 \\$60 就能控制 LAION-400M 的约 0.01%（Carlini 等，S&P 2024——这是可行性佐证，本身不是一次隐私泄露结果）。结论先行：训练数据完整性 = 隐私问题；不可信的数据源是隐私放大器。",
+      "summary_en": "poisoning isn't only an integrity (\"corrupt the model\") problem — it's a privacy problem too. Tramèr et al. (*Truth Serum*, CCS 2022) show that inserting a tiny amount (< 0.1%) of carefully crafted poison into the training set raises the success of membership inference / attribute inference / data extraction against other, non-poisoned records by 1–2 orders of magnitude; their signature number — inserting just 8 poison samples into CIFAR-10 (about 0.03% of that sampled training set) lifts membership-inference true-positive rate (TPR) from 7% to 59% (at 0.1% FPR) for a targeted image. And web-scale poisoning is cheap and practical: by buying expired domains for a \"split-view,\" you can control ~0.01% of LAION-400M for ~\\$60 (Carlini et al., S&P 2024 — this is a feasibility result, not itself a privacy-leak result). Conclusion first: training-data integrity = a privacy problem; an untrusted data source is a privacy amplifier.",
       "tags": [
         "数据投毒",
         "隐私放大",
@@ -7508,9 +7801,12 @@
       "phase": "",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "语料快照域名或投毒权限变化",
+        "目标知识或 DP 保护单位变化"
+      ],
       "source_version": "",
       "maturity": "研究",
       "maturity_en": "Research",
@@ -7523,6 +7819,7 @@
       ],
       "era": "卷二 · 记忆与抽取",
       "sources": [
+        "https://arxiv.org/html/2204.00032",
         "https://dl.acm.org/doi/10.1145/3548606.3560554",
         "https://arxiv.org/abs/2302.10149"
       ],
@@ -7566,9 +7863,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "候选空间排名估计或注入策略变化",
+        "模型族或抽取攻击变化"
+      ],
       "source_version": "",
       "maturity": "研究",
       "maturity_en": "Research",
@@ -7624,9 +7924,12 @@
       "phase": "",
       "severity": "中",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-04-29",
+      "review_triggers": [
+        "去重算法阈值或增量语料变化",
+        "训练预算或 DP 邻接定义变化"
+      ],
       "source_version": "",
       "maturity": "生产",
       "maturity_en": "Production",
@@ -7681,9 +7984,12 @@
       "phase": "",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "模型端点或查询限额变化",
+        "抽取方法或语料来源证据变化"
+      ],
       "source_version": "",
       "maturity": "研究",
       "maturity_en": "Research",
@@ -7774,8 +8080,8 @@
       "kind": "entry",
       "title": "Agent 工具外联数据外泄：藏在内容里的一段指令，就可能驱使我把私有上下文经工具发出去",
       "title_en": "Agent tool-use exfiltration: one instruction hidden in content can drive me to send private context out through a tool",
-      "summary": "当我被接上工具（读网页 / 读文件 / 发 HTTP / 发邮件 / 查库）、又会读到不可信内容时，攻击者只要把指令藏进我会读到的内容里（间接提示注入），就可能驱使我把手里的私有上下文经工具调用发出去。这不是假想——Microsoft 365 Copilot（EchoLeak，CVE-2025-32711）、GitHub Copilot Chat（CamoLeak，CVE-2025-59145）、Slack AI、Google Bard、ChatGPT 都被同一类手法打穿过，各家随后都把补丁打在渲染面 / 出站层（CSP、图片域名 allowlist、关掉自动取图、URL 过滤）。结论先行：隐私边界不能止于「模型不主动泄露」——一旦我能行动（有工具 / 能渲染外链）且会读不可信内容，私有数据就有了外泄通道。要从架构上掐：工具最小权限、出站受控、把我读到的一切当不可信。",
-      "summary_en": "when I'm wired to tools (read web / read files / make HTTP / send email / query a DB) and I also read untrusted content, an attacker only has to hide an instruction in content I'll read (indirect prompt injection) to drive me to send my private context out through a tool call. This isn't hypothetical — Microsoft 365 Copilot (EchoLeak, CVE-2025-32711), GitHub Copilot Chat (CamoLeak, CVE-2025-59145), Slack AI, Google Bard, and ChatGPT were all broken by the same class of attack, and each vendor then put the fix at the render / egress layer (CSP, image-domain allowlist, disabling auto-fetch of images, URL filtering). Conclusion first: the privacy boundary can't stop at \"the model won't leak on its own\" — once I can act (have tools / can render external links) and read untrusted content, private data has an exfiltration channel. Cut it at the architecture level: least-privilege tools, controlled egress, and treat everything I read as untrusted.",
+      "summary": "Agent 读取不可信内容又能调用工具或渲染外链时，注入可能把私有上下文带出。CamoLeak 历史披露与 2026 Auto Mode 实验红队支持这一攻击面，包括跨上下文、压缩与子 agent。权限、出站目的和数据接收授权须由可信系统约束，不能只靠模型承诺。",
+      "summary_en": "an agent that reads untrusted content and calls tools or renders external links may send private context out through injection. Historical CamoLeak disclosure and the 2026 Auto Mode red-team experiment support this surface, including cross-context, compaction, and subagent paths. Trusted systems must constrain permissions, egress destinations, and data-recipient authorization rather than relying on model promises.",
       "tags": [
         "Agent 安全",
         "间接提示注入",
@@ -7799,9 +8105,12 @@
       "phase": "",
       "severity": "高",
       "evidence": "安全报告",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-12-29",
+      "review_triggers": [
+        "工具渲染器权限或监控覆盖变化",
+        "跨 agent 压缩摘要或外泄攻击变化"
+      ],
       "source_version": "",
       "maturity": "研究",
       "maturity_en": "Research",
@@ -7813,14 +8122,8 @@
       ],
       "era": "卷四 · RAG 与 Agent",
       "sources": [
-        "https://www.aim.security/post/breaking-down-echoleak-the-first-zero-click-ai-vulnerability-enabling-data-exfiltration-from-m365-copilot",
-        "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-32711",
         "https://www.legitsecurity.com/blog/camoleak-critical-github-copilot-vulnerability-leaks-private-source-code",
-        "https://promptarmor.substack.com/p/data-exfiltration-from-slack-ai-via",
-        "https://embracethered.com/blog/posts/2023/google-bard-data-exfiltration/",
-        "https://embracethered.com/blog/posts/2023/openai-data-exfiltration-first-mitigations-implemented/",
-        "https://arxiv.org/abs/2302.12173",
-        "https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf"
+        "https://alignment.anthropic.com/2026/red-teaming-auto-mode/"
       ],
       "url": "https://xuebinma.github.io/AIWiki/privacy/rag-agents/agent-tool-exfiltration",
       "url_en": "https://xuebinma.github.io/AIWiki/en/privacy/rag-agents/agent-tool-exfiltration",
@@ -7900,8 +8203,8 @@
       "kind": "entry",
       "title": "跨会话 / 跨租户记忆串味：共享的记忆 / 缓存若不按用户隔离，我会把一个人的数据端给另一个人",
       "title_en": "Cross-session / cross-tenant memory bleed: shared memory / cache without per-user isolation, and I hand one person's data to another",
-      "summary": "当很多用户共享同一套记忆 / 会话 / 缓存基础设施，而它没有严格按用户隔离时，我可能把一个人的对话历史、记忆、甚至账单信息端给另一个人。这不是「我记错了」——是基础设施层的租户隔离失效。真实案例：2023-03 ChatGPT 因 redis-py 的并发竞态，部分用户看到他人对话标题与新会话首条消息，且约 1.2% 的活跃 Plus 用户的姓名 / 邮箱 / 账单地址 / 卡号后四位在一个约 9 小时的窗口里被串（OpenAI 官方复盘）。结论先行：跨会话隔离是系统架构的职责，不能靠「我自觉别串」——每一层缓存 / 记忆 / 会话都按用户作用域，并发安全 + 归属校验 + 审计缺一不可。",
-      "summary_en": "when many users share one memory / session / cache infrastructure and it isn't strictly isolated per user, I may hand one person's conversation history, memory, even billing info to another. This isn't \"I misremembered\" — it's tenant-isolation failure at the infrastructure layer. Real case: in March 2023 a redis-py concurrency race in ChatGPT let some users see others' chat titles and the first message of a new conversation, and about 1.2% of active Plus users had their name / email / billing address / last-four card digits exposed in a roughly 9-hour window (OpenAI's official postmortem). Conclusion first: cross-session isolation is the system's responsibility, not \"I'll be careful not to mix things up\" — scope every cache / memory / session by user, with concurrency safety + ownership checks + auditing.",
+      "summary": "共享会话/记忆/缓存若失去身份与权限绑定，可能把 A 的数据返回 B。OpenAI2023 事故中 1.2% 是特定 9 小时活跃 Plus 订户付款信息可能暴露的范围，不等于这些数据全部被实际看到。隔离靠系统认证、授权、连接并发安全与归属校验，不靠模型口头承诺。",
+      "summary_en": "shared sessions/memory/caches can return A’s data to B if identity and permission binding fail. In OpenAI’s 2023 incident, 1.2% describes possible payment-data exposure among Plus subscribers active in a specific nine-hour window, not confirmed viewing of every record. Isolation relies on system authentication, authorization, pool concurrency, and ownership checks, not model promises.",
       "tags": [
         "跨会话串味",
         "多租户",
@@ -7927,9 +8230,12 @@
       "phase": "",
       "severity": "高",
       "evidence": "安全报告",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "身份缓存键或权限变化",
+        "连接池取消逻辑或存储版本变化"
+      ],
       "source_version": "",
       "maturity": "生产",
       "maturity_en": "Production",
@@ -7958,8 +8264,8 @@
       "kind": "entry",
       "title": "嵌入反演：把文本变成向量不等于匿名——向量能被还原回原文、甚至逐字",
       "title_en": "Embedding inversion: turning text into a vector is not anonymization — vectors can be recovered back to the original text, sometimes verbatim",
-      "summary": "把私有文本嵌入成向量、存进向量库，不等于匿名化——嵌入可被反演回原文。Song & Raghunathan（CCS 2020）在其设置下从句嵌入恢复出输入约 50–70% 的词（词集，无序）；Morris 等的 vec2text（EMNLP 2023）对 GTR-base 嵌入把 32-token 短文本逐字精确还原 92%。结论先行：嵌入是私有数据的另一种表示，不是脱敏后的产物——按「可还原回原文」来加密、做访问控制、设保留期，别因为「我们只存了向量」就放松。",
-      "summary_en": "embedding private text into vectors and storing them in a vector store is not anonymization — embeddings can be inverted back to the original text. Song & Raghunathan (CCS 2020) recovered roughly 50–70% of the input words (a word set, no order) from sentence embeddings in their setup; Morris et al.'s vec2text (EMNLP 2023) recovered 92% of 32-token text inputs exactly against GTR-base embeddings. Conclusion first: an embedding is just another representation of private data, not a de-identified artifact — encrypt it, access-control it, and set its retention as if it could be turned back into the original text; don't relax just because \"we only stored vectors.\"",
+      "summary": "文本向量不自动匿名。Song 与 Raghunathan 在所测句嵌入上报告词集恢复 F1 约 0.5–0.7；vec2text 在指定 GTR-base、32-token 输入与迭代攻击设置中达到 92% 逐字恢复。指标、编码器、文本长度与对手能力不同，不能合并成所有向量的统一泄露率。",
+      "summary_en": "text vectors are not automatically anonymous. Song and Raghunathan report word-set recovery F1 around 0.5–0.7 for evaluated sentence embeddings; vec2text reaches 92% exact recovery for specified GTR-base, 32-token inputs and iterative attacks. Different metrics, encoders, lengths, and adversary capabilities do not form one leakage rate for all vectors.",
       "tags": [
         "嵌入反演",
         "向量反演",
@@ -7983,9 +8289,12 @@
       "phase": "",
       "severity": "高",
       "evidence": "研究支持",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2027-01-29",
+      "review_triggers": [
+        "编码器向量精度或反演攻击变化",
+        "导出权限或存储加密边界变化"
+      ],
       "source_version": "",
       "maturity": "研究",
       "maturity_en": "Research",
@@ -7998,9 +8307,9 @@
       ],
       "era": "卷四 · RAG 与 Agent",
       "sources": [
-        "https://dl.acm.org/doi/10.1145/3372297.3417270",
+        "https://arxiv.org/abs/2004.00053",
         "https://aclanthology.org/2023.emnlp-main.765/",
-        "https://docs.pinecone.io/guides/production/security-overview",
+        "https://docs.pinecone.io/admin/security/security-overview",
         "https://learn.microsoft.com/en-us/azure/search/search-security-manage-encryption-keys",
         "https://www.edpb.europa.eu/system/files/2024-12/edpb_opinion_202428_ai-models_en.pdf"
       ],
@@ -8210,8 +8519,8 @@
       "kind": "entry",
       "title": "多租户 RAG 检索泄露：向量不是匿名，按用户过滤也未必是隔离",
       "title_en": "Multi-tenant RAG retrieval leakage: vectors aren't anonymous, and filtering by user isn't always isolation",
-      "summary": "在多租户 RAG 里，两个直觉都靠不住——「向量化了就匿名了」和「按用户过滤了就隔离了」。在已研究的 embedding 设置下，向量可被反演回近似原文（含 PII），所以别把它当匿名化结果；检索是按相似度排序、不是按权限，ACL 若配在检索之后而非之前，最相关的那块私有 chunk 可能来自别的租户；而共享缓存 / 长期 memory 的一个边界 bug，就能把一个用户的私有上下文带进另一个会话。",
-      "summary_en": "in multi-tenant RAG, two intuitions both fail — \"vectorized means anonymized\" and \"filtered by user means isolated.\" In some studied embedding settings a vector can be inverted back to approximate original text (including PII), so don't treat it as anonymization; retrieval ranks by similarity, not permission, so if the ACL runs after retrieval instead of before it, the most relevant private chunk may come from another tenant; and a single boundary bug in a shared cache / long-term memory can carry one user's private context into another's session.",
+      "summary": "多租户 RAG 的隐私边界由认证身份、文档授权、检索/重排/上下文和缓存共同决定。向量不是匿名化，namespace 也不是调用者授权。过滤要在越权内容离开可信边界前生效；检索服务内部的 post-filter 不自动等于泄露，更不能把 Azure security trimming 一概称为应用层后过滤。",
+      "summary_en": "multi-tenant RAG privacy depends on authenticated identity, document authorization, retrieval / re-ranking / context, and caches together. Vectors are not anonymization, and namespaces do not authorize callers. Filter before unauthorized content leaves the trusted boundary; post-filtering inside a trusted retrieval service is not inherently a disclosure, and Azure security trimming is not invariably application-side post-filtering.",
       "tags": [
         "RAG",
         "多租户",
@@ -8235,9 +8544,12 @@
       "phase": "",
       "severity": "高",
       "evidence": "官方文档",
-      "verified_at": "",
-      "review_after": "",
-      "review_triggers": [],
+      "verified_at": "2026-10-29",
+      "review_after": "2026-12-29",
+      "review_triggers": [
+        "ACL 租户 API 或 RLS 角色变化",
+        "重排日志缓存或产品资格变化"
+      ],
       "source_version": "",
       "maturity": "试验",
       "maturity_en": "Experimental",
@@ -8250,6 +8562,7 @@
       ],
       "era": "卷四 · RAG 与 Agent",
       "sources": [
+        "https://learn.microsoft.com/en-us/azure/search/vector-search-filters",
         "https://docs.pinecone.io/guides/index-data/implement-multitenancy",
         "https://learn.microsoft.com/en-us/azure/search/search-security-trimming-for-azure-search",
         "https://docs.weaviate.io/weaviate/manage-collections/multi-tenancy",

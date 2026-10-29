@@ -87,7 +87,7 @@
     },
     "vlm-geolocation-inference": {
       "severity": "高",
-      "maturity": "生产",
+      "maturity": "研究",
       "technique": "推断类攻击"
     },
     "agent-privacy-benchmark": {
@@ -314,7 +314,7 @@
     },
     "vlm-geolocation-inference": {
       "severity": "High",
-      "maturity": "Production",
+      "maturity": "Research",
       "technique": "Inference attacks (MIA / inversion / attribute)"
     },
     "agent-privacy-benchmark": {
