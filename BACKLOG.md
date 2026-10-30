@@ -1,9 +1,34 @@
 # 选题储备库 / Backlog
 
-本项目是**百科**，目标是把各阶段的「AI 使用误区」铺到足够密。这份清单是看板：记录候选选题、状态、认领者，按批次推进。
+本项目是**百科**，目标是把各阶段的「AI 使用误区」铺到足够密。这份清单记录尚待处理的提案、持续维护事项与已完成的选题。
 
-> **状态**：⬜ 待写 ｜ 🟡 进行中 ｜ ✅ 已发布
-> **规模目标（第一版完整，按误区聚集程度加权）**：约 50–66 条；长期随模型/版本迭代上不封顶。
+> **状态**：⬜ 待做 / 待评估 ｜ 🔄 持续维护 ｜ ⏸️ 待外部证据触发 ｜ ✅ 仓库已落地 ｜ ❌ 历史取舍未采纳。
+> **本次校准**：2026-10-30，对照仓库 `2920ff1` 的正文、中英镜像、配置、脚本及验收记录。✅ 表示对应仓库工件已存在并满足所述范围，不表示线上已更新，也不表示每篇文章的配方或实验均已运行。历史批次记录见文末。
+
+## 当前行动清单
+
+以下均为未完成或需评估的提案，不代表已经认领或正在实施。
+
+- ⬜ **主题首页角色 CTA（可选扩展）**：[编码引言](docs/intro.md)及[英文镜像](i18n/en/docusaurus-plugin-content-docs/current/intro.md)已提供工程师、架构师、发布 / 安全三个角色入口及 `/roles` 回链；[主题首页](src/pages/index.mdx)及[英文首页](i18n/en/docusaurus-plugin-content-pages/index.mdx)仍按两大主题分流。若希望首次访问即按角色进入，可评估把编码引言的入口移植到主题首页，保留两主题的层级。
+- ⬜ **`evidenceLevel` 证据强度轴**：现有 `evidence` 是作者依据来源记录的**证据类型**；[贡献指南](CONTRIBUTING.md)规定选取规则，[索引脚本](scripts/gen-mcp-index.js)直接读取 frontmatter，尚无从 `sources` 自动分类强度的实现。历史提案 `incident-backed` / `mechanism-documented` / `experience-based` / `speculative` 仅为候选取值，须先明确可重复的派生规则、混合证据及冲突处理，再评估术语、徽章和存量迁移，不能把来源类别当成结论强度。
+- ⬜ **阶段总论**：各阶段已有 `_category_.json` 简介；原提案是在阶段入口补「这一阶段 AI 最容易整体性翻车的地方」的机制总论，并串起条目。简介存在不等于这一叙事层已完成，需先确认增量价值。
+- ⬜ **人类职责边界（升级角色页）**：[角色页](src/pages/roles.mdx)及[英文镜像](i18n/en/docusaurus-plugin-content-pages/roles.mdx)已有各角色关注点和标签入口；尚缺逐角色明确「哪些判断不可外包」的责任层。
+- ⬜ **案例卡片标准化**：[案例规范](CONTRIBUTING.md)和现有案例已包含时间、影响、来源及「印证 / 不证明」等内容；若继续做统一卡片，应先定义耐久字段与呈现方式。修复状态、工具版本按案例条件说明，不设为每案必显的统一字段；现有内容大半已具备，是否仍需统一字段或呈现方式待评估，不预设新增组件。
+- ⬜ **必读 20 条轻量治理**：[页面](docs/core-20.mdx)与[写作规范](STYLE-GUIDE.md)已有入选依据；原提案中的 CONTRIBUTING 进出准则及页顶「非固定榜单」说明尚未齐备。保留轻量完善，四维数字评分仍不采纳。
+- ⬜ **模板按使用者分组**：[分类说明](docs/toolkit/_category_.json)及[英文分类译文](i18n/en/docusaurus-plugin-content-docs/current.json)仍是通用工件介绍；可评估在 description 增加按角色 / 任务的分组地图，不必新增子目录和分类翻译键。
+- ⬜ **后续策展专题**：AI Code Review 已完成；数据库迁移、多 agent 协作、成本治理可按需要评估聚合入口。已有 [schema 设计](docs/03-architecture/schema-design-sloppy.mdx)、[子代理边界](docs/00-setup-collaboration/subagent-no-boundaries.mdx)、[成本循环](docs/05-implementation/runaway-agent-loops.mdx)等正文，不等于这些专题页已经完成，也不应为专题重复立相同根因条目。
+- ⬜ **可派生的成熟度标记**：`case-backed`（被案例反链）/ `template-linked`（被模板引用）仍为提案；[当前元数据组件](src/components/PitfallMeta/index.js)未实现这类状态轴。若做，仅收可机械派生的关系，不加主观 `draft/reviewed` 评级。
+- ⬜ **最小协作工作流入口**：已有[小 bug 修复](docs/toolkit/workflow-small-bugfix.mdx)、[大重构](docs/toolkit/workflow-large-refactor.mdx)、[需求到发布](docs/toolkit/workflow-idea-to-release.mdx)、[AI 与人审分工](docs/toolkit/workflow-ai-human-review.mdx)及[最小安全基线](docs/threat-model.mdx)，尚未形成一个统一的端到端最小协作入口。先评估能否通过现有工件串联解决；这与历史上未采纳的独立「正用法」站区不是同一实现。
+- ⏸️ **较弱的工具差异候选**：保留工作区信任、内容排除与数据使用策略等研究方向。2026-06/07 对 Cursor / Copilot 的观察只是历史候选，不能作为当前默认值；有足够一手证据且能说明独特防法时，再决定并入既有条目还是单列。当前核查入口见[工具矩阵](docs/tool-matrix.mdx)。
+
+## 持续维护
+
+- 🔄 **来源与适用边界**：工程实践优先已写入 [STYLE-GUIDE](STYLE-GUIDE.md) 和[作者 skill](.claude/skills/aiwiki-entry-author/SKILL.md)，属于已采用的规范；后续持续逐条执行，区分产品行为、受测研究和工程推断，不把规范存在当成所有结论永久有效。
+- 🔄 **有意义的例外**：[条目模板](docs/_templates/entry-template.md)和写作规范已有可选「什么时候例外」。随事实复核补充适用边界，没有实质例外时可省略，不再按主题一概规定永不添加；历史「已回填 33 条」仅是当时批次记录。
+- 🔄 **案例增补**：案例库基线已完成；仅在出现真实、公开、可核查且增加独立机制信息的案例时补充，保持中英、双链及「不证明」边界。事故披露不表示当前版本仍受影响。
+- 🔄 **工具矩阵与工具差异**：机制级入口已完成；按[矩阵的核查日期及来源](docs/tool-matrix.mdx)和条目的复核触发条件维护，区分 CLI / IDE / 云端、版本、平台与权限模式。新增工具或差异需有证据；某文未覆盖不等于产品没有能力。
+- 🔄 **统计、索引与镜像**：新增或实质修订时同步目录、[机制索引](docs/mechanisms.mdx)、中英元数据及机器索引；使用 [check:counts](scripts/check-counts.js)、[check:mirror-deep](scripts/check-mirror-deep.js) 和[内容检查](scripts/check-content.js)防漂移。脚本通过只证明其检查范围，不能替代逐条来源与配方验证。
+- 🔄 **定期 / 事件触发复核**：遵循[复核治理](CONTRIBUTING.md)及文章的 `review_after` / `review_triggers`。2026-10-29 的 105 条旧文复核已结项，后续到期维护是新一轮工作，不能继续挂作同一批「进行中」。
 
 ## 原则
 
@@ -11,39 +36,42 @@
 - **加权分布**：误区在「编码实现」最密，「灵感/详细设计」天然薄，别平均摊。
 - **活文档**：模型每次大更新都可能带来新误区，持续新增。
 
-## 进度总览
+## 当前进度总览
 
-| 阶段 | 目标 | 已发布 |
-|------|------|--------|
-| 00 准备与协作 | 8–10（+4 治理/安全子簇） | 17 |
-| 01 灵感与可行性 | 4–6 | 6 |
-| 02 需求分析 | 5–7 | 6 |
-| 03 概要设计 | 5–7 | 7 |
-| 04 详细设计 | 4–6 | 6 |
-| 05 编码实现 | 12–15 | 15 |
-| 06 测试 | 5–7（+4 AI 审查子簇） | 10 |
-| 07 验收与发布 | 6–8（+2 治理/安全子簇） | 10 |
-| **合计** | 50–66 | **77** |
+| 阶段 | 仓库已收录 |
+|------|------------|
+| 00 准备与协作 | 18 |
+| 01 灵感与可行性 | 6 |
+| 02 需求分析 | 6 |
+| 03 概要设计 | 7 |
+| 04 详细设计 | 8 |
+| 05 编码实现 | 17 |
+| 06 测试 | 12 |
+| 07 验收与发布 | 11 |
+| **合计** | **85** |
 
-> 另有：案例库 5 例（`docs/cases/`）+ 索引页 `/tool-matrix`、`/mechanisms`（机制索引）、`/core-20`（必读 20 条）。条数以 `docs/` 实际为准。
+> 口径：`docs/00-*` 至 `docs/07-*` 的误区正文，不含案例、模板、索引和隐私主题。配套目录见[案例库](docs/cases/)、[模板库](docs/toolkit/)及 [README 现状](README.zh-CN.md)；计数以实际文件和检查脚本为准。以下是选题收录记录，具体论断、版本和适用条件以正文为准。
 
 ## 00 准备与协作
 
 - ✅ 一上来就把所有权限 / 自动确认都给我（过度授权，缺少 scope 边界）
 - ✅ 把该进 settings 的东西塞进 CLAUDE.md（settings 管「能做什么」、CLAUDE.md 管「该知道什么」）
-- ✅ 该用 hooks 保证「必须执行」的事，却只写在提示词里
+- ✅ [hook 与提示词的执行边界](docs/00-setup-collaboration/hooks-not-prompts.mdx)：明确覆盖事件、调用路径及失败处理。
 - ✅ 给 MCP 过多 / 过敏感的访问，扩大提示注入面
 - ✅ 多个 subagent 协作时没有清晰职责边界与共享状态契约
-- ✅ 不用 plan mode 就直接放手让我改
+- ✅ [按任务风险使用计划](docs/00-setup-collaboration/skipping-plan-mode.mdx)，避免复杂或高后果任务未经澄清就执行。
 - ✅ 没接版本化文档（如 Context7），放任我上网搜文档、猜 API
-- ✅ 把项目专属流程塞进 CLAUDE.md 而不是做成 skill（progressive disclosure）
+- ✅ [指令与可复用流程分层](docs/00-setup-collaboration/process-in-claudemd-not-skill.mdx)：skill 组织流程，仍须验证执行。
 - ✅ 你越来越懒得查我：自动化偏误 / 技能萎缩 / 橡皮图章式审查（扩充，研究后新增）
 - ✅ 破坏性 / 不可逆操作：删库、抹备份、无视冻结期（扩充，取材真实事故）
 - ✅ 自主性 / 审批边界策略：按风险分级设人审门（治理子簇，研究支持）
 - ✅ 数据边界策略：哪些数据绝不喂给外部 AI（治理子簇，OWASP LLM02）
 - ✅ 沙箱 / 文件系统隔离：软权限 vs OS 级硬隔离（基础设施安全子簇，官方文档）
 - ✅ 网络出口控制：砍掉致命三件套「对外通信」腿（基础设施安全子簇，SSRF / lethal trifecta）
-- ✅ 世界可写配置 → 跨工具提权：从 `C:\ProgramData` 等世界可写路径载入会执行的配置（CVE-2026-35603 类，四工具同根因，安全报告）
+- ✅ [世界可写配置提权](docs/00-setup-collaboration/world-writable-config-escalation.mdx)：历史漏洞与配置加载风险，按正文限定 ACL、受测工具版本和进程权限。
+- ✅ [Gemini 文件夹信任继承](docs/00-setup-collaboration/gemini-folder-trust-inheritance.mdx)
+- ✅ [Cursor ignore 文件的适用边界](docs/00-setup-collaboration/cursor-ignore-best-effort.mdx)
+- ✅ [Skill 与插件供应链](docs/00-setup-collaboration/skill-plugin-supply-chain.mdx)
 
 ## 01 灵感与可行性
 
@@ -81,6 +109,8 @@
 - ✅ 我引入性能反模式而不自知
 - ✅ 并发 / 竞态：单线程跑得对，一并发就出错（查缺补漏）
 - ✅ 魔数 / 硬编码：把该配置的值写死进代码（查缺补漏）
+- ✅ [文件系统事件与写入顺序假设](docs/04-detailed-design/fs-event-ordering.mdx)
+- ✅ [预览与执行不同源](docs/04-detailed-design/preview-and-execution-diverge.mdx)
 
 ## 05 编码实现
 
@@ -93,12 +123,14 @@
 - ✅ 我不引用具体文件状态，按「干净重来」覆盖了你的改动
 - ✅ 长重构中途我跟丢了「已经改过哪些文件」
 - ✅ 退化式调试循环 / pattern locking：反复套失败修法越改越糟（扩充）
-- ✅ 上下文腐烂 / lost-in-the-middle：上下文越长越丢中段（扩充）
+- ✅ [上下文腐烂与关键信息利用](docs/05-implementation/context-rot.mdx)：按模型、任务、干扰与位置条件理解受测结论。
 - ✅ 吞掉异常 / 空 catch 让它「跑通」（查缺补漏，区别于退化调试循环）
 - ✅ 开发期提示注入：读了恶意 README/issue/rules 就被劫持（查缺补漏）
 - ✅ Agent 失控循环烧 token / 成本失控（查缺补漏，成本维度）
 - ✅ 注释 / 文档与代码漂移（查缺补漏）
 - ✅ Git 卫生：巨型提交 / 烂提交信息 / 提交垃圾（查缺补漏）
+- ✅ [长任务恢复、重试与幂等](docs/05-implementation/durable-tasks-retry-idempotency.mdx)
+- ✅ [外部命令继承配置](docs/05-implementation/shelling-out-inherits-config.mdx)
 
 ## 06 测试
 
@@ -112,6 +144,8 @@
 - ✅ 审查只挑表面 / 风格，漏语义与逻辑 bug（AI 审查子簇）
 - ✅ 只看 diff 不看上下文的「上下文饥饿」审查（AI 审查子簇）
 - ✅ 审查谄媚 + 橡皮图章：迎合作者框架 / 人盖章 AI 审查（AI 审查子簇）
+- ✅ [测试 fixture 造假](docs/06-testing/test-fixture-fabrication.mdx)
+- ✅ [代理评测不能只靠单元测试](docs/06-testing/agent-evals-not-just-unit-tests.mdx)
 
 ## 07 验收与发布
 
@@ -125,65 +159,35 @@
 - ✅ License / IP 污染：逐字复现训练数据里受版权/copyleft 保护的代码（查缺补漏）
 - ✅ AI 生成代码的归属 / 责任 / IP 治理（治理子簇，US Copyright Office）
 - ✅ 日志注入 / 审计链污染：审计完整性与注入面（基础设施安全子簇，OWASP CWE-117）
+- ✅ [文档限制不能替代防护](docs/07-acceptance-release/documented-limits-not-defenses.mdx)
 
 ---
 
-## 结构 / 流程待办（评审与 refresh 沉淀）
+## 已完成的结构与流程
 
-上面是**逐条选题**看板；这一区记**结构 / 流程层**的改动——来自外部评审或 `aiwiki-research-refresh` 分诊后「认同但本轮不做」的项。
+- ✅ **案例库基线**：目前收录 [Replit](docs/cases/replit-prod-db-deletion.mdx)、[Samsung](docs/cases/samsung-chatgpt-source-leak.mdx)、[Gemini Tracebit](docs/cases/gemini-cli-tracebit-rce.mdx)、[Codex 配置 RCE](docs/cases/codex-cli-config-rce.mdx)、[Copilot CamoLeak](docs/cases/github-copilot-camoleak.mdx)，均有英文镜像及「印证 / 不证明」块。旧「脚手架 + 2 例」描述已被后续增补取代；持续补例见上，不再标作正在搭建。
+- ✅ **工具矩阵机制级升级**：[矩阵](docs/tool-matrix.mdx)及[英文镜像](i18n/en/docusaurus-plugin-content-docs/current/tool-matrix.mdx)已按工具列出本次已核机制、仍需确认的边界、问题入口及历史案例。已满足原「让读者知道差异是什么」的意图，无需强行恢复旧勾选网格或「稳定 / 版本观察」两层形状；当前事实以页面核查日期及来源为准。
+- ✅ **短导航与适用范围回填**：本次逐文件核对了编号条目的中英 frontmatter，`sidebar_label` 与 `applies_to` 均无缺失；「01–07 尚未回填」及「只在 Gemini 试点」已过时。依据见[写作规范](STYLE-GUIDE.md)、[术语](terminology.md)及 [docs](docs/) / [英文正文](i18n/en/docusaurus-plugin-content-docs/current/)。字段存在证明覆盖，不代表标签含义无需人工复核。
+- ✅ **编码引言角色 CTA**：[中文](docs/intro.md)和[英文](i18n/en/docusaurus-plugin-content-docs/current/intro.md)均有角色按钮；主题首页的可选扩展另列当前行动，避免混为一项。
+- ✅ **分类页卡片徽章**：[DocCard](src/theme/DocCard/index.js)展示严重度 / 角色等已有元数据，[生成器](scripts/gen-entry-meta.js)从 frontmatter 派生，[prebuild](package.json)已接入。未因此新增主观成熟度或来源强度分类器。
+- ✅ **统计与镜像闸门**：[计数检查](scripts/check-counts.js)覆盖手写现状，[深层镜像检查](scripts/check-mirror-deep.js)比较结构与链接，均接入 [CI](.github/workflows/lint.yml)。历史验收的条目数 / 镜像对数只是当时基线，当前口径见进度表与 [README](README.zh-CN.md)。
+- ✅ **模板库与适用边界**：[目录](docs/toolkit/)及[英文镜像](i18n/en/docusaurus-plugin-content-docs/current/toolkit/)已有基础、工作流、治理工件，以及后续的[提示结构骨架](docs/toolkit/prompt-structure-skeleton.mdx)、[代理升级评测模板](docs/toolkit/agent-upgrade-eval-template.mdx)；各模板已有适用边界。旧「12 件 / 仅 5 件补边界」是批次范围，不是当前覆盖声明；工件存在不表示其配方均已实际运行。
+- ✅ **安全策展与最小安全基线**：[威胁模型页](docs/threat-model.mdx)及[英文镜像](i18n/en/docusaurus-plugin-content-docs/current/threat-model.mdx)聚合安全 / 治理条目、案例和基线，并有[导航入口](docusaurus.config.js)。这里的基线是已有清单，不能据此宣称安全控制均已在部署中生效。
+- ✅ **机制索引与必读入口**：[机制索引](docs/mechanisms.mdx)按七个主因桶策展，[内容检查](scripts/check-content.js)检查每篇误区恰好出现一次；[必读 20 条](docs/core-20.mdx)及中英引言提供优先阅读入口。旧「全 76 条」已被当前目录取代；定量评分提案仍未采纳。
+- ✅ **AI Code Review 专题**：[专题页](docs/code-review.mdx)及[英文镜像](i18n/en/docusaurus-plugin-content-docs/current/code-review.mdx)串起自审、漏逻辑、上下文不足与谄媚等审查条目和分工工件。其余策展专题仍待评估，不继续用「批次一进行中」代表整个方向。
+- ✅ **fixture / 文件事件候选落地**：[测试数据造假](docs/06-testing/test-fixture-fabrication.mdx)、[文件事件顺序](docs/04-detailed-design/fs-event-ordering.mdx)及英文镜像已收录，并进入中英机制索引；不再是等待挑选的候选。正文存在和文档复核不等于其中每个示例均已执行。
+- ✅ **自主审批 / 测试闭环独立条目**：[自主审批边界](docs/00-setup-collaboration/autonomy-approval-boundaries.mdx)与[测试闭环](docs/06-testing/tests-as-verification-loop.mdx)均已发布到仓库并有英文镜像。历史「仅并入小节，不另立条目」的决定已被后续实现取代；保留当前不同机制与工程用途。
+- ✅ **首次刷新验收与 105 条旧文复核**：[初次验收](ACCEPTANCE-20261029.md)、[总览](REVIEW-SUMMARY-20261029.md)及三份逐篇记录（[编码边界](REVIEW-coding-boundaries-20261029.md)、[工程实践](REVIEW-coding-engineering-20261029.md)、[隐私](REVIEW-privacy-20261029.md)）记录已完成的来源复核、中英修订与验证。105 指该批旧文清单，不是当前全站文章数；验收限记录所述源码、构建、抽查与测试，未声称所有配方重跑或线上已更新。
 
-> **铁律**：评审 / 研究里「认同但暂不做」的结论，必须落到这里，**别只留在对话**——会话压缩会把它丢掉（这份 backlog 正是为补这个洞而扩）。
-> 状态：⬜ 待做 ｜ 🟡 进行中 ｜ ⏸️ 待触发（依赖外部条件）｜ ✅ 已落地 ｜ ❌ 评估后不做
+## 历史快照与取舍
 
-### 待做
+本节只解释旧记录如何迁移，不是当前行动指令，也不构成新一轮撰写、发布或部署授权。
 
-- 🟡 **来源重心：工程实践 > 学术论文（用户指示 2026-06，最高优先）**：写条目 / 跑 `aiwiki-research-refresh` 时，以「**各公司在生产里实际怎么做 / 怎么翻过车**」为主线——厂商工程博客、事故复盘 / postmortem、厂商安全 & 数据治理 / 配置文档、真实部署与从业者一手账、开源工具 issue。**学术论文降为机制背书 / 佐证，不当头条证据。** 验证门槛不降（仍一手、可核、带条件 + 日期戳），换的是**主来源类型**。判据：能讲「X 公司这么做 / 这么出过事」就别只摆「Y 论文证明」。落地深度见对话确认（写进规范 / 回填存量）。
-- 🟡 **案例库**（评审 P2，杠杆最大）：真实、公开、可核查的事故 / 复盘案例集，每例映射到它印证的误区条目——给「机制推理」补上「真实世界确实这样翻过车」的硬证据。**已起**：`docs/cases/` 脚手架 + 2 例（Replit 代码冻结期删生产库、Samsung 源码泄密给 ChatGPT），中英镜像 + 与误区条目双链。后续持续补例。
-- 🟡 **各条「什么时候例外」小节**：进 `entry-template`，逐条回填「这条规则何时不适用」，免得把建议讲成教条。**进展**：模板加节 + 已回填 33 条（中英）——有真实工程例外的条目都已覆盖；近乎绝对的规则（编造来源、作弊测试、泄密、提示注入、许可合规等）按约定**不加**。
-- ✅ **分类页卡片**：swizzle `@theme/DocCard`，分类页每张卡片加 严重度 / 角色 徽章（元数据由 `scripts/gen-entry-meta.js` 从 frontmatter 派生，挂 prebuild）；不碰 `_category_.json` / i18n 键。
-- ✅ **核对并同步「现状」计数**（2026-07 评审修复）：`CLAUDE.md`「现状」与 `docs/core-20.mdx`（中英）的条目数已按实际 79 条同步（04 ×7、06 ×11）。**这是同一类债第三次发生**——根治已落地为 `check:counts` 闸门（2026-07 评审第二批）：声称 vs 实际不一致即 CI 红，措辞改动导致匹配不到也算失败（检查不允许静默失效）。同批还落了 `check:mirror-deep`（镜像结构对等：## 标题数 / admonition 序列 / 内链目标集 / slug），把「中文改了英文没跟」从人工纪律升级为闸门；153 对现状全绿作基线。
-- 🟡 **首屏角色 CTA 分流**（评审 P0）：首页首屏加「我是工程师 / 架构师 / 负责发布·安全」角色按钮，把新访客直接分流到 `/roles`，让角色入口承担转化。
-- ✅ **模板库 / 清单**（评审 P2，「拿来即用」）：`docs/toolkit/`「🧰 模板与清单」区共 **12 件**——5 件基础（权限配置、PR review 清单、任务启动、上线前安全清单、坏 → 好 prompt）+ 7 件新增（4 工作流模板：小 bug 修复 / 大重构 / 需求→发布 / AI+ 人 review 分工；3 治理模板：自主性风险分级 / 数据分级策略 / IP 披露清单，落地 G1/G2/G3），中英镜像 + 与误区双链。
-- ✅ **安全 threat-model 聚合页**（评审第六节方向 2 结构项）：`docs/threat-model.mdx`（`/threat-model`，navbar「安全索引 / Threat Model」第四浏览轴），按 7 个威胁维度把安全/治理条目 + 3 安全案例策展成威胁模型，中英镜像。
-- ✅ **跨工具「世界可写配置」误区**（工具扩展研究沉淀）：**CVE-2026-35603**——`C:\ProgramData` 配置目录默认人人可写，**Codex / Cursor / Gemini CLI / Claude Code 四家都中**，可植入「每轮必跑」命令做本地提权。已落地 `docs/00-setup-collaboration/world-writable-config-escalation.mdx`（站里首条真·四工具范式级条目，挂机制索引「工具与权限外溢」，evidence 安全报告，出处 Cymulate + GitLab Advisory）。CVE-2026-35603 = Claude Code 实例；四家修复状态打版本戳指 Cymulate。
-- ⬜ **其余工具差异候选（证据弱 / 跨工具，暂存）**：Cursor 的 VS Code Workspace-Trust 默认关（继承机制、无独有 bug）→ 宜作 `over-permissioning` 小节而非单条；GitHub Copilot 免费档训练默认 + content exclusion 不覆盖 agent（易过时）→ 训练默认作观察项、exclusion 事实可并入 `mcp-over-access`。来自 Cursor / Copilot 研究 List B 的弱项，按证据关未写。
-- 🟡 **docs/ 缺口扫描候选（2026-06，Explore 子代理跑出）**：①**最高杠杆方向——2026-07 已推进一波**：05/06 新增 5 条「工具差异」小节（/compact 时机、git 卫生、幻觉 API、改测试、审自己代码），全书带小节条目 12 → 17（另 2 条泛工具小节），矩阵加 5 行 + 补「泛工具小节」注 + 戳 2026-07；素材全部一手官方文档当场核（含 Gemini Code Assist 消费版 2026-07-17 关停这类时效样本）。**第三波（2026-07）再 +3**：00 权限外溢桶——网络出口失控（Claude Code 代理 allowlist / Codex 默认断网 / Gemini proxied 档）、沙箱条**泛工具小节升级为逐家**（Codex 默认开是招牌分叉、Copilot 沙箱 2026-06 起预览）、子代理无边界（Claude Code 与 Cursor 原生 subagents vs 其余无）；带小节条目 17 → 20（≈25%，目标达成），矩阵 +3 行。**弃写**：autonomy-approval-boundaries（over-permissioning 小节已覆盖四家审批档位，重复度 ~80%）；tests-as-verification-loop（与 gaming-tests 小节同根因高重合）——均按「根因判据」并入既有小节不另立。后续按新工具机制出现再逐波推进。新条候选：②**test fixture / mock 数据藏假数据**（06，区别于 `over-mocking` 的「过度打桩」，讲「测试数据本身不真」）；③**文件系统事件（create/modify/delete）顺序假设搞反**（04，编码 agent 特有：看得到时间戳却幻觉顺序保证，区别于真并发的竞态）。其余（db schema 迁移逆向兼容、多 subagent 并行编辑冲突）并入 #8 batch-two，不重复立项。均需用户挑选再写。
-
-- ⬜ **`evidenceLevel`：证据「强度」字段（评审第三轮 #5；本轮只留接口，未实现）**。现有 `evidence`（证据**类型**）已确定性派生自 `sources`；评审建议再加一个**强度**轴，但双方一致要求**必须可机械派生、不靠作者打分**，否则会变成新漂移源。已定取值（比「高/中/低」更不主观，确定性派生）：`incident-backed`（有 CVE/GHSA/真实事故/安全公司复盘）｜`mechanism-documented`（仅官方文档证明机制存在）｜`experience-based`（仅博客/社区/作者经验）｜`speculative`（无可核查来源）。**做法**：写进 `terminology.md` 的确定性派生规则 → 扩 `PitfallMeta` 徽章 → 回填全站。待规则定稿后单独 PR。
-- ⬜ **工具矩阵「机制格」升级（评审第三轮 #6；本轮未做）**：保留现有 ✓ 概览，另加一版**机制名级**矩阵（如「project memory / settings split」「trust / sandbox」级别），让读者看到「差异是什么」而不仅是「有差异」。**铁律**：只写机制名，**不写具体命令 / JSON 字段 / 默认值，除非带版本戳 + 出处**（延续 `CLAUDE.md` 反过时铁律；矩阵页已标「截至 2026-06」）。
-- ⬜ **`sidebar_label` 短名回填其余阶段（评审第三轮 #4 续）**：本轮已给 cases + 工具特有 + 00 超长标题配短 `sidebar_label`；01–07 其余叙事长标题条目仍用长 title 占侧边栏，按 `STYLE-GUIDE`/skill 的约定逐阶段回填（非阻塞，新条目按约定自带）。
-
-#### 评审第七轮分诊（2026-06，IA 策展四件套已落地）
-
-> 一份重看线上内容的评审。**旗舰 P0「英文首页落后」复核为误报**（中英 intro 已同口径，评审看的是旧部署缓存）。其余按项目原则取舍：
-
-- ✅ **工具矩阵分层**：`tool-matrix` 各工具节拆「机制（稳定）/ 版本观察（截至 2026-06）」两层，把易腐内容（默认值、CVE/GHSA、修复状态）隔进打戳层（部分落地三轮 #6「机制格」意图；完整机制名级矩阵仍 ⬜，见上）。
-- ✅ **AI Code Review 专题页**：`docs/code-review.mdx`（`/code-review`），策展审查子簇 4 条 + 分工/清单工件；4 条审查条目「延伸阅读」回链该页（落地四轮 #8 的 code review 专题）。
-- ✅ **最小安全基线**：`threat-model` 顶部加 8 条工具中立速用清单、链既有详版，补「按团队落地」入口。
-- ✅ **机制桶再平衡**：「全局视野不足」（21 条，过大）拆成「局部视野不足 / 长期演进视野不足」，桶数 6→7。**未拆「治理责任」桶**（混轴：机制 vs 领域，治理已有 `/threat-model`）。
-- ❌ **「正确协作模式」独立入口**：与四轮 #6「正用法独立区」同一提案，仍不做（稀释「第一人称误区手册」定位；正向镜像已分布在每条 What to do instead + 机制页正向镜像）。
-- ⏸️ **案例卡片标准化**：只对耐久字段（时间/影响/攻击面/来源/印证/不证明，已大半在）有意义；「已修复状态/工具版本」最易腐烂，不做每案必显的一等字段。
-- ⏸️ **必读 20 条评分**：可做轻量版（CONTRIBUTING 写进出准则 + 页顶「非固定榜单」一句）；**不做** 4 维数字评分（不可逆性/新手高发度无法机械派生 → 违反「可机械派生、不主观」铁律）。
-- ⏸️ **模板按使用者分组**：走低 i18n 风险路径（分类页 description 做「分组地图」，仿 02-requirements 五路小地图），**别新建子目录 `_category_`**（触发侧边栏分类 i18n 键翻译）。
-
-#### 索引/可信度层（评审第四轮，用户选 #3+#1+#4+#5）
-
-- ✅ **机制索引页（#3，首推）**：`docs/mechanisms.mdx`（+英镜像，slug `/mechanisms`，navbar「机制索引 / Mechanisms」）。7 个根因桶（长上下文退化 / 概率性补全与遵守 / 工具与权限外溢 / 目标函数错位 / 局部视野不足 / 长期演进视野不足 / 反馈循环退化），全 76 条**各挂恰好一个主桶**、每桶带一句机制说明 + 一句「正向镜像」。手工策展页，不给条目加 `mechanism:` 元数据（避免又一层会漂的字段）；与 `intro` 互链。**新增条目须顺手挂进对应桶。**
-- ✅ **必读 20 条（#1）**：`docs/core-20.mdx`（+英镜像，slug `/core-20`）；入选规则写在页顶（`severity: 高` 为主 + 「新手最早踩 + 后果最不可逆」粗排，含少数基础项）。入口在 `intro` 顶部 CTA + 侧边栏置顶（`sidebar_position: 0.5`），**不挤 navbar**。
-- ✅ **案例「印证 / 不证明」块（#4）**：5 条案例（中英）末尾加固定块——「印证的误区」清单 + 「不证明」防过度泛化（接续 PR #29 归因严谨化）。
-- ✅ **模板「适用边界」（#5）**：5 个 `docs/toolkit/*.mdx`（中英）各加「适合什么时候用 / 不适合什么时候用 / 使用前请替换」三段，让模板从「万能 prompt」变「可裁剪工件」。
-- ⬜ **#2 阶段总论**：每个生命周期阶段开头加一段「这一阶段 AI 最容易整体性翻车的地方」总论，把零散条目串成叙事。评审第四轮提出，本轮未做。
-- ⬜ **#7 人类职责边界（升级 `/roles` 页）**：在按角色浏览页之上，加一层「这个角色对 AI 产出该守住哪些不可外包的判断」。本轮未做。
-- 🟡 **#8 新专题候选**：评审第四轮建议补 code review / db migration / 多 agent 协作 / 成本治理等专题。**已落地批次一「AI 代码审查」子簇 4 条**（自我偏好 / 漏逻辑 / 上下文饥饿 / 审查谄媚 + 橡皮图章，均 `06-testing`、`evidence: 研究支持`，挂机制索引「反馈循环退化 / 目标函数错位 / 局部视野不足」）；db migration / 多 agent 协作 / 成本治理等其余专题待后续批次。
-- ⬜ **#9 成熟度 status（仅收可机械派生）**：若做，只收 `case-backed`（被某案例 `cases/` 反链印证）/ `template-linked`（被某 toolkit 模板引用）这类**可机械派生**的标记，**不收**主观 `draft/reviewed`（与 `evidenceLevel` 同一治理标准）。本轮未做。
-- ❌ **#6 正用法独立区（评审第四轮）**：不做——会稀释「第一人称误区手册」的定位；正向镜像已分布在每条「What to do instead」+ 机制页每桶一句「正向镜像」里，无需另起独立站区。
-
-### 待触发（条件未到，不算欠债）
-
-- 🟡 **工具矩阵页 + 各条「工具差异」实际内容**（**已扩到 5 工具**）：结构定调见 `CLAUDE.md`「目录与双语约定」与 `terminology.md`「tool 工具 / agent」（轴按工具 / agent 非模型）。已落地（中英镜像）：8 条主条目各带 **Gemini CLI / Codex CLI / Cursor / GitHub Copilot** 工具差异小节（Codex 略 skipping-plan-mode）+ 独立条目 `gemini-folder-trust-inheritance`、`cursor-ignore-best-effort` + 案例库 `gemini-cli-tracebit-rce`、`codex-cli-config-rce`、`github-copilot-camoleak` + `docs/tool-matrix`（已重构为「覆盖网格 + 每工具小节」）。后续可选：补更多工具、回填 Codex 的 plan-mode 近似。
-- 🟡 **「适用范围」字段**（**已触发**，与工具矩阵同批）：取值已落到 `terminology.md`「applies_to」（Coding Agent 通用 / 通用 LLM / 某工具特有 等）+「tool」枚举轴；条目用工具名作 tag（沿用 roles 的 tag 聚合）。先在 Gemini CLI 试点条目上铺。
-
-### 评估后不照做（存档，便于追溯）
-
-- ❌ **改名 / 去掉第一人称**（评审建议）→ 没退；改为把第一人称降级为「写作视角」、权威前置到出处（PR #20 Workstream A 已落地）。
-- ✅ **评审基于过时状态的几点**，复核后确认已满足：彩色 `evidence` 徽章、出处真实可核查（PR #20 一并对齐）。
+- **第一版规模与旧计数**：2026-06/07 的首版规划为约 50–66 条，随后曾有 76 / 77 / 79 条等快照；案例从最初 2 例扩充，模板与镜像对数也随批次增长。它们不再约束当前规模，现状见上表、README 和检查脚本。
+- **工具差异扩充批次**：2026-06/07 曾按「12 → 17 → 20 条带差异小节」推进，并记录过具体默认值、产品生命周期与工具能力判断。这些是当时研究记录，不作为当前事实复制；现行矩阵已改为带来源与核查日期的机制入口。新增工具与差异属于持续维护，不是仍未触发的脚手架任务。
+- **根因去重决策的后续变化**：曾评估不单列自主审批与测试闭环；后续已形成独立正文，旧「弃写」结论失效。fixture 和文件事件候选亦已完成。数据库迁移、多 agent、成本治理保留为策展候选，不据历史文字自动扩写。
+- **2026-06 第七轮英文首页告警**：当时复核记录为旧部署缓存导致的误报；这是历史结论，不能替代当前双语验收。2026-10-29 的双语与预览检查另见验收报告。
+- **机制桶调整**：历史上将过大的「全局视野不足」拆成局部与长期演进视野，形成现行七桶；未另设「治理责任」机制桶，治理问题通过威胁模型轴策展。
+- ❌ **独立「正用法」站区 / 改名去第一人称**：保留当时未采纳的取舍。正向做法分布于条目、机制索引和工具模板，第一人称是写作视角、证据才支撑结论；该取舍不阻止评估现有工件组成的最小协作工作流。
+- ❌ **主观量化评级**：不采纳必读榜单四维数字打分及主观 `draft/reviewed` 成熟度。尚待评估的可派生强度 / 关系标记不能据此视为已设计或已实现。
+- ✅ **早期评审已满足项**：证据类型徽章、出处规范、案例归因与模板边界已有实现和规范。维护时仍需检查具体事实与来源，不以一次评审结项代替后续核验。
