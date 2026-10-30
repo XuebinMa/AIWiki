@@ -10,27 +10,30 @@ applies_to: "All coding agents"
 evidence: Security advisory
 tags: [config security, privilege escalation, supply chain, trust boundary, Windows, security, Claude Code, Cursor, Codex CLI, Gemini CLI, DevOps Engineer, Architect, Engineer]
 sources:
-  - { title: "CVE-2026-35603: AI Coding Tools Privilege Escalation (Cymulate Research Labs)", url: "https://cymulate.com/blog/cve-2026-35603-ai-coding-tools-privilege-escalation/" }
-  - { title: "CVE-2026-35603 — Claude Code system-wide config loading local privilege escalation (GitLab Advisory Database)", url: "https://advisories.gitlab.com/npm/@anthropic-ai/claude-code/CVE-2026-35603/" }
+  - { title: "GHSA-5cwg-9f6j-9jvx (Anthropic official advisory)", url: "https://github.com/anthropics/claude-code/security/advisories/GHSA-5cwg-9f6j-9jvx" }
+  - { title: "CVE-2026-35603 research (Cymulate)", url: "https://cymulate.com/blog/cve-2026-35603-ai-coding-tools-privilege-escalation/" }
+verified_at: 2026-10-29
+review_after: 2026-11-29
+review_triggers: [security_advisory_change, configuration_loading_change]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['DevOps Engineer', 'Architect', 'Engineer']} phase="Setup & Collaboration" severity="High" appliesTo="All coding agents" evidence="Security advisory" />
 
-> In one sentence: you have me load config and hooks from a "anyone-can-write" system directory (on Windows, `C:\ProgramData`), and nobody checks who owns that directory or who dropped the file. So a low-privileged local user just drops a config there, attaches a "run on every startup" hook, and I execute their command as **every** user who launches me—including administrators—with no elevation, no confirmation from you, and no warning.
+> In one sentence: a historical Windows vulnerability allowed a low-privileged account to create trusted system configuration that later ran commands as another user launching the tool. Actual ACLs, paths, versions, and victim-process privileges determine exposure.
 
 ## Symptom
 
 You hand my system-wide config to a conventional spot—on Windows, `C:\ProgramData\<tool>\`. To you this is the proper "system-wide, shared by all users" location, as respectable as Program Files.
 
-The catch: `C:\ProgramData` is **writable by non-administrative users** by default. And I (along with peer tools) neither pre-create my subdirectory at install time nor ACL-restrict it, and I don't check who actually wrote a config file before loading it. So any standard account can race in, create that subdirectory first, and drop a config I'll dutifully load—with a hook or notify command that fires on startup. The next person who launches me (quite possibly an administrator) starts work, and that command runs under **their** identity.
+The catch: Default `C:\ProgramData` ACLs permit standard users to create some child directories and files. This does not make every existing descendant writable. The affected versions in the research neither pre-create my subdirectory at install time nor ACL-restrict it, and I don't check who actually wrote a config file before loading it. So any standard account can race in, create that subdirectory first, and drop a config I'll dutifully load—with a hook or notify command that fires on startup. The next person who launches me (quite possibly an administrator) starts work, and that command runs under **their** identity.
 
 ## Why this happens
 
 Because what I trust is the **path**, not the **owner**.
 
-I'm built to "read default config from this system-wide path." When I read it, I assume the location is trustworthy—after all, it sounds like it ought to be owned by the system or an administrator. But I never ask the kernel "who owns this directory, this file—who can write here?" On Windows, the very-system-sounding `ProgramData` directory happens to be world-writable by default, and the tools all failed to claim and lock their subdirectory at install—so "should be owned by an admin" is only my assumption, not a fact the system enforces.
+I'm built to "read default config from this system-wide path." When I read it, I assume the location is trustworthy—after all, it sounds like it ought to be owned by the system or an administrator. But I never ask the kernel "who owns this directory, this file—who can write here?" On Windows, the very-system-sounding `ProgramData` directory happens to be world-writable by default, and the studied versions failed to claim and lock their subdirectory at install—so "should be owned by an admin" is only my assumption, not a fact the system enforces.
 
 Worse, what I read in isn't inert data—it's **executable**: nearly every tool has an event-triggered command-execution surface—hooks, notify commands, startup triggers—meant to let you bake in "automatically do X whenever Y." But once that "automatically do X" config comes from a place an attacker can write, it becomes the attacker's "automatically do X **on my behalf**." Cymulate's research strings the chain together: **a world-writable config directory + loading without validating provenance + an auto-firing execution surface**—stack those three and a standard user can make arbitrary commands run as everyone who launches the tool.
 
@@ -39,7 +42,7 @@ Worse, what I read in isn't inert data—it's **executable**: nearly every tool 
 - **Cross-user code execution + local privilege escalation.** One plant by a low-privileged user, and the command runs in the context of **every** user who starts the tool—admins included. The attacker doesn't escalate; they wait for the admin to escalate for them.
 - **Persistence.** The config just sits there and re-fires on every startup; unlike a one-shot exploit, it's a durable, resident backdoor.
 - **A foothold for credential theft and lateral movement.** With execution in an admin context, reading credentials, making outbound requests, and pivoting to reachable systems all follow naturally (same chain as [network egress control](./network-egress-control.mdx) and [shipping vulnerabilities / leaking sensitive data](../07-acceptance-release/security-data-leaks.mdx)).
-- **This isn't one vendor's slip.** Cymulate found the same pattern across Claude Code, Cursor, Codex CLI, and Gemini CLI—a **paradigm-level** shared trap, not an isolated case.
+- **The historical research covered several tools.** Cymulate described tested Claude Code, Cursor, Codex CLI, and Gemini CLI paths. Its other-vendor status is an observation at report time, not proof that every latest release is vulnerable on 2026-10-29.
 
 ## What to do instead
 
@@ -82,24 +85,24 @@ Note: the difference isn't whether I *can* run a hook—it's whether I'll *accep
 
 This targets the combination "**multi-user** machine + loading **executable** config from a **shared system path**"; not every machine hits it:
 
-- **Single-user machine**: the whole box has only your account—no "other low-privileged user" to be crossed—so there's no "they plant, you trigger" chain; the environment dissolves the risk.
+- **No untrusted local writer.** The cross-user planting prerequisite is absent, but malicious processes, downloaded scripts, or compromised accounts can still write. A single-user label alone does not eliminate configuration risk.
 - **Hardened, controlled image**: the `ProgramData` subdirectories are uniformly pre-created and locked in the image, and standard users can't land writes there—the hardening is already done at the system layer.
 
 The criterion: an exception holds only when **no untrusted local user on the same machine can write to that config source**. The moment it's multi-user, or standard users can write the shared config directory, fall back to the default—validate provenance, use a write-protected location.
 
 ## How this differs from neighboring pitfalls
 
-- [Soft permissions only, no OS-level sandbox](./sandbox-filesystem-isolation.mdx): that one is about **a compromised agent escaping the sandbox** (runtime isolation); this one is earlier in the chain—the attacker **doesn't have to compromise me first**, they just feed a config into a writable path I trust and I execute it for them. One is "break out," the other is "be fed bad input at the source."
-- [Granting full permissions up front](./over-permissioning.mdx): that governs how **broad my permissions** are; this governs how unguarded my **config source** is—even with permissions tightened, a hook loaded from a world-writable path still gets through, because the issue isn't "what I'm allowed to do" but "who put this instruction here."
+- [Soft permissions only, no OS-level sandbox](./sandbox-filesystem-isolation.mdx): that one is about **runtime access scope and isolation** (runtime isolation); this one is earlier in the chain—the attacker **doesn't have to compromise me first**, they just feed a config into a writable path I trust and I execute it for them. One is "break out," the other is "be fed bad input at the source."
+- [Granting full permissions up front](./over-permissioning.mdx): that governs how **broad my permissions** are; this governs how unguarded my **config source** is—configuration hooks may run outside ordinary tool approvals, without necessarily bypassing OS or process permissions, because the issue isn't "what I'm allowed to do" but "who put this instruction here."
 - [A `.codex` config turns "open the repo" into silent RCE](../cases/codex-cli-config-rce.mdx): that case loads a malicious **project-level** config and the **person opening the repo** is hit; this is **system-wide, cross-user**—one plant harms every user on the machine who launches the tool.
 
 ## Version notes
 
-:::note Applicable versions
-**CVE-2026-35603 is this class's specific instance in Claude Code** (`C:\ProgramData\ClaudeCode\managed-settings.json` + a session-start hook); Anthropic deprecated that path, relocated managed settings to write-protected `Program Files`, and notified enterprise customers. Cymulate's research shows the same pattern appeared across **Claude Code / Cursor / Codex CLI / Gemini CLI**—**per-tool fix status is whatever Cymulate's report and the vendors' advisories say, and it changes over time (as of 2026-06)**. But the principle "don't load executable config from a world-writable path" doesn't expire with any single fix: it targets the mechanism, not a version. On non-Windows platforms, any setup where the system-wide config directory is writable by non-privileged users can reproduce the same chain.
+:::note Versions
+Claude Code's official GHSA-5cwg-9f6j-9jvx lists affected versions `< 2.1.75` and fix `2.1.75`. Exploitation requires a local low-privileged user to plant configuration and a victim subsequently to launch the tool. Execution inherits the victim process's privileges; administrator group membership does not automatically elevate a process. Other products in Cymulate's report are limited to its tested versions and environment, not current product-wide vulnerability claims.
 :::
 
 ## Further reading and sources
 
-- [CVE-2026-35603: AI Coding Tools Privilege Escalation (Cymulate Research Labs)](https://cymulate.com/blog/cve-2026-35603-ai-coding-tools-privilege-escalation/): the primary research, dissecting how "world-writable `ProgramData` config directory + loading without provenance checks + an auto-execution surface" forms cross-user privilege escalation across four AI coding tools.
-- [CVE-2026-35603 — Claude Code system-wide config loading local privilege escalation (GitLab Advisory Database)](https://advisories.gitlab.com/npm/@anthropic-ai/claude-code/CVE-2026-35603/): the CVE record with affected-version / remediation detail.
+- [GHSA-5cwg-9f6j-9jvx (Anthropic official advisory)](https://github.com/anthropics/claude-code/security/advisories/GHSA-5cwg-9f6j-9jvx)
+- [CVE-2026-35603 research (Cymulate)](https://cymulate.com/blog/cve-2026-35603-ai-coding-tools-privilege-escalation/)

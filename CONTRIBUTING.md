@@ -26,6 +26,10 @@
    | `evidence` | 证据类型，取 `sources` 里最强一类：官方文档 / 研究支持 / 安全报告 / 社区案例 / 经验观察 / 推测待验证（见 `terminology.md`） |
    | `tags` | 检索标签 |
    | `sources` | 出处列表，**至少一条** |
+   | `verified_at` | 实际复核来源的日期，`YYYY-MM-DD`；不是文件修改时间。范围与条件写在版本说明 |
+   | `source_version` | 已核对的产品、规范或论文版本；避免只写“最新版” |
+   | `review_after` | 易变事实的下次复核日期；到期提示复核，不自动判旧文错误 |
+   | `review_triggers` | 事件触发条件列表，如权限机制变化、协议升级、论文正式发表 |
    | `sidebar_position` | 在该阶段内的排序 |
 
 4. 按统一七段结构写正文：**现象 → 为什么会这样 → 后果 → 最佳实践 → 示例 → 版本说明 → 延伸阅读与出处**。
@@ -59,7 +63,7 @@
 
 - **中文是创作源**，先写好中文。
 - 英文译文放在 `i18n/en/docusaurus-plugin-content-docs/current/` 下，目录结构与 `docs/` 镜像。
-- 暂未翻译的条目，英文站点会自动回退显示中文，不影响构建。
+- 新增和实质修订须同步英文；站点可能回退中文，但镜像完整性检查不接受漏译。
 - **给某个阶段目录（分类）添加第一条条目时**，记得去 `i18n/en/docusaurus-plugin-content-docs/current.json` 补上该分类的英文 `label` 与 generated-index 的 `title` / `description`。分类名不随条目翻译走——漏了的话，英文站的侧边栏、面包屑、分类首页会显示中文（曾踩过这个坑）。
 - **改动 `docs/**/_category_.json` 的 `label`（包括加 / 换 emoji）后必做**：翻译键由 label 文本推导，改字即换键、旧译失配。先 `npm run write-translations -- --locale en` 生成新键，把英文文案搬到新键、删掉旧键，再 `npm run check:i18n` 确认通过（CI 同样会卡）。不要只改 `current.json` 里的 `message` 值而不动键名——那正是上次回退成中文的原因。
 
@@ -77,10 +81,16 @@ vale docs i18n                                    # 套话 / AI 腔（error 级�
 cspell "docs/**/*.{md,mdx}" "i18n/**/*.{md,mdx}"  # 拼写
 npm run check:i18n                                # 侧边栏分类翻译完整性
 npm run check:mirror                              # 中英镜像完整性（每条 docs 都要有 i18n/en 对应）
+npm run check:mirror-deep                         # 标题、提示块与内链结构对等
+npm run check:counts                              # README、导读与社交图等登记数字
+npm run check:content                             # 真实双语摘要、唯一 ID、来源、元数据与机制覆盖
+npm run test:mcp                                  # 含实际文档索引的检索回归
 npm run build                                     # 全量构建无报错（onBrokenLinks 设为 throw，连带校验 MDX/import/死内链）
 ```
 
 并人工通读：无错别字、语义清晰、语气自然、所有出处链接可访问。
+
+`npm run review:queue` 输出缺复核元数据或已到复核日期的条目；可加 `-- --as-of=YYYY-MM-DD` 固定队列日期。没有结构化日期不等于文章从未核验，不能批量用当前日期冒充复核。权限默认值、工具能力和厂商条款应较早复核；稳定概念和历史事故可按版本或事件触发。论文的出版状态与工程成熟度分别判断。事实、英文、矩阵、统计与机器索引应在同次更新中同步。
 
 ## 提交
 

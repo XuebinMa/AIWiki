@@ -138,7 +138,9 @@
 | 隐私案例库入口 | P2 | ✅ **已落（2026-07）**：`privacy/incidents.mdx`（真实事故与实证索引，中英，slug `incidents`，侧栏 pos 8）——两层：**A 真实生产事故**（EchoLeak / CamoLeak / ChatGPT 串味 / NYT 保全令 / o3 反向定位⚠️）+ **B 里程碑演示**（Nasr 抽取 / Carlini 扩散图 / Morris 嵌入反演 / PromptPeek KV-cache / Fredrikson 反演），每条反链条目 + 一手源；两层分列即一条纪律（别把「已证明可行」当「生产已泄露」） |
 | 最小隐私基线页面 | P2 | ✅ **已落（2026-07）**：`privacy/baseline.mdx`（10 条速用基线，中英，slug `baseline`，侧栏 pos 7）——数据分级 + 边界 / 厂商「不训练」非整条边界 / RAG 前置 ACL·向量非匿名 / 租户隔离 + 并发压测 / Agent 出站收口渲染层 / MCP 最小采集 + 审子处理方 / 去重 + DP 审 ε / 删除跨副本扇出可验证 / 发布前记忆量化 + 注入 eval / 推理链·截屏当输出面脱敏；每条点破一个假安全、仿 `docs/threat-model` 顶部基线 |
 
-## 选题储备（按卷 × 技术板块，待逐条立项）
+## 选题储备（历史批次快照）
+
+> 以下保留当时的分卷数量与选题状态，不代表当前目录。2026-10-29 刷新后的现状是 45 条（卷一至卷六分别 6 / 6 / 6 / 9 / 12 / 6）；以 `privacy/` 实际条目和生成索引为准。
 
 > 卷（阅读主线）与技术板块（查询轴）见 PROPOSAL 第 6 节（板块经 R1 调整为 14，含去重边界）。下面只占位，逐条进流水线前再细化、去重、配 ≥2 个一手出处。
 
@@ -163,7 +165,7 @@
 | 合成数据隐私与失效 | 卷六 / PII | Stadler USENIX'22（相似度评估严重低估风险）；GAN-Leaks CCS'20；PATE-GAN ICLR'19；NIST SP 800-226 | 研究/试验 |
 | 隐私定向投毒 Truth Serum | 卷二 | Tramèr 等 Truth Serum CCS'22（投毒 <0.1% 放大对他人记录泄露 1–2 个数量级） | 研究 |
 | 属性 / 分布推断 | 卷一 推断类攻击 | Ganju CCS'18；Suri&Evans PoPETs'22（n_leaked 形式化）；Ateniese IJSN'15 | 研究 |
-| 机器遗忘可验证性 / 审计 | 卷五 遗忘 | Thudi USENIX'22（模型级无法验证遗忘、可伪造证明）；TOFU COLM'24；MUSE ⚠️preprint | 研究 |
+| 机器遗忘可验证性 / 审计 | 卷五 遗忘 | Thudi USENIX'22（模型级无法验证遗忘、可伪造证明）；TOFU COLM'24；MUSE ICLR 2025 | 研究 |
 | LLM 水印及其极限 | 卷六 / 新角度 | Kirchenbauer ICML'23（green/red list）；可靠性 ICLR'24（改写可去）；Copyright Traps ICML'24 | 研究 |
 | 推理期侧信道（token 长度 / prompt 缓存 / 投机解码 / 硬件缓存） | 卷五 / 新角度 | Weiss USENIX'24（token 长度→29% 逐字 / 55% 主题）；Gu ICML'25（跨用户 prompt 缓存计时）；Wei NDSS'25；Gao USENIX'25 | 研究 |
 | 拆分学习泄露 split learning | 卷五 FL 簇 | Pasquini CCS'21 FSHA（恶意服务器重建输入）；UnSplit WPES'22 | 研究 |
@@ -189,7 +191,7 @@
 | 候选 | 卷 / 板块 | 已核一手源（最强） | maturity |
 |---|---|---|---|
 | 推理链（思维）泄露 `reasoning-trace-leakage` | 卷三 / 上下文面 | Leaky Thoughts EMNLP 2025（主会，思考越多漏越多）；Trend Micro DeepSeek-R1 | 研究 |
-| 多智能体内部信道泄露 `multi-agent-internal-leakage` | 卷四 / RAG 与 Agent | AgentLeak ⚠️（内漏比外漏多 2.6×、输出审计漏 46%）；MAGPIE NeurIPS'25 Workshop ⚠️；ConVerse ⚠️ | 研究 |
+| 多智能体内部信道泄露 `multi-agent-internal-leakage` | 卷四 / RAG 与 Agent | AgentLeak ⚠️（内漏比外漏多 2.6×、输出审计漏 46%）；MAGPIE NeurIPS'25 Workshop ⚠️；ConVerse EACL 2026 Findings | 研究 |
 | Computer-use 屏幕捕获隐私 `computer-use-screen-capture-privacy` | 卷四 / RAG 与 Agent | Anthropic computer-use 文档；OpenAI Operator system card | 生产 |
 | LoRA / 适配器泄露微调数据 `lora-adapter-leakage` | 卷三 或卷五 | LoRA-Leak ⚠️（delta + 公开底座 = MIA 放大器）；SPIE | 研究/试验 |
 
@@ -198,7 +200,7 @@
 | 候选 | 卷 / 板块 | 已核一手源（最强） | maturity |
 |---|---|---|---|
 | DP 审计 / 一次训练审计 ε `dp-privacy-auditing` | 卷三 或卷五 / 隐私评测与审计 | Steinke NeurIPS'23 杰出论文「Privacy Auditing with One Training Run」；ICLR'25 后续 | 研究/试验 |
-| 遗忘基准与标准化评测 `unlearning-benchmarks` | 卷五 / 隐私评测与审计 | RWKU NeurIPS'24 D&B；MUSE ⚠️preprint（须与 `machine-unlearning` / `unlearning-verification` 严格划界）| 研究 |
+| 遗忘基准与标准化评测 `unlearning-benchmarks` | 卷五 / 隐私评测与审计 | RWKU NeurIPS'24 D&B；MUSE ICLR 2025（须与 `machine-unlearning` / `unlearning-verification` 严格划界）| 研究 |
 | DP 上下文学习 / 私有提示 `dp-in-context-learning` | 卷三 / 差分隐私 | Wu ICLR'24（DP-ICL，Microsoft Research）| 试验 |
 | 多模态训练图像抽取 `multimodal-training-image-extraction` | 卷二 / 记忆与抽取 | Carlini USENIX'23（扩散模型逐字抽取）；VLM-MIA NeurIPS'24 | 研究 |
 

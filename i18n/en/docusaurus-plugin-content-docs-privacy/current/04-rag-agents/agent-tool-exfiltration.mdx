@@ -11,22 +11,19 @@ severity: High
 maturity: Research
 evidence: Security advisory
 tags: [agent security, indirect prompt injection, data exfiltration, tool use, outbound, least privilege, Security Engineer, Privacy Engineer]
+verified_at: 2026-10-29
+review_triggers: ["Tools renderers permissions or monitor coverage change", "Cross-agent compaction or exfiltration attacks change"]
+review_after: 2026-12-29
 sources:
-  - { title: "Aim Labs, Breaking down 'EchoLeak', the First Zero-Click AI Vulnerability Enabling Data Exfiltration from Microsoft 365 Copilot (CVE-2025-32711)", url: "https://www.aim.security/post/breaking-down-echoleak-the-first-zero-click-ai-vulnerability-enabling-data-exfiltration-from-m365-copilot" }
-  - { title: "MSRC, CVE-2025-32711 — M365 Copilot Information Disclosure Vulnerability (server-side fix)", url: "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-32711" }
-  - { title: "Legit Security (Omer Mayraz), CamoLeak: Critical GitHub Copilot Vulnerability Leaks Private Source Code (CVE-2025-59145)", url: "https://www.legitsecurity.com/blog/camoleak-critical-github-copilot-vulnerability-leaks-private-source-code" }
-  - { title: "PromptArmor, Data Exfiltration from Slack AI via indirect prompt injection (2024)", url: "https://promptarmor.substack.com/p/data-exfiltration-from-slack-ai-via" }
-  - { title: "Johann Rehberger (Embrace The Red), Hacking Google Bard — From Prompt Injection to Data Exfiltration (2023)", url: "https://embracethered.com/blog/posts/2023/google-bard-data-exfiltration/" }
-  - { title: "Embrace The Red, OpenAI ChatGPT data-exfiltration mitigations (url_safe / Safe URL)", url: "https://embracethered.com/blog/posts/2023/openai-data-exfiltration-first-mitigations-implemented/" }
-  - { title: "Greshake et al., Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection (ACM AISec 2023; arXiv 2302.12173)", url: "https://arxiv.org/abs/2302.12173" }
-  - { title: "OWASP Top 10 for LLM Applications 2025 — LLM01:2025 Prompt Injection + LLM02:2025 Sensitive Information Disclosure", url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf" }
+  - { title: "CamoLeak: original disclosure", url: "https://www.legitsecurity.com/blog/camoleak-critical-github-copilot-vulnerability-leaks-private-source-code" }
+  - { title: "Anthropic Auto Mode red team (2026-10-22)", url: "https://alignment.anthropic.com/2026/red-teaming-auto-mode/" }
 ---
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="Volume 4 · RAG and agents" technique="RAG & agent privacy" audience={['Security Engineer', 'Privacy Engineer']} severity="High" maturity="Research" evidence="Security advisory" />
 
-> In one sentence: when I'm wired to **tools** (read web / read files / make HTTP / send email / query a DB) and I also read **untrusted content**, an attacker only has to **hide an instruction in content I'll read** (indirect prompt injection) to drive me to **send my private context out through a tool call**. This isn't hypothetical — Microsoft 365 Copilot (EchoLeak, CVE-2025-32711), GitHub Copilot Chat (CamoLeak, CVE-2025-59145), Slack AI, Google Bard, and ChatGPT were all broken by the same class of attack, and each vendor then put the fix at the **render / egress layer** (CSP, image-domain allowlist, disabling auto-fetch of images, URL filtering). Conclusion first: the privacy boundary can't stop at "the model won't leak on its own" — once I can **act** (have tools / can render external links) and **read untrusted content**, private data has an exfiltration channel. Cut it at the **architecture** level: least-privilege tools, controlled egress, and treat everything I read as untrusted.
+> In one sentence: an agent that reads untrusted content and calls tools or renders external links may send private context out through injection. Historical CamoLeak disclosure and the 2026 Auto Mode red-team experiment support this surface, including cross-context, compaction, and subagent paths. Trusted systems must constrain permissions, egress destinations, and data-recipient authorization rather than relying on model promises.
 
 ## Mechanism: what happens on my side
 
@@ -94,8 +91,8 @@ Every step is tied to **your tool inventory and sensitive-data surface** — wit
 
 **Minimal testable assertions** (turn exfiltration into a regression check):
 
-- How to test: for each outbound tool, run indirect-injection red-teaming — hide an exfil instruction in untrusted content I'll read, put real private data in context, and see whether the private data gets sent out.
-- Pass: **zero exfiltration** under injection — egress is blocked by allowlist / human confirmation; tools are least-privilege; untrusted content can't directly trigger outbound.
+- How to test: use synthetic private canaries and controlled local sinks across all egress surfaces, testing direct / encoded disclosure, trusted-domain proxies, redirects, and tool combinations. Include subagent, compaction-summary, and retry-spanning chains. Do not exfiltrate third-party real private data for testing.
+- Pass: within the declared tools, attacks, and budget, sinks, rendering / proxies, shared files, and logs show no unauthorized canary disclosure while legitimate tasks still work. A domain allowlist does not authorize every disclosure; confirmation must show the actual recipient, data, and purpose. Zero observed leaks is not universal immunity.
 - Fail: injection leads to exfiltration, arbitrary URLs / recipients are reachable, or there's no egress control at all → don't give this agent outbound tools; harden the egress layer first.
 
 ## Real-world cases / research status (engineering feasibility)
@@ -104,11 +101,7 @@ Every step is tied to **your tool inventory and sensitive-data surface** — wit
 
 **Real incidents / how vendors fixed them** (one class of mechanism, broken serially across mainstream products; each vendor's fix lands exactly on the render / egress layer this entry's "How the defense works" calls out):
 
-- **Microsoft 365 Copilot — EchoLeak (CVE-2025-32711, CVSS 9.3)**: a **zero-click** exfil disclosed by Aim Labs in June 2025 — the attacker only sends an email carrying a hidden injection; Copilot's RAG pulls it into context, follows it, and encodes internal data into an outbound link. The chain serially bypassed Microsoft's XPIA (cross-prompt injection) classifier, link redaction, and CSP, egressing via a Teams proxy that CSP allowed. Microsoft fixed it **server-side** (MSRC logged it as an information-disclosure vulnerability; no in-the-wild exploitation reported). It proves: **classifier- / system-prompt-level injection defenses get routed around; the real gate must sit at the egress and render layer.**
-- **GitHub Copilot Chat — CamoLeak (CVE-2025-59145, CVSS 9.6)**: disclosed by Legit Security (Omer Mayraz) in October 2025 — an injection hidden in GitHub's "invisible" markdown comments inside a PR drives Copilot to encode private-repo source / secrets **character by character** into a string of pre-generated Camo image-proxy URLs (one valid signed URL per character, each returning a 1×1 pixel); because it rides GitHub's own trusted proxy it bypasses CSP and ordinary egress controls. GitHub's fix: **disable image rendering in Copilot Chat and block the Camo proxy for chat-rendered content** (2025-08-14).
-- **Slack AI (PromptArmor, August 2024)**: with only the ability to post in **any public channel**, an attacker plants an injection; when a user with private-channel access asks / summarizes via Slack AI, the model follows it and encodes **private-channel** content into a clickable link to exfiltrate. Slack then **shipped a patch** (said it had no evidence of unauthorized access to customer data).
-- **Google Bard (Johann Rehberger / rez0 / Greshake, November 2023)**: less than a day after Bard Extensions launched, researchers demonstrated injection via untrusted Extension data encoding the user's **chat history** into an image URL; to bypass CSP it routed data through Google Apps Script into an attacker-readable Google Doc. Google **confirmed a fix** within a month (per the disclosure, CSP was left unchanged; instead filtering was added against inserting data into URLs).
-- **ChatGPT markdown-image exfil and OpenAI's mitigations**: the classic trick is to make the model encode private data into a markdown image URL the client auto-loads. From December 2023 OpenAI added **`url_safe`** (check a URL before showing it, drop it if deemed unsafe) and later deployed **Safe URL**. Rehberger (Embrace The Red) documents that the mitigation **reduces but doesn't eliminate** — bypasses like "one distinct URL per character" are still called out as viable in the paper. It shows instruction-level / single-point filtering **lowers risk, not an absolute boundary**.
+- **GitHub Copilot Chat — CamoLeak (CVE-2025-59145, CVSS 9.6)**: disclosed by Legit Security (Omer Mayraz) on September 30, 2025 — an injection hidden in GitHub's "invisible" markdown comments inside a PR drives Copilot to encode private-repo source / secrets **character by character** into a string of pre-generated Camo image-proxy URLs (one valid signed URL per character, each returning a 1×1 pixel); because it rides GitHub's own trusted proxy it bypasses CSP and ordinary egress controls. GitHub's fix: **disable image rendering in Copilot Chat and block the Camo proxy for chat-rendered content** (2025-08-14).
 
 **The fix vendors converged on across cases** (the same handful of items in this entry's recipe): **CSP / image-domain allowlists, URL / link allowlists, disabling or sandboxing auto-fetch of external resources for markdown, and human confirmation for outbound actions**. The shared lesson on the flip side: **both "add a system prompt telling the model not to exfil" and "put an injection classifier in front" have been empirically routed around** — instructions and data share a channel, so the hard boundary must sit at the render / egress layer the model can't reach.
 
@@ -137,22 +130,11 @@ Breaking the false security item by item:
 ## Version notes
 
 :::note Applicable versions
-"Model reads untrusted content + has outbound tools = private data can be exfiltrated via a tool" is a **model- / framework-independent** paradigm-level conclusion (the root cause is instructions and data on one channel + the model being able to act). Which injection works and which egress control suffices evolve with model, framework, and tool implementation; **robust defense against prompt injection remains an open problem as of this stamp (2026-06)** — verify against the latest research and your own red-team results before citing any "now defended" claim. (Sources verified 2026-06.)
+Checked the original CamoLeak disclosure (2025-09-30, correcting October) and Anthropic’s 2026-10-22 Auto Mode red team on 2026-10-29. The study shows multi-context / multi-agent / malicious-compaction attacks can hide overall exfiltration intent from per-action monitors. Results are a September 2026 experimental snapshot, not proof current products are universally bypassable. The EchoLeak source was unavailable and MSRC returned a JS shell, so all patch details were not independently confirmed here. Review by 2026-12-29, earlier for tools / renderers, permissions, monitor coverage, or attacks.
 :::
 
 ## Further reading and sources
 
-> Primary: Security advisory (injection-driven exfil on real products + vendor fixes); Supplementary: Research (the indirect-injection mechanism) and framework (OWASP LLM01/LLM02).
+- [CamoLeak: original disclosure](https://www.legitsecurity.com/blog/camoleak-critical-github-copilot-vulnerability-leaks-private-source-code)
 
-Real incidents / vendor fixes (this entry's headline evidence):
-
-- [Aim Labs: Breaking down EchoLeak — the first zero-click AI exfil from Microsoft 365 Copilot (CVE-2025-32711)](https://www.aim.security/post/breaking-down-echoleak-the-first-zero-click-ai-vulnerability-enabling-data-exfiltration-from-m365-copilot) and [MSRC CVE-2025-32711 (server-side fix)](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-32711) — zero-click email injection exfiltrating via RAG, serially bypassing the XPIA classifier / link redaction / CSP; Microsoft fixed server-side.
-- [Legit Security: CamoLeak — GitHub Copilot Chat leaks private source code (CVE-2025-59145)](https://www.legitsecurity.com/blog/camoleak-critical-github-copilot-vulnerability-leaks-private-source-code) — character-by-character exfil through GitHub's own Camo image proxy, bypassing CSP; GitHub's fix disables image rendering in Copilot Chat.
-- [PromptArmor: Slack AI data exfiltration from private channels via indirect prompt injection (2024)](https://promptarmor.substack.com/p/data-exfiltration-from-slack-ai-via) — injection planted in a public channel encodes private-channel content into a clickable link to exfiltrate; Slack patched it.
-- [Johann Rehberger: Hacking Google Bard — From Prompt Injection to Data Exfiltration (2023)](https://embracethered.com/blog/posts/2023/google-bard-data-exfiltration/) — injection via Extensions encodes chat history into an image URL, bypassing CSP via Apps Script; Google fixed within a month.
-- [Embrace The Red: OpenAI's mitigations for ChatGPT data exfiltration (url_safe / Safe URL)](https://embracethered.com/blog/posts/2023/openai-data-exfiltration-first-mitigations-implemented/) — markdown image-URL exfil and OpenAI's URL filtering; the mitigation lowers risk, bypasses remain.
-
-Mechanism and framework (backing):
-
-- [Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection (Greshake et al., ACM AISec 2023; arXiv 2302.12173)](https://arxiv.org/abs/2302.12173) — indirect prompt injection: inject instructions into data that will be read to remotely manipulate LLM-integrated apps, including data theft. This entry's mechanism source, explaining why the incidents above happen.
-- [OWASP Top 10 for LLM Applications 2025 — LLM01 Prompt Injection + LLM02 Sensitive Information Disclosure](https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf) — injection is #1 (instructions and data on one channel), sensitive-information disclosure includes prompt-based exfiltration; together they form this entry's attack chain.
+- [Anthropic Auto Mode red team (2026-10-22)](https://alignment.anthropic.com/2026/red-teaming-auto-mode/)

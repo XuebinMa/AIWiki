@@ -11,6 +11,9 @@ severity: High
 maturity: Research
 evidence: Research
 tags: [gradient leakage, gradient inversion, federated learning, deep leakage from gradients, secure aggregation, differential privacy, Privacy Engineer, ML Engineer, Security Engineer]
+verified_at: 2026-10-29
+review_triggers: ["Models batches or local steps change", "Update views inversion or active attacks change"]
+review_after: 2027-04-29
 sources:
   - { title: "Zhu et al., Deep Leakage from Gradients (NeurIPS 2019; arXiv 1906.08935)", url: "https://arxiv.org/abs/1906.08935" }
   - { title: "Geiping et al., Inverting Gradients — How easy is it to break privacy in federated learning? (NeurIPS 2020; arXiv 2003.14053)", url: "https://arxiv.org/abs/2003.14053" }
@@ -20,7 +23,7 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="Volume 5 · Frontier and deployment" technique="Federated learning & secure aggregation" audience={['Privacy Engineer', 'ML Engineer', 'Security Engineer']} severity="High" maturity="Research" evidence="Research" />
 
-> In one sentence: federated learning is often described as "share only **gradients / updates**, not raw data, so it's private." But Deep Leakage from Gradients (Zhu et al., NeurIPS 2019) shows that shared gradients can be **inverted back into the original training samples** — pixel-wise for images, token-wise for text, with a core algorithm under 20 lines. Geiping et al. (NeurIPS 2020) went further on **high-resolution images and trained networks**, and broke gradients even **averaged over steps / samples**. Conclusion first: "sharing gradients" ≠ "private"; FL needs **secure aggregation + DP** for a real guarantee — don't read "didn't send raw data" as privacy.
+> In one sentence: DLG and Inverting Gradients reconstruct training inputs under evaluated architectures, batches, and visible updates, disproving automatic privacy from sharing gradients. Gradient matching does not always uniquely recover the original. Secure aggregation restricts individual views; DP bounds a defined unit’s contribution to releases. Choose and analyze them under the threat model.
 
 ## Mechanism: what happens on my side
 
@@ -29,9 +32,9 @@ In FL, the client sends its locally-computed **gradient / update** to the server
 1. Randomly initialize a **dummy sample** (and a dummy label).
 2. Run the dummy through forward + backward to get its gradient.
 3. **Iteratively optimize the dummy** so its gradient **approaches the observed real gradient**.
-4. On convergence, the dummy approximates the **real training sample**.
+4. Compare resulting candidates with authorized originals; convergence does not guarantee a unique true input.
 
-To be clear about the red line: this isn't the model "leaking on purpose" — it's that **a gradient as a mathematical object constrains the input that produced it**, and enough optimization can **solve** for that input (same logic as model extraction's "output constrains parameters," here "gradient constrains input"). Externally verifiable and reproducible, independent of whether anyone "wants to" leak.
+Red line: gradients can constrain inputs and enable reconstruction, but recoverability depends on architecture, batch size, local steps, label knowledge, optimization, and priors. Gradient matching need not identify a unique true input; convergence does not prove recovery of the original record. Report success against verifiable original matches / sensitive-attribute recovery.
 
 ```mermaid
 flowchart TB
@@ -40,7 +43,7 @@ flowchart TB
     U -.obtained by a malicious/curious server or eavesdropper.-> ATK
     ATK["Attacker gets a single gradient"] --> D["Random dummy sample"]
     D --> O["Iterate: make dummy's gradient match the real gradient"]
-    O --> R["Converge → reconstruct the training sample<br/>(pixel-wise image / token-wise text)"]
+    O --> R["Candidate after convergence → verify against originals<br/>Image / text and sensitive-attribute metrics"]
 ```
 
 ## Threat surface: who can attack, what's reconstructable, and the boundary
@@ -86,12 +89,12 @@ Every conclusion is tied to **your model, batch, aggregation, and DP config** �
 **Minimal testable assertions** (turn inversion risk into a regression check):
 
 - How to test: run gradient inversion (DLG / Inverting Gradients class) against your FL updates, evaluating reconstruction quality under your batch / secure-aggregation / DP config.
-- Pass: there's **secure aggregation** (the server can't get individual updates) or **DP** (ε reported clearly), and inversion quality is pushed to **unrecognizable / unusable**.
+- Pass: on controlled originals, under declared attacks and compute budgets, reconstruction / sensitive-attribute metrics and confidence intervals meet the threshold. Separately review aggregation security and DP parameters / units / accounting; unsuccessful reconstruction does not establish formal security. Aggregate sums may still support differencing or malicious-server attacks.
 - Fail: a single update is obtainable and inversion reconstructs **recognizable** samples, or there's no aggregation / DP at all → don't claim "FL so it's private"; add secure aggregation / DP first.
 
 ## Research status (engineering feasibility)
 
-(This entry's maturity is "Research": below is **empirical attack** evidence proving "shared gradients ≠ private," not "FL is unusable" — it points to "you must stack secure aggregation / DP.")
+(This entry is Research based on the original empirical studies. Results show leakage from particular updates, not every configuration or one universal defense combination.)
 
 - **Reconstructing training data from gradients**: Zhu et al.'s **Deep Leakage from Gradients** (NeurIPS 2019) shows that shared gradients alone can **reconstruct images pixel-wise and match text token-wise**, with the core matching algorithm implementable in under 20 lines of PyTorch — directly falsifying "sharing only gradients is safe."
 - **Breaking at high resolution, on trained networks**: Geiping et al.'s **Inverting Gradients** (NeurIPS 2020) uses a **cosine-similarity loss + optimization tricks from adversarial attacks** to faithfully reconstruct on **high-resolution** images and **trained deep networks**, and notes that **privacy is not protected even for gradients averaged over multiple iterations / samples** — directly refuting "just average and it's safe." The title's rhetorical "how easy is it to break privacy" answers: easy.
@@ -100,7 +103,7 @@ Every conclusion is tied to **your model, batch, aggregation, and DP config** �
 
 Breaking the false security item by item:
 
-- **"Sharing only gradients" carries zero guarantee.** Gradients encode the input; enough optimization reconstructs it; FL privacy rides on secure aggregation / DP, not "didn't send raw data."
+- **Sharing gradients does not automatically protect privacy.** Visible updates may enable reconstruction, depending on configuration and attack. Enough optimization time alone does not guarantee success.
 - **Big batch / compression only raise difficulty.** They raise inversion cost, but Geiping shows it's not unbreakable — not a formal guarantee.
 - **Secure aggregation protects the single point, but with premises.** If parties collude, or honest parties fall below threshold, the aggregation's protection weakens (see *Secure aggregation*'s threat model).
 - **DP has a utility cost, and ε must be reported.** Noise suppresses inversion while degrading accuracy; without a clear ε, "added DP" says nothing.
@@ -116,7 +119,7 @@ Breaking the false security item by item:
 ## Version notes
 
 :::note Applicable versions
-"Shared gradients can be inverted into training samples" is a **model-independent** mathematical fact (gradients constrain the input). But **how big a batch / which aggregation / how much DP noise suffices** are tightly tied to model structure, data, and attack method — Zhu's (2019, small-batch origins) and Geiping's (2020, high-res / trained nets / breaking averages) conclusions **don't transfer directly** to your setup; you must run an inversion audit against your own FL config. Inversion attacks keep advancing; stamped 2026-06. (Sources verified 2026-06.)
+Rechecked DLG and Inverting Gradients on 2026-10-29. They support recovery under particular conditions, not a universal claim that enough optimization recovers any gradient’s input. Formal DP from clipping / noise and empirical reconstruction degradation require separate evidence. Review by 2027-04-29, earlier for model / batch / local-step changes, update visibility, inversion, or active attacks.
 :::
 
 ## Further reading and sources

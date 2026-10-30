@@ -11,6 +11,9 @@ severity: 中
 maturity: 生产
 evidence: 官方文档
 tags: [端侧推理, on-device, 机密推理, 推理路由, Gemini Nano, Apple Intelligence, 隐私工程师, 安全工程师, ML 工程师]
+verified_at: 2026-10-29
+review_triggers: ["OS/AICore或端侧模型变化", "云路由遥测或出站通道变化"]
+review_after: 2026-12-29
 sources:
   - { title: "Apple Machine Learning Research, Introducing Apple's On-Device and Server Foundation Models（官方：~30 亿参数端侧模型 + 更大的服务端模型经 Private Cloud Compute；请求先判能否端侧、需要更多算力才回落 PCC）", url: "https://machinelearning.apple.com/research/introducing-apple-foundation-models" }
   - { title: "Apple Machine Learning Research, Introducing the Third Generation of Apple's Foundation Models（官方：AFM 3 Core 端侧 3B / AFM 3 Cloud 经 PCC；五模型家族横跨端侧到服务端）", url: "https://machinelearning.apple.com/research/introducing-third-generation-of-apple-foundation-models" }
@@ -42,7 +45,7 @@ flowchart TB
     L --> O1["结果留在本机"]
     C -.->|这一段回到机密推理去验证| V["云端可验证透明<br/>见 confidential-inference"]
     M["遥测 / 诊断 / 崩溃日志"] -. 独立于推理数据面的旁路 .-> Net["可能出站的其它通道"]
-    D["模型下载 / 更新"] -. 走受管代理（如 Private Compute Services）.-> Net
+    D["模型下载 / 更新"] -.->|"走受管代理，如Private Compute Services"| Net
 ```
 
 ## 威胁面：端侧防什么、不防什么
@@ -92,7 +95,7 @@ flowchart TB
 **最小可测试断言**（把「端侧」收成可回归的检查，别停在「我们用了端侧模型」）：
 
 - 怎么测：① 端侧路径——对一批「应当端侧」的请求，在受控设备上监控网络出站，断言推理期间**无 prompt 载荷发往服务端**；② 回落审计——构造「应触发回落云」的请求，断言它被**如实记录**（触发条件、目标端点、送出的数据范围），且对该段跑机密推理的证明验证；③ 旁路盘点——枚举遥测 / 诊断 / 模型下载通道，断言它们**不夹带 prompt 正文**、且去向可解释。
-- 通过：端侧请求的推理期无 prompt 出站；回落请求全部被记录且其云段证明可验；旁路通道不含 prompt 正文——「端侧」这块牌子名副其实、边界可核。
+- 通过：固定设备 / OS / 模型版本，覆盖推理、后台等待、重连、崩溃与云回落后，受控 canary 不在可观测出站载荷中出现，路由与目标可解释；对加密载荷还需运行时 / 端点证据。短时未见网络包不能证明延迟队列、日志或其他进程永不外传。
 - 失败：某个「本应端侧」的请求把 prompt 发了出去（或悄悄回落云而未记录），或遥测里夹带了 prompt 派生内容 → 别声称「端侧所以不外传」，回到路由 / 出站层查是哪一路漏了。
 
 ## 真实案例 / 厂商现状
@@ -116,7 +119,7 @@ flowchart TB
 ## 版本说明
 
 :::note 适用版本
-「端侧推理让 prompt 不必离开设备，但『端侧』不覆盖回落云 / 遥测 / 模型下载、也不防本机被攻陷」是与具体厂商无关的**部署期事实**。但**厂商的具体实现与端侧 / 云分界演进很快**：Apple Intelligence 的端侧模型规模、PCC 回落触发与送云数据范围、Gemini Nano / AICore 的端侧能力与出站通道都在迭代（模型代号、路由策略、可用设备随时变）。本条按 2026-07 的厂商现状表述（Apple Intelligence 端侧 ~3B + PCC、2026-06 第三代 AFM 家族；Gemini Nano 经 Android AICore + Private Compute Services）；具体能力、分界与出站行为以厂商当下文档和你的实测为准。（出处核验于 2026-07。）
+2026-10-29 核对 Apple 第三代模型与 Gemini Nano 当前官方文档，保留端侧与云回落分界。网络观测是有限证据；本机恶意软件、诊断与延迟同步需独立检查。Gemini Nano 的能力 / AICore 策略不能外推整个宿主 App 不联网。2026-12-29 前，或 OS / AICore、端侧模型、云路由、遥测与出站通道变化时复核。
 :::
 
 ## 延伸阅读与出处

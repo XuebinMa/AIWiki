@@ -10,16 +10,20 @@ applies_to: "All coding agents"
 evidence: Security advisory
 tags: [network isolation, egress control, SSRF, data exfiltration, lethal trifecta, security, DevOps Engineer, Architect, Gemini CLI, Codex CLI]
 sources:
-  - { title: "The lethal trifecta (Simon Willison)", url: "https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/" }
-  - { title: "OWASP LLM02:2025 Sensitive Information Disclosure", url: "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/" }
-  - { title: "Configure the sandboxed Bash tool (Claude Code official docs: network isolation)", url: "https://code.claude.com/docs/en/sandboxing" }
+  - { title: "Configure the sandboxed Bash tool (Claude Code)", url: "https://code.claude.com/docs/en/sandboxing" }
+  - { title: "Managed configuration (OpenAI)", url: "https://learn.chatgpt.com/docs/enterprise/managed-configuration" }
+  - { title: "Instance Metadata Service (AWS)", url: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html" }
+  - { title: "LLM02: Sensitive Information Disclosure (OWASP)", url: "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/" }
+verified_at: 2026-10-29
+review_after: 2026-11-29
+review_triggers: [permission_or_runtime_change, network_policy_change]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['DevOps Engineer', 'Architect']} phase="Setup & Collaboration" severity="High" appliesTo="All coding agents" evidence="Security advisory" />
 
-> In one sentence: you controlled which files I can read, but not where I can send requests. As long as I can make outbound traffic to any domain, I become the exit for data exfiltration: the source code, secrets, and data I read, I can encode into a URL and send to an attacker's server—which is exactly the third leg of the "lethal trifecta" that most deserves to be cut.
+> In one sentence: you controlled which files I can read, but not where I can send requests. As long as I can make outbound traffic to any domain, I become the exit for data exfiltration: the source code, secrets, and data I read, I can encode into a URL and send to an attacker's server—an outward capability that needs explicit controls.
 
 ## Symptom
 
@@ -29,16 +33,14 @@ So when I read a piece of untrusted content (a third-party repo, an issue, a web
 
 ## Why this happens
 
-Because **data exfiltration needs a "way out," and unrestricted outbound networking is that way out.**
+Unrestricted outbound requests provide a disclosure route, but restricting one route does not close every route. Allowed domains may host attacker-controlled accounts, paths, or uploads. Final responses, browsers, remote MCP servers, and other tools need separate coverage in the threat model.
 
-Simon Willison sums up this class of risk as the "lethal trifecta": **access to private data + exposure to untrusted content + external communication**—an agent that has all three can be exploited, no matter how strong the model. The first two are often what you must grant to make me useful (I have to read your code, I have to process external input); so **the third leg—external communication—becomes the one that most deserves, and is most able, to be cut.** Cut it, and even with the other two present, the data can't get out.
-
-The real cost of skipping egress control has been demonstrated again and again. **Agentic SSRF** is a genuine threat: an agent that can make arbitrary outbound requests, if lured into hitting the cloud metadata endpoint `169.254.169.254`, can fetch the host's instance credentials; security analyses of large numbers of MCP servers have found a substantial fraction with SSRF vulnerabilities that can be used to scrape IAM keys out of EC2 metadata. On the exfiltration side there are real cases too: M365 Copilot was once lured by a carefully crafted email into silently exfiltrating data from the victim's mailbox by encoding it into a URL during a normal summarization flow. All of these attacks depend on the same thing—**outbound is open.**
+SSRF can reach internal services or cloud metadata, but access to `169.254.169.254` does not necessarily yield credentials. On AWS, instance configuration, IAM roles, and IMDSv2 session tokens matter. Check the execution environment rather than inferring theft from reachability alone.
 
 ## Consequences
 
 - **A data exfiltration channel.** Anything I read—source code, secrets, customer data—can be encoded into an outbound request and sent away, while the request itself may look utterly unremarkable in the logs.
-- **SSRF against the internal network and cloud metadata.** Being able to make arbitrary outbound requests means being able to probe the internal network, hit `169.254.169.254` to grab instance credentials, or turn a cloud-hosted agent into a springboard for attacking your internal systems.
+- **SSRF against internal services and cloud metadata.** Unrestricted requests can reach sensitive services; credential access depends on the actual metadata and identity configuration.
 - **A starting point for lateral movement.** Once there's external communication plus the ability to obtain credentials, the attack spreads from "this one machine" to everything you can reach.
 
 ## What to do instead
@@ -48,7 +50,7 @@ The real cost of skipping egress control has been demonstrated again and again. 
 - **Outbound goes through an allowlist, deny by default.** Let my network reach only the explicitly listed domains (a private mirror, the required APIs), and deny everything else. This shrinks an infinite exfiltration surface into an auditable short list—Claude Code's sandbox does exactly this, enforcing a domain allowlist through an external proxy.
 - **Forcibly block the metadata endpoint and sensitive internal endpoints.** `169.254.169.254` (cloud instance metadata), internal management planes, sensitive services on `localhost`—block them explicitly even when they're outside the allowlist, to stop SSRF from grabbing credentials.
 - **Pair it with filesystem isolation.** Isolating only the filesystem and not the network is like locking the data inside the room but leaving the window open (see [sandbox isolation](./sandbox-filesystem-isolation.mdx)); the official docs state plainly that you can't have one without the other—without network isolation, a compromised agent can exfiltrate an SSH key.
-- **Log all outbound.** Even when you allow it, route outbound requests through an auditable proxy so they leave a trail, making it easier to spot anomalous external connections after the fact (see [log injection and audit integrity](../07-acceptance-release/log-injection-audit-integrity.mdx)).
+- **Record outbound metadata according to risk.** Keep time, destination, originating tool, and result without recording secret-bearing URL parameters, request bodies, or authentication headers unchanged.
 
 ## Example
 
@@ -67,16 +69,16 @@ Result: one "diagnostics report" exfiltrated the entire secrets file, and in the
 Environment: outbound denied by default, only the npm registry and your private API are allowlisted; the metadata endpoint is blocked.
 Me: (read the same malicious issue, got lured the same way into curling that domain)
 Me: (the connection to collect.evil.tld was rejected by the proxy—not on the allowlist)
-Result: the injection still fired, but the "way out" was sealed shut, so the secrets couldn't be exfiltrated.
+Result: this request is blocked because its destination is not allowed; inspect allowed destinations and other tools for remaining disclosure routes.
 ```
 
-The first two legs of the lethal trifecta are both still present (I read untrusted content, and I can reach `.env`), but cut the "external communication" leg and the attack can't be completed.
+The example shows a destination restriction blocking one attack route, not proof that all outward communication is isolated.
 
 ## When the exception applies
 
 "Deny all outbound by default" targets agents that "read untrusted content + can reach sensitive data"; some tasks genuinely need a wider network:
 
-- **Research / scraping / package-install tasks**: when broad connectivity is needed to get the job done, don't cut it off entirely, but you should still **route through a proxy that logs every outbound request** and block the metadata and internal endpoints—what you relax is "which public domains it can reach," not "it can reach anything including sensitive internal surfaces."
+- **Research / scraping / package-install tasks**: when broad connectivity is needed to get the job done, don't cut it off entirely, but you should still **route through a proxy that records necessary outbound metadata with sensitive fields removed** and block the metadata and internal endpoints—what you relax is "which public domains it can reach," not "it can reach anything including sensitive internal surfaces."
 - **Purely offline tasks**: for work that needs no network at all (local refactoring, editing docs), cutting all outbound is simplest, with not even an allowlist to maintain.
 - **Already inside a network-isolated environment**: you're already running me inside a CI / VPC with controlled egress, the environment layer already gates this, no need to stack another.
 
@@ -84,31 +86,27 @@ The test: an exception holds only when **the value or reachability of exfiltrati
 
 ## How this differs from neighboring pitfalls
 
-- [Giving MCP too much / too sensitive access](./mcp-over-access.mdx): that one touches on "external communication widens the injection surface," but its focus is the MCP authorization surface; this one explains **network egress control** in full on its own—it's the shared "way out" used by MCP and every tool, and should be plugged uniformly at the network layer with an allowlist.
+- [Giving MCP too much / too sensitive access](./mcp-over-access.mdx): that one touches on "external communication widens the injection surface," but its focus is the MCP authorization surface; this one explains **network egress control** in full on its own—local processes, browsers, and remote MCP can have different routes. Identify execution locations and constrain the relevant routes or a network layer covering them.
 - [Sandbox / filesystem isolation](./sandbox-filesystem-isolation.mdx): that one governs "which files I can read / change" (the **entry** for data and the local blast radius); this one governs "where I can send" (the **exit** for data). They are two sides of the sandbox, and you can't have one without the other.
 - [Shipping vulnerabilities / leaking sensitive data by default](../07-acceptance-release/security-data-leaks.mdx): that one is me **unintentionally** writing code that leaks data; this one plugs the network channel by which a **hijacked** agent actively exfiltrates—one is a code defect, the other is an attack exit.
 
 ## Tool differences
 
-> As of 2026-07, mechanism level; egress mechanisms and defaults change fast across versions — defer to each tool's current docs.
+**Claude Code** currently uses a local proxy to constrain hosts reached by sandboxed shell commands. Built-in file and web tools, MCP servers, and hooks are outside that Bash sandbox. Excluded commands and approved unsandboxed retries also require separate review. Host permission is not outgoing-content inspection.
 
-Same root cause — **leave the exit open and private data has a way out** — but each tool builds "where I'm allowed to send" differently:
+**Codex** documentation distinguishes command networking and browser policy checks from separate controls for web search, apps, and MCP. A command proxy is not a global firewall for every capability, and brand comparisons do not establish universally tighter defaults.
 
-- **Claude Code**: sandboxed network traffic goes through a **local proxy outside the sandbox**, admitted by a domain allowlist (wildcards supported); new domains can prompt interactively or be denied outright by managed policy, and you can swap in your own proxy. The docs say plainly it decides by **hostname** and doesn't inspect TLS — stronger guarantees require your own TLS-terminating proxy.
-- **Codex CLI**: the default sandbox means **network off by default** — egress control starts from zero trust, and connectivity is an explicit opt-in; the tightest default of the four.
-- **Gemini CLI**: every sandbox backend supports forcing traffic through a **custom proxy** (the proxied Seatbelt tiers / a container proxy command) — which domains pass is up to your proxy logic: the mechanism is complete, the policy is yours to write.
-- **Cursor / GitHub Copilot (local IDE agents)**: as of 2026-07, no equivalent native egress-narrowing mechanism verified — egress control falls to your environment layer (container network policy / an egress proxy).
-
-Whichever you use, two constants: **the unit of egress control is "a domain list + who enforces it,"** and hostname-based admission ≠ content inspection — pair it with a [data boundary policy](./data-boundary-policy.mdx) to actually stop exfiltration.
+For other clients and remote servers, identify where each tool executes. A common boundary requires controls around the relevant processes or network and tests of normal, elevated, and remote paths.
 
 ## Version notes
 
-:::note Applicable versions
-"Cut the external communication leg" is a paradigm-level mitigation under the "lethal trifecta" framework, and it **applies across models and across tools**. The stronger the model, the more elaborately I can be lured, and the harder the first two legs (reading private data, exposure to untrusted content) are to eliminate entirely—so "controlling the exit," as the most controllable leg, only grows in value. The built-in network isolation capabilities of each tool keep evolving, but the principle "deny outbound by default" does not change.
+:::note Scope
+Checked Claude Code, Codex, and AWS documentation on 2026-10-29. Default deny and task-specific exceptions reduce risk rather than guarantee zero disclosure. Reassess new tools, proxies, credentials, or allowed destinations.
 :::
 
 ## Further reading and sources
 
-- [The lethal trifecta (Simon Willison)](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/): argues that having all three—private data + untrusted content + external communication—is enough to be exploited, and controlling the exit is the most feasible leg to mitigate.
-- [OWASP LLM02:2025 Sensitive Information Disclosure](https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/): the sensitive-information-disclosure risk, including scenarios of exfiltration through output / outbound channels and their mitigations.
-- [Configure the sandboxed Bash tool (Claude Code official docs)](https://code.claude.com/docs/en/sandboxing): enforce an outbound domain allowlist with an external proxy, and state explicitly that "without network isolation, a compromised agent can exfiltrate an SSH key."
+- [Configure the sandboxed Bash tool (Claude Code)](https://code.claude.com/docs/en/sandboxing)
+- [Managed configuration (OpenAI)](https://learn.chatgpt.com/docs/enterprise/managed-configuration)
+- [Instance Metadata Service (AWS)](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html)
+- [LLM02: Sensitive Information Disclosure (OWASP)](https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/)

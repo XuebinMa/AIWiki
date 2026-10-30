@@ -1,5 +1,5 @@
 ---
-title: "Multimodal training-image extraction: diffusion / vision models spit training images back, extending the privacy risk to pixels"
+title: "Multimodal training-image extraction: diffusion near-copies and vision-language membership inference"
 slug: multimodal-training-image-extraction
 sidebar_label: Multimodal image extraction
 sidebar_position: 6
@@ -11,7 +11,12 @@ severity: Medium
 maturity: Research
 evidence: Research
 tags: [memorization, training-data extraction, multimodal, diffusion models, membership inference, deduplication, differential privacy, Privacy Engineer, ML Engineer, Security Engineer]
+verified_at: 2026-10-29
+review_triggers: ["Generators sampling or image-text data change", "Image-similarity or VLM membership-inference methods change"]
+review_after: 2027-04-29
 sources:
+  - { title: "Diffusion-extraction full text", url: "https://arxiv.org/html/2301.13188" }
+  - { title: "Diffusion Art author manuscript", url: "https://arxiv.org/abs/2212.03860" }
   - { title: "Carlini et al., Extracting Training Data from Diffusion Models (USENIX Security 2023; arXiv 2301.13188)", url: "https://www.usenix.org/conference/usenixsecurity23/presentation/carlini" }
   - { title: "Somepalli et al., Diffusion Art or Digital Forgery? Investigating Data Replication in Diffusion Models (CVPR 2023)", url: "https://openaccess.thecvf.com/content/CVPR2023/html/Somepalli_Diffusion_Art_or_Digital_Forgery_Investigating_Data_Replication_in_Diffusion_CVPR_2023_paper.html" }
   - { title: "Li et al., Membership Inference Attacks against Large Vision-Language Models / VL-MIA (NeurIPS 2024; arXiv 2411.02902)", url: "https://papers.nips.cc/paper_files/paper/2024/hash/b2c892312af07f8a77afbeed188391f4-Abstract-Conference.html" }
@@ -43,7 +48,7 @@ flowchart TB
 First pin the attacker model: diffusion extraction is mostly **black-box** (being able to sample by prompt is enough, no weights needed); VLM membership inference varies by method (VL-MIA uses confidence-style signals). The success criterion is not "looks similar to the eye" but **the similarity between a generated image and some training image crossing a threshold** (recomputable).
 
 - **Duplication is the main amplifier — not "any image is extractable."** Carlini et al.'s (USENIX Security 2023) extraction pipeline deliberately **targets highly duplicated samples**: for Stable Diffusion they took the roughly **350,000 most-duplicated** examples in the training set, generated **500** images per caption, ran near-duplicate filtering over some **175 million** generations, and flagged a caption as memorized only when **at least 10** of its 500 images collapsed into a near-duplicate clique (patch-based image distance) — ultimately confirming **94** Stable Diffusion extractions under the strict criterion, loosened to **109** near-copies under manual inspection. The key finding: **a duplicated training image is orders of magnitude more likely to be memorized than a non-duplicated one.** So the extractable profile is "highly duplicated + distinctive," not "any image in the training set."
-- **Near-verbatim, not bit-exact.** Text extraction is often **verbatim** (a UUID or key, character for character); image extraction is usually a **near-copy** — visually indistinguishable from the original, over the similarity threshold, but not necessarily pixel-perfect. For privacy / copyright, a near-copy is **already enough to constitute leakage and infringement** (a face you can recognize as a specific person, a painting whose source you can name).
+- **Near-copy differs from pixel equality.** Studies use specified pixel/perceptual criteria and must calibrate false matches from natural neighbors. Recovering identities or sensitive content can provide privacy evidence; similarity alone does not determine copyright infringement.
 - **The stakes concentrate in three kinds of images**: **faces** (identifiable to a person), **medical imaging** (patient-identifiable and highly sensitive), and **copyrighted art / trademarked logos** (Carlini et al.'s extracted samples ranged from photographs of real people to trademarked company logos).
 - **VLM membership inference: decide whether an image is in the training set.** Li et al. (NeurIPS 2024) introduce **VL-MIA, the first membership-inference benchmark for large vision-language models**, together with a token-level image-detection pipeline and the MaxRényi-K% metric (based on model output confidence), turning "was this image / image-text pair used in training" into a reproducible, scorable detection — motivated precisely by the risk that training sets contain sensitive images like **private photos and medical records**. This shares a root with [Membership inference](../01-foundations/membership-inference.mdx), only with the decision target swapped from a text sample to an image.
 
@@ -87,7 +92,7 @@ Every quantitative parameter (dedup similarity threshold, replication-audit thre
 **Minimal testable assertions** (turn the recipe into a regression check):
 
 - How to test: before release, batch-generate against the training set (including the highly duplicated subset), compute the "near-duplicate hit rate" under a fixed similarity criterion, and make it a CI gate in the pipeline audit step; on the VLM side run per-sample MIA and report TPR at low FPR.
-- Pass: near-duplicate hit rate ≤ a preset threshold, and clearly below baseline after dedup / DP; MIA TPR at low FPR is close to the random baseline.
+- Pass: fix sampling budget, training-neighbor index, and pixel / perceptual thresholds, calibrating false matches with untrained neighbors; near-copy and identity / sensitive-attribute disclosure meet thresholds. Report VLM candidate image-text MIA separately with low-FPR metrics and intervals. Similarity, successful MIA, privacy disclosure, and legal infringement are different findings; finite non-detection does not prove every image impossible to extract.
 - Fail: a highly duplicated image has an abnormally high near-duplicate hit rate (it can be near-reproduced), or MIA TPR at low FPR is well above baseline → go back and strengthen image dedup / DP, then re-test.
 
 ## Research status (engineering feasibility)
@@ -104,7 +109,7 @@ Calling out each "false security" in turn:
 
 - **"A generative model only paints new images, it won't emit the originals" is wrong.** Existing research recomputes near-copies on widely used open-source diffusion models; it just happens **mostly on highly duplicated images**, not on any image — but that's no reason for comfort, it only bounds the risk profile.
 - **Reducing duplication ≠ eradicating it.** Dedup removes the "duplication" amplifier; an image that appears **only once, yet is distinctive enough** (a strongly featured face, a lesion scan) can still be memorized and near-reproduced. A formal guarantee needs DP on top, and **DP's ε is not zero** — it bounds single-sample influence, not "never reproduces," and generation quality drops: an explicit trade-off.
-- **A near-copy still infringes and still leaks.** Don't console yourself with "it's not pixel-perfect anyway" — a face you can recognize as a specific person, a painting whose source you can name, is already leakage / infringement in the privacy and copyright sense. A loose similarity threshold is just self-deception.
+- **Assess near-copies in separate layers.** Report similarity, identity/sensitive-content disclosure, and applicable legal assessment separately; a threshold is not infringement certification.
 - **Similarity filtering is cat-and-mouse.** Matching outputs against the training set backstops, but bypasses (a smaller crop, a slight style transfer) keep appearing; it doesn't hold the floor.
 - **Risk scales with data scale / duplication.** The more a training image is duplicated, the more easily it comes back; feeding the same batch of high-value images repeatedly (celebrity faces, signature designs) for better results tends to scale this privacy / copyright risk up too — dedup / auditing / DP must scale with it.
 
@@ -117,7 +122,7 @@ Calling out each "false security" in turn:
 ## Version notes
 
 :::note Applicable versions
-Verbatim (near-verbatim) memorization and extractability in the image domain are **mechanism-level phenomena of diffusion / vision generative models** — common across model generations, not one model's temperament. Founding evidence: diffusion extraction established on open-source text-to-image models like Stable Diffusion in 2023 (Carlini, USENIX Security 2023), data replication systematically measured and tied to training scale the same year (Somepalli, CVPR 2023), and VLM membership inference benchmarked in 2024 (Li et al., NeurIPS 2024, VL-MIA). **In existing measurements, duplication of training images is the main amplifier of extractability** — so feeding high-value images repeatedly into training should not be treated as inherently safe; it calls for image dedup, replication auditing, and privacy controls (the exact behavior varies with the training pipeline and dedup / DP strategy, and is not guaranteed monotonic across all setups). (Sources verified 2026-07.)
+Checked the diffusion-extraction full text, CVPR author manuscript, and NeurIPS 2024 VL-MIA on 2026-10-29. Over a thousand images is an aggregate across models / settings, not all Stable Diffusion; 94 strict / 109 relaxed copies use specific criteria. Diffusion reconstruction and VLM membership detection do not establish each other, and near-copying alone does not establish legal infringement. Review by 2027-04-29, earlier for generators / sampling, image-text training sets, similarity, or MIA methods.
 :::
 
 ## Further reading and sources
@@ -125,3 +130,7 @@ Verbatim (near-verbatim) memorization and extractability in the image domain are
 - [Extracting Training Data from Diffusion Models (Carlini et al., USENIX Security 2023; arXiv 2301.13188)](https://www.usenix.org/conference/usenixsecurity23/presentation/carlini) — a generate-and-filter pipeline extracts training images from Stable Diffusion (about 94 under the strict criterion, loosened to about 109 near-copies), ranging from photographs of real people to trademarked logos; duplicated samples are orders of magnitude more likely to be memorized, and diffusion is less private than GANs. Primary source for this entry.
 - [Diffusion Art or Digital Forgery? Investigating Data Replication in Diffusion Models (Somepalli et al., CVPR 2023)](https://openaccess.thecvf.com/content/CVPR2023/html/Somepalli_Diffusion_Art_or_Digital_Forgery_Investigating_Data_Replication_in_Diffusion_CVPR_2023_paper.html) — measures training-data replication via image retrieval, finds blatant replication on models including Stable Diffusion, with the replication rate affected by training-set size; independent of Carlini, confirming near-copying really happens.
 - [Membership Inference Attacks against Large Vision-Language Models (Li et al., NeurIPS 2024; arXiv 2411.02902)](https://papers.nips.cc/paper_files/paper/2024/hash/b2c892312af07f8a77afbeed188391f4-Abstract-Conference.html) — VL-MIA, the first VLM membership-inference benchmark, plus a token-level image-detection pipeline and the MaxRényi-K% metric, turning "is this image in a VLM's training set" into reproducible detection; confirms the lower-bar image-domain membership-inference leakage path.
+
+- [Diffusion Art author manuscript](https://arxiv.org/abs/2212.03860)
+
+- [Diffusion-extraction full text](https://arxiv.org/html/2301.13188)

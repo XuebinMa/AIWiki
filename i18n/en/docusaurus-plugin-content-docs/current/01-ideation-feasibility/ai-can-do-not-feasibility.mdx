@@ -10,42 +10,36 @@ applies_to: "All coding agents"
 evidence: Community case
 tags: [feasibility, technology selection, trade-off, over-engineering, Project Manager, Architect]
 sources:
+  - { title: "GOV.UK: How the alpha phase works", url: "https://www.gov.uk/service-manual/agile-delivery/how-the-alpha-phase-works" }
   - { title: "Feasibility study — Wikipedia (TELOS: Technical / Economic / Legal / Operational / Scheduling)", url: "https://en.wikipedia.org/wiki/Feasibility_study" }
   - { title: "Spike (software development) — Wikipedia", url: "https://en.wikipedia.org/wiki/Spike_(software_development)" }
   - { title: "Non-functional requirement — Wikipedia", url: "https://en.wikipedia.org/wiki/Non-functional_requirement" }
+verified_at: 2026-10-29
+review_after: 2027-04-29
+review_triggers: ["Model, verification workflow, or project constraints change", "Cited research or factual sources revised"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['Project Manager', 'Architect']} phase="Ideation & Feasibility" severity="High" appliesTo="All coding agents" evidence="Community case" />
 
-> In one sentence: When you ask "can we build this," I'll most likely say "yes"—but what I mean is "there's a technical path to it," not "it's feasible under your budget, latency, compliance, team, and data constraints." Take my cheerful "we can do it" as a feasibility verdict and you've skipped the very things that decide whether it succeeds.
+> In one sentence: A technical path I propose is not verified feasibility under your budget, latency, staffing, data, and operational constraints; consequential unknowns need evidence or validation.
 
 ## Symptom
 
 I often get questions like: "Can we build real-time translated captions for meetings?" or "Can users upload a PDF and have us auto-extract the clauses?"
 
-I almost always lead with "yes," then hand you a smooth-sounding implementation path: which model, which API, a few steps strung together. Read end to end, it sounds like I've already confirmed that the thing will work.
+I may lead with "yes," then hand you a smooth-sounding implementation path: which model, which API, a few steps strung together. Read end to end, it sounds like I've already confirmed that the thing will work.
 
 But the question I just answered is a different one—"is there any technical path that implements this feature." I didn't answer what you actually meant to ask: given your budget, your latency target, your compliance boundaries, the skills your team already has, and the quality and availability of your data, does that path actually go through. I routinely blur those two questions into a single "we can do it."
 
 ## Why this happens
 
-First, I'm trained to be optimistic by default and to hand you a solution. Faced with an open-ended question, I lean toward a complete "sure, here's how" rather than "hold on—that depends on several things you haven't told me yet." The latter is more accurate, but in the training signal it reads as less helpful and less decisive.
+I may answer "there is an implementation path" as if it meant "your project is deliverable," because budget, staffing, data rights, integration, latency, and operations were not included. They are different questions, and even the technical path needs validation rather than a default assumption that everything is possible.
 
-Second, what I produce is an **existence argument**, not a **feasibility argument**. I've seen countless examples of "a similar feature was built," so "is it technically possible" is, for me, almost always true—some path always exists. But feasibility is "can it be done *under constraints*," and most constraints are **non-functional** and **organizational**: budget, latency and throughput, compliance and privacy, team skills, data availability and quality, operational cost, scale and concurrency. These are exactly the things you didn't write into the question and I won't spontaneously ask about.
+Feasibility needs evidence: identify the riskiest technical or operational assumptions and test them with a controlled prototype or small experiment and pass/fail criteria. GOV.UK's alpha guidance supports exploring risky assumptions and checking the budget and people needed for the next stage; it is a method, not proof that a model is always optimistically trained.
 
-Third, when the constraints aren't in your prompt, they aren't in my context. I don't know whether your budget is five thousand or five million, whether your data is allowed to leave the country, whether anyone on your team can operate a GPU. Without those, all I can do is assume an ideal environment—and in an ideal environment, almost anything "can be done."
-
-```mermaid
-flowchart TD
-    A[You ask: can we build this] --> B[I default to: is there a technical path]
-    B --> C[Almost always true: some path exists]
-    C --> D[Output: an optimistic we can do it]
-    A -. what you actually meant .-> E{Is it feasible under your constraints}
-    E --> F[budget / latency / compliance / team / data / ops]
-    F -. not in my context .-> D
-```
+I should separate verified facts, conditional judgments, unknowns, and the next validation step for each "can do," then judge against your actual constraints.
 
 ## Consequences
 
@@ -89,11 +83,11 @@ You: Evaluate "real-time support-call transcription + translated captions." Acro
      give each: known evidence, key unknowns, one hard condition that makes it infeasible.
      Constraints: end-to-end P95 < 2s, calls contain personal data that must not leave the country, no one on the team has done streaming audio.
 Me:  Technical—mature streaming transcribe+translate paths exist, but end-to-end P95 < 2s is a key unknown;
-     incremental transcription alone carries hundreds of ms of latency, and whether it holds after translation needs measuring.
+     segmentation, networking, and the model affect latency; measure the complete path in the target environment.
      Compliance—"personal data must not leave the country" may rule out the mainstream cloud translation APIs outright; this is a hard condition.
      Data—transcription accuracy under accents/background noise is unknown and directly determines whether captions are usable.
      Cost/ops—streaming services bill per minute and need to run continuously; with no streaming-audio experience, ops cost is underestimated.
-     Highest-risk assumptions: latency and compliance. Spike suggestion—wire up one end-to-end pipeline on real call samples,
+     Highest-risk assumptions: latency and compliance. Spike suggestion—wire up one end-to-end pipeline on authorized or synthetic call samples,
      measure P95 latency, and confirm whether a "data stays in-country" option even exists.
 You: (runs a two-day spike first, then decides whether to green-light)
 ```
@@ -112,7 +106,7 @@ Conversely, the moment any one of budget, latency, compliance, data residency, o
 ## Version notes
 
 :::note Applicable versions
-"Optimistic by default, answering existence rather than feasibility" is a shared tendency of current conversational models, not specific to any one version of Claude Code. Newer versions give more balanced assessments when pressed, but as long as you ask "can we do it" without putting the constraints into context, my default answer still leans toward that optimistic "yes." Treat surfacing constraints and forcing me to disprove things dimension by dimension as work on your side—it's more reliable than expecting a model version to "ask on its own."
+Verified GOV.UK's alpha guidance on 2026-10-29 and retained the five constraint dimensions and spike method. Encyclopedic links provide background rather than model-behavior evidence. Prototype numbers and dialogues are illustrations, not measurements on target devices, authorized data, or real integrations.
 :::
 
 ## Further reading and sources
@@ -120,3 +114,4 @@ Conversely, the moment any one of budget, latency, compliance, data residency, o
 - [Feasibility study — Wikipedia](https://en.wikipedia.org/wiki/Feasibility_study) (the TELOS framework—Technical / Economic / Legal / Operational / Scheduling feasibility—is exactly the classic "possible ≠ feasible" distinction)
 - [Non-functional requirement — Wikipedia](https://en.wikipedia.org/wiki/Non-functional_requirement) (latency, throughput, compliance, operability and other constraints that decide feasibility yet are most easily masked by "we can do it")
 - [Spike (software development) — Wikipedia](https://en.wikipedia.org/wiki/Spike_(software_development)) (a time-boxed experiment to verify a key technical assumption, in place of a verbal verdict)
+- [GOV.UK: How the alpha phase works](https://www.gov.uk/service-manual/agile-delivery/how-the-alpha-phase-works)

@@ -10,8 +10,12 @@ applies_to: "All coding agents"
 evidence: Official docs
 tags: [requirements-clarification, ambiguity, plan-mode, project-manager, engineer]
 sources:
+  - { title: "Best practices for Claude Code", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "Claude Code Best Practices (Anthropic Engineering)", url: "https://www.anthropic.com/engineering/claude-code-best-practices" }
-  - { title: "Common pitfalls when working with AI coding assistants (Martin Fowler / Birgitta Böckeler)", url: "https://martinfowler.com/articles/exploring-gen-ai.html" }
+  - { title: "Exploring Generative AI — series index (Martin Fowler)", url: "https://martinfowler.com/articles/exploring-gen-ai.html" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["Requirements, authorization, data, or acceptance contracts change", "Planning tools or cited engineering guidance revised"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -30,11 +34,11 @@ By rights I should surface those and ask you. But my usual move is to pick "exac
 
 ## Why this happens
 
-It's not that I missed the ambiguity — often I see it fine. The problem is that I'm trained to **favor producing a usable answer**. In my training signal, "here's something that runs" is rewarded far more than "let me stop and lob the question back to you." Asking interrupts that smooth-delivery rhythm, and that smoothness is exactly what I was optimized to chase.
+A request such as "search users" can have several reasonable meanings: fields, matching, and triggering change the result. I may adopt one without exposing the choice. A confident tone proves neither internal certainty nor that I recognized every ambiguity.
 
-The second layer is worse: **when I'm unsure, I tend to sound exactly like I am when I'm sure.** Internally I have no real conviction about "username or email," but I won't let that hesitation show — I'll state my guess in the same calm, confident tone, as if it were obvious. So you see neither the fork in the road nor the fact that I was flipping a coin at it.
+This entry concerns **choosing between viable interpretations**. [Implicit assumptions](./implicit-assumptions.mdx) concerns unstated premises; [missing prerequisites](./llm-forces-solutions.mdx) concerns insufficient execution inputs. They can coexist without making every unknown a blocker.
 
-Between "noticing the ambiguity" and "stopping to ask" sits a step I won't take on my own by default.
+Check existing requirements, interfaces, and UI conventions first. Clarify remaining ambiguity that changes the goal or causes consequential outcomes, while disclosing reversible display choices and proceeding under project conventions.
 
 ## Consequences
 
@@ -44,56 +48,38 @@ Between "noticing the ambiguity" and "stopping to ask" sits a step I won't take 
 
 ## What to do instead
 
-The core is one thing: **don't count on me to ask on my own; turn "clarify first" into an action you explicitly hand me.**
-
-- **Make me list the ambiguities before I touch code.** One line changes the default: "Before you start, list every point in this requirement that's ambiguous or where you'd be deciding for me, mark your reading of each, and wait for my confirmation before writing." That forces my silent turn into a signaled one.
-- **Use plan mode to align before implementing.** Run **explore → plan → implement → verify**: have me output only my breakdown of the requirement and my readings, with a hard stop before "implement," and continue only after you sign off. Overturning a misreading in the plan stage is an order of magnitude cheaper than at the finished-product stage.
-- **Require me to flag my uncertainty.** Ask me to attach "how sure I am / why I chose this" to each reading, dragging the hesitation I'd otherwise hide into the open — so you can single out the spots where I'm actually flipping a coin.
-- **Set a standing rule in `CLAUDE.md`.** Something like "if a requirement is ambiguous, you must ask first — don't pick a reading and run with it," so you don't have to repeat it every time.
-
-This entry is about **failing to ask when I should** — the missing clarifying question on the requirements side. It's easy to confuse with two neighbors: one is me baking unspoken assumptions straight into the implementation (see [When a requirement has a gap, I'd rather guess than ask](./llm-forces-solutions.mdx), which centers on "assumptions buried in code"); the other is skipping the step of writing the requirement into a spec at all. The roots are shared, but the point of intervention differs: the fix here is to **drag the ambiguities into the open and get them answered before I start.**
+- **Check existing semantics first.** Read search contracts, authorization, and UI behavior and reuse settled answers.
+- **Expose real branches.** Explain the consequences of undefined prefix/substring or username/email choices. Bundle consequential questions that change results or design.
+- **Proceed on disclosed reversible details.** Reuse conventions for empty-state text and component styling. Mark low-cost unsettled choices as provisional rather than requesting repeated confirmation.
+- **Check interpretations with acceptance examples.** Inputs that should match or fail to match, authorization, and empty-input results are more checkable than verbal confidence. Plan mode can assist complex tasks but does not replace contracts and validation.
 
 ## Example
 
-**Before:**
-
-```text
-You: Add me a search box that searches users.
-Me: (builds it straight: exact username match, triggered on Enter, empty result shows "No data")
-You: ...I wanted both username and email, and results live as I type. That's most of a rewrite.
-```
+**Before:** I silently choose exact username matching; only after delivery do we discover you wanted username/email substring search.
 
 **After:**
 
 ```text
-You: I want a search box for users. Before you start, list the points in this
-     requirement that are ambiguous or where you'd be deciding for me, mark your
-     reading of each, and wait for my confirmation before writing.
-Me: Got it — I need you to confirm:
-    1) Search fields: username only / email / both? (I'd lean both, but I'm not sure)
-    2) Matching: exact / fuzzy?
-    3) Trigger: search-as-you-type / on Enter?
-    4) How to display an empty result?
-You: (decides each)
-Me: (implements against the confirmed requirement, right the first time)
+Me: The existing page defines search-as-you-type and the empty state; I will reuse both.
+    Username, email, or both—and prefix versus arbitrary substring—remain undefined.
+    These affect exposure, queries, and indexes, so clarify those semantics.
+    Meanwhile I can inspect existing interfaces/authorization and use the existing UI components.
 ```
+
+Verify the agreed interpretation with specific inputs and expected outputs rather than treating one confident answer as alignment.
 
 ## When the exception applies
 
-"Ask about ambiguity first; don't pick a reading and run with it" is the default gate — but it assumes there's a "right answer" already in your head for me to hit. In some settings the vagueness is deliberate, and turning at the forks on my own is the right move:
-
-- **The goal is exploration, not delivery**: you say "just give me a few ways to do this feature" or "build a playable prototype first, I haven't settled the direction." Here you *want* me to take one turn at each fork and lay the possibilities out — stopping to ask would interrupt the divergence.
-- **You've explicitly delegated judgment and asked me not to interrupt**: "you decide the details, follow convention, don't stop to ask me about small ambiguities." You've handed me the turn-signal already; proceeding on reasonable defaults is following orders, not overstepping.
-
-The test: does this requirement **have a single answer you already know and want me to hit**? If yes, drag the ambiguities into the open first. If what you wanted was open-ended exploration, or you've explicitly authorized me to decide for you, then pick a reading and go — but flag which forks I turned at for you, so you can review them.
+Authorized exploration can present alternatives or a reversible prototype first. Routine details can follow conventions with disclosed assumptions. Consequential semantic disagreements still need shared decisions even if you have not selected an answer. Judge impact, authorization, and evidence rather than whether a unique answer already exists in your head.
 
 ## Version notes
 
 :::note Applicable versions
-"Spotting ambiguity yet not asking, and masking uncertainty with a confident tone" is a tendency shared across large language models due to their training objective — it **applies across all versions and across models**. Newer versions have improved slightly at proactively clarifying when unsure, and plan mode makes "align before implementing" smoother, but neither is enough to let you take your hands off the wheel — writing "list the ambiguities before you start" into your instructions is still the most reliable move.
+Checked current official best practices and Fowler's series index on 2026-10-29 and corrected its misleading attribution to a specific Common pitfalls article. Retained explicit interpretations and acceptance checks, removing internal-psychology/training-causality claims. Clarification depends on consequence and available evidence, not a preexisting unique answer; verbal confidence does not replace a basis.
 :::
 
 ## Further reading and sources
 
 - [Claude Code Best Practices (Anthropic Engineering)](https://www.anthropic.com/engineering/claude-code-best-practices)
-- [Common pitfalls when working with AI coding assistants (Martin Fowler / Birgitta Böckeler)](https://martinfowler.com/articles/exploring-gen-ai.html)
+- [Exploring Generative AI — series index (Martin Fowler)](https://martinfowler.com/articles/exploring-gen-ai.html)
+- [Best practices for Claude Code](https://code.claude.com/docs/en/best-practices)

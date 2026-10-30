@@ -6,17 +6,21 @@ sidebar_position: 3
 roles: [Engineer, Architect]
 phase: Setup & Collaboration
 severity: Medium
-applies_to: "All Claude Code versions"
+applies_to: "Claude Code versions with skills"
 evidence: Official docs
 tags: [CLAUDE.md, skill, context management, configuration, Engineer, Architect]
 sources:
+  - { title: "Best practices (Claude Code)", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "Extend Claude with skills (official)", url: "https://code.claude.com/docs/en/skills" }
   - { title: "How Claude remembers your project (official memory docs)", url: "https://code.claude.com/docs/en/memory" }
+verified_at: 2026-10-29
+review_after: 2026-11-29
+review_triggers: [vendor_documentation_change, permission_or_runtime_change]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['Engineer', 'Architect']} phase="Setup & Collaboration" severity="Medium" appliesTo="All Claude Code versions" evidence="Official docs" />
+<PitfallMeta roles={['Engineer', 'Architect']} phase="Setup & Collaboration" severity="Medium" appliesTo="Claude Code versions with skills" evidence="Official docs" />
 
 > In one sentence: You drop your "twelve-step release process" and your "full database-migration SOP" straight into `CLAUDE.md`, figuring I'll always remember them. The result: they sit in context on every session, so even a "fix a typo" task has to read through them first — yet these steps, useful only for specific tasks, belong in a skill that loads on demand.
 
@@ -39,32 +43,9 @@ The content itself is good — clear, specific, each step justified. The problem
 
 ## Why this happens
 
-The key is that `CLAUDE.md` and a skill have completely different **load timing**.
+Root project instructions usually remain available in a session. Skill names and descriptions support discovery, while procedure bodies load when used. Unrelated tasks can therefore avoid carrying a release manual; see [CLAUDE.md overload](../05-implementation/claude-md-overload.mdx).
 
-`CLAUDE.md` is loaded into context **in full at the start of every session**, whether this task needs it or not. A skill is different: its body **unfolds only when it's used** — when you explicitly invoke `/skill-name`, or when I judge the current task relevant to it. The official docs put this plainly: "a skill's body loads only when it's used, so long reference material costs almost nothing until you need it"; and — a line that could have been written for this entry — "when a section of `CLAUDE.md` has grown into a *procedure* rather than a *fact*, move it to a skill."
-
-That's the value of progressive disclosure: the always-loaded context holds only "facts you need every time," while "procedures needed only for specific tasks" go in a drawer you pull open when you need them.
-
-Leaving the procedure in `CLAUDE.md` trips two wires at once:
-
-- **Signal-to-noise drops.** Those twelve release steps are pure noise for tasks like "fix a typo" or "add a log line," yet they still consume my limited attention budget and push the conventions that genuinely matter every time further down. This is a cause-and-effect pair with [CLAUDE.md Overload](../05-implementation/claude-md-overload.mdx) — that entry is about "too many rules getting ignored," and dumping a whole procedure in is one of the main things that bloats the file.
-- **Fixed overhead grows.** The longer the file, the more of the window gets eaten at the opening of every session, and the less room is left for the actual task — even when this session has nothing to do with releasing.
-
-Drop it into the three-layer model from earlier and it's clear:
-
-- **`settings.json` = what I *can do*** (see [You Wrote a settings.json Rule as a CLAUDE.md Note](./settings-vs-claudemd.mdx)).
-- **`CLAUDE.md` = what I *should know*:** the always-loaded facts and conventions.
-- **skill = a *procedure loaded on demand*:** unfolds only when used.
-
-This entry is only about the boundary between the latter two: **the always-loaded "facts/conventions" stay in `CLAUDE.md`; "procedures for specific tasks" become a skill.**
-
-```mermaid
-flowchart TD
-    A[A chunk of content] --> B{Is it a fact I need every timeor a procedure for a certain task?}
-    B -->|Fact/convention| C[CLAUDE.md<br/>resident every session]
-    B -->|Multi-step procedure| D[skill<br/>loaded on demand, unfolds when used]
-    D --> E[On unrelated tasks, takes no context]
-```
+This is progressive disclosure. It organizes and loads materials without guaranteeing execution of natural-language steps. Client controls cover matching calls, project instructions provide facts and conventions, and skills provide on-demand procedures. Configure execution controls for checks that must be enforced; see [instructions and configuration](./settings-vs-claudemd.mdx).
 
 ## Consequences
 
@@ -74,21 +55,13 @@ flowchart TD
 
 ## What to do instead
 
-**Pull multi-step procedures out of `CLAUDE.md` and make them skills; keep `CLAUDE.md` to facts you need every time.**
+**Load task-specific procedures through skills without treating them as enforcement.**
 
-1. **The signal: if a chunk is "steps" rather than a "fact," move it.** Anything that goes "first... then... next...," carries a numbered list, or appears only for a certain kind of task is almost certainly skill material.
-
-2. **Create a skill.** Write the procedure in `.claude/skills/<name>/SKILL.md`; the body can be as long as you like — it only loads when invoked or judged relevant:
-
-```text
-.claude/skills/
-└── release/
-    └── SKILL.md   # the full twelve-step release process goes here
-```
-
-3. **Leave just a one-line pointer in `CLAUDE.md` (if needed).** For example, "for releases, use the `/release` skill," rather than copying all twelve steps verbatim.
-
-4. **Rule of thumb: is this chunk "something every task needs to know"?** Yes → keep it in `CLAUDE.md`; no (only a certain kind of task needs it) → make it a skill. The official wording is just as crisp: "Keep CLAUDE.md to facts Claude should hold in every session; move a multi-step procedure to a skill."
+1. Keep persistent project facts in instruction files. Load procedures when needed, placing long references in supporting files. Names and descriptions also cost discovery context; overhead is not zero.
+2. Set invocation controls for release, migration, and other workflows with side effects. Claude Code's `disable-model-invocation: true` requires explicit user invocation; it does not replace permissions or approval for the resulting actions.
+3. Review a skill's source, version, scripts, hooks, and pre-approved tools. A “skill” label does not make commands trustworthy. Recheck permission changes after upgrades.
+4. Put checks that must run every time in appropriate hooks/CI. Natural-language skill steps can still be missed. Evaluate triggering, steps, and results on real tasks.
+5. Keep only a short pointer in `CLAUDE.md` when needed rather than unfolding the whole procedure for every task.
 
 ## Example
 
@@ -122,11 +95,11 @@ You: /release
 Me: (only now loads the release process and walks the twelve steps)
 ```
 
-The difference isn't whether I can remember the procedure; it's that **when you don't need it, it takes no space, and when you do, it's there in full.**
+The difference isn't whether I can remember the procedure; it's that **when you don't need it, it takes no space, and when needed, load it and verify that the important steps and materials are available.**
 
 ## How this differs from CLAUDE.md Overload
 
-[CLAUDE.md Overload](../05-implementation/claude-md-overload.mdx) is about "too many rules, averaged into dilution" — a *quantity* problem whose fix is trimming and adding priority. This entry is about "this procedure shouldn't be resident at all" — a *placement* problem whose fix is changing layers (move it into an on-demand skill). The two often appear together: dumping a whole procedure into `CLAUDE.md` is frequently the very move that tips it into overload.
+[CLAUDE.md overload](../05-implementation/claude-md-overload.mdx) examines redundant/conflicting persistent rules and actual loading. This entry asks whether a particular procedure belongs on demand. Moving it into a skill reduces irrelevant persistent content while leaving source, permission, and step validation necessary.
 
 ## When the exception applies
 
@@ -139,8 +112,8 @@ The test, in one line: **ask "does almost every session use this procedure?" —
 
 ## Version notes
 
-:::note Applicable versions
-"Keep resident facts in `CLAUDE.md`, make on-demand procedures into skills" is Claude Code's recommended division of labor and **applies to all versions**; skills follow the [Agent Skills](https://agentskills.io) open standard. The specific capabilities of skills (subagent execution, invocation control, dynamic context injection, etc.) evolve across versions — defer to the official skills docs for the version you run.
+:::note Verified 2026-10-29
+On-demand loading and enforcement are distinct capabilities. Skill availability, invocation controls, permission fields, and retention after compaction vary by tool/version. This is not an all-version claim or permission to grow a skill indefinitely.
 :::
 
 ## Further reading and sources

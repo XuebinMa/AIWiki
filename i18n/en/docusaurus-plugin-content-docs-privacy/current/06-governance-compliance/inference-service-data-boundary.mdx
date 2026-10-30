@@ -11,8 +11,11 @@ severity: Medium
 maturity: Production
 evidence: Official docs
 tags: [data boundary, data retention, zero data retention, subprocessors, compliance, Privacy Engineer, Compliance Engineer, Security Engineer]
+verified_at: 2026-10-29
+review_triggers: ["Contracts account authorization or model eligibility change", "Endpoints caches or third-party retention policies change"]
+review_after: 2026-11-29
 sources:
-  - { title: "OpenAI, Data controls in the OpenAI platform (official: API not used for training by default, abuse-log retention, ZDR)", url: "https://platform.openai.com/docs/guides/your-data" }
+  - { title: "OpenAI, Data controls in the OpenAI platform (official: API not used for training by default, abuse-log retention, ZDR)", url: "https://developers.openai.com/api/docs/guides/your-data" }
   - { title: "Anthropic, API and data retention (official: commercial terms not used for training, log retention, ZDR)", url: "https://platform.claude.com/docs/en/manage-claude/api-and-data-retention" }
   - { title: "OWASP Top 10 for LLM Applications, LLM02:2025 Sensitive Information Disclosure", url: "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/" }
 ---
@@ -25,7 +28,7 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 ## Mechanism: what happens on my side (the framing)
 
-Your prompt reaching me is a **data egress** — it leaves your trust boundary and enters the provider's systems. There it passes through a chain of hops, each a potential point of retention or leakage:
+Sending a prompt to a provider leaves your trust boundary; legal cross-border transfer depends on regions, processing entities, and jurisdiction. Check training use, abuse logs, human review, application state, caches, and onward transfers separately.
 
 used to improve / train the model? → written into **abuse-monitoring logs**, kept how long? → seen by **human review**? → passing through **subprocessors** (cloud, vector store, monitoring)? → landing in which **region**? → entering **caches / eval sets**?
 
@@ -83,7 +86,7 @@ This checklist is the seed of the toolkit's [LLM vendor data-boundary checklist]
 **Minimal testable assertions** (treat the checklist as a regression artifact):
 
 - How to test: keep a filled checklist per vendor, each cell carrying "source of the term + version date," reviewed quarterly.
-- Pass: every cell has a source and a date and matches your signed contract / DPA; no blank cells, no stale cells.
+- Pass: each checklist cell has current terms, account authorization, and actual request configuration. Check eligibility / retention / deletion separately for stateful features, background polling, caches, files, and remote tools. No-training and ZDR must not be treated as zero application state across endpoints; explain differences between contractual and observed coverage.
 - Fail: a cell has no source / contradicts the contract / is past its review date → mark it "unverified" and fill it in before any deployment decision.
 
 ## A real case / current vendor state (stamped 2026-06; verify current terms before deploying)
@@ -93,7 +96,7 @@ The table below is stamped 2026-06 and only illustrates "verify the boundary cel
 
 | Vendor | Scope | Trained on by default | Default retention | ZDR / exceptions |
 |---|---|---|---|---|
-| OpenAI | API (most endpoints) | No (unless you opt in) | abuse-monitoring logs commonly ~30 days then deleted (longer if legally required / to prevent abuse); **but application state, retention, and ZDR eligibility vary by endpoint / feature** | ZDR offered to eligible enterprises, not a self-serve toggle — enabled per endpoint by your account team |
+| OpenAI | Check account / project, endpoint, model, and feature | Not used for training by default unless shared | Separate abuse logs, application state, caches, and files | ZDR / MAM / other retention controls have eligibility and exceptions; encrypted GPU KV cache can persist as application state up to 24 hours, and remote MCP follows third-party policies |
 | Anthropic | API (commercial terms) | No (not used for training without your express permission) | **conversation content (your inputs and Claude's outputs) is not retained by default**; features that must store use the shortest practical TTL; **certain models (Covered Models) require 30-day retention** | ZDR covers the Messages and Token Counting APIs; **not** Console / Workbench, consumer products, Teams / Enterprise interfaces, or Managed Agents; data may be kept up to 2 years for violations or where required by law |
 
 - **Verify cell by cell — don't stretch one cell across the platform.** At the same vendor, retention and ZDR eligibility can differ widely by API / feature / model (e.g. Anthropic's Batch ~29 days, code-execution containers up to 30 days, Files until explicitly deleted). Treating "one cell" as the whole boundary is exactly the false security this entry breaks.
@@ -131,13 +134,13 @@ Calling out each false security:
 ## Version notes
 
 :::note Applicable versions
-The data-lifecycle checklist is a **vendor-agnostic** methodology, stable over the long run. But the **specific values** filled into it (retention days, whether training is on by default, ZDR conditions, the subprocessor list) are vendor terms and **change frequently** — every vendor figure here is stamped 2026-06 and is illustrative only; any deployment decision must rest on the **current** official docs you check and the contract you sign, reviewed quarterly. (Sources verified 2026-06.)
+Checked current OpenAI data controls and Claude API retention documentation on 2026-10-29. ZDR combines account / organization, model, and feature eligibility; it does not make an entire platform stateless. Claude’s Yes (qualified) can retain bounded technical artifacts briefly, and using a No feature steps outside ZDR for that data. Review by 2026-11-29, earlier for contract, account authorization, endpoint / cache, or third-party policy changes.
 :::
 
 ## Further reading and sources
 
 Mixed evidence — **primary: Official docs** (OpenAI / Anthropic official pages); **supplementary: framework** (OWASP LLM02).
 
-- [Data controls in the OpenAI platform (OpenAI official)](https://platform.openai.com/docs/guides/your-data) — Official docs: API not trained on by default, abuse-log retention, enterprise zero data retention (ZDR).
+- [Data controls in the OpenAI platform (OpenAI official)](https://developers.openai.com/api/docs/guides/your-data) — Official docs: API not trained on by default, abuse-log retention, enterprise zero data retention (ZDR).
 - [API and data retention (Anthropic official)](https://platform.claude.com/docs/en/manage-claude/api-and-data-retention) — commercial terms not used for training, API log retention, ZDR.
 - [OWASP LLM02:2025 Sensitive Information Disclosure](https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/) — sensitive-information disclosure risk including the "input retained / used for training" facet, and mitigations.

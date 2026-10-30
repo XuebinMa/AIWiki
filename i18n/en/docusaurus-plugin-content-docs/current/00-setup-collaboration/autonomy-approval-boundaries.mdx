@@ -10,16 +10,20 @@ applies_to: "All coding agents"
 evidence: Research
 tags: [autonomy, approval gates, risk tiering, governance, human-in-the-loop, Project Manager, Architect, DevOps Engineer]
 sources:
+  - { title: "Red-Teaming Auto Mode (Anthropic, 2026-10-22)", url: "https://alignment.anthropic.com/2026/red-teaming-auto-mode/" }
   - { title: "AURA: An Agent Autonomy Risk Assessment Framework (arXiv:2510.15739)", url: "https://arxiv.org/abs/2510.15739" }
   - { title: "AI Risk Management Framework, AI RMF 1.0 (NIST)", url: "https://www.nist.gov/itl/ai-risk-management-framework" }
   - { title: "Bare Minimum Mitigations for Autonomous AI Development (arXiv:2504.15416)", url: "https://arxiv.org/abs/2504.15416" }
+verified_at: 2026-10-29
+review_after: 2026-11-29
+review_triggers: [vendor_documentation_change, permission_or_runtime_change]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['Project Manager', 'Architect', 'DevOps Engineer']} phase="Setup & Collaboration" severity="High" appliesTo="All coding agents" evidence="Research" />
 
-> In one sentence: you turned on autonomous execution for me but never spelled out "which actions I may take directly, and which I must ask you about first." So I drop database tables, change production config, and fire off outbound requests with the same casualness I'd use to fix a typo—not out of malice, but because you never handed me a ruler graded by risk, so I treated "I can do it automatically" as "I should do it automatically."
+> In one sentence: You enable automatic execution without aligning task authorization, risk policy, and execution controls. I may mistake an action I can take for one I am authorized to take. Match approval depth to the action, while allowing clear, authorized low-risk work to proceed.
 
 ## Symptom
 
@@ -28,15 +32,13 @@ For the sake of efficiency, you let me execute automatically and prompt for conf
 - Low-risk and reversible: editing a comment, adding a test, formatting, changing one line of copy.
 - High-risk or irreversible: dropping a table, changing a production environment variable, running a data migration, `git push --force`, calling an endpoint that sends data to the outside world.
 
-In my eyes these are all just "the next step to execute." I won't automatically stop before the second kind and wait for your nod—unless you've **already** drawn me gates graded by risk.
+Without an explicit policy or sufficient control coverage, I may treat these actions as available next steps. Recognizing risk does not guarantee correct stopping on every occasion.
 
 ## Why this happens
 
-Because **autonomy is a continuous spectrum, but risk is not evenly distributed**—and the moment those two fall out of alignment, things go wrong.
+Overall autonomy and the risk of an individual action are separate axes. Reading code, running reviewed tests, and changing production resources have different consequences within one task. Models and tools can recognize some risks, but recognition is neither a complete policy nor proof of user authorization.
 
-The industry has roughly tiered agent autonomy: from "I only lend a hand when you ask" (you are the operator), to "I do the work myself and only come to you when I'm stuck" (you are the approver), to "I run the whole thing on my own and you merely watch" (you barely intervene). The higher the tier, the fewer the points where a human steps in. The problem is: **what should be decided by "the risk of the single operation" gets decided instead by "overall autonomy."** I have no built-in scale for risk—from my vantage point, "drop a table" and "edit a comment" are both just one tool call, and unless the difference in cost is written into the prompt or baked into the config, I cannot sense it.
-
-And the current governance standards put their finger on exactly this gap. Frameworks like AURA—**autonomy risk assessment frameworks**—exist precisely to establish an operable ruler for "which risk level of action must have a human review it"; a general AI-risk framework like the NIST AI RMF gives the GOVERN/MAP/MEASURE/MANAGE scaffolding but leaves the agentic specifics—"at which autonomy level human-in-the-loop must be mandatory"—to practice. In other words, **whether to stop and ask a human at this step should not rest on my in-the-moment judgment, but be a policy you set in advance according to risk.** If you don't set it, I'll pave over every operation with one uniform casualness.
+Automatic approval classifiers reduce interruptions while retaining model judgment. Anthropic's controlled study published on 2026-10-22 examines monitor injection, cross-context attacks, coverage gaps, and policy failures using September 2026 snapshots, not incident rates. High-consequence actions need independent controls; see [execution boundaries](./settings-vs-claudemd.mdx).
 
 ## Consequences
 
@@ -46,19 +48,21 @@ And the current governance standards put their finger on exactly this gap. Frame
 
 ## What to do instead
 
-**Don't give me a one-size-fits-all autonomy; give me an approval table tiered by risk: auto-pass low risk, mandatory human review for high risk, dry-run-then-confirm for the irreversible.**
+**Choose gates from authorization, reversibility, blast radius, and data sensitivity.**
 
-- **Tier operations along three dimensions: reversibility × blast radius × data sensitivity.** All three low → execute automatically + notify after the fact; any one high → pause and wait for human review; irreversible and large blast radius (deleting data, touching production, sending data outbound) → mandatory human review + print "what I'm about to do" before executing.
-- **Turn the tiering into a mechanism, don't just write it in the prompt.** Use settings' allow/ask/deny and hooks to nail high-risk actions down to "must confirm" (connects to [over-permissioning](./over-permissioning.mdx) and [using a prompt where you should have used a hook](./hooks-not-prompts.mdx))—prose rules I merely follow most of the time, but a deterministic gate I can't get around.
-- **Leave an approval trail.** Make every high-risk action stopped by a gate log an entry: who approved it, who vetoed it, what the context was at the time. This is both the basis for incident postmortems and a governance-compliance requirement.
-- **Autonomy evolves with trust, but the risk gate stays permanent.** You can raise overall autonomy as I prove myself on a given class of task; but the gate "anything irreversible / touching production / sending data outbound requires human review" does not loosen with trust—it guards against consequences, not against capability.
+- Clear, authorized, low-risk actions can proceed with verification rather than repeated confirmation.
+- For high-consequence or unauthorized actions, prepare a reviewable proposal, impact preview, and recovery evidence before requesting necessary execution approval. A broad plan is not a pass for every later action.
+- Client rules and command hooks cover specified events and matching calls. Combine them with read-only credentials, isolation, and service controls, checking uncovered tools. See [over-permissioning](./over-permissioning.mdx) and [hook boundaries](./hooks-not-prompts.mdx).
+- Record who authorized what, actual actions, and results. Automatic review, agent assertions, and external text do not replace user authorization.
+- Limit budgets, retries, and external side effects. Reassess new goals, environments, or permissions; existing authorization does not require another question simply because a session changed.
 
 ```text
-A tiering skeleton you can put into settings / CLAUDE.md:
-- Auto-pass (notify only): reading code, editing comments/tests/copy, local formatting, running read-only commands.
-- Pause and ask me: installing a new dependency, changing CI config, large cross-file changes, calling paid/external endpoints.
-- Mandatory human review + dry-run: deleting data/tables, changing production environments, data migrations, force push, sending data outbound.
+Low-risk and authorized: Reversible changes within scope, with reviewed checks.
+Uncertain: Investigate actual impact read-only; bundle material unresolved decisions into questions.
+High-consequence: Present specific changes, preview, and recovery evidence; approve at the necessary execution point.
 ```
+
+This is a policy outline, not executable settings configuration.
 
 ## Example
 
@@ -87,7 +91,7 @@ The same sentence, "use your own judgment": without risk tiering I pave it over 
 
 "Set gates by risk" targets scenarios where I can move real systems; in some scenarios, cranking the approval gates to the max is pure friction instead:
 
-- **Disposable sandbox / throwaway environment**: when exploring inside an isolated container, a temporary branch, or a purely local toy project, the risk is already contained by the environment itself (connects to [sandbox isolation](./sandbox-filesystem-isolation.mdx)), and letting me trial-and-error at high autonomy is far more efficient than waiting for your nod at every step.
+- **Disposable sandbox / throwaway environment**: when exploring inside an isolated container, a temporary VM, or a purely local toy project, the risk is already contained by the environment itself (connects to [sandbox isolation](./sandbox-filesystem-isolation.mdx)), and letting me trial-and-error at high autonomy is far more efficient than waiting for your nod at every step.
 - **Demo / teaching scenario**: deliberately opened up to show how far I can run on my own, with an explicit guarantee that nothing connects to any production system—here high autonomy is the point, not an oversight.
 
 The criterion: an exception holds only when **the worst case is bounded by the environment** (isolated, throwaway, unable to reach real data/production). The moment I can reach an irreversible operation, one with a large blast radius, or one over sensitive data, fall back to the default—tier by risk, and leave the high-danger step to a human.
@@ -100,11 +104,13 @@ The criterion: an exception holds only when **the worst case is bounded by the e
 
 ## Version notes
 
-:::note Applicable versions
-"Autonomy should be tiered by risk, not one-size-fits-all" is a paradigm-level governance problem of agentic collaboration, **applicable across models and across tools**. The stronger the model and the bolder you are about letting go, the higher overall autonomy will climb—which makes the gate "high-risk actions perpetually need human review" more important, not less necessary: capability has gone up, but the irreversibility of consequences has not gone away with it.
+:::note Verified 2026-10-29
+Allocating autonomy by risk and authorization is governance advice, not a claim that models cannot recognize risk. Defaults, classifiers, and enforced controls vary by product. Verify coverage rather than treating model judgment as a complete security guarantee.
 :::
 
 ## Further reading and sources
+
+- [Red-Teaming Auto Mode (2026-10-22)](https://alignment.anthropic.com/2026/red-teaming-auto-mode/): controlled monitor evaluation, not an attack-success rate for current products.
 
 - [AURA: An Agent Autonomy Risk Assessment Framework (arXiv:2510.15739)](https://arxiv.org/abs/2510.15739): provides an operable risk assessment framework for "what governance requirements correspond to which autonomy level."
 - [AI Risk Management Framework (NIST AI RMF 1.0)](https://www.nist.gov/itl/ai-risk-management-framework): frames AI risk governance through GOVERN/MAP/MEASURE/MANAGE, supporting a risk-tiered, human-in-the-loop approach.

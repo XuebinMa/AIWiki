@@ -28,13 +28,16 @@ jobs:
         uses: huacnlee/autocorrect-action@v2.13.3
 
       - name: Vale（套话 / AI 腔）
-        uses: errata-ai/vale-action@2.1.2
-        with:
-          version: 3.9.1 # 钉住 vale 版本防规则漂移；升级手动改（Cliches.yml 只用 existence，跨版本稳定）
-          fail_on_error: true
-          filter_mode: nofilter # PR 也全量扫，与本地 `vale docs i18n privacy` 等价（默认 added 只扫改动行）
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # 直接运行同版本 CLI，避免 reviewdog 读取超过 300 文件的 PR diff 时失败。
+        # 保留安装依赖前的全仓库扫描和错误退出，不依赖 PR 注释接口。
+        run: |
+          curl --fail --location --silent --show-error --retry 3 \
+            https://github.com/vale-cli/vale/releases/download/v3.9.1/vale_3.9.1_Linux_64-bit.tar.gz \
+            --output "$RUNNER_TEMP/aiwiki-vale.tar.gz"
+          echo "fbc2eb47d0b8c50220ed1a2c5c611fbe0904ed567d638143d482016a18fd2db0  $RUNNER_TEMP/aiwiki-vale.tar.gz" | sha256sum --check -
+          tar --extract --gzip --file "$RUNNER_TEMP/aiwiki-vale.tar.gz" --directory "$RUNNER_TEMP" vale
+          "$RUNNER_TEMP/vale" --version
+          "$RUNNER_TEMP/vale" .
 
       - name: 配置 Node
         uses: actions/setup-node@v6
@@ -59,6 +62,12 @@ jobs:
 
       - name: 手写计数一致性（core-20 / CLAUDE.md 现状 vs 实际条目数）
         run: npm run check:counts
+
+      - name: 内容交付（真实索引、双语摘要/来源/元数据、机制索引覆盖）
+        run: npm run check:content
+
+      - name: MCP 回归（含真实内容索引与跨主题取文）
+        run: npm run test:mcp
 
       - name: 构建（两 locale；连带校验 MDX / import / 死内链）
         run: npm run build

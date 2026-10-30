@@ -1,5 +1,5 @@
 ---
-title: 不给我接版本对得上的文档源，放任我凭记忆和网搜写 API
+title: "我凭记忆写 API，没有核对实际版本的文档和类型"
 sidebar_label: "不接版本化文档放任凭记忆写"
 slug: no-versioned-docs
 sidebar_position: 8
@@ -10,9 +10,11 @@ applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [文档源, Context7, MCP, 幻觉, 版本漂移, 检索, 工程师, 架构师]
 sources:
-  - { title: "Context7（upstash/context7，版本化文档 MCP 源）", url: "https://github.com/upstash/context7" }
-  - { title: "Connect Claude Code to tools via MCP（Claude Code 官方）", url: "https://code.claude.com/docs/en/mcp" }
-  - { title: "Claude Code Best Practices（Anthropic 官方）", url: "https://code.claude.com/docs/en/best-practices" }
+  - { title: "Context7 (maintainer repository)", url: "https://github.com/upstash/context7" }
+  - { title: "Claude Code best practices", url: "https://code.claude.com/docs/en/best-practices" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: [dependency_or_retrieval_change, vendor_documentation_change]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -29,22 +31,16 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 为什么会这样
 
-根因有三层，都来自「我是一个有训练截止时间的模型」这件事：
+**训练知识不是项目的版本事实。** 我可能把不同版本的 API 混在一起，也可能通过仓库、检索或工具获得新信息；不能概括为截止日期之后一概不知道。
 
-**第一，我的知识有截止日期，但你的依赖在持续演进。** 训练截止之后这个库改了什么、删了哪个方法、哪个参数换了默认值，我一概不知道。当你不给版本、也不给文档时，我只能用记忆里「印象最深」的那个版本补位——通常是训练数据里出现最多的旧版本，未必是你锁定的那个。
-
-**第二，缺一个「版本正确的事实源」时，我会用「看起来对」的东西补位。** 我生成代码的本质是预测「最像正确答案的 token 序列」。在没有权威参照的情况下，一个名字顺口、签名合理、其实不存在的方法，和一个真实方法，对我来说「看起来」一样可信。这就是幻觉 API 的由来——它不是我在撒谎，而是我在没有事实锚点时，把统计上最可能的形状当成了真。
-
-**第三，网搜不等于版本正确。** 你以为「让它上网搜就准了」，但搜到的网页可能是三年前的旧版教程、可能是低质量的二手转述、可能混着好几个大版本的片段。我没有可靠的办法判断哪一篇对应你锁定的版本，于是照抄——把别人的过时和错误，原样搬进你的代码。
+**检索需要核对适用性。** 搜索结果可能过时，文档 MCP 也可能缺少指定版本或返回不相关片段。先读 lockfile、已安装包、类型声明、源码和官方版本文档，再核对方法签名与默认行为。
 
 ```mermaid
 flowchart LR
-    A[让我写某库调用] --> B{有版本化文档源?}
-    B -- 没有 --> C[凭训练记忆 + 网搜]
-    C --> D["旧版 API / 混版 / 幻觉方法<br/>看起来都对"]
-    D --> E[运行时才崩]
-    B -- 有 --> F[以你给的文档为准]
-    F --> G[版本正确的调用]
+    A[确认实际依赖版本] --> B[读取对应文档或本地类型/源码]
+    B --> C[核对签名与行为]
+    C --> D[编译/最小调用验证]
+    D --> E[记录来源与未确认项]
 ```
 
 ## 后果
@@ -58,7 +54,7 @@ flowchart LR
 
 **给我接一个版本对得上的事实源，并明确告诉我「以文档为准，不要凭记忆」。** 几个可直接照做的动作：
 
-1. **接一个版本化文档源。** 最省事的是把 [Context7](https://github.com/upstash/context7) 这类 MCP 文档源接进来——它按你指定的库和版本，把官方文档与示例直接喂进我的上下文。Claude Code 通过 MCP 连接外部数据源正是为这种场景设计的。
+1. **接一个版本化文档源。** 可选择 Context7 的 MCP 或 CLI/Skills 等检索方式；其维护者说明支持版本化文档，但应核对返回的库 ID、版本和片段。不是每个库的每个版本都可直接假定覆盖，也不要求已有本地事实时额外接 MCP。
 
 ```text
 # 在提示里点名版本，并让我去查文档源
@@ -67,7 +63,7 @@ flowchart LR
 
 2. **把锁定版本的官方文档纳入上下文。** 没有 MCP 时，退而求其次：把该版本文档的关键页面下载到仓库里，或在 `CLAUDE.md` 里写明依赖版本和文档链接，让我每次都能对上号。
 
-3. **对关键 API 明确要求「以你给的为准，而非我的记忆」。** 这一句话能直接改变我的优先级——有外部事实源时我会优先采信它，而不是默认相信记忆。
+3. **对关键 API 明确要求「以你给的为准，而非我的记忆」。** 这项要求帮助聚焦，但不能保证我一定使用了正确资料；应记录实际核验的来源与版本。
 
 4. **陌生或快速演进的库，要求我核对真实签名。** 让我把用到的方法名、参数逐一对着文档源确认一遍，而不是写完就交。拿不准的地方，宁可让我说「文档里没查到，需要你确认」，也别让我猜。
 
@@ -93,22 +89,15 @@ flowchart LR
 
 ## 什么时候例外
 
-接文档源是为了对冲「我的记忆对不上你的版本」。当这种错配的风险本来就低，省掉这一步是合理的：
-
-- **稳定多年、我烂熟的 API。** 语言标准库、十年没大改签名的成熟库——训练数据里它的用法既密集又一致，我跨版本记串的概率很低，为它单独接文档源是过度准备。
-- **一次性 / 探索性代码。** spike、临时脚本、马上要丢的原型——跑通即弃，没人会因为我用了某个小版本的写法而踩生产坑，对的成本是「能跑」，不是「版本绝对精确」。
-- **你已经把版本事实喂进上下文。** 相关文档片段、`.d.ts` 类型、官方示例已经贴进来或在仓库里随手可读时，事实源已经到位，再叠一个 MCP 文档源是重复。
-
-判据一句话：**先问「这个库在我训练截止后改没改、我有没有可能记串」——会改、或你拿不准我记得对不对，就接版本化文档源；稳定到我闭着眼都对、或代码反正要丢，才可以省。**
+已有可靠本地类型、官方示例或测试时，可以直接用它们，不必额外安装文档工具。稳定 API 或可丢弃原型可以降低核验成本，但不能只凭「模型很熟」免除检查；一次性脚本若会改持久数据，仍需核对真实版本与副作用。
 
 ## 版本说明
 
-:::note 适用版本
-「训练有截止时间、对你锁定的具体版本无感知」是所有大模型的固有属性，**与具体模型无关**，新模型只是把截止日期往后挪，不改变「截止之后一无所知」这个事实。版本化文档源（Context7 等 MCP 文档工具）是较新的外部能力，需以你所用客户端是否支持 MCP、以及对应文档源是否覆盖你的库为准。本条与《在快速演进的库上幻觉 API / 版本漂移》（编码实现阶段）讲的是同一根因的两个侧面：那一条在「写代码当下」补救，本条在「准备阶段」从源头堵住。
+:::note 适用范围
+2026-10-29 核对 Context7 维护者说明与 Claude Code 文档。版本资料是核验途径，不是正确性保证；库、文档源或检索工具变化时复核。
 :::
 
 ## 延伸阅读与出处
 
-- [Context7（upstash/context7，版本化文档 MCP 源）](https://github.com/upstash/context7)
-- [Connect Claude Code to tools via MCP（Claude Code 官方）](https://code.claude.com/docs/en/mcp)
-- [Claude Code Best Practices（Anthropic 官方）](https://code.claude.com/docs/en/best-practices)
+- [Context7 (maintainer repository)](https://github.com/upstash/context7)
+- [Claude Code best practices](https://code.claude.com/docs/en/best-practices)

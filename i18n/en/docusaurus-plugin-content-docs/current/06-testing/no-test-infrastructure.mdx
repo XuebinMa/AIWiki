@@ -10,8 +10,10 @@ applies_to: "All coding agents"
 evidence: Official docs
 tags: [verification loop, testing, CI, Engineer, QA Engineer]
 sources:
-  - { title: "Best practices for Claude Code (Anthropic)", url: "https://code.claude.com/docs/en/best-practices" }
-  - { title: "Agentic AI Coding: Best Practice Patterns for Speed with Quality (CodeScene)", url: "https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality" }
+  - { title: "Claude Code best practices", url: "https://code.claude.com/docs/en/best-practices" }
+verified_at: 2026-10-29
+review_after: 2027-04-29
+review_triggers: [verification_workflow_change, source_revision]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -28,11 +30,9 @@ As for *how to prove it actually works* — I've left that to you.
 
 ## Why this happens
 
-Setting up test infrastructure **produces nothing visible**. Install a framework, configure a runner, write a smoke test that only asserts `1 + 1 === 2`, edit the CI config — finish that whole lap and your feature hasn't gained a single line. And I'm optimized to **produce something you can see as fast as possible**: a working feature, a mergeable diff, a "done." Under those incentives, scaffolding naturally falls behind the implementation — and "behind" usually ends up meaning "never."
+I can omit repeatable validation when task scope and verification are unclear. That is a workflow risk, not evidence that every model lacks long-term engineering judgment or necessarily avoids testing.
 
-There's a deeper layer. I don't proactively pave the road for my "future self." I lack the sustained engineering instinct that says "this project will be changed a hundred times, so it needs a safety net first" — unless you write that into the task, I default to treating it as out of scope.
-
-But that's exactly what dismantles the thing I most need. I'm good at generating **plausible-looking** code, yet I never actually ran it (see [Trust, Then Verify](./trust-then-verify.mdx)). To get from "plausible" to "actually correct," I rely on a check that emits a pass/fail signal, so I can enter the loop of write → run → read the result → fix. **Without test infrastructure, that loop has nowhere to close** — I can only stop at "looks right," and so can you.
+No dedicated test framework does not mean no validation. Existing tests, type checks, builds, static analysis, or comparison scripts can provide partial evidence. Their relevance to changed behavior matters more than whether a library was installed.
 
 ## Consequences
 
@@ -47,22 +47,22 @@ But that's exactly what dismantles the thing I most need. I'm good at generating
 
 A "minimal viable" test setup needs only three things:
 
-1. **One runnable test**: even if it asserts the simplest possible fact, the point is that it actually executes and can go green.
+1. **One meaningful runnable check**: inspect existing tools first, verify representative behavior, and confirm a safe intentional failure is detected. A constant assertion does not establish feature coverage.
 2. **A command to run it**: something like `npm test`, so I (and you) can get a pass/fail with one keystroke at any time.
-3. **Wire it into CI**: have that command run automatically on every commit, turning verification from "someone remembers to run it" into "the machine always runs it."
+3. **Add CI where useful**: specify triggering events and scope; required status checks are also needed to block merging. Not every commit automatically exercises every path.
 
 You can ask me directly like this:
 
 ```text
 Before writing any implementation, set up the minimal test infrastructure for this project:
-1. Pick a mainstream test library for this language/framework and install it;
-2. Write one smoke test that passes, confirming the runner works;
+1. Inspect existing test tools; add dependencies only if needed;
+2. Write a representative behavioral check and confirm that it detects the target failure;
 3. Give me a command to run the tests, recorded in README / package.json;
 4. Add a CI config so the tests run automatically on every push.
 Get it all green and show me the green before you start on the feature.
 ```
 
-Once the scaffold stands, have me work the way [Trust, Then Verify](./trust-then-verify.mdx) describes: write the tests first, then write the implementation to make them go green. Only then does the verification loop truly close — **one test that genuinely passes beats zero.**
+Once the scaffold stands, have me work the way [Trust, Then Verify](./trust-then-verify.mdx) describes: write the tests first, then write the implementation to make them go green. Only then does the verification loop truly close — **prefer one lightweight check that actually tests target behavior; framework count is not quality.**
 
 ## Example
 
@@ -94,7 +94,7 @@ Me: (tests first, implementation to all-green; from now on, if anyone reorders t
 
 Setting up test infrastructure first is the default, but in a few cases not setting it up is the right call:
 
-- **A throwaway spike or one-off script**: a demo written to check feasibility, a data migration you run once and delete — it won't be changed a second time, so the "will be changed a hundred times" safety net has nothing to protect, and standing up a framework and CI is pure overhead. Running it once and eyeballing the result is enough.
+- **Low-impact disposable probes** can use lightweight validation without a whole framework. One-time migrations can change persistent data and still need risk-based invariant checks, dry runs, and recovery; an eyeballed run is not sufficient by default.
 - **The project already has infrastructure**: the test library, runner, and CI are all there and you're just adding a feature — then this isn't "setting up infrastructure," it's using it; this pitfall doesn't apply, and you write tests the [trust, then verify](./trust-then-verify.mdx) way.
 - **It genuinely can't be stood up, and a cheaper check exists**: for some one-off glue code, an isolated test setup costs far more than the code itself, while a type check / build / a script that diffs one expected output already gives a red/green signal — use that lightweight check instead of forcing up a whole framework.
 
@@ -102,12 +102,10 @@ The test: the exception holds when this code **won't outlive this one use, or th
 
 ## Version notes
 
-:::note Applicable versions
-"Prioritize visible output, don't proactively build infrastructure" is a side effect of the direction current models are optimized toward, and it applies **across all versions and across models**. No matter how strong the model, if the task doesn't explicitly require "set up test infrastructure first," I tend to skip it — so the fix for this one lives in your prompts and project conventions, not in the model version.
+:::note Scope
+Official guidance supports executable verification, not a universal claim that models skip testing. Choose depth and budget by risk rather than unconditionally adding frameworks, dependencies, or full CI for low-impact edits.
 :::
 
 ## Further reading and sources
 
-- [Best practices for Claude Code (Anthropic)](https://code.claude.com/docs/en/best-practices) — the "Give Claude a way to verify its work" section, and its listing of the "trust-then-verify gap" as a common failure pattern.
-- [Agentic AI Coding: Best Practice Patterns for Speed with Quality (CodeScene)](https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality)
-- Same-thread entry: [Trust, Then Verify](./trust-then-verify.mdx)
+- [Claude Code best practices](https://code.claude.com/docs/en/best-practices)

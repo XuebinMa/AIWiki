@@ -11,7 +11,11 @@ severity: 中
 maturity: 试验
 evidence: 研究支持
 tags: [差分隐私, DP-SGD, 微调, 隐私预算, 成员推断, 隐私工程师, ML 工程师]
+verified_at: 2026-10-29
+review_triggers: ["邻接单位或采样变化", "裁剪会计或发布组合变化"]
+review_after: 2027-04-29
 sources:
+  - { title: "NIST SP 800-226 最终版（2025）", url: "https://csrc.nist.gov/pubs/sp/800/226/final" }
   - { title: "Abadi et al., Deep Learning with Differential Privacy (ACM CCS 2016. arXiv 1607.00133)", url: "https://arxiv.org/abs/1607.00133" }
   - { title: "Li et al., Large Language Models Can Be Strong Differentially Private Learners (ICLR 2022. arXiv 2110.05679)", url: "https://arxiv.org/abs/2110.05679" }
   - { title: "Yu et al., Differentially Private Fine-tuning of Language Models (ICLR 2022. arXiv 2110.06500)", url: "https://arxiv.org/abs/2110.06500" }
@@ -55,9 +59,9 @@ DP 直接削弱的是**单样本可区分性**——成员推断（某人在不�
 
 ## 防护原理
 
-(ε, δ)-差分隐私的定义：对两个**相邻**数据集（差恰好一条样本），机制输出落在任意集合里的概率之比被 e^ε 框住，外加一个 δ 的松弛项。直觉上——你这条数据在不在，几乎不改变我「长成什么样」的分布，所以攻击者很难从我身上反推你在不在。
+(ε, δ)-DP 的定义：对约定邻接关系下任意相邻数据集 D、D′ 与事件 S，`Pr[M(D) ∈ S] ≤ exp(ε) Pr[M(D′) ∈ S] + δ`。保护对象由邻接关系决定；该不等式约束分布差异，不保证某条敏感文本绝不出现。
 
-工程上靠两块拼出来：**裁剪 + 加噪**给出单步的隐私损失，**隐私会计**把多步训练累加成总预算——Abadi 等提出的 moments accountant（矩会计）让这个累加比朴素组合定理紧得多，从而在同样隐私下少加很多噪声、保住更多效用（Abadi et al., 2016）。点破：**ε 是预算不是开关，δ 是允许「翻车」的小概率，隐私单位决定保护谁**——这三样不写清楚，「DP」二字没有意义。
+工程上靠两块拼出来：**裁剪 + 加噪**给出单步的隐私损失，**隐私会计**把多步训练累加成总预算——Abadi 等提出的 moments accountant（矩会计）让这个累加比朴素组合定理紧得多，从而在同样隐私下少加很多噪声、保住更多效用（Abadi et al., 2016）。点破：**ε 是预算不是开关，δ 是事件概率不等式的加性松弛项，不能一般地解读为以 δ 概率完全失去隐私，隐私单位决定保护谁**——这三样不写清楚，「DP」二字没有意义。
 
 ## 落地实现（配方）
 
@@ -80,7 +84,7 @@ DP 直接削弱的是**单样本可区分性**——成员推断（某人在不�
 **最小可测试断言**（把上面的配方收成可回归的检查）：
 
 - 怎么测：用独立的隐私会计（moments / RDP accountant）复算报告的 (ε, δ)，并核对隐私单位与裁剪 / 加噪配置一致。
-- 通过：(ε, δ) 能被独立复算到同一量级；裁剪 norm / noise multiplier / 采样率 / 步数齐全；隐私单位与要保护的对象（样本 / 用户）一致。
+- 通过：独立会计按相同邻接关系、隐私单位、采样方法、裁剪、噪声与步数，在说明的数值误差内复算一致；私有调参、评估和其他发布纳入组合。单有裁剪 / 加噪和一次 MIA 测试不构成完整证明，DP 微调也不抹去底座此前泄露的私有数据。
 - 失败：复算不出 / 缺会计 / 隐私单位错配 → 不算 formal DP，别标「已加 DP」。
 
 ## 真实案例 / 工程可行性
@@ -124,7 +128,7 @@ DP-SGD 的算法骨架跨库一致，但**工程实现与默认会计**有别，
 ## 版本说明
 
 :::note 适用版本
-DP-SGD 的算法骨架（裁剪 + 加噪 + 矩会计）自 2016 年（Abadi, CCS）确立，是**与模型无关**的训练机制，跨厂商通用。把它在大语言模型微调上做到「效用可接受」则是 2022 年前后的进展（Li / Yu, ICLR 2022），并随 Opacus 等库持续工程化。**注意**：论文里的 ε 取值与效用结论绑定特定模型、数据、任务，不能直接迁移；落地必须用你自己的隐私会计重新算。（出处核验于 2026-06。）
+2026-10-29 复核 Li / Yu 2022 与 NIST SP 800-226 最终版（2025-03-06），修正 δ 解释与「同量级」会计验收。论文效用绑定特定模型 / 任务；库默认值与所有生产配置未逐项重测。2027-04-29 前，或会计器、采样、隐私单位、裁剪实现与发布组合变化时复核。
 :::
 
 ## 延伸阅读与出处
@@ -132,3 +136,5 @@ DP-SGD 的算法骨架（裁剪 + 加噪 + 矩会计）自 2016 年（Abadi, CCS
 - [Deep Learning with Differential Privacy（Abadi 等，ACM CCS 2016；arXiv 1607.00133）](https://arxiv.org/abs/1607.00133) —— DP-SGD 奠基：逐样本裁剪 + 高斯噪声给出 (ε, δ)-DP，moments accountant 紧化多步预算。
 - [Large Language Models Can Be Strong Differentially Private Learners（Li 等，ICLR 2022；arXiv 2110.05679）](https://arxiv.org/abs/2110.05679) —— 大预训练模型 + DP 专用超参 + ghost clipping，在同等隐私预算下超过此前最好的 DP 模型。
 - [Differentially Private Fine-tuning of Language Models（Yu 等，ICLR 2022；arXiv 2110.06500）](https://arxiv.org/abs/2110.06500) —— 参数高效微调（LoRA / adapter）与 DP 结合，在效用 / 隐私 / 算力三维同时改进。
+
+- [NIST SP 800-226 最终版（2025）](https://csrc.nist.gov/pubs/sp/800/226/final)

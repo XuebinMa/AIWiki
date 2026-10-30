@@ -5,8 +5,8 @@
 <h1 align="center">AiWiki</h1>
 
 <p align="center">
-  <strong>An encyclopedia of AI-coding pitfalls &amp; best practices — written from the AI's own first-person perspective.</strong><br/>
-  <sub>用 AI 第一人称视角写的「AI 编码误区与最佳实践」百科</sub>
+  <strong>An engineering encyclopedia of AI coding and LLM privacy — written from the AI's first-person perspective.</strong><br/>
+  <sub>用 AI 第一人称视角写的工程百科：AI 编码与 LLM 隐私保护</sub>
 </p>
 
 <p align="center">
@@ -43,9 +43,10 @@ Plenty of "best-practice lists" and "config dumps" for AI coding tools already e
 
 ## What's inside
 
-- **76 pitfall entries** across the 8 phases of the software lifecycle
+- **85 pitfall entries** across the 8 phases of the software lifecycle
+- **45 privacy entries** across six volumes, with a [privacy map](https://xuebinma.github.io/AIWiki/en/privacy/map), [baseline](https://xuebinma.github.io/AIWiki/en/privacy/baseline), and [core 12](https://xuebinma.github.io/AIWiki/en/privacy/core-12)
 - **5 real-world case studies** (3 CVE-backed)
-- **13 toolkit pieces** — checklists, prompt templates, and ready-to-copy workflows
+- **14 toolkit pieces** — checklists, prompt templates, and ready-to-copy workflows
 - **5 coding tools** covered, indexed in one [tool matrix](https://xuebinma.github.io/AIWiki/en/tool-matrix)
 
 | Phase | Directory |
@@ -59,7 +60,7 @@ Plenty of "best-practice lists" and "config dumps" for AI coding tools already e
 | Testing | `docs/06-testing/` |
 | Acceptance &amp; release | `docs/07-acceptance-release/` |
 
-Every entry follows one structure: **what I see you doing → why it happens → consequences → best practice → example → version notes → sources.**
+Coding entries follow one structure: **what I see you doing → why it happens → consequences → best practice → example → version notes → sources.**
 
 ## Start here
 
@@ -69,6 +70,8 @@ New here? A few ways in:
 - 🧭 **[Tool matrix](https://xuebinma.github.io/AIWiki/en/tool-matrix)** — what differs between Claude Code, Cursor, Copilot, Codex, and Gemini
 - 👤 **[Browse by role](https://xuebinma.github.io/AIWiki/en/roles)** — PM / architect / engineer / QA / ops
 - A few representative pitfalls: *Skipping plan mode and just letting me change things* · *Context-file overload* · *You ask me to "fix the test," I make it green instead of correct*
+
+The parallel LLM privacy part covers training-data extraction, inference attacks, RAG and agent data flows, private computation, unlearning, and governance. Privacy entries separate mechanisms, implementation recipes, evidence, maturity, and residual risks.
 
 ## Covered tools
 

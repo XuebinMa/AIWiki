@@ -10,8 +10,12 @@ applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [边界条件, 详细设计, 健壮性, 工程师]
 sources:
+  - { title: "Making retries safe with idempotent APIs", url: "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/" }
   - { title: "Fallacies of distributed computing — Wikipedia", url: "https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing" }
   - { title: "Claude Code Best Practices（Anthropic 官方）", url: "https://code.claude.com/docs/en/best-practices" }
+verified_at: 2026-10-29
+review_after: 2027-04-29
+review_triggers: ["实际规模、维护能力或公共契约变化", "所引研究、规范或工程指导修订"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -28,26 +32,15 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 为什么会这样
 
-这和[《写实现时漏边界》](./missing-edge-cases.mdx)是两个高度的问题。那条讲的是「代码里少了一个 null 判断」；这条讲的是「整个方案默认了一组在小规模、顺利路径下成立、但在真实世界里不成立的前提」。
+我可能验证了示例中的成功路径，却没有写出输入上限、故障模型与系统不变量。图中一条箭头能连起来，不代表超时、重复投递、部分失败和恢复时也成立。
 
-根因在于我**优化的是「读起来合理、自洽」，而不是「在最坏情况下仍然成立」**：
+这里的解释是设计缺少可检查的前提，而不是已证明我的内部只追求「像真的」。重试、幂等、背压和降级各解决不同问题：盲目重试可能放大故障，幂等也须明确键、去重范围及保存期限。并非每个系统都应无条件装上所有机制。
 
-- **我默认走 happy path 设计。** 我的方案天然描述「一切顺利时它怎么转」，因为那是最清楚、最好讲的故事。失败、超时、部分成功、重试、并发——这些「不顺」的分支不在那个故事里，除非你逼我去想最坏情况。
-- **我会把分布式与规模的经典谬误一起继承下来。** 「网络可靠」「延迟为零」「带宽无限」「不会有人重复触发」——这些被反复证伪的假设，恰恰是最常见的方案默认前提，而我也常默认它们成立。
-- **合理 ≠ 健壮。** 我最擅长生产「貌似合理」的东西，方案这一层尤其如此：它没有可运行的代码去戳破，全靠你顺着读，而顺着读时脆弱假设是看不出来的。
-
-```mermaid
-flowchart TD
-    A[你要一套方案] --> B[我给出 happy path 设计]
-    B --> C{有人逼它面对最坏情况吗}
-    C -->|没有，顺着读都合理| D["规模放大 / 超时重试<br/>并发与幂等 / 部分失败"]
-    C -->|你显式追问失败路径| E[方案补上退化与恢复策略]
-    D --> F[上了真实负载就垮]
-```
+我应先列出本项目会承担的失败及其后果，再选择能够维持不变量的最小机制，并用故障场景核验。
 
 ## 后果
 
-- 脆弱藏在设计里，要到联调、压测甚至上线才暴露——这时返工的不是一行代码，而是整套数据流，代价是实现阶段的数倍。
+- 脆弱藏在设计里，要到联调、压测甚至上线才暴露——这时返工的不是一行代码，而是整套数据流，具体代价取决于部署和兼容边界，不能给出通用倍数。
 - 丢单、重复处理、雪崩这类问题，往往直接砸在数据正确性和线上稳定性上，比单点崩溃更难收拾。
 - 你基于一个看着靠谱的方案做了排期和承诺，等脆弱暴露，塌的是整个计划的时间线。
 
@@ -83,10 +76,11 @@ flowchart TD
 ## 版本说明
 
 :::note 适用版本
-「优化貌似合理而非最坏情况健壮」是大语言模型的本质倾向，**全模型、跨工具通用**。模型越强，给出的方案越完整、越顺滑，脆弱假设反而藏得越深——所以「逼方案直面最坏情况」这件事，越是用强模型越不能省。
+2026-10-29 复核代理验证指导及 AWS 幂等 API 工程说明。保留按失败场景推敲方案的原则；来源提供方法与案例，未给出「所有模型」发生率或通用返工倍数。具体机制须结合副作用、吞吐、延迟和恢复目标验证。
 :::
 
 ## 延伸阅读与出处
 
 - [Fallacies of distributed computing — Wikipedia](https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing)
 - [Claude Code Best Practices（Anthropic 官方）](https://code.claude.com/docs/en/best-practices)
+- [Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/)

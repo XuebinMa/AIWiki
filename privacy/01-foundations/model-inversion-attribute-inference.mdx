@@ -11,7 +11,11 @@ severity: 高
 maturity: 研究
 evidence: 研究支持
 tags: [模型反演, 属性推断, 推断类攻击, 置信度泄露, 成员推断, 差分隐私, 隐私工程师, ML 工程师, 安全工程师]
+verified_at: 2026-10-29
+review_triggers: ["反演访问模型或输出粒度变化", "敏感人群属性或基线变化"]
+review_after: 2027-04-29
 sources:
+  - { title: "CCS 2015 原文（作者托管）", url: "https://www.cs.toronto.edu/~ristenpart/papers/mi-ccs.pdf" }
   - { title: "Fredrikson et al., Model Inversion Attacks that Exploit Confidence Information and Basic Countermeasures (ACM CCS 2015)", url: "https://dl.acm.org/doi/10.1145/2810103.2813677" }
   - { title: "Fredrikson et al., Privacy in Pharmacogenetics: An End-to-End Case Study of Personalized Warfarin Dosing (USENIX Security 2014)", url: "https://www.usenix.org/conference/usenixsecurity14/technical-sessions/presentation/fredrikson_matthew" }
 ---
@@ -58,7 +62,7 @@ flowchart TB
 - **差分隐私**：DP 限制单样本对模型的影响，削弱「针对训练中某个体」的反演 / 推断（见《[DP 微调](../03-conversational-llms/dp-fine-tuning.mdx)》）；但属性推断里**源于人群相关性**的那部分，DP 也压不掉。
 - **谨慎设计类别粒度**：避免「一个类 = 一个真人」这种让反演直接等价于「重建某人」的建模方式。
 
-点破：**属性推断不可能靠技术「清零」**——它一半是统计现实。诚实的目标是「**降低模型带来的额外泄露**」，而不是承诺「攻击者推不出任何属性」。把后者当成可达目标，是这条的假安全。
+点破：**属性推断不可能靠技术「清零」**——它可能部分来自人群统计相关性。诚实的目标是「**降低模型带来的额外泄露**」，而不是承诺「攻击者推不出任何属性」。把后者当成可达目标，是这条的假安全。
 
 ## 落地实现（配方）
 
@@ -78,7 +82,7 @@ flowchart TB
 **最小可测试断言**（把反推风险收成可回归的检查）：
 
 - 怎么测：对你的接口跑模型反演（优化输入最大化目标类置信度）+ 属性推断（部分特征 + 人群先验），在你的输出粒度 / DP 配置下评估重建可辨认度 / 属性推断准确率。
-- 通过：在仅给标签 / 粗化置信度 + DP 的配置下，反演重建**不可辨认到个人**、属性推断准确率**接近人群基线**（即「模型没带来显著额外泄露」）。
+- 通过：在经授权或合成的测试数据、声明的接口与攻击预算下，重建辨认度 / 属性推断相对无模型基线的增益及置信区间满足门槛。有限攻击失败不能证明所有反演失败，粗化输出也不排除其他访问模型下的攻击。
 - 失败：精细置信度可被优化出**可辨认**的类别代表、或属性推断**显著高于**人群基线，而接口无输出粒度控制 / 无 DP → 按配方收紧。
 
 ## 真实案例 / 研究进展（工程可行性）
@@ -95,7 +99,7 @@ flowchart TB
 
 - **置信度是燃料。** 对外暴露精细概率 = 给反演 / 推断供油；输出最小化有可用性代价，但这是真实取舍。
 - **模型反演 ≠ 逐字还原训练图。** 它给的是类别代表；危害在「类=个人」时。别把它和梯度反演 / 训练数据抽取混为「能调出任意原图」。
-- **属性推断压不到零。** 一半源于人群统计；诚实目标是「降低模型的额外泄露」，不是「攻击者一无所获」。
+- **属性推断压不到零。** 可能部分源于人群统计；诚实目标是「降低模型的额外泄露」，不是「攻击者一无所获」。
 - **DP 压个体、压不掉统计。** DP 削弱针对训练中某个体的反演，但属性与可观测特征的相关性它管不着。
 - **类别粒度是建模决策。** 「一个类一个真人」会让反演直接等价于「重建某人」——这是设计时就该规避的。
 
@@ -108,10 +112,12 @@ flowchart TB
 ## 版本说明
 
 :::note 适用版本
-「置信度输出可被用于反演类别代表 / 推断敏感属性」是**与具体模型无关**的范式级事实（输出携带超出预测本身的信息）。但**能反演到多可辨认、属性推断高出基线多少**，强绑定模型类型、类别粒度、输出粒度与数据——Fredrikson 等（2014/2015）的人脸 / 华法林结论**不能直接迁移**到你的设置；落地须按你自己的接口跑反演 / 推断审计。后续 GAN / 扩散增强方法在演进，本段打戳 2026-06。（出处核验于 2026-06。）
+2026-10-29 核对作者托管的 CCS 2015 原文与 USENIX 2014 华法林研究：类别代表图像不等于某条训练照片逐像素恢复；属性推断可能利用人群相关性，也可针对非成员。DP 约束所定义记录 / 用户的额外贡献，不能消除已有统计知识。2027-04-29 前，或新反演访问模型、敏感人群 / 输出接口变化时复核。
 :::
 
 ## 延伸阅读与出处
 
 - [Model Inversion Attacks that Exploit Confidence Information and Basic Countermeasures（Fredrikson 等，ACM CCS 2015）](https://dl.acm.org/doi/10.1145/2810103.2813677) —— 模型反演奠基：利用置信度黑盒重建人脸识别模型训练集成员的可辨认人脸。本条主源。
 - [Privacy in Pharmacogenetics: An End-to-End Case Study of Personalized Warfarin Dosing（Fredrikson 等，USENIX Security 2014）](https://www.usenix.org/conference/usenixsecurity14/technical-sessions/presentation/fredrikson_matthew) —— 属性推断真实案例：从剂量模型 + 部分人口学信息推断敏感基因型。本条属性推断依据。
+
+- [CCS 2015 原文（作者托管）](https://www.cs.toronto.edu/~ristenpart/papers/mi-ccs.pdf)

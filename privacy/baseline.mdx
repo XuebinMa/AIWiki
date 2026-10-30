@@ -4,6 +4,9 @@ slug: baseline
 sidebar_label: 最小隐私基线
 sidebar_position: 7
 description: 上线一个用到 LLM 的功能前，先照这 10 条把隐私底线立起来——工具中立、每条链到展开版。它是下限不是上限，配合「隐私地图」按威胁反查、「事故索引」看现实代价一起用。
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: [source_revision, evidence_or_threat_model_change]
 ---
 
 # 最小隐私基线（速用清单）
@@ -22,19 +25,19 @@ description: 上线一个用到 LLM 的功能前，先照这 10 条把隐私底�
 
 3. **RAG / 向量库按调用者权限过滤，别把「向量化」当匿名。** 检索按调用者的访问控制过滤、存储层按租户隔离；记住 embedding 可被反演回近似原文与 PII——存了一堆向量，等于存了一份可还原的敏感数据。见[RAG 检索泄露](./04-rag-agents/rag-retrieval-leakage.mdx)、[嵌入反演](./04-rag-agents/embedding-inversion.mdx)。
 
-4. **记忆 / 缓存 / 会话按用户隔离，并按「不串」压测并发。** 多租户共享存储 + 竞态 + 缺归属校验，是教科书级串味的配方（ChatGPT 2023-03 事故正是如此）；按用户分区 + TTL，压测「每条消息只对正确用户可见」，别跑通一次就放心。见[跨会话记忆串味](./04-rag-agents/cross-session-memory-bleed.mdx)。
+4. **记忆 / 缓存 / 会话按用户隔离，并分别测错配与侧信道。** 多租户共享存储需并发压测与归属校验；缓存时序则用 A 预热、B 独立身份探测的受控对照，不能把同一用户的正常冷热加速算成跨用户泄露。见[跨会话记忆串味](./04-rag-agents/cross-session-memory-bleed.mdx)、[推理期侧信道](./05-frontier-deployment/inference-side-channels.mdx)。
 
 5. **Agent 出站收口在工具 / 渲染层，别靠「叫模型别外发」。** 出站走 allowlist、关闭或转义 markdown 图片 URL 这类自动加载的渲染面——EchoLeak、CamoLeak 都走「把私有数据编码进图片 URL、客户端一加载就外泄」，而指令式防御连专门拦注入的分类器都被绕过。硬约束要加在工具与出站层。见[Agent 工具外联外泄](./04-rag-agents/agent-tool-exfiltration.mdx)。
 
-6. **接 MCP / 第三方 server 走最小采集，并审子处理方。** 「只连官方 server 就安全」是错的；同意不是一次性，数据交出去之后「最小采集」也管不到——列清哪些上下文会被交出、谁在采、把凭据集中放在一处又放大了多大爆炸半径。见[MCP 数据流与最小采集](./04-rag-agents/mcp-data-flow-privacy.mdx)。
+6. **接 MCP / 第三方 server 先核实际数据流，再做最小采集。** 普通工具调用不因协议要求自动附上整段会话；分别审参数、附加输入、资源读取、元数据与下游凭据。无状态协议也不等于无留存，按实际版本与授权范围检查缓存和状态句柄。见[MCP 数据流与最小采集](./04-rag-agents/mcp-data-flow-privacy.mdx)。
 
 7. **训练 / 微调前先去重；开了 DP 就把 ε 当真去审。** 去重打掉的是「重复」这个记忆放大器，DP 给的是「单样本影响有界」而非零泄露；开了 DP 别只信声称的 ε——用够强的攻击审出经验下界，实现 / 会计的 bug 会悄悄掏空保证。见[训练数据去重](./02-memorization-extraction/training-data-deduplication.mdx)、[DP 微调](./03-conversational-llms/dp-fine-tuning.mdx)、[DP 审计](./02-memorization-extraction/dp-privacy-auditing.mdx)。
 
 8. **删除要跨副本扇出、且能验证，别把「关开关」当「已删」。** 主库删掉，不等于备份 / 日志 / 向量库 / 派生模型里那几份也删了；模型「记住」的那份要机器遗忘且可验证。关掉记忆开关通常只是「以后不再记」，已经存下的照旧在。见[数据生命周期与删除传播](./06-governance-compliance/data-lifecycle-deletion.mdx)、[可验证删除与机器遗忘](./05-frontier-deployment/machine-unlearning.mdx)。
 
-9. **发布前量一次「记住了多少」、跑一遍隐私 eval。** 用 canary 探针量记忆暴露度、用 Agent 注入外泄基准量「被注入后会漏什么」——过基准不等于真安全，但不量就是盲发。把它纳入发布前 eval 与回归。见[量化记忆与审计](./02-memorization-extraction/quantifying-memorization.mdx)、[Agent 隐私评测](./04-rag-agents/agent-privacy-benchmark.mdx)。
+9. **发布前评测采集、传播与披露，也量任务效果。** 用无真实 PII 的受控 canary 量记忆；Agent 评测同时检查越范围读取、内部未授权共享、最终泄露 / 外发与注入攻击。按任务相关性和接收者权限判违规，合法必要共享不算泄露。见[量化记忆与审计](./02-memorization-extraction/quantifying-memorization.mdx)、[Agent 隐私评测](./04-rag-agents/agent-privacy-benchmark.mdx)。
 
-10. **推理链、computer-use 截屏都是输出面，一样要脱敏。** 「思考是内部的所以安全」是错的——思考越多、带出的敏感数据越多；截屏截的是整屏（含无关的、他人的数据），不是任务那一块。把思维轨迹与屏幕捕获当会外泄的输出面来对待。见[推理链泄露](./03-conversational-llms/reasoning-trace-leakage.mdx)、[Computer-use 屏幕捕获隐私](./04-rag-agents/computer-use-screen-capture-privacy.mdx)。
+10. **推理文本管暴露路径，截图先管输入捕获面。** 分清原始推理链、摘要和端点未开放的隐藏推理；只审实际可达内容，不把不可观测写成零泄露。截图核 display / window / tab / region 和实际 payload，在发给模型前最小化，不能靠答案脱敏撤回已采集图片。见[推理链泄露](./03-conversational-llms/reasoning-trace-leakage.mdx)、[Computer-use 屏幕捕获隐私](./04-rag-agents/computer-use-screen-capture-privacy.mdx)。
 
 :::tip 怎么用这 10 条
 按顺序过一遍，每条问自己「我这套现在过不过得了」。过不了的，点进去读**机制 + 落地配方 + 最小可测试断言**；过得了的，也别当终点——它挡的是最基本的坑。
@@ -45,3 +48,5 @@ description: 上线一个用到 LLM 的功能前，先照这 10 条把隐私底�
 - 按你**最担心的泄露面**反查还差什么：[隐私地图 · 威胁 → 缓解矩阵](./map.mdx)——每条都写了「在管的条目」和「没解决的残余风险」。
 - 想看这些机制在现实里**真翻过什么车**：[真实事故与实证索引](./incidents.mdx)——从 EchoLeak 到跨用户串味，每个都踩中上面某条基线。
 - 要**可勾选、可存档**的落地工件：[厂商数据边界清单](./vendor-data-boundary-checklist.mdx)（按厂商填、打日期、季度复核）。
+
+本次相关引导语复核于 2026-10-29；各条引用的历史事故、厂商条款与实验设置仍以对应正文版本说明为准。

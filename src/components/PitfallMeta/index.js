@@ -68,7 +68,7 @@ export default function PitfallMeta({ roles = [], phase, severity, appliesTo, ev
         <Badge
           label={<Translate id="pitfallMeta.severity">严重度</Translate>}
           value={severity}
-          className={severityClass[severity] || styles.sevMed}
+          className={severityClass[String(severity).toLowerCase()] || styles.sevMed}
         />
       )}
       {appliesTo && (

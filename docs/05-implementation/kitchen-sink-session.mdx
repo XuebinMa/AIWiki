@@ -10,15 +10,19 @@ applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [上下文管理, 会话, 工程师]
 sources:
+  - { title: "Explore the context window", url: "https://code.claude.com/docs/en/context-window" }
   - { title: "Claude Code Best Practices（官方）", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "MuhammadUsmanGM/claude-code-best-practices", url: "https://github.com/MuhammadUsmanGM/claude-code-best-practices" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["编辑、压缩、记忆或检查点恢复机制变化", "任务契约、验证证据或并行写入方式变化"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['工程师']} phase="编码实现" severity="中" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
-> 一句话摘要：你在一段对话里先修了个 bug，又顺手问了个不相关的问题，再回头继续原来的任务。我的上下文被无关内容填满，回答开始变差——而你以为是我「变笨了」。
+> 一句话摘要：无关任务混在一起时，我可能误用旧前提并增加上下文成本；先保存当前目标与核验状态，再选择继续、摘要或独立会话，不能把清理会话当成文件回退。
 
 ## 现象
 
@@ -28,18 +32,11 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 为什么会这样
 
-我没有「忘掉上一件事」的开关。在同一段会话里，**之前所有的内容都还留在我的上下文窗口里**——包括那个和当前任务毫无关系的正则讨论。
+无关讨论可能占用上下文、增加处理成本，或让上一任务的假设被误用到当前任务。但不能说所有原始历史始终留在窗口里：客户端可能裁剪工具输出、压缩历史、按需检索或把工作放到独立上下文。
 
-我每生成一个回答，都是在「当前窗口里的全部内容」上做注意力分配。无关内容越多，真正重要的指令（比如你最初定下的代码风格、那个登录接口的关键约束）占的比重就越小，越容易被稀释、被忽略。这不是我「累了」，而是信噪比下降了。
+当前 Claude Code 官方指南仍建议无关任务之间清理会话，但也明确自动压缩和更大窗口改变了旧的容量管理习惯。任务混杂是需要观察的质量与成本风险，不是「聊三件事就必然变差」的定律。
 
-```mermaid
-flowchart LR
-    A[任务一: 修登录] --> B[任务二: 写正则]
-    B --> C[任务三: 回到登录]
-    C --> D{上下文窗口}
-    D --> E["登录约束 + 正则 + 残留<br/>信号被噪声淹没"]
-    E --> F[回答质量下降]
-```
+我应保留当前目标、已核验事实和未完成事项，再选择继续、摘要或独立会话；不要为了机械清空而丢掉有效状态。
 
 ## 后果
 
@@ -49,15 +46,9 @@ flowchart LR
 
 ## 最佳实践
 
-**任务切换时，开一段干净的对话。** 在 Claude Code 里就是一条命令：
-
-```text
-/clear
-```
-
-它会清空当前上下文，让我从零开始面对新任务。一个简单的判断标准：**如果新问题不需要旧对话里的任何信息，就该 `/clear`。**
-
-如果你确实要在相关任务间切换、又想保留要点，可以在 `/clear` 之前让我把关键结论总结成几句话，下一段对话开头再贴回来——用一小段精炼的摘要，换掉一大段嘈杂的历史。
+- **任务无关时优先独立会话。** 我可以先保存原任务的进度、当前 diff、验证结果和下一步，再开新会话；相关小问题无需机械拆开。
+- **继续旧任务先重建必要状态。** 读取当前文件与清单，不只依赖上段对话的印象。
+- **使用 /clear 前知道它清什么。** 当前 Claude Code 中它用于清理会话上下文；它不撤销磁盘改动，也不等于删除规则 / 记忆。需要保留任务时先保存一段经过核对的交接摘要。
 
 ## 示例
 
@@ -88,10 +79,11 @@ flowchart LR
 ## 版本说明
 
 :::note 适用版本
-这是上下文窗口机制带来的固有现象，与具体版本无关，**全模型、跨工具通用**。不同模型的窗口大小不同，会改变「多久开始变差」的临界点，但不会改变「无关内容稀释信号」这一根本规律。
+2026-10-29 核验当前最佳实践及上下文文档。保留不相关任务分开处理的建议，去掉「全部历史永远在窗口」与全模型阈值断言。/clear 清理会话不等于撤销文件、删除持久记忆或停止所有后台工作；规则、记忆和后续检索仍可能重新载入。
 :::
 
 ## 延伸阅读与出处
 
 - [Claude Code Best Practices（Anthropic 官方）](https://code.claude.com/docs/en/best-practices)
 - [MuhammadUsmanGM/claude-code-best-practices](https://github.com/MuhammadUsmanGM/claude-code-best-practices)
+- [Explore the context window](https://code.claude.com/docs/en/context-window)

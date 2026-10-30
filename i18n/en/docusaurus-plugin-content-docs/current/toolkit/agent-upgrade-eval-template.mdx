@@ -1,0 +1,111 @@
+---
+title: "Agent upgrade evaluation template: fixed environments and budgets, outcomes, boundaries, and resource use"
+sidebar_label: Agent upgrade eval template
+slug: agent-upgrade-eval-template
+sidebar_position: 14
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: [source_revision, evidence_or_threat_model_change]
+tags: [agent evaluation, model upgrade, regression testing, verification loop, QA Engineer, Engineer, Architect, DevOps Engineer]
+sources:
+  - { title: "Demystifying evals for AI agents (Anthropic, 2026-01-09)", url: "https://www.anthropic.com/research/demystifying-evals-for-ai-agents" }
+---
+
+> In one sentence: after changing a model, prompt, skill, or tool, do not just ask me whether this run looks better. Start the same tasks from fixed state, keep every attempt under the same budget, and compare final state, unauthorized actions, stability, cost, and latency separately. This is an adaptable engineering record, not a vendor's official acceptance standard.
+
+## What to freeze before comparing
+
+Change only the variable you intend to evaluate. If the model, prompt, and tools all change, describe the result as a change to the combination rather than crediting the model alone.
+
+| Fixed item | Fill in for this comparison |
+|---|---|
+| Versions and variables | Baseline/candidate model IDs, harness, prompts, skills and plugins, tool schemas, code revision; single or combined change |
+| Inputs and environment | Task-set version, repository commit, tenant/data snapshots, time conditions, dependencies and tool versions |
+| Permissions and network | Read/write scope, protected objects, destinations, confirmation conditions, service-side authorization |
+| Per-trial budget | Token/reasoning settings, tool-call and retry limits, deadline, human-intervention rules |
+| Reset and caching | Restored snapshot, cross-trial memory cleanup, cache policy, external-service simulation or isolation |
+| Grading and repetition | Predetermined assertions, rubric, trial count, failure categories, stop conditions |
+
+Record conditions you cannot hold fixed, such as a remote service's current version or network variation; they limit attribution. Permissions and memory belong to the environment too. Resetting the code directory alone is insufficient.
+
+## Individual task record
+
+```text
+task_id / task_set_version:
+User goal and explicit success conditions:
+Inputs, environment snapshot, and trusted sources:
+Required final state:
+Forbidden actions, objects, and outbound data:
+Correct behavior for missing information, insufficient permission, or service failure:
+Independent result checks and the owner of acceptance assertions:
+How to reset side effects and persistent memory:
+Human reference solution or verified feasible path:
+```
+
+Include actual past failures and cases where clarification, declining an unauthorized action, or stopping safely is correct. Not completing a dangerous request must not automatically count as reduced capability. Use synthetic or authorized data, not real secrets as probes.
+
+## What to retain for every trial
+
+```text
+run_id / task_id / baseline_or_candidate / trial_id:
+Actual versions, start/end times, environment reset evidence:
+Final-state evidence and assertion results:
+Tool calls, arguments, destinations, permission decisions, and exceptions:
+Whether human intervention was needed and what it supplied:
+Actual total cost, tokens, tool/retry counts, elapsed time:
+Category: success / task failure / boundary failure / evaluation infrastructure failure
+Failure cause and evidence location:
+```
+
+Record enough tool calls and results for review; do not require extra internal reasoning to fill the form. Traces may contain private information and need access controls, data minimization, and retention rules. Keep budget exhaustion, timeouts, and failed trials, not just the best attempt.
+
+## Compare five dimensions together
+
+| Dimension | Baseline | Candidate | Interpretation |
+|---|---|---|---|
+| Final state | Per-task results and evidence | Same definition | What was actually completed; duplicate or incorrect objects left behind |
+| Authorization and boundaries | Failures and affected objects | Same definition | Completion cannot cancel a forbidden outbound transfer |
+| Stability | Every trial for every task | Same counts and budgets | Separate occasional success from consistent success; retain failure distributions |
+| Cost | All trials and accounting rules | Same definition | Include failures, retries, tool charges, and human help; identify unknowns |
+| Latency | Individual durations and distribution | Same definition | Define timing boundaries and whether queues/retries count; do not report only the fastest |
+
+For rates, provide numerators, denominators, and missing data. List infrastructure failures separately and say whether they were rerun; do not silently remove them. If reporting “at least one success across attempts,” also show individual results. That metric does not replace a requirement for consistent success.
+
+## Decision record
+
+```text
+Decision: upgrade / keep improving / retain baseline
+Supporting tasks and evidence:
+Unresolved boundary failures and capability regressions:
+Acceptable cost/latency ranges and who set them:
+Uncovered tasks, tools, data, and external conditions:
+Rollout scope, stop conditions, and rollback version:
+Reviewer and date:
+```
+
+Set thresholds before inspecting candidate results. Loosening assertions or giving the candidate more budget afterward is not improvement under the same conditions.
+
+## Applicability boundaries
+
+### When to use it
+
+Upgrades to recurring agent workflows, especially when model, prompt, plugin, or tool changes can affect external state. Start with a small set of real failures and expand coverage with use.
+
+### When not to use it
+
+A one-off static text edit with no tool actions can be reviewed directly. This template also cannot replace penetration testing, privacy proofs, business acceptance, or expert judgment in high-risk domains. Tested tasks do not represent every future input.
+
+### Replace before use
+
+Supply real model versions, code commits, snapshots, tools, and cost sources. Define permission boundaries, per-trial budgets, resets, independent assertions, and project-specific thresholds. If snapshots or actual-state queries are unavailable, add them first; do not fill “final-state evidence” with my own report.
+
+## Version notes
+
+:::note Applicable versions
+Verified on 2026-10-29. This template adapts principles from Anthropic's agent evaluation guide into a project-specific comparison record. Fields, trial counts, and thresholds can be tailored; it does not guarantee safety or superiority over the baseline in untested environments.
+:::
+
+## Further reading and sources
+
+- [Demystifying evals for AI agents](https://www.anthropic.com/research/demystifying-evals-for-ai-agents) — a first-party guide to agent task evaluations; this page's particular tables and decision fields are engineering recommendations.
+- Companion pitfall: [The unit tests passed, so you accepted my whole chain of actions](../06-testing/agent-evals-not-just-unit-tests.mdx).

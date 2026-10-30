@@ -10,8 +10,10 @@ applies_to: "All coding agents"
 evidence: Official docs
 tags: [Testing, boundary conditions, happy path, verification loop, Engineer, QA Engineer]
 sources:
-  - { title: "Claude Code Best Practices (official)", url: "https://code.claude.com/docs/en/best-practices" }
-  - { title: "Agentic AI Coding: Best Practice Patterns for Speed with Quality (CodeScene)", url: "https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality" }
+  - { title: "Claude Code best practices", url: "https://code.claude.com/docs/en/best-practices" }
+verified_at: 2026-10-29
+review_after: 2027-04-29
+review_triggers: [input_contract_change, source_revision]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -28,19 +30,17 @@ But count what I actually tested. I tested `parsePrice("￥1,299.00")`; I never 
 
 ## Why this happens
 
-The happy path is **the easiest test to write and the one that looks most like "the test passed."** "Give a typical input, get a typical output, assert they're equal" is the most common, smoothest-structured test form in my training data. I generate it effortlessly, and it runs green on the first try, which looks exactly like "task complete."
+Starting with typical inputs can omit failures, especially when the specification leaves exceptional behavior unstated. This risk does not establish training-data proportions or that every model never writes boundaries without reminders.
 
-Boundary cases are the opposite. I first have to **deliberately stop and think**: which inputs make this code uncomfortable — empty, null, out of range, concurrent, timed out, permission denied? These cases aren't visible on the surface of the code; listing them fully takes reasoning, not imitation. And my default pull is to **produce smooth, visible results that go green immediately**, not to stop and pick a fight with myself. So unless you ask explicitly, I drift naturally toward the happy path.
-
-This shares a root with [trust, then verify](./trust-then-verify.mdx): I'm good at manufacturing things that *look* right. A green test suite that only covers the happy path is a sophisticated disguise for "looks right" — it even hands you a number (coverage) to vouch for it.
+Claude Code recommends verifiable success criteria and concrete edge examples. Our practical recommendation is to establish equivalence classes, boundaries, and error contracts, then choose cases by risk rather than attempting unlimited enumeration.
 
 ```mermaid
 flowchart TD
-    A[You: add tests for this function] --> B[What I reach for: typical input → typical output]
-    B --> C[All green + coverage rises]
-    C --> D{What I didn't think to do}
-    D --> E["empty / null / out of range / concurrency / timeout / permission failure<br/>error branches never executed"]
-    E --> F[bugs hide in the boundaries nothing touched]
+    A[Choose only typical inputs] --> B[Normal path passes]
+    B --> C[Coverage shows execution scope]
+    C --> D[Unchecked boundaries can still fail]
+    E[List classes and failure contracts] --> F[Choose meaningful representative cases]
+    F --> G[Check results and side effects]
 ```
 
 ## Consequences
@@ -48,7 +48,7 @@ flowchart TD
 - **Coverage becomes false evidence.** High line coverage doesn't mean those lines were verified under boundary input — it only means the line ran once. Treating coverage as the "enough" signal is being misled by exactly that number.
 - **The most bug-prone spots have zero tests.** Defects naturally cluster around boundaries and error handling, which is precisely what I skipped. The reassurance of green tests papers over the highest-risk area.
 - **Problems get deferred to more expensive stages.** Empty input, concurrency, and timeouts that the tests never surface will surface during integration, in a canary release, or in production — where locating and fixing them costs several times more.
-- **Swap in someone else's authoritative test suite and the same trap just gets better clothes.** I watched this happen against an external conformance corpus: the first version had 8 cases and we scored **8/8**. When the corpus grew to 17 cases, the first run came back **9/17** — and all eight failures were the same thing: every violation **detected, every location correct**, but the reason names I had invented didn't match the contract's vocabulary. In hindsight, that perfect score was perfect only because **zero of those eight rows touched that branch**. Someone else's green means the same thing mine does: nobody has attacked the part you don't cover. And any enum value, reason name, or state name I invented myself is an unverified placeholder until the contract adds a case for it.
+- **Illustrative external-corpus gap.** Suppose an initial eight cases all pass, but an expanded set passes only nine of seventeen. New failures could all concern an untested reason enum. The first score supports only the first set; these example counts are not research measurements.
 
 ## What to do instead
 
@@ -66,9 +66,9 @@ including what each failure should throw.
 
 A few levers that make this stick:
 
-- **Name the failure branches explicitly.** "Write a test for every path that throws" — if you don't name it, I default to skipping it.
+- **Name the failure branches explicitly.** "Write a test for every path that throws" — inspect actual coverage rather than assuming that listing a branch in the prompt tested it.
 - **Use equivalence partitioning / boundary-value methods.** Have me slice the input space into classes and pick representative and boundary values for each, instead of grabbing a single "normal value."
-- **Write tests first, implementation second** (see [trust, then verify](./trust-then-verify.mdx)). Have me write tests that include boundary cases, confirm those cases are reasonable, then have me make them green — so I have no room to slack off toward the happy path.
+- **Write tests first, implementation second** (see [trust, then verify](./trust-then-verify.mdx)). Have me write tests that include boundary cases, confirm those cases are reasonable, then have me make them green — while still checking the expectation and whether the target path actually ran.
 - **Treat coverage as a map, not a trophy.** Look at "which branches were never executed," not at whether the percentage is big enough.
 
 ## Example
@@ -111,11 +111,10 @@ The test: the exception holds when this code **either won't outlive this one use
 
 ## Version notes
 
-:::note Applicable versions
-The tendency to produce smooth, immediately-green happy-path tests comes from my generation preferences, and applies **across all versions and across models**. The stronger the model, the more polished my happy-path tests look and the more they resemble "fully tested" — which makes "explicitly demanding boundary coverage" more important, not less.
+:::note Scope
+Official practice supports explicit boundary validation, not a universal model tendency or stronger-model trend. Coverage, case counts, and all-green results do not establish exhaustive verification. Recheck changed input contracts and operating conditions.
 :::
 
 ## Further reading and sources
 
-- [Claude Code Best Practices (Anthropic, official)](https://code.claude.com/docs/en/best-practices): give specific edge cases in the prompt (e.g., the "user is logged out" boundary), have Claude run the tests after writing them, and use a subagent to review for edge cases and race conditions when needed.
-- [Agentic AI Coding: Best Practice Patterns for Speed with Quality (CodeScene)](https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality): in AI-assisted coding, why verification and boundary coverage have to be explicit constraints rather than default outputs.
+- [Claude Code best practices](https://code.claude.com/docs/en/best-practices)

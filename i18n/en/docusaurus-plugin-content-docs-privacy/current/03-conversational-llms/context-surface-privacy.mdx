@@ -11,7 +11,11 @@ severity: High
 maturity: Research
 evidence: Research
 tags: [context-surface privacy, system prompt extraction, prompt leakage, context window, jailbreak bypass, Security Engineer, Privacy Engineer]
+verified_at: 2026-10-29
+review_triggers: ["Context assembly or role hierarchies change", "Tool permissions or extraction attacks change"]
+review_after: 2027-01-29
 sources:
+  - { title: "OWASP LLM07:2025 System Prompt Leakage", url: "https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/" }
   - { title: "OWASP Top 10 for LLM Applications 2025 — LLM07:2025 System Prompt Leakage", url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf" }
   - { title: "Zhang, Carlini & Ippolito, Effective Prompt Extraction from Language Models (COLM 2024; arXiv 2307.06865)", url: "https://arxiv.org/abs/2307.06865" }
   - { title: "Sha & Zhang, Prompt Stealing Attacks Against Large Language Models (arXiv 2402.12959)", url: "https://arxiv.org/abs/2402.12959" }
@@ -22,13 +26,13 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="Volume 3 · Conversational LLMs" technique="Context-surface privacy" audience={['Security Engineer', 'Privacy Engineer']} severity="High" maturity="Research" evidence="Research" />
 
-> In one sentence: stuffing rules, keys, other users' data, and retrieved snippets into my context window and then hoping "the user can't see the system prompt" doesn't hold. On my side, the system prompt, conversation history, tool returns, and retrieved snippets all live in **one and the same context window**, with **no built-in confidential/public tier** as far as I'm concerned; as long as something is in that window, an attacker can often extract it with ordinary conversation (research has observed "simple text attacks extract the system prompt with high probability" across 3 prompt sources × 11 LLMs — Zhang, Carlini & Ippolito, COLM 2024). Conclusion first: **the system prompt is not a secret, and shouldn't be a security control** (OWASP LLM07:2025) — don't put credentials / business logic / other people's data into the context, and assume it can be extracted.
+> In one sentence: system prompts, history, retrieved snippets, and tool results become potential extraction surfaces once available in context. Roles and instruction hierarchies can influence behavior, but do not replace backend access controls or prove secrets unreproducible. Research demonstrates extraction on particular models and prompt sets, not inevitable extraction from every context. Following OWASP LLM07:2025, system prompts should not contain credentials or serve as the sole security control.
 
 ## Mechanism: what happens on my side
 
 In my forward pass, the system prompt, developer instructions, conversation history, tool returns, and RAG-retrieved snippets are concatenated into **one continuous token sequence** and fed in. I process them with **no built-in "confidential vs. public" tier** — the boundary between "system" and "user" is a **soft convention** (held up by special delimiters / role tags plus training tendencies), not a **hard isolation**.
 
-To be precise about the red line (this is a mechanism tendency, not a promise): training makes me **inclined** not to recite the system prompt verbatim, inclined to obey "don't reveal the text above"–style instructions — but that is a **statistical tendency, not an enforced boundary**. What's externally observable is that enough paraphrase, role-play, translation, encoding, or summarization requests can route around that tendency and make the output **reproduce** the content of the system prompt. In other words, "told not to say it" and "unable to say it" are different things — I can't do the latter, because that text is right there in my current context.
+Red line: research demonstrates extraction under some attacks, but presence in context does not imply attack success. Instruction hierarchies, training, and detection can reduce empirical risk; confidentiality authorization still needs trusted-backend enforcement, not a model’s assertion that it will never disclose.
 
 ```mermaid
 flowchart TB
@@ -125,7 +129,7 @@ Breaking the false security item by item:
 ## Version notes
 
 :::note Applicable versions
-"The system prompt / context is not confidential" is a **model-independent, paradigm-level** fact — the root cause is that LLMs concatenate system, developer, user, tool, and retrieval inputs into **one continuous token sequence** with no enforced confidentiality tier, which is common across vendors. The specific extraction success rate and which bypass works evolve with models and defenses; this section is stamped 2026-06; both sides are moving, so verify conditions at the source before citing any specific success rate. OWASP version is **2025** (LLM07:2025). (Sources verified 2026-06.)
+Checked original prompt-extraction studies and the direct OWASP guidance on 2026-10-29. Context minimization and backend authorization remain relevant. Prompt reconstruction may recover a semantically similar prompt rather than its exact original text. Review by 2027-01-29, earlier for changed context assembly, role hierarchies, tool permissions, or extraction attacks.
 :::
 
 ## Further reading and sources
@@ -136,3 +140,5 @@ Breaking the false security item by item:
 - [Effective Prompt Extraction from Language Models (Zhang, Carlini & Ippolito, COLM 2024; arXiv 2307.06865)](https://arxiv.org/abs/2307.06865) — 3 prompt sources × 11 LLMs; simple text attacks extract the system prompt with high probability, plus a framework distinguishing a real prompt from a hallucination.
 - [Prompt Stealing Attacks Against Large Language Models (Sha & Zhang; arXiv 2402.12959)](https://arxiv.org/abs/2402.12959) — reconstructs the prompt behind a model from its answer: information can leak from the output side, so blocking the direct ask doesn't block the leak.
 - [System Prompt Extraction Attacks and Defenses in Large Language Models (arXiv 2505.23817)](https://arxiv.org/abs/2505.23817) — a survey of both the attack and defense sides of system-prompt extraction; the defense side remains an open problem (this entry's maturity follows from that).
+
+- [OWASP LLM07:2025 System Prompt Leakage](https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/)

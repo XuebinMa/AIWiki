@@ -10,10 +10,15 @@ applies_to: "All coding agents"
 evidence: Official docs
 tags: [file state, full-file rewrite, minimal diff, version control, engineer, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
+  - { title: "Claude Code checkpointing", url: "https://code.claude.com/docs/en/checkpointing" }
   - { title: "Claude Code Best Practices (Anthropic official)", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "Git Book — 2.5 Undoing Things", url: "https://git-scm.com/book/en/v2/Git-Basics-Undoing-Things" }
-  - { title: "Gemini CLI — File System Tools (replace: old_string + context match, model self-correction)", url: "https://google-gemini.github.io/gemini-cli/docs/tools/file-system.html" }
+  - { title: "Gemini CLI — File System Tools (replace: old_string + context match, model self-correction)", url: "https://geminicli.com/docs/tools/file-system/" }
   - { title: "OpenAI — Apply Patch tool (apply_patch: context-anchored patches)", url: "https://developers.openai.com/api/docs/guides/tools-apply-patch" }
+
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["Editing, compaction, memory, or checkpoint recovery changes", "Task contract, verification evidence, or concurrent writing changes"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -30,20 +35,11 @@ But in the meantime, you hand-added two boundary checks, or a teammate's change 
 
 ## Why this happens
 
-Two mechanisms stack on top of each other.
+I may generate a replacement from a stale context copy without checking the current disk or editor contents. Whole-file rewriting expands the risk; a local patch can also match the wrong similar location. Having read a file once does not establish its state at edit time.
 
-First, **I lean toward "handing you a fresh, clean version" rather than making the smallest change against what's already there.** A full-file rewrite is less effort for me — I don't have to line up exactly with the indentation on some line of yours, a variable name I've never seen, or a block of logic I'm afraid to touch because I don't understand it. Relaying the whole thing at once produces output that looks neat and complete. But it's neat relative to *the version in my memory*, not relative to *the real version on disk*.
+Tools can reduce overwrites with context matching, version checks, or conflict signals, but coverage differs. Even a fresh read leaves a read/write window for another writer. Use version/content preconditions or explicit edit ownership when concurrent editing needs protection.
 
-Second, **I have too little respect for the file's current state.** The copy of the file in my context may have been read in several turns ago; in the meantime you hand-edited it and other changes landed, so the file has long since changed — and I don't automatically re-read it. I treat the stale copy in my context as the truth, so my "rewrite" is really overwriting the latest version with an expired snapshot.
-
-```mermaid
-flowchart TD
-    A[Latest file on disk<br/>incl. lines you just hand-edited] --> B{Did I re-read before acting?}
-    B -- No, used the stale copy in context --> C[Full-file rewrite from an expired snapshot]
-    C --> D[Your hand-edits silently overwritten]
-    B -- Yes, read the latest content --> E[Minimal diff against current state]
-    E --> F[Only the lines that should change; your edits survive]
-```
+I should identify existing changes and ownership, read current state, edit the necessary scope, and inspect the resulting diff rather than explaining the issue as a subjective lack of respect.
 
 ## Consequences
 
@@ -93,24 +89,18 @@ You: (diff is one line; validations preserved as-is)
 
 ## Tool divergence
 
-> As of 2026-06, at the mechanism level; each tool's implementation and defaults change fast — re-check as needed.
+The Gemini replace documentation checked on 2026-10-29 requires matching target text and constrains replacement counts; that is not a file-level concurrency lock. OpenAI's API apply-patch guide makes the host responsible for applying patches and reporting success/failure. Version comparison and transaction behavior depend on that implementation, not every Codex client.
 
-Same root cause — **I overwrite the newer version on disk with a stale copy** — but tools anchor "the edit to the file's current state" differently, which decides whether it **silently clobbers** or **hits a wall first**:
-
-- **Claude Code**: I must have read the file in this session before editing, and if it changed since I last read it, the edit fails outright — "read before write" is enforced at the tool layer (the easiest thing to clobber is actually a whole-file `Write`, which doesn't depend on existing content). Checkpoints / `/rewind` only track my edits, not external processes; git is still the safety net.
-- **Gemini CLI**: `replace` locates the target by `old_string` plus a few lines of surrounding context; if the file drifted the match fails, or it triggers a model-based self-correction to re-guess the span — the anchor is "the snippet I remember," not a forced re-read of disk.
-- **Codex CLI**: `apply_patch` anchors on context lines; if context doesn't match the current file the patch won't apply — but it has a known "reports success yet changed nothing" silent failure, sneakier still.
-- **Cursor / GitHub Copilot** (IDE form): edits land on the editor's **currently open buffer**, so the file's current state IS the editor state; the risk shifts to "the version in my cross-turn / cross-session memory disagreeing with the live content in your editor."
-
-The cure doesn't change: have me **re-read the current state before acting and make a minimal diff**, and commit your changes as the safety net — don't bet that some tool's anchoring will sound the alarm for you.
+Claude Code checkpoints track files touched by its file tools in the current conversation; later Bash or external changes to the same files can also be reverted. Untracked Bash-only files, some subagent edits, and linked paths have coverage limitations. Inspect files and diffs before restoring rather than assuming only my last edit will be undone.
 
 ## Version notes
 
 :::note Applicable versions
-"Rewriting a whole file from a stale copy" is a tendency at the level of model behavior, so it applies across versions — it's tied directly to whether I "read before I write," not to a particular version number. One thing to note separately: Claude Code's checkpoints / `/rewind` **only track changes I make, not external processes** (the official docs say plainly that this "isn't a replacement for git"). So changes you made by hand, or that another tool landed, may not be recoverable via checkpoints once I overwrite them — your real safety net is git, and a change is only safe once it's committed.
+Checked Git undo, Gemini replace, OpenAI API apply-patch, and Claude Code checkpoint documentation on 2026-10-29. API patch application and failure reporting belong to the host implementation, not every Codex CLI version. Removed the unsupported product-wide silent-success claim. Checkpoints can also revert later external changes to tracked files; inspect scope first.
 :::
 
 ## Further reading and sources
 
 - [Claude Code Best Practices (Anthropic official)](https://code.claude.com/docs/en/best-practices) — using `@` to make me read the file before answering; small, clear changes being more controllable than big rewrites; and the warning that checkpoints "aren't a replacement for git."
 - [Git Book — Undoing Things](https://git-scm.com/book/en/v2/Git-Basics-Undoing-Things) — `git restore` / `git checkout` to recover committed changes that got overwritten; this is the final safety net for an overwrite accident.
+- [Claude Code checkpointing](https://code.claude.com/docs/en/checkpointing)

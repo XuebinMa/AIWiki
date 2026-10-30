@@ -10,8 +10,12 @@ applies_to: "All coding agents"
 evidence: Official docs
 tags: [boundary conditions, detailed design, robustness, Engineer]
 sources:
+  - { title: "Making retries safe with idempotent APIs", url: "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/" }
   - { title: "Fallacies of distributed computing — Wikipedia", url: "https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing" }
   - { title: "Claude Code Best Practices (Anthropic, official)", url: "https://code.claude.com/docs/en/best-practices" }
+verified_at: 2026-10-29
+review_after: 2027-04-29
+review_triggers: ["Actual scale, maintenance capacity, or public contracts change", "Cited research, standards, or engineering guidance revised"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -28,26 +32,15 @@ Until order volume grows from hundreds to hundreds of thousands: serial one-by-o
 
 ## Why this happens
 
-This is a different altitude from [When I miss edges while writing the implementation](./missing-edge-cases.mdx). That one is about "a missing null check in the code"; this one is about "the whole design assuming a set of premises that hold at small scale on the happy path but don't hold in the real world."
+I may validate the sample success path without stating input limits, failure models, and system invariants. An arrow connecting two boxes does not establish correctness under timeouts, duplicate delivery, partial failures, or recovery.
 
-The root cause is that I **optimize for "reads as reasonable and self-consistent" rather than "still holds in the worst case":**
+The explanation is missing checkable assumptions, not proof that I internally pursue only plausibility. Retries, idempotency, backpressure, and degradation solve different problems: blind retries can amplify failures, and idempotency needs a key, deduplication scope, and retention period. Every system does not need every mechanism unconditionally.
 
-- **I design for the happy path by default.** My design naturally describes "how it runs when all goes well," because that's the clearest, best-told story. Failure, timeout, partial success, retry, concurrency — those "not-smooth" branches aren't in that story unless you force me to think about the worst case.
-- **I inherit the classic fallacies of distribution and scale.** "The network is reliable," "latency is zero," "bandwidth is infinite," "nobody will trigger it twice" — these repeatedly disproven assumptions are exactly the most common default premises of a design, and I tend to assume them too.
-- **Reasonable ≠ robust.** I'm at my best producing things that "look reasonable," and especially so at the design layer: there's no runnable code to puncture it, it all rides on you reading along — and while reading along, fragile assumptions are invisible.
-
-```mermaid
-flowchart TD
-    A[You ask for a design] --> B[I give a happy-path design]
-    B --> C{Did anyone force it to face the worst case?}
-    C -->|No, it reads fine straight through| D["scale-up / timeout & retry<br/>concurrency & idempotency / partial failure"]
-    C -->|You explicitly probe the failure paths| E[Design adds degradation and recovery]
-    D --> F[Collapses under real load]
-```
+I should list the failures this project must tolerate and their consequences, then select the minimum mechanisms that preserve its invariants and validate failure scenarios.
 
 ## Consequences
 
-- The fragility hides inside the design and surfaces only at integration, load testing, or even in production — by which point what gets reworked isn't a line of code but the whole data flow, costing several times the implementation effort.
+- The fragility hides inside the design and surfaces only at integration, load testing, or even in production — by which point what gets reworked isn't a line of code but the whole data flow, with rework depending on deployment and compatibility boundaries.
 - Dropped orders, duplicate processing, cascading failures hit data correctness and production stability directly — harder to clean up than a single-point crash.
 - You scheduled and committed against a design that looked solid; when the fragility surfaces, what collapses is the timeline of the whole plan.
 
@@ -83,10 +76,11 @@ Me: (produces a design with degradation paths that survives worst-case scrutiny)
 ## Version notes
 
 :::note Applicable versions
-"Optimizing for looking reasonable rather than worst-case robust" is an inherent tendency of large language models — it applies to **all models and coding agents**. The stronger the model, the more complete and polished the design it gives, which actually hides the fragile assumptions deeper — so "force the design to face the worst case" is something you can skip less, not more, the stronger the model you use.
+Rechecked agent verification guidance and AWS's engineering account of idempotent APIs on 2026-10-29. Retained failure-scenario design review; the sources provide methods and cases, not all-model rates or a universal rework multiplier. Validate mechanisms against side effects, throughput, latency, and recovery objectives.
 :::
 
 ## Further reading and sources
 
 - [Fallacies of distributed computing — Wikipedia](https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing)
 - [Claude Code Best Practices (Anthropic, official)](https://code.claude.com/docs/en/best-practices)
+- [Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/)

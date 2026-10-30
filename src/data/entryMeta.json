@@ -104,6 +104,14 @@
         "架构师"
       ]
     },
+    "skill-plugin-supply-chain": {
+      "severity": "高",
+      "roles": [
+        "运维工程师",
+        "工程师",
+        "架构师"
+      ]
+    },
     "skipping-plan-mode": {
       "severity": "中",
       "roles": [
@@ -353,6 +361,14 @@
         "运维工程师"
       ]
     },
+    "durable-tasks-retry-idempotency": {
+      "severity": "高",
+      "roles": [
+        "工程师",
+        "架构师",
+        "运维工程师"
+      ]
+    },
     "git-hygiene": {
       "severity": "中",
       "roles": [
@@ -415,6 +431,14 @@
       "severity": "高",
       "roles": [
         "工程师"
+      ]
+    },
+    "agent-evals-not-just-unit-tests": {
+      "severity": "高",
+      "roles": [
+        "测试工程师",
+        "工程师",
+        "架构师"
       ]
     },
     "ai-reviews-own-code": {
@@ -684,6 +708,14 @@
         "Architect"
       ]
     },
+    "skill-plugin-supply-chain": {
+      "severity": "High",
+      "roles": [
+        "DevOps Engineer",
+        "Engineer",
+        "Architect"
+      ]
+    },
     "skipping-plan-mode": {
       "severity": "Medium",
       "roles": [
@@ -933,6 +965,14 @@
         "DevOps Engineer"
       ]
     },
+    "durable-tasks-retry-idempotency": {
+      "severity": "High",
+      "roles": [
+        "Engineer",
+        "Architect",
+        "DevOps Engineer"
+      ]
+    },
     "git-hygiene": {
       "severity": "Medium",
       "roles": [
@@ -995,6 +1035,14 @@
       "severity": "High",
       "roles": [
         "Engineer"
+      ]
+    },
+    "agent-evals-not-just-unit-tests": {
+      "severity": "High",
+      "roles": [
+        "QA Engineer",
+        "Engineer",
+        "Architect"
       ]
     },
     "ai-reviews-own-code": {

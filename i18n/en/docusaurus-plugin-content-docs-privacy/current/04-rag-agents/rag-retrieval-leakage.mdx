@@ -11,13 +11,17 @@ severity: High
 maturity: Experimental
 evidence: Official docs
 tags: [RAG, multi-tenant, vector store, embedding inversion, cross-session memory, Privacy Engineer, Security Engineer, ML Engineer]
+verified_at: 2026-10-29
+review_triggers: ["ACL tenant APIs or RLS roles change", "Re-ranking logs caches or product eligibility change"]
+review_after: 2026-12-29
 sources:
+  - { title: "Azure vector-filter execution modes", url: "https://learn.microsoft.com/en-us/azure/search/vector-search-filters" }
   - { title: "Pinecone Docs, Implement multitenancy (official docs: tenant isolation by namespace; metadata filtering is shared and not isolation)", url: "https://docs.pinecone.io/guides/index-data/implement-multitenancy" }
   - { title: "Microsoft Learn, Security filters for trimming results in Azure AI Search (official docs: query-time OData security filter / security trimming)", url: "https://learn.microsoft.com/en-us/azure/search/search-security-trimming-for-azure-search" }
   - { title: "Weaviate Docs, Multi-tenancy operations (official docs: native multi-tenancy with a dedicated shard per tenant)", url: "https://docs.weaviate.io/weaviate/manage-collections/multi-tenancy" }
   - { title: "Qdrant Docs, Multitenancy (official docs: payload-based partitioning, group_id with is_tenant)", url: "https://qdrant.tech/documentation/manage-data/multitenancy/" }
   - { title: "AWS, Access control for vector stores using metadata filtering with Amazon Bedrock Knowledge Bases (official blog: metadata filtering for retrieval-time access control)", url: "https://aws.amazon.com/blogs/machine-learning/access-control-for-vector-stores-using-metadata-filtering-with-knowledge-bases-for-amazon-bedrock/" }
-  - { title: "PostgreSQL Docs, Row Security Policies (official docs: Row-Level Security, enforced in the database, not bypassable by app code)", url: "https://www.postgresql.org/docs/current/ddl-rowsecurity.html" }
+  - { title: "PostgreSQL Row Security Policies", url: "https://www.postgresql.org/docs/current/ddl-rowsecurity.html" }
   - { title: "Morris et al., Text Embeddings Reveal (Almost) As Much As Text (EMNLP 2023; arXiv 2310.06816)", url: "https://arxiv.org/abs/2310.06816" }
   - { title: "OpenAI, March 20 ChatGPT outage (official incident postmortem: a redis-py bug exposed cross-user data)", url: "https://openai.com/index/march-20-chatgpt-outage/" }
   - { title: "OWASP Top 10 for LLM Applications, LLM02:2025 Sensitive Information Disclosure", url: "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/" }
@@ -27,132 +31,79 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="Volume 4 · RAG and agents" technique="RAG & agent privacy" audience={['Privacy Engineer', 'Security Engineer', 'ML Engineer']} severity="High" maturity="Experimental" evidence="Official docs" />
 
-> In one sentence: in multi-tenant RAG, two intuitions both fail — "vectorized means anonymized" and "filtered by user means isolated." In some studied embedding settings a vector **can be inverted back to approximate original text** (including PII), so don't treat it as anonymization; retrieval ranks by **similarity**, not permission, so if the ACL runs after retrieval instead of before it, the most relevant private chunk may come from **another tenant**; and a single boundary bug in a shared cache / long-term memory can carry one user's private context into another's session.
+> In one sentence: multi-tenant RAG privacy depends on authenticated identity, document authorization, retrieval / re-ranking / context, and caches together. Vectors are not anonymization, and namespaces do not authorize callers. Filter before unauthorized content leaves the trusted boundary; **post-filtering inside a trusted retrieval service is not inherently a disclosure**, and Azure security trimming is not invariably application-side post-filtering.
 
 ## Mechanism: what happens on my side
 
-In RAG, what I do is: chunk your private documents, embed them into vectors in a store, and at query time retrieve the most relevant chunks by similarity and put them into my context to answer. This chain has three independent leak points:
+I answer from supplied retrieval results; I cannot replace system decisions about each chunk’s authorization. A trusted backend derives tenant scope from authenticated identity and current permissions, supplying allowed documents to retrieval, re-ranking, and generation. Unauthorized content sent to an external model, re-ranker, user-visible response, or log is a separate disclosure point.
 
-1. **An embedding is not a one-way hash.** It retains enough lexical and semantic information that, under the right conditions, it can be **inverted back to approximate original text** by a learned decoder — Morris et al.'s vec2text iteratively approaches the target vector and, in its research setting, reconstructs sentences with high fidelity, recovering **real names** from embeddings of clinical notes (Morris et al., EMNLP 2023). Inversion fidelity depends on the embedding model, whether the attacker can query the same model, text length, and domain distribution; but the conclusion is clear enough: "we only stored vectors, not the text" is **not** anonymization.
-2. **Retrieval is by similarity, not permission.** I bring back "the chunks most like the question," not "the chunks you're allowed to see." If tenant / user access control runs **after retrieval** (or is forgotten), then during ranking another tenant's private chunk may already enter the candidate set — even enter my context.
-3. **Shared state bleeds.** Caches, session state, and long-term memory, if keyed wrong or mismatched under concurrency, can put A's private context into B's session.
-
-Red line: I shouldn't write "I'll keep it secret" — I can't make that promise. What is externally observable is: **under these mechanisms, private data can, recomputably and across boundaries, show up where it shouldn't.**
+Embedding inversion is a related representation risk: with raw vectors, an attacker can attempt reconstruction under particular encoders / priors. Not every vector is inevitably recoverable verbatim; see [embedding inversion](./embedding-inversion.mdx).
 
 ```mermaid
 flowchart TB
-    Q["user query"] --> R["retrieve by similarity<br/>(not by permission)"]
-    V["vector store: embeddings of private docs"] --> R
-    V -.if obtained.-> INV["embedding inversion<br/>recover approximate text + PII"]
-    R --> A{"ACL before retrieval<br/>or after?"}
-    A -->|after / forgotten| LEAK["cross-tenant chunk enters my context"]
-    A -->|partition by tenant before| OK["only this tenant's chunks recalled"]
-    C["shared cache / long-term memory<br/>wrong key or concurrency bug"] --> BLEED["A's context bleeds into B's session"]
+    I["Authenticated identity and current document rights"] --> B["Trusted backend binds tenant/filter/database policy"]
+    Q["User query"] --> B
+    B --> R["Candidates inside trusted retrieval service<br/>filtered according to execution mode"]
+    R --> A{"Authorized before leaving trusted service?"}
+    A -->|No| X["Reject; do not send to model/external re-ranker/user logs"]
+    A -->|Yes| M["Allowed context and generation"]
+    M --> C["Identity- and permission-scoped cache/memory"]
 ```
 
-## Threat surface: how it's exploited
+## Threat surface: where authorization can be lost
 
-- **Cross-tenant retrieval**: ACL filtered after retrieval, or relying on "application-layer trust" instead of "index-layer isolation" — an attacker crafts queries that pull another tenant's relevant content into the answer.
-- **Embedding inversion**: an attacker who obtains a vector-store export, a backup, or embeddings returned by some endpoint can reconstruct approximate originals — relaxing vector-store access control on the theory "they're just vectors, not sensitive" effectively relaxes the originals.
-- **Cross-session / cross-user bleed**: a boundary bug in cache / memory — no advanced attack needed, a concurrency race suffices (see "A real case").
-- **Tool / retrieved results into long-term memory**: writing retrieved private fragments into a long-term memory that gets recalled across sessions turns a one-time grant into long-term residency.
+- A caller forges tenant / namespace / group_ids and the backend trusts them.
+- Retrieval is correct but re-ranking, context, traces, caches, exports, or backups use broader rights.
+- Permissions are revoked but stale caches or persistent memory still return content.
+- Source text is restricted while raw vectors are downloadable, enabling inversion attempts; at-rest encryption does not stop a credentialed query service reading them.
 
 ## How the defense works
 
-Core: **do isolation at the data layer, before retrieval; treat embeddings as sensitive data.**
-
-- **Partition by tenant / user before retrieval**: a separate index per tenant, or force a tenant filter in the vector query (pre-filter), so "out-of-scope chunks never enter the candidate set" rather than deleting them after.
-- **Bring embeddings under access control and encryption**: they can be inverted, so protect them at the originals' sensitivity level — read access, exports, and backups of the vector store all need governing.
-- **Strong session / tenant keys + isolation tests**: use unconfusable keys for caches and memory; inject cross-tenant probes before launch to actively test for leaks.
-- **Minimize private data entering memory**: tool / retrieved results do **not** enter long-term memory by default; residency needs an explicit, scoped grant.
+Separate authentication, authorization, and partitioning: namespaces / shards control where data lives; permissions control who can select it. A trusted backend binds identity and checks authorization before retrieval results leave its boundary. ANN pre-filtering / post-filtering are execution and recall choices, not binary safety labels. Filtering after content already reached a model or external log is too late.
 
 ## Buildable recipe
 
-**How it's actually done in production: the isolation mechanism each vector DB / retrieval service gives you.** The recipe below isn't invented from scratch — the mainstream vector DBs and retrieval services each ship an isolation primitive for exactly this. Look at the mechanism each one provides first (learn the mechanism name; specific APIs go stale), then map the recipe onto it:
-
-- **Pinecone** — tenant isolation by **namespace**: one namespace per tenant, each stored separately; its docs explicitly cast metadata filtering as the *shared, cross-tenant query* path and **not** an isolation mechanism (Pinecone Docs, *Implement multitenancy*).
-- **Azure AI Search** — **security filters / security trimming**: an **OData filter applied at query time** (e.g. `search.in` over a filterable `group_ids` field). The docs state plainly that this *simulates* document-level authorization for cases that "can't use the built-in ACL" — i.e. **post-retrieval trimming, not the service enforcing native ACLs** (Microsoft Learn, *Security filters for trimming results*).
-- **Weaviate** — **native multi-tenancy**: a dedicated **shard per tenant**; one tenant's data isn't visible to another and deletes don't affect others (Weaviate Docs, *Multi-tenancy operations*).
-- **Qdrant** — **payload-based partitioning**: one collection partitioned by `group_id`, with a payload index marked `is_tenant=true`; v1.16 adds tiered multi-tenancy (small tenants share a shard, large ones get promoted to their own) (Qdrant Docs, *Multitenancy*).
-- **AWS Bedrock Knowledge Bases** — **metadata filtering** for access control: attach metadata to documents and filter visible documents at retrieval time by user role / permission (AWS, *Access control for vector stores using metadata filtering*).
-- **pgvector / Postgres** — **Row-Level Security (RLS)**: write tenant isolation as a database policy (every SQL statement filtered by a session variable like `app.tenant_id`), so isolation is **enforced in the database** and app code can't bypass it; with `FORCE ROW LEVEL SECURITY` not even the table owner can (PostgreSQL Docs, *Row Security Policies*).
-
-The common thread to read off this list: **isolation is the *system's* job (pre-filter / in-database policy / dedicated shard), not the *model's*.** Note that Azure's security trimming and the "filter by metadata after retrieval" family are **query-time trimming** — misconfigure or skip it and you've left the window where "out-of-scope chunks enter candidates first," which is exactly what steps 1 and 4 below close. The recipe just turns these primitives into testable engineering steps:
+| System | Checked primitive | Additional authorization condition |
+|---|---|---|
+| Pinecone | Namespace-level partitioning; shared-index metadata approaches also documented | Select namespaces from identity; do not permit arbitrary caller switching |
+| Azure AI Search | OData security filters; separate native ACL support | A string principal is not authentication; bind filters in a trusted backend. Check vector pre/post modes separately |
+| Weaviate | Separate shard per tenant | Restrict tenant selection, collection rights, and credentials |
+| Qdrant | Payload tenant fields / indexes and tiered multitenancy | Partition optimization is not automatic authorization; check JWT/server filters and read/write endpoints |
+| PostgreSQL / pgvector | RLS and FORCE ROW LEVEL SECURITY | Superusers/BYPASSRLS still bypass; owners normally bypass. Use low-privilege app roles, trusted tenant variables, and pool resets |
 
 ```text
-1. Index-layer isolation: a separate collection/namespace per tenant, or force a
-   pre-filter with tenant_id in the retrieval query; ACL takes effect "before
-   retrieval," not by filtering after retrieval at the app layer.
-2. Treat the vector store as sensitive storage: access control + at-rest
-   encryption on read/export/backup; don't assume "just vectors, not sensitive."
-3. Minimize before ingest: PII scan/redact chunks before writing; decide by
-   sensitivity whether they may enter a retrievable store at all.
-4. Isolation regression tests: inject cross-tenant probes, auto-test "can A's
-   query recall/answer B's chunks," as a CI gate:
-   - seeds: tenant_a_secret = "TENANT_A_ONLY_<random>"; tenant_b_probe = a
-     question highly similar in meaning to A's document
-   - assert: B's retrieval candidates exclude A's doc / B's final answer excludes
-     A's content / logs, traces, caches don't record A's doc for B
-   make it a CI gate, not a one-off manual spot check.
-5. Memory containment: retrieved results/tool outputs don't enter long-term
-   memory by default; if they do, explicit grant + scoped + clearable.
+1. Derive identity and current ACL from authenticated sessions; reject arbitrary caller-selected tenants/groups.
+2. Scope queries, re-ranking, generation, raw-vector exports, traces, and caches consistently.
+3. Minimize sensitive indexed fields; retain lineage for document/vector/cache erasure and revocation.
+4. Insert synthetic tenant canaries; test reads/search/exports/updates/post-revocation using distinct real identities.
+5. Keep positive controls for legitimate same-tenant and authorized-shared access; blanket denial is not isolation success.
 ```
 
-Every boundary (which layer does ACL, who can read the vector store, memory recall scope) must be written as a testable assertion — don't stop at a verbal "we filter by user."
+**Minimal testable assertion**: under A/B identities, B cannot retrieve A’s unauthorized canary through responses, model / external-re-ranker context, returned vectors, user-visible traces, or caches, while A’s allowed read succeeds. Repeat after revocation and cache updates. All assertions must hold together; finite success does not prove every path safe.
 
-**Minimal testable assertions** (turn the probe recipe above into a CI gate):
+## Real cases and product scope
 
-- How to test: on every build, run the cross-tenant probe — A's private document + a B query highly similar in meaning to it.
-- Pass: B's retrieval candidates, final answer, and logs / traces / cache **all exclude** A's document (all three assertions green).
-- Fail: any assertion hits A's content → isolation breaks at that layer; move the ACL to the pre-retrieval index layer and re-test.
+Official docs describe deployable primitives; this entry does not certify individual account configurations. Azure’s security-filter pattern is string-based query filtering without authenticating the principal; native ACL and data-source / API eligibility require separate checks. PostgreSQL’s current stable documentation is 18 while 19 remains RC; a “current” URL does not identify your deployment version.
 
-## A real case: an adjacent incident
-
-**An adjacent real incident: cross-user state-isolation failure.** Strictly, this is not RAG vector-retrieval leakage but a state-isolation incident in an LLM service; it's here because it proves that **the same class of boundary-layer bug** can cause cross-user data leakage in a production LLM service. On March 20, 2023, a bug in the Redis client library redis-py that OpenAI used caused a spike in request cancellations, giving connections a small probability of returning **someone else's data**: some users saw **other active users' conversation titles** in the sidebar; if two were active at once, the first message of a new conversation could be visible to another; the same bug also made payment-related information of about **1.2% of ChatGPT Plus users** visible to others in a roughly nine-hour window (name, email, payment address, last four digits and expiry of a credit card — **full card numbers were not exposed**). This is OpenAI's own postmortem (OpenAI, *March 20 ChatGPT outage*, 2023). What it confirms is not some advanced attack but the same class of mechanism risk: **in a production LLM service, a single bug in the "boundary layer" — cache / concurrency — is enough to bleed private data across users.** Isolation must be enforced at the data layer, not left to the app layer's "it shouldn't happen."
+OpenAI’s 2023 cache incident is an adjacent state-isolation failure, **not a vector-RAG disclosure demonstration**. The provider reports possible exposure affecting about 1.2% of Plus subscribers active in a particular nine-hour window, not confirmed viewing of all affected records. It illustrates the need for shared-state authorization and ownership checks.
 
 ## Residual risk and trade-offs
 
-Calling out each false security:
-
-- **"Vectorized = anonymized" is wrong.** Embeddings can be inverted back to approximate text and PII (Morris 2023); storing vectors stores a recoverable copy of sensitive data.
-- **"Filtered by user = isolated" depends on which layer.** Filtering after retrieval / at the app layer leaves a window where "out-of-scope chunks enter candidates first"; only index-layer isolation before retrieval counts as isolation.
-- **"Only embeddings, not text" isn't safe.** See the first point — the embedding itself leaks.
-- **Retrieval quality vs. strict isolation is a real trade-off.** One big shared index recalls better but mixes the boundaries; per-tenant partitioning is safer but may cost some recall and money.
-- **Long-term memory recall vs. bleed risk.** Letting me "remember" more improves the experience, but each extra cross-session residency is one more bleed surface.
-
-## Compliance mapping
-
-- **OWASP LLM02:2025 (Sensitive Information Disclosure)**: this is its textbook form — exposing PII or others' data through retrieval / output; mitigations include data sanitization and access control.
-- **GDPR**: cross-tenant / cross-user leakage is a personal-data breach triggering notification duties; a vector store, as storage of personal data, is equally subject to minimization, access control, and cross-border transfer rules.
-
-(Compliance evolves with statute/framework versions; this section is stamped 2026-06 — verify the latest text before citing.)
-
-## How this differs from neighboring techniques
-
-- **RAG retrieval leakage vs. training-data extraction**: here the private data lives in the **vector store / at retrieval time**, defended by configuration and isolation; in [training-data extraction](../02-memorization-extraction/training-data-extraction.mdx) it lives in the **weights / at training time**, defended by dedup / DP. Both are "private data leaking out," but they live in different layers of the system.
-- **RAG retrieval leakage vs. context-surface privacy**: [context-surface privacy](../03-conversational-llms/context-surface-privacy.mdx) is about "things in my current context" — the system prompt, conversation context — being extracted (Volume 3); this entry is about the retrieval system **pulling in** private data it shouldn't, the opposite direction, living in the retrieval and storage layer.
+Strict authorization can change recall and cost; measure the effect rather than assume a shared large index always improves recall over correct partitioning. Filters do not recover already-exported vectors or old logs; propagate permission changes and erasure. [Cross-session bleed](./cross-session-memory-bleed.mdx) and [data lifecycle](../06-governance-compliance/data-lifecycle-deletion.mdx) expand these state concerns.
 
 ## Version notes
 
 :::note Applicable versions
-Embedding invertibility is a **property of embedding representations**, not limited to one vector store or model (Morris et al. demonstrate it across several mainstream embedding models, EMNLP 2023); the ACL layer for multi-tenant retrieval and the isolation of cache / memory are **system-design problems**, common across vendors. Exact inversion fidelity and mitigation effectiveness vary with model and implementation — deploy against your own isolation tests. (Sources verified 2026-06.)
+Checked Pinecone / Weaviate / Qdrant, Azure security/vector filters, PostgreSQL RLS, and embedding research on 2026-10-29. Actual account permissions were not inspected; native ACL source/API eligibility and preview status need deployment-time checks. Review by 2026-12-29, earlier for identities, ACL/tenant APIs, RLS roles, re-ranking/logging/caching, or product eligibility.
 :::
 
 ## Further reading and sources
 
-Mixed evidence — **primary: Official docs** (each vector DB / retrieval service's multi-tenancy isolation mechanism — this entry's strongest claim, "isolation is the system's job," is now vendor-documented); **supplementary: Research** (mechanism backing for embedding inversion), **official incident** (OpenAI outage), **framework** (OWASP).
-
-Isolation mechanism per vector DB / retrieval service (official docs; verified 2026-06):
-
-- [Pinecone Docs — Implement multitenancy](https://docs.pinecone.io/guides/index-data/implement-multitenancy) — tenant isolation by namespace (each stored separately); metadata filtering is the shared, cross-tenant path, not isolation.
-- [Microsoft Learn — Security filters for trimming results in Azure AI Search](https://learn.microsoft.com/en-us/azure/search/search-security-trimming-for-azure-search) — query-time OData security filter (`search.in`) that *simulates* document-level authorization for cases that can't use native ACLs.
-- [Weaviate Docs — Multi-tenancy operations](https://docs.weaviate.io/weaviate/manage-collections/multi-tenancy) — native multi-tenancy with a dedicated shard per tenant; one tenant's data isn't visible to another.
-- [Qdrant Docs — Multitenancy](https://qdrant.tech/documentation/manage-data/multitenancy/) — payload-based partitioning within one collection (`group_id` marked `is_tenant`); tiered multi-tenancy from v1.16.
-- [AWS — Access control for vector stores using metadata filtering with Amazon Bedrock Knowledge Bases](https://aws.amazon.com/blogs/machine-learning/access-control-for-vector-stores-using-metadata-filtering-with-knowledge-bases-for-amazon-bedrock/) — metadata filtering for retrieval-time access control.
-- [PostgreSQL Docs — Row Security Policies](https://www.postgresql.org/docs/current/ddl-rowsecurity.html) — Row-Level Security filters every SQL statement by a session variable; enforced in the database, not bypassable by app code.
-
-Mechanism backing and an adjacent incident:
-
-- [Text Embeddings Reveal (Almost) As Much As Text (Morris et al., EMNLP 2023; arXiv 2310.06816)](https://arxiv.org/abs/2310.06816) — Research: vec2text inverts text embeddings back to approximate originals and recovers real names from clinical-note embeddings.
-- [March 20 ChatGPT outage (OpenAI official postmortem, 2023)](https://openai.com/index/march-20-chatgpt-outage/) — a redis-py bug made cross-user conversation titles and some payment info visible.
-- [OWASP LLM02:2025 Sensitive Information Disclosure](https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/) — the risk category and mitigations for sensitive-information disclosure in LLM applications.
+- [Pinecone multitenancy](https://docs.pinecone.io/guides/index-data/implement-multitenancy)
+- [Azure security-filter pattern](https://learn.microsoft.com/en-us/azure/search/search-security-trimming-for-azure-search)
+- [Azure vector-filter modes](https://learn.microsoft.com/en-us/azure/search/vector-search-filters)
+- [Weaviate multitenancy](https://docs.weaviate.io/weaviate/manage-collections/multi-tenancy)
+- [Qdrant multitenancy](https://qdrant.tech/documentation/manage-data/multitenancy/)
+- [PostgreSQL row security](https://www.postgresql.org/docs/current/ddl-rowsecurity.html)
+- [Text Embeddings Reveal (Almost) As Much As Text](https://arxiv.org/abs/2310.06816)
+- [OpenAI 2023 outage](https://openai.com/index/march-20-chatgpt-outage/)

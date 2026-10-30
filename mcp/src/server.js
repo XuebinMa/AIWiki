@@ -2,7 +2,7 @@
 /**
  * aiwiki-mcp：把 AiWiki 百科（AI 编码误区 + LLM 隐私保护）暴露为 MCP 工具。
  *
- * 数据来自站点公开索引 https://xuebinma.github.io/AIWiki/api/index.json，
+ * 数据来自站点公开索引 https://xuebinma.github.io/AIWiki/api/index-v2.json，
  * 条目全文按需从 GitHub raw 拉取——包本身不内置内容，站点更新即生效。
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -10,6 +10,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 import { createLoader } from './lib/loader.js';
 import { searchEntries } from './lib/search.js';
+import { canonicalId, resolveEntry } from './lib/identity.js';
 
 const loader = createLoader();
 
@@ -21,12 +22,17 @@ const server = new McpServer({
 function formatResult(entry, lang) {
   const en = lang === 'en';
   return {
-    id: entry.id,
+    id: canonicalId(entry),
     subject: entry.subject,
     title: en && entry.title_en ? entry.title_en : entry.title,
     summary: en && entry.summary_en ? entry.summary_en : entry.summary,
     severity: entry.severity || undefined,
     phase: entry.phase || undefined,
+    verified_at: entry.verified_at || undefined,
+    review_after: entry.review_after || undefined,
+    source_version: entry.source_version || undefined,
+    maturity: (en ? entry.maturity_en : entry.maturity) || entry.maturity || undefined,
+    sources: entry.sources?.length ? entry.sources : undefined,
     url: en ? entry.url_en : entry.url,
   };
 }
@@ -86,14 +92,15 @@ server.registerTool(
       'Fetch the full markdown of one AiWiki entry by id (as returned by aiwiki_search). ' +
       'Entries include mechanism analysis, consequences, best practices, and verifiable sources.',
     inputSchema: {
-      id: z.string().describe('Entry id, e.g. "context-rot"'),
+      id: z.string().describe('Canonical id returned by search, e.g. "coding-pitfalls:context-rot"; unique legacy ids are accepted'),
+      subject: z.enum(['coding-pitfalls', 'privacy']).optional().describe('Disambiguate an old, unqualified id'),
       lang: z.enum(['zh', 'en']).optional().describe('Content language (default zh; falls back to zh if en missing)'),
     },
   },
-  async ({ id, lang = 'zh' }) => {
+  async ({ id, subject, lang = 'zh' }) => {
     try {
       const index = await loader.getIndex();
-      const entry = index.entries.find((e) => e.id === id);
+      const entry = resolveEntry(index.entries, id, subject);
       if (!entry) {
         return {
           isError: true,

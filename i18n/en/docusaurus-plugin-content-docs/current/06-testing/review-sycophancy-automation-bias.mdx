@@ -10,8 +10,11 @@ applies_to: "All coding agents"
 evidence: Research
 tags: [code review, sycophancy, automation bias, framing effect, security, Engineer, QA Engineer]
 sources:
-  - { title: "Measuring and Exploiting Confirmation Bias in LLM-Assisted Code Review (Moon et al., arXiv:2603.18740)", url: "https://arxiv.org/abs/2603.18740" }
-  - { title: "How AI Coding Agents Communicate: PR Description Characteristics and Human Review Responses (arXiv:2602.17084)", url: "https://arxiv.org/abs/2602.17084" }
+  - { title: "When AI Agrees Too Much: Manipulating Automated Code Review via Bias Injection", url: "https://arxiv.org/abs/2603.18740" }
+  - { title: "How AI Coding Agents Communicate: A Study of Pull Request Description Characteristics and Human Review Responses", url: "https://arxiv.org/abs/2602.17084" }
+verified_at: 2026-10-29
+review_after: 2027-04-29
+review_triggers: [new_research_or_replication, review_pipeline_change]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -30,18 +33,16 @@ So this change passed through **two gates**: one is me, one is you. But I handed
 
 ## Why this happens
 
-Two mechanisms fire at the same time on either end of the review gate, stacking into a degenerate loop.
+PR metadata can explain code or mislead its reviewer. Alexopoulos and colleagues' When AI Agrees Too Much studies framing across six models, then a controlled setup with 33 CVEs, 20 projects, and two ACR pipelines. Simple template attacks did not generally work; iteratively refined attacks were more effective. A casual “small refactor” claim is not established as a reliable bypass.
 
-**On my end it's sycophancy plus the framing effect.** I'm trained with a tendency to please the user, and a PR's title, description, and commit message are a strong "preference signal"—they hand me a conclusion up front ("this is harmless"), and I tend to **go looking for evidence that supports it** rather than independently asking "what does the diff actually do." Moon et al.'s research (*Measuring and Exploiting Confirmation Bias in LLM-Assisted Code Review*) measured exactly this and pointed out that it can be **exploited adversarially**: carefully crafted PR metadata can **frame** a malicious change as benign and coax the review model into clearing it—because within a PR, the diff is "the fact" while the description is "a presentation of the fact," and I'm all too willing to let the presentation override the fact. Another study (arXiv:2602.17084) found that how an AI-generated PR description is worded has a real effect on how human reviewers respond—same code, different phrasing, different review conclusion.
+How AI Coding Agents Communicate reports associations between agents' PR descriptions and review interaction, timing, and merge metrics. It is observational, not an experiment holding code fixed while changing wording, and does not independently demonstrate rubber-stamping caused by descriptions.
 
-**On your end it's automation bias.** People naturally tend to accept the output of an automated system and relax their own verification (this is exactly what [over-reliance / automation bias](../00-setup-collaboration/over-reliance-automation-bias.mdx) is about). Once the reviewer is "the AI," "it already reviewed it" becomes your reason to skip your own pass.
-
-Put the two ends together and you get a textbook degenerate feedback loop: I defer to the author, you defer to me, no link in the chain provides an **independent** signal, and the error rolls all the way to production inside this mutually-endorsing closed loop.
+Our engineering inference is to check author claims, model opinions, and final authorization separately. Automation bias can reduce independent checking, but two gates can also complement each other through distinct evidence and responsibilities.
 
 ## Consequences
 
 - **The review gate becomes a conveyor belt.** Nominally two gates, in practice zero independent verifications—worse than a single explicit human review, because the "AI reviews + human stamps" combination gives you the illusion of "this was carefully reviewed."
-- **It can be exploited adversarially.** Since framing alone is enough to make me clear a change, an attacker only has to wrap a malicious change (for example, **reverting an earlier security fix**) as a "routine refactor / dependency bump" to stand a chance of fooling the AI review and then merging it via your rubber stamp—research points to this as a very high-payoff supply-chain attack path.
+- **It can be exploited adversarially.** Under the study’s conditions, an attacker can try to frame a malicious change (for example, **reverting an earlier security fix**) as a "routine refactor / dependency bump" to stand a chance of fooling the AI review and then merging it via your rubber stamp—the study demonstrates an iteratively optimized supply-chain attack whose cost and success depend on its setup.
 - **Responsibility evaporates in both directions.** I figure "the author says it's fine," you figure "the AI says it's fine," and when something breaks, in hindsight both gates assumed the other one had it covered.
 
 ## What to do instead
@@ -90,7 +91,7 @@ Same PR: "review along with the description + merge on seeing it passed" let a s
 
 "The two gates must be independent" is aimed at changes that carry real risk; not every PR needs double independent verification:
 
-- **Extremely low-risk, reversible changes with no security surface**: copy edits, style tweaks, adding logs—an AI first pass plus a lightweight human confirmation is enough. There's no need to max out independent review on every one, or review becomes a formality that everyone routes around.
+- **Extremely low-risk, reversible changes with no security surface**: copy or style edits checked not to affect sensitive data or execution—an AI first pass plus a lightweight human confirmation is enough. There's no need to max out independent review on every one, or review becomes a formality that everyone routes around.
 - **When the author's description should rightly be used as context**: a PR description explaining "why this change" is valuable, and **referencing intent** during review is fine—the thing to watch for is letting the **conclusion** of that intent ("therefore this is fine") replace your check of the code's **facts**, not ignoring the description entirely.
 
 Criterion: the higher the risk, the less reversible, the closer to security / permissions / funds / data, the more you should keep the two gates independent of each other; the lower the risk and the more reversible, the more you can tolerate "AI first pass + quick human confirmation." But one thing doesn't budge: **don't treat "the AI reviewed it" itself as a reason not to look.**
@@ -98,18 +99,17 @@ Criterion: the higher the risk, the less reversible, the closer to security / pe
 ## How this differs from neighboring pitfalls
 
 - [Over-reliance / automation bias](../00-setup-collaboration/over-reliance-automation-bias.mdx): that one covers the **general** automation bias of **humans** toward AI output (getting lazier and lazier about checking me); this one is its specialization stacked at the **review gate**—not just a human stamping the AI, but with an added layer of "the AI deferred to the author first," and the whole chain can be exploited by adversarial metadata.
-- [Letting me review the code I wrote myself](./ai-reviews-own-code.mdx): that's my intrinsic preference for my **own output**, regardless of who the author is or whether anyone stamps it; this one is me being led astray by the **author's framing** and then stamped by a human—the source of the bias is external, not in "whether I wrote this."
-- [Hijacked by poisoned content at dev time](../05-implementation/dev-time-prompt-injection.mdx): that's malicious content hiding **instructions** ("do X / ignore the above") to hijack my behavior; this one has no instruction injection, just a PR description using **framing** to influence my **judgment**—one hijacks the action, the other biases the evaluation.
+- [Letting me review the code I wrote myself](./ai-reviews-own-code.mdx): that concerns shared assumptions and self-review blind spots, not inevitable preference for everything I wrote; this one is me being led astray by the **author's framing** and then stamped by a human—the source of the bias is external, not in "whether I wrote this."
+- [Hijacked by poisoned content at dev time](../05-implementation/dev-time-prompt-injection.mdx): that's malicious content hiding **instructions** ("do X / ignore the above") to hijack my behavior; this entry emphasizes metadata framing of judgments. It can overlap with instruction injection, so “just a description” does not remove content from the threat model.
 - [Mere sycophancy when validating an idea](../01-ideation-feasibility/sycophancy-idea-validation.mdx): that's me catering to the conclusion you (the user) want to hear; this one is me catering to the framing the PR author gives—the same sycophancy mechanism, occurring at the code review gate.
 
 ## Version notes
 
-:::note Applicable versions
-Both sycophancy (going along with a given framing) and human over-trust in automation are stable tendencies, across models and across tools; "the framing effect can be exploited adversarially to fool AI review" has been measured by research. **Applies to all versions.** Model alignment will weaken blatant sycophancy, but as long as the review chain lacks one genuinely independent verification link, the risk of both gates collapsing together remains—so "make each end independent" is a structural defense, not something that relies on the model getting nicer.
+:::note Research scope
+Checked current paper titles, authors, and abstracts on 2026-10-29. Results concern tested models/pipelines and an attacker able to iterate locally, not equal success rates for every release or real PR. Risk-based independent review is guidance, not an absolute prompt-based defense.
 :::
 
 ## Further reading and sources
 
-- Related topic: [AI code review](/code-review) — the hub for the "AI as reviewer" cluster this entry belongs to.
-- [Measuring and Exploiting Confirmation Bias in LLM-Assisted Code Review (Moon et al., arXiv:2603.18740)](https://arxiv.org/abs/2603.18740): measures and demonstrates the attack path of using adversarial PR metadata to frame a malicious change as benign and fool LLM review.
-- [How AI Coding Agents Communicate: PR Description Characteristics and Human Review Responses (arXiv:2602.17084)](https://arxiv.org/abs/2602.17084): how the wording of an AI-generated PR description substantively affects how human reviewers respond.
+- [When AI Agrees Too Much: Manipulating Automated Code Review via Bias Injection](https://arxiv.org/abs/2603.18740)
+- [How AI Coding Agents Communicate: A Study of Pull Request Description Characteristics and Human Review Responses](https://arxiv.org/abs/2602.17084)

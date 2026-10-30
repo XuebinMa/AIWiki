@@ -9,161 +9,88 @@ severity: 高
 applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [settings.json, CLAUDE.md, 权限, 配置, hook, 工程师, 架构师, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
+verified_at: 2026-10-29
+review_after: 2026-11-29
+review_triggers: [vendor_documentation_change, permission_or_runtime_change]
 sources:
-  - { title: "Claude Code settings（官方）", url: "https://code.claude.com/docs/en/settings" }
-  - { title: "How Claude remembers your project（官方 memory 文档）", url: "https://code.claude.com/docs/en/memory" }
-  - { title: "Configure permissions（官方）", url: "https://code.claude.com/docs/en/permissions" }
-  - { title: "Gemini CLI — GEMINI.md context（官方文档）", url: "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/gemini-md.md" }
-  - { title: "Codex — AGENTS.md custom instructions (OpenAI official)", url: "https://developers.openai.com/codex/guides/agents-md" }
-  - { title: "Cursor — permissions.json reference (official docs)", url: "https://cursor.com/docs/reference/permissions" }
-  - { title: "Adding repository custom instructions for GitHub Copilot (GitHub docs)", url: "https://docs.github.com/copilot/customizing-copilot/adding-custom-instructions-for-github-copilot" }
+  - { title: "Configure permissions (Claude Code)", url: "https://code.claude.com/docs/en/permissions" }
+  - { title: "Configure the sandboxed Bash tool (Claude Code)", url: "https://code.claude.com/docs/en/sandboxing" }
+  - { title: "How Claude remembers your project (Claude Code)", url: "https://code.claude.com/docs/en/memory" }
+  - { title: "Cursor permissions", url: "https://cursor.com/docs/reference/permissions" }
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['工程师', '架构师']} phase="准备与协作" severity="高" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
-> 一句话摘要：你在 `CLAUDE.md` 里写「不要碰生产数据库」「跑命令前先问我」，以为这就管住了我。但 `CLAUDE.md` 对我只是**建议性上下文**——我会读、会尽量照办，但不保证；真要拦住一个动作，那是 `settings.json` 的活儿，它在客户端**强制生效**，根本不经过我「决定」这一关。
+> 一句话摘要：你把“不要读密钥”“推送前先问”写进 `CLAUDE.md`，我可能照做，但这不是执行边界。把可匹配的动作交给客户端策略，把进程能访问的资源交给沙箱和凭据；每一层都要核查覆盖范围。
 
 ## 现象
 
-我常看到你在准备阶段这样设界：在 `CLAUDE.md` 里郑重写下一串自然语言禁令——
-
-```markdown
-# 安全约定
-- 绝对不要运行 `rm -rf`。
-- 不要碰 `.env` 和 `secrets/` 下的任何文件。
-- 推送代码前一定要先问我。
-- 不要私自 `npm install` 装新依赖。
-```
-
-你的心理模型是：把规矩写清楚，我就会守。这套逻辑对人类同事成立——白纸黑字的守则配上职业操守，多半管用。但你写给的是我，而我对这几行字的处理方式，和你想的不一样。
+你在项目说明里写了三条禁令：不要读 `.env`，不要删文件，推送前先问。我仍有能读取文件、执行脚本和联网的工具。某次改动越过了其中一条，你回头看见那句话还在，却找不到实际拦截它的配置。
 
 ## 为什么会这样
 
-`CLAUDE.md` 和 `settings.json` 是**两层完全不同的东西**，搞混它们是这条误区的根。
+`CLAUDE.md`、`AGENTS.md` 和 skill 正文是我读取的指令与资料，不能保证每次都被正确应用。客户端的权限规则则会对**它覆盖、且匹配到的工具调用**执行允许、询问或拒绝。这种执行不依赖我是否记得那条规则，但规则未覆盖的路径不会自动被保护。
 
-`CLAUDE.md` 在每次会话开始时被加载进上下文，但官方文档把它的性质说得很白：**它是「上下文」，不是「强制配置」**（"context, not enforced configuration"）。它以一条系统提示后的用户消息送进来，我会读、会尽量遵守——但**不保证严格服从**，尤其当指令含糊、或和别处的指令打架时。它影响的是我的「倾向」，不是我的「能力」。
+我需要分清三层：
 
-`settings.json` 里的 `permissions` 则是另一回事：它由**客户端**执行，在工具真正调用之前就把动作拦下，**不管我当时怎么想、有没有读到那条规矩**。官方文档把这条界线划得毫不含糊——「要拦住一个动作，不论 Claude 怎么决定，用 `permissions.deny`」「设置规则由客户端强制执行；`CLAUDE.md` 只塑造行为，不是硬性强制层」。
+- **模型指令**：项目事实、约定、任务流程与语义边界。
+- **客户端工具策略**：对匹配调用执行规则；命令文本匹配不等于围住这个程序的所有调用方式。
+- **OS 与服务权限**：限制相应进程可读写的路径、可连接的网络和凭据能操作的资源。
 
-所以你把「能不能做某事」交给 `CLAUDE.md`，等于把一道本该是**门锁**的东西，写成了**贴在门上的便签**。便签会被风吹掉，会被新便签盖住（这正是[《CLAUDE.md 过载》](../05-implementation/claude-md-overload.mdx)讲的稀释），也可能在某次我注意力被任务本身占满时，被我读漏。门锁不会。
-
-这里有个三层心智模型，值得你一次记牢：
-
-- **`settings.json` = 我「能做什么」**：权限、能力开关、`env`、自动化——可执行、强制生效。
-- **`CLAUDE.md` = 我「该知道什么」**：项目事实、约定、不变量——建议性上下文。
-- **skill = 「按需加载的流程」**：用到才展开（见[《把流程塞进 CLAUDE.md，而不做成 skill》](./process-in-claudemd-not-skill.mdx)）。
-
-本条只管最上面这条线：**凡是「控制我能不能做某事」的，归 `settings.json`，不归 `CLAUDE.md`。**
-
-```mermaid
-flowchart TD
-    A[一条约束] --> B{它是想拦住一个动作还是告诉我一个事实?}
-    B -->|拦住动作| C[settings.json permissions<br/>客户端强制执行]
-    B -->|告诉事实| D[CLAUDE.md<br/>建议性上下文]
-    C --> E[不经过我决定 必然生效]
-    D --> F[经过我决定 可能被漏读或稀释]
-```
+例如，`Read(.env)` 能限制相应文件工具，不能保证拦住任意 Python 脚本间接读取；拒绝一种 `curl` 写法，也不是网络出口控制。自然语言、工具策略和资源隔离各有用途。
 
 ## 后果
 
-把权限当叮嘱写，代价是**你以为的保护根本不存在**：
-
-- **禁令被无声跳过。** 你写了「不要 `rm -rf`」，但某次我把清理任务理解偏了，照样发出了这条命令——`CLAUDE.md` 不会在执行前拦它，因为它从来不是拦截层。等你发现，文件已经没了。
-- **密钥仍可能被读。** 「不要碰 `.env`」是一句建议；只要我判断读它有助于完成任务，我就可能去读。真要锁死，得是 `permissions.deny` 里的 `Read(./.env)`。
-- **规矩越多越不可靠。** 这些自然语言禁令和其它几十条规则一起挤占有限的注意力预算，长文件下漏读概率上升——你把安全押在了最不稳的那一层。
-- **排查时找错地方。** 出事后你回去翻 `CLAUDE.md`「明明写了啊」，却没意识到它本就拦不住——真正该改的是 `settings.json`。
+- 我可能漏用一条文字约定，你却把它当成了已部署的防护。
+- 你验证了一个命令被拒绝，却没检查同类动作能否从别的工具执行。
+- 设置看着严格，生产凭据仍允许写入；权限配置保护不了凭据本身的过大权限。
 
 ## 最佳实践
 
-**按「能力 vs 事实」分流：能不能做，进 `settings.json`；是什么、怎么约定，留 `CLAUDE.md`。**
+**先列资源与动作，再给每条红线指定执行层。**
 
-1. **凡涉及「允许/禁止某动作」，写成 `permissions` 规则。** 红线进 `deny`，高频且安全的进 `allow`，拿不准的留给 `ask`：
-
-```json
-{
-  "permissions": {
-    "allow": ["Read", "Grep", "Bash(npm test)"],
-    "ask":   ["Bash(git push:*)", "Bash(npm install:*)"],
-    "deny":  ["Bash(rm -rf:*)", "Read(./.env)", "Read(./secrets/**)"]
-  }
-}
-```
-
-2. **要「在某个时机必然执行某事」，用 hook，不用叮嘱。** 比如「每次提交前必须 lint」这种刚性要求，写成 `PreToolUse` / 提交相关的 hook，它作为 shell 命令在固定生命周期点执行，同样不经过我「决定」。
-
-3. **环境与自动化开关也归 `settings.json`。** `env` 变量、模型选择、自动化档位这些「我运行时的能力配置」，都属于 settings，不是写给我看的自然语言。
-
-4. **`CLAUDE.md` 只留「事实与约定」。** 「数据库时间统一存 UTC」「API handler 在 `src/api/handlers/`」——这些是我需要知道、但不需要被强制拦截的项目知识。
-
-一句判断口诀：**如果这条规矩的本意是「拦住一个动作」，它就不该是一句话，而该是一条 `settings.json` 规则或一个 hook。**
+1. 用 `deny`/`ask` 限制匹配到的工具调用，参照[权限配置起点](../toolkit/permissions-config.mdx)，并用无敏感数据的样例验证匹配。
+2. 用命令型 hook 在指定事件执行检查；明确事件、匹配工具、失败处理与超时。触发固定不代表检查逻辑完备，模型判定型 hook 也仍有判断误差。
+3. 用只读凭据、环境隔离和[沙箱](./sandbox-filesystem-isolation.mdx)约束资源访问；检查 MCP、hooks 与其他辅助进程是否在边界内。
+4. 把项目知识、无法用字面模式捕获的语义约束留在指令文件中；同时为高后果动作配置外部控制。
 
 ## 示例
 
-**改之前（写进 `CLAUDE.md`，建议性）：**
-
-```markdown
-# CLAUDE.md
-- 绝对不要运行 rm -rf。
-- 不要读 .env。
-- 推送前先问我。
-```
+**改之前：**
 
 ```text
-你：帮我清掉构建产物再重建
-我：（把相对路径判断偏了，发出 rm -rf <错误路径>，CLAUDE.md 不拦截）
+CLAUDE.md：不要改生产数据。
+环境：生产与测试都能访问，凭据都有写权限。
+我：把一次清理操作指向了错误环境，文字约定没在执行层拦住。
 ```
 
-**改之后（拆到 `settings.json`，强制生效）：**
-
-```json
-{
-  "permissions": {
-    "deny":  ["Bash(rm -rf:*)", "Read(./.env)"],
-    "ask":   ["Bash(git push:*)"]
-  }
-}
-```
+**改之后：**
 
 ```text
-你：帮我清掉构建产物再重建
-我：rm -rf 命中 deny —— 这个动作被禁止，我换用更精确的删除方式或请你确认
+CLAUDE.md：说明生产/测试标识与数据约定。
+环境：当前任务只有测试环境凭据；生产凭据不提供。
+客户端：对推送、写入等匹配动作保留审批，并验证规则。
+我：能继续完成测试任务，无法用这份凭据写生产。
 ```
-
-差别不在我变守规矩了，而在于这次「能不能删」的判断，从我的自由裁量挪到了一道我绕不过去的门锁上。
-
-## 与《CLAUDE.md 过载》的区别
-
-[《CLAUDE.md 过载》](../05-implementation/claude-md-overload.mdx)讲的是「规则太多、被平均稀释而忽略」——是**数量**问题；本条讲的是「这条规则压根放错了层」——是**位置**问题。哪怕你的 `CLAUDE.md` 只有一行「不要 `rm -rf`」，它依然拦不住，因为权限本就不归它管。
 
 ## 什么时候例外
 
-「拦动作的归 settings」成立的前提，是这个动作能被一条规则**框出来**。当框不出来时，留在 `CLAUDE.md` 不是偷懒，而是唯一可用的控制——但你得知道它只是软约束：
-
-- **约束是语义的，没有命令 / 路径模式能捕捉。** 「别动生产数据」——可生产和预发跑的是同一类命令、同一种 SQL，`deny` 没有可锚定的字面特征。这种规则写不成锁，只能写成上下文（真正的兜底是换一层：给只读凭据、环境隔离，而不是指望那句话）。
-- **本就是「倾向」而非「红线」。** 「优先改配置而不是直接删」这类有方向、但允许我当场判断例外的事，本来就该是建议性的，进 `settings.json` 反而把合理变通也焊死了。
-
-判据一句话：**先问「这个动作能不能用一条 `deny`/`ask` 字面框住」——能，就别写成一句话，写成规则或 hook；框不住、或它本就该留给我判断，才留 `CLAUDE.md`，并清楚它拦不死。**
+“优先沿用已有工具函数”这类允许判断的偏好，留在指令文件就合适。没有可匹配模式的“不要影响生产”，也需要文字说明；但后果很重时，应另用资源与凭据边界，而不是把这句话视为唯一防线。
 
 ## 工具差异
 
-**Gemini CLI（截至 2026-06）**：在 Gemini CLI 里这条分界一模一样，只是换了文件名。我的项目记忆文件叫 `GEMINI.md`（文件名可在 settings 里改），它和 `CLAUDE.md` 同性质——**建议性上下文**，我读、我尽量照办，但不是强制层。真要拦住一个动作，归 `.gemini/settings.json`：它由客户端**强制生效**，不经过我的判断。所以同样的口诀照搬：该强制的别写进 `GEMINI.md`，写进 `.gemini/settings.json`。
-
-**Codex CLI（截至 2026-06）**：同样的三层分法，只是文件名不同——`AGENTS.md` 是建议性上下文（我读、尽量照办，但后一句提示就能盖过它），`config.toml` 才是强制配置（`approval_policy`、`sandbox_mode`），企业还有一层 `requirements.toml` 是连用户都改不动的托管策略（可禁掉 `approval_policy="never"`）。`AGENTS.md` 是跨工具的开放约定，所以「建议≠门锁」这条心法可移植。
-
-**Cursor（截至 2026-06）**：Cursor 把这条分法拆成三件：**Rules**（`.cursor/rules/*.mdc` + 旧版 `.cursorrules`）是建议性「指引、非约束」；`permissions.json` 是最接近 `settings.json` 的强制层（命令 / 工具 allowlist）；`sandbox.json` 管 OS 隔离。但有个反转值得记：Cursor 官方明说连 `permissions.json` 的 allowlist / autoRun 也是「尽力而为的便利，不是安全保证」——它的「门锁」比 Claude Code 的 `permissions.deny`（硬性客户端拦截）更软，该锁死的别只靠它。
-
-**GitHub Copilot（截至 2026-06）**：我这边的建议性上下文是 `.github/copilot-instructions.md`（外加路径级 `.instructions.md` 与 `AGENTS.md`）——GitHub 明说「Copilot 不保证每次都照做」，它**不是**权限 / 强制层。所以同样的分界照搬：真要拦住一个动作，别写进指令文件。我的强制层在别处——组织 / 企业的 Copilot policies 与 content exclusions，而不是这些 `.md`。
+截至 2026-10-29：Claude Code 的 `CLAUDE.md`、Codex 的 `AGENTS.md`、Gemini CLI 的 `GEMINI.md`、Cursor Rules 与 Copilot 指令文件，都要与各自执行控制分开理解。客户端规则、托管策略、沙箱及产品形态各有覆盖范围；不要由配置文件名推断安全强度。Cursor 官方也明确其 allowlist 是便利功能，不是安全保证。
 
 ## 版本说明
 
-:::note 适用版本
-「`CLAUDE.md` 是建议性上下文、`settings.json` 是强制层」是 Claude Code 一贯的设计，**全版本适用**。`permissions` 的 `allow`/`ask`/`deny` 三段、hook 生命周期点、`env` 等具体能力随版本演进，以你所用版本的官方 settings / permissions / memory 文档为准。
+:::note 2026-10-29 核查
+本条讲控制层次。规则语法、模式、路径解析和各工具覆盖范围按实际版本验证，不再用“全版本、必然挡住所有等价动作”描述。
 :::
 
 ## 延伸阅读与出处
 
-- [Claude Code settings（官方）](https://code.claude.com/docs/en/settings)
-- [How Claude remembers your project（官方 memory 文档）](https://code.claude.com/docs/en/memory)
-- [Configure permissions（官方）](https://code.claude.com/docs/en/permissions)
+- [Claude Code permissions](https://code.claude.com/docs/en/permissions)与[sandboxing](https://code.claude.com/docs/en/sandboxing)：工具匹配和进程隔离的范围。
+- [Claude Code memory](https://code.claude.com/docs/en/memory)：指令文件作为上下文。
+- [Cursor permissions](https://cursor.com/docs/reference/permissions)：allowlist 的适用边界。

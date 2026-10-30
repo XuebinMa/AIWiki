@@ -10,15 +10,19 @@ applies_to: "All coding agents"
 evidence: Official docs
 tags: [context management, sessions, Engineer]
 sources:
+  - { title: "Explore the context window", url: "https://code.claude.com/docs/en/context-window" }
   - { title: "Claude Code Best Practices (official)", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "MuhammadUsmanGM/claude-code-best-practices", url: "https://github.com/MuhammadUsmanGM/claude-code-best-practices" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["Editing, compaction, memory, or checkpoint recovery changes", "Task contract, verification evidence, or concurrent writing changes"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['Engineer']} phase="Implementation" severity="Medium" appliesTo="All coding agents" evidence="Official docs" />
 
-> In one sentence: you fix a bug, then ask an unrelated question, then come back to the original task. My context fills up with irrelevant material and my answers start to degrade—and you assume I just "got dumber."
+> In one sentence: Mixed tasks may cause me to reuse stale assumptions and add context cost; preserve goals and verified state before continuing, summarizing, or separating sessions, without treating context clearing as file rollback.
 
 ## Symptom
 
@@ -28,18 +32,11 @@ Three unrelated things in one conversation. By the third, you'll feel my respons
 
 ## Why this happens
 
-I don't have a switch that "forgets the last thing." Within a single session, **everything that came before is still sitting in my context window**—including that regex discussion that has nothing to do with the current task.
+Unrelated discussion can consume context, add processing cost, or transfer assumptions from one task into another. But not all raw history stays in the window forever: clients can trim tool output, summarize history, retrieve on demand, or use separate contexts.
 
-Every answer I generate is an allocation of attention over *everything currently in the window*. The more irrelevant material there is, the smaller the share held by what actually matters (the code style you set at the start, the key constraints of that login endpoint), and the easier those are to dilute and ignore. This isn't me "getting tired"—it's the signal-to-noise ratio dropping.
+Current Claude Code guidance still recommends clearing between unrelated tasks, while noting that automatic compaction and larger windows change older capacity-management habits. Mixed tasks pose a quality/cost risk to observe, not a law that three topics necessarily degrade an answer.
 
-```mermaid
-flowchart LR
-    A[Task 1: fix login] --> B[Task 2: write regex]
-    B --> C[Task 3: back to login]
-    C --> D{Context window}
-    D --> E["login + regex + leftovers<br/>signal buried in noise"]
-    E --> F[Answer quality drops]
-```
+I should preserve the active goal, verified facts, and unfinished work before choosing to continue, summarize, or start a separate session rather than clearing useful state mechanically.
 
 ## Consequences
 
@@ -49,15 +46,9 @@ flowchart LR
 
 ## What to do instead
 
-**When you switch tasks, start a clean conversation.** In Claude Code that's a single command:
-
-```text
-/clear
-```
-
-It wipes the current context so I face the new task from scratch. A simple rule of thumb: **if the new problem doesn't need any information from the old conversation, you should `/clear`.**
-
-If you really are switching between related tasks and want to keep the key points, have me summarize the essential conclusions into a few sentences *before* you `/clear`, then paste them back at the start of the next conversation—trade a long, noisy history for a short, distilled one.
+- **Prefer a separate session for unrelated work.** Preserve progress, the current diff, verification results, and next steps first. Related small questions need not be split mechanically.
+- **Rebuild necessary state when returning.** Read current files and the checklist instead of relying only on the previous conversation.
+- **Understand /clear before using it.** In current Claude Code it clears conversation context, not disk changes or necessarily rules/memory. Save a checked handoff summary first when work must continue.
 
 ## Example
 
@@ -87,11 +78,12 @@ Me: (focused, accurate)
 
 ## Version notes
 
-:::note Applies to
-This is an inherent effect of how the context window works, independent of version—**all models and coding agents apply**. Different models have different window sizes, which shifts *how soon* things start degrading, but not the underlying rule that irrelevant material dilutes the signal.
+:::note Applicable versions
+Checked current best-practice and context-window documentation on 2026-10-29. Retained separate handling for unrelated tasks and removed claims that all history remains forever or one threshold applies across models. /clear is not file rollback, persistent-memory deletion, or a universal background-task stop; rules, memory, and retrieval can load again.
 :::
 
 ## Further reading and sources
 
 - [Claude Code Best Practices (Anthropic, official)](https://code.claude.com/docs/en/best-practices)
 - [MuhammadUsmanGM/claude-code-best-practices](https://github.com/MuhammadUsmanGM/claude-code-best-practices)
+- [Explore the context window](https://code.claude.com/docs/en/context-window)

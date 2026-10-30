@@ -15,6 +15,9 @@ sources:
   - { title: "Weiss et al., What Was Your Prompt? A Remote Keylogging Attack on AI Assistants (USENIX Security 2024)", url: "https://www.usenix.org/conference/usenixsecurity24/presentation/weiss" }
   - { title: "Gu et al., Auditing Prompt Caching in Language Model APIs (ICML 2025, PMLR v267)", url: "https://proceedings.mlr.press/v267/gu25b.html" }
   - { title: "I Know What You Asked: Prompt Leakage via KV-Cache Sharing in Multi-Tenant LLM Serving (PromptPeek, NDSS 2025)", url: "https://www.ndss-symposium.org/ndss-paper/i-know-what-you-asked-prompt-leakage-via-kv-cache-sharing-in-multi-tenant-llm-serving/" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: [source_revision, evidence_or_threat_model_change]
 ---
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
@@ -65,9 +68,10 @@ To break down the boundary: both **live at the deployment / network layer, beyon
 2. Cache side (prompt cache): scope cache keys per user / tenant (see the key-scoping in
    "Cross-session memory bleed"), or explicitly disable cross-user sharing; if you must
    share, flatten the timing of hits vs. misses.
-3. Timing baseline: run a Gu-et-al.-style timing audit on your own inference service —
-   compare the time-to-first-token distribution of "cached vs. cold" prompts, and quantify
-   how distinguishable they are.
+3. Cross-principal timing audit: let isolated identity A warm a synthetic canary prefix,
+   then let B send matching / non-matching probes against an unwarmed control. Randomize
+   order, repeat, and report detection advantage and confidence intervals. Use same-user
+   cold / warm caching as a positive control, not as evidence of cross-user leakage.
 4. Threat register: explicitly register "token-by-token streaming + global cache" as a
    side-channel surface in your threat model and change reviews; re-test on every streaming
    / cache change, and don't assume last time's patch still holds.
@@ -77,9 +81,9 @@ Every step is tied to your own deployment: until you've quantified **whether you
 
 **Minimal testable assertions** (turn the side channel into a regression check):
 
-- How to test: (1) Length — record the encrypted packet-length sequence of your own streamed responses, and assert its correlation with the underlying token lengths has been squashed below a threshold by padding / batching; (2) Cache — run the same prompt "cold / warm" twice, take the time-to-first-token distributions, and assert the two are indistinguishable (or that the cache is already per-user isolated).
-- Pass: the packet-length sequence has no significant correlation with token length, or the latency distributions of cache hit and miss overlap within the set threshold — the side channel is unusable.
-- Fail: packet length is still readable token-by-token, or cold/warm latency is significantly separable → don't claim "encrypted therefore safe"; go back to the streaming / cache layer and add padding or isolation.
+- How to test: (1) Length — record encrypted packet lengths and measure reconstruction / classification with a controlled attack. (2) Cache — A warms an artificial canary prefix containing no real PII; B probes with separate credentials, compared with unwarmed and non-matching controls. Randomize, repeat, and report sample size, effect size, and confidence intervals. Same-user cold / warm requests form a positive control.
+- Pass: **length and cross-principal caching must each pass**. Under prespecified attacks, sample sizes, and tolerances, both length-reconstruction advantage and B’s advantage in detecting A’s warming stay below their limits; positive controls detect expected cache benefits. This supports only the tested channels, not a claim that all side channels are unusable.
+- Fail: either tested channel exceeds its limit, or a failed positive control / insufficient sample leaves the result inconclusive → fix and re-test the relevant streaming or cache-isolation layer. Passing the other check cannot hide this failure.
 
 ## Real cases / engineering status (research demonstrations)
 
@@ -109,7 +113,7 @@ Breaking the false security item by item:
 ## Version notes
 
 :::note Applicable versions
-"Beyond encryption, streamed token length and prompt-cache timing are still side channels" is a vendor-independent **deployment-time fact** (the root cause is token-by-token streaming + length-based segmentation + cross-user cache reuse). But **two things change with version**: (1) after Weiss et al.'s disclosure, the relevant vendors patched the token-length channel, and the **~29% / ~55% reconstruction rates are tied to their tested systems at that time**, not the current state of any deployment today; (2) Gu et al.'s "8/17 have caching, 7 share across users" is a **2025 snapshot**, and providers can adjust their cache policies at any time. The cat-and-mouse is dynamic — padding / isolation can be reopened by a new streaming / decoding optimization, so re-test continuously on your own deployment. Stamped 2026-06. (Sources verified 2026-06.)
+"Beyond encryption, streamed token length and prompt-cache timing are still side channels" is a vendor-independent **deployment-time fact** (the root cause is token-by-token streaming + length-based segmentation + cross-user cache reuse). But **two things change with version**: (1) after Weiss et al.'s disclosure, the relevant vendors patched the token-length channel, and the **~29% / ~55% reconstruction rates are tied to their tested systems at that time**, not the current state of any deployment today; (2) Gu et al.'s "8/17 have caching, 7 share across users" is a **2025 snapshot**, and providers can adjust their cache policies at any time. The cat-and-mouse is dynamic — padding / isolation can be reopened by a new streaming / decoding optimization, so re-test continuously on your own deployment. This revision checks Gu / PromptPeek’s cross-principal threat models and updates acceptance tests as of 2026-10-29. Historical attack results remain tied to the papers’ systems; current provider policies were not re-audited.
 :::
 
 ## Further reading and sources

@@ -3,79 +3,65 @@ title: Tool matrix
 slug: /tool-matrix
 description: Which AI-coding-tool pitfalls are paradigm-level and universal, which differ in defense between tools, and which are unique to one tool — one index.
 sidebar_position: 9
+verified_at: 2026-10-29
+source_version: "Official product documentation snapshot 2026-10-29; surface-specific"
+review_after: 2026-11-29
+review_triggers: [vendor_documentation_change, permission_or_runtime_change]
+sources:
+  - { title: "Configure permissions (Claude Code)", url: "https://code.claude.com/docs/en/permissions" }
+  - { title: "Configure the sandboxed Bash tool (Claude Code)", url: "https://code.claude.com/docs/en/sandboxing" }
+  - { title: "Codex commands", url: "https://learn.chatgpt.com/docs/developer-commands" }
+  - { title: "Codex subagents", url: "https://learn.chatgpt.com/docs/agent-configuration/subagents" }
+  - { title: "Gemini CLI Plan Mode", url: "https://geminicli.com/docs/cli/plan-mode/" }
+  - { title: "Gemini subagents", url: "https://geminicli.com/docs/core/subagents/" }
+  - { title: "Cursor subagents", url: "https://cursor.com/docs/subagents" }
+  - { title: "Cursor permissions", url: "https://cursor.com/docs/reference/permissions" }
+  - { title: "GitHub Copilot coding agent", url: "https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-coding-agent" }
 ---
 
 # Tool matrix
 
-Most pitfalls in this book are **paradigm-level** — they come from the shared machinery of a large model plus tool-calling, long context, and auto-execution, so **you hit them in any tool**. By default, then, every entry applies across AI coding tools. This page indexes only the **two kinds of exception**: where the same root cause needs a **different guardrail in a different tool** (written up in an entry's "Tool differences" section), and where a pitfall comes from a **mechanism unique to one tool** (its own entry / a case).
+Capabilities change quickly. This page separates **book coverage** from **product capabilities**: an entry lacking tool-specific guidance does not establish that the product lacks a feature. Identify CLI/IDE/cloud surface, version, platform, and actual permission mode in every comparison.
 
-:::note Coverage depth (read it honestly)
-**Claude Code has the deepest coverage** and is the book's default reference (it applies to nearly every entry, so the matrix gives it no column of its own). **Gemini CLI, Codex CLI, Cursor, and GitHub Copilot** are the filled-in second batch, and the table below is each one's first set of tool differences — **Codex / Gemini (open-source, complete docs) are the most solid**; **Cursor / Copilot (proprietary, multi-mode, fast-changing) lean on security disclosures + official docs and are thinner**. The matrix lists **mechanism names only**, not exact commands, and it **goes stale fast** — when you act, defer to your version's official docs. As of 2026-07.
-:::
+## Current verification entry points
 
-## Coverage at a glance
+| Tool | Mechanisms checked in this refresh | What to confirm before use |
+|---|---|---|
+| Claude Code | Instructions and execution policies are separate; the built-in sandbox mainly covers shell commands and subprocesses | File/web tools, MCP, hooks, sensitive reads, and unsandboxed retries |
+| Codex | `/plan` and native subagents exist; subagents inherit parent safety constraints | Interface, configuration precedence, network/filesystem limits, and workspace independence |
+| Gemini CLI | Plan Mode and native subagents exist | Current default mode, policy, and subagent tool permissions |
+| Cursor | Native subagents exist; official permissions allowlists are not a security guarantee | Editor/CLI/cloud execution location, sandbox, and team policies |
+| GitHub Copilot | Distinguish completion, IDE agents, cloud coding agents, and code review | Instruction support, tool permissions, network, and review coverage for each surface |
 
-Rows = pitfalls that have a "Tool differences" section (click in for each tool's specific mechanism); columns = the four second-batch tools; `✓` = the entry has a difference section for that tool, `–` = none yet.
+Verified **2026-10-29**. These are checked mechanisms, not an exhaustive feature table or security ranking. Defaults and claims that a feature does not exist age especially quickly; retain uncertainty where evidence is insufficient.
 
-| Pitfall (main entry) | Gemini | Codex | Cursor | Copilot |
-|---|:-:|:-:|:-:|:-:|
-| [Advisory context vs enforced config](./00-setup-collaboration/settings-vs-claudemd.mdx) | ✓ | ✓ | ✓ | ✓ |
-| [Context-file overload](./05-implementation/claude-md-overload.mdx) | ✓ | ✓ | ✓ | ✓ |
-| [Over-permissioning](./00-setup-collaboration/over-permissioning.mdx) | ✓ | ✓ | ✓ | ✓ |
-| [Skipping plan mode](./00-setup-collaboration/skipping-plan-mode.mdx) | ✓ | – | ✓ | ✓ |
-| [Destructive / irreversible actions](./00-setup-collaboration/destructive-irreversible-actions.mdx) | ✓ | ✓ | ✓ | ✓ |
-| [MCP over-access](./00-setup-collaboration/mcp-over-access.mdx) | ✓ | ✓ | ✓ | ✓ |
-| [Dev-time prompt injection](./05-implementation/dev-time-prompt-injection.mdx) | ✓ | ✓ | ✓ | ✓ |
-| [CI permission blindspot](./07-acceptance-release/cicd-permission-blindspot.mdx) | ✓ | ✓ | ✓ | ✓ |
-| [Overwriting without checking file state](./05-implementation/ignoring-file-state-overwrite.mdx) | ✓ | ✓ | ✓ | ✓ |
-| [Runaway autonomous loops](./05-implementation/runaway-agent-loops.mdx) | ✓ | ✓ | – | – |
-| [Mistimed /compact](./05-implementation/compact-timing.mdx) | ✓ | ✓ | ✓ | – |
-| [Poor git hygiene](./05-implementation/git-hygiene.mdx) | ✓ | ✓ | ✓ | – |
-| [Hallucinated APIs / version drift](./05-implementation/hallucinated-api-version-drift.mdx) | ✓ | – | ✓ | ✓ |
-| [Gaming the tests](./06-testing/gaming-tests.mdx) | – | ✓ | ✓ | ✓ |
-| [Reviewing my own code favors me](./06-testing/ai-reviews-own-code.mdx) | – | – | ✓ | ✓ |
-| [Uncontrolled network egress](./00-setup-collaboration/network-egress-control.mdx) | ✓ | ✓ | – | – |
-| [Soft permissions without an OS-level sandbox](./00-setup-collaboration/sandbox-filesystem-isolation.mdx) | ✓ | ✓ | – | ✓ |
-| [Subagents without boundaries](./00-setup-collaboration/subagent-no-boundaries.mdx) | – | – | ✓ | – |
+## Find an entry by question
 
-> Column shorthands: Gemini = Gemini CLI, Codex = Codex CLI, Copilot = GitHub Copilot. The `Skipping plan mode` row is `–` for Codex: Codex has no dedicated "plan mode," only a read-only preset that approximates one, so the evidence is too thin to list. The `Gaming the tests` row is `–` for Gemini: no equivalent deterministic-hook mechanism verified for Gemini CLI. The `Reviewing my own code` row is `–` for Gemini: the Gemini-family independent reviewer is **Gemini Code Assist** (a GitHub app), not Gemini CLI — the column axis tracks tools, and we don't mix products (the entry names it explicitly).
-> The `Uncontrolled network egress` row is `–` for Cursor / Copilot: no native egress-narrowing mechanism verified for the local IDE agent shapes (egress control falls to your environment layer). The `Subagents without boundaries` row is `✓` only for Cursor: no equivalent native subagent mechanism verified for Gemini / Codex as of 2026-07, and none for Copilot.
->
-> One more entry carries a **tool-generic** differences section (mechanism families, no per-vendor rows, so no ✓ columns): [Context-starved review](./06-testing/context-starved-review.mdx).
+| Question | Entry points |
+|---|---|
+| Can an instruction file enforce access? | [Instructions and configuration](./00-setup-collaboration/settings-vs-claudemd.mdx) |
+| Which processes are actually isolated? | [Sandbox scope](./00-setup-collaboration/sandbox-filesystem-isolation.mdx), [network egress](./00-setup-collaboration/network-egress-control.mdx) |
+| Which steps need planning or approval? | [Planning by need](./00-setup-collaboration/skipping-plan-mode.mdx), [risk and approval](./00-setup-collaboration/autonomy-approval-boundaries.mdx) |
+| How do subagents share context, files, and Git? | [Subagent ownership and workspaces](./00-setup-collaboration/subagent-no-boundaries.mdx), [Git hygiene](./05-implementation/git-hygiene.mdx) |
+| Long sessions, instructions, and recovery | [Context rot](./05-implementation/context-rot.mdx), [instruction overload](./05-implementation/claude-md-overload.mdx), [compaction recovery](./05-implementation/compact-timing.mdx) |
+| External content and tool access | [Dev-time injection](./05-implementation/dev-time-prompt-injection.mdx), [MCP access](./00-setup-collaboration/mcp-over-access.mdx) |
+| Verification and independent review | [Test loops](./06-testing/tests-as-verification-loop.mdx), [self-review limits](./06-testing/ai-reviews-own-code.mdx), [review context](./06-testing/context-starved-review.mdx) |
 
-## Per tool (mechanisms + unique entries)
+Claude Code remains the book's deepest reference. Read other tools through verified differences in individual entries. Shared failure modes do not mean every model or default configuration reproduces them.
 
-Read each section in two layers: **Mechanism (stable)** = the axis that sets this tool apart from the others, doesn't shift with point releases, safe to remember; **Version observation (as of 2026-06, will go stale)** = defaults, CVE / GHSA, and fix status — the most perishable line, so when you actually act, defer to your version's official docs and don't treat this line as a lasting fact.
+## Historical cases and tool-specific boundaries
 
-### Gemini CLI
-- **Mechanism (stable)**: differentiating axis = **the default state of plan mode / checkpointing** + **how folder trust inherits into subdirectories**.
-- **Version observation (as of 2026-06, will go stale)**: Plan Mode on by default, Checkpointing off by default; critical in-the-wild findings — the Tracebit RCE, CI auto-trusting the workspace (GHSA-wpqr, CVSS 10).
-- Unique entry: [Gemini trust inheritance](./00-setup-collaboration/gemini-folder-trust-inheritance.mdx)
-- Case: [hijacked by "tell me about this repo" (Tracebit RCE)](./cases/gemini-cli-tracebit-rce.mdx)
-- All entries → [/tags/gemini-cli](/tags/gemini-cli)
+Historical disclosures explain mechanisms, not necessarily vulnerabilities in current versions. They do not replace present configuration checks:
 
-### Codex CLI
-- **Mechanism (stable)**: differentiating axis = **sandbox default state** (opposite of Claude Code) + **the enforcement tiers of a three-layer config** (advisory / local / org-enforced).
-- **Version observation (as of 2026-06, will go stale)**: the only one sandboxed by default (macOS Seatbelt / Linux Landlock + network off); config splits into `AGENTS.md` / `config.toml` / `requirements.toml`; config-poisoning RCE (CVE-2025-61260).
-- Case: [a `.codex` config turned "open the repo" into silent RCE (CVE-2025-61260)](./cases/codex-cli-config-rce.mdx)
-- All entries → [/tags/codex-cli](/tags/codex-cli)
+- Gemini: [trust inheritance](./00-setup-collaboration/gemini-folder-trust-inheritance.mdx), [Tracebit RCE](./cases/gemini-cli-tracebit-rce.mdx).
+- Codex: [configuration RCE](./cases/codex-cli-config-rce.mdx).
+- Cursor: [ignore-file boundary](./00-setup-collaboration/cursor-ignore-best-effort.mdx).
+- Copilot: [CamoLeak](./cases/github-copilot-camoleak.mdx).
 
-### Cursor
-- **Mechanism (stable)**: differentiating axis = **permissions are "best-effort," not a security guarantee** + **the command gate can be bypassed at the parser level** + **the MCP attack surface**.
-- **Version observation (as of 2026-06, will go stale)**: the docs say plainly that `permissions.json` and `.cursorignore` are not security boundaries; denylist deprecated, NomShub bypass; two MCP CVEs (CurXecute / MCPoison).
-- Unique entry: [.cursorignore isn't a boundary](./00-setup-collaboration/cursor-ignore-best-effort.mdx)
-- All entries → [/tags/cursor](/tags/cursor)
+## Official sources
 
-### GitHub Copilot
-- **Mechanism (stable)**: differentiating axis = **three modes defend differently** (completion / Chat / coding agent) + the coding agent's **server-side guardrails and firewall coverage boundary** + **the instructions-file read cap**.
-- **Version observation (as of 2026-06, will go stale)**: the coding agent pushes only to `copilot/*` branches with the firewall on by default, but the firewall doesn't cover MCP or setup steps; code review reads only the first 4,000 chars of the instructions file; CVE-2025-53773, CamoLeak (CVSS 9.6).
-- Case: [private-repo secrets exfiltrated through the Camo image proxy (CamoLeak)](./cases/github-copilot-camoleak.mdx)
-- All entries → [/tags/git-hub-copilot](/tags/git-hub-copilot)
-
-### Claude Code
-- **Mechanism (stable)**: the book's **default reference** — applies to nearly every entry (so no tag, no column). Differentiating axis = the hardest **enforcement layer**: client-side `permissions.deny`, deterministic hooks, rewind snapshots — the baseline the four tools' "tool differences" above are contrasted against.
-- **Version observation (as of 2026-06, will go stale)**: rewind snapshots on by default.
-
-:::note This table will go stale
-Tool differences and defaults change fast with each version. This page records mechanism names and direction only, not specific commands; when you actually act, defer to your version's official docs. Spot something out of date? Flag it on [GitHub](https://github.com/xuebinma/AIWiki/issues).
-:::
+- [Claude Code permissions](https://code.claude.com/docs/en/permissions) and [sandboxing](https://code.claude.com/docs/en/sandboxing).
+- [Codex commands](https://learn.chatgpt.com/docs/developer-commands) and [subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents).
+- [Gemini Plan Mode](https://geminicli.com/docs/cli/plan-mode/) and [subagents](https://geminicli.com/docs/core/subagents/).
+- [Cursor subagents](https://cursor.com/docs/subagents) and [permissions](https://cursor.com/docs/reference/permissions).
+- [GitHub Copilot coding agent](https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-coding-agent).

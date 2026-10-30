@@ -2,7 +2,7 @@
   "name": "aiwiki",
   "version": "0.1.0",
   "private": true,
-  "description": "AiWiki —— 从 AI 视角写的「AI 使用误区与最佳实践」百科。聚焦用 AI 编码工具做软件工程的通用误区，当前以 Claude Code 覆盖最深。",
+  "description": "AiWiki —— 从 AI 第一人称写的工程百科，包含 AI 编码误区与 LLM 隐私保护两个并列主题。",
   "scripts": {
     "docusaurus": "docusaurus",
     "gen:meta": "node scripts/gen-entry-meta.js",
@@ -20,7 +20,10 @@
     "check:i18n": "node scripts/check-i18n.js",
     "check:mirror": "node scripts/check-mirror.js",
     "check:mirror-deep": "node scripts/check-mirror-deep.js",
-    "check:counts": "node scripts/check-counts.js"
+    "check:counts": "node scripts/check-counts.js",
+    "check:content": "node scripts/check-content.js",
+    "review:queue": "node scripts/check-content.js --review-queue",
+    "test:mcp": "node --test mcp/test/*.test.js"
   },
   "dependencies": {
     "@docusaurus/core": "^3.8.0",

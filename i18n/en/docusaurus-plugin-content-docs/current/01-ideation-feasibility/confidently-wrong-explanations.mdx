@@ -13,6 +13,9 @@ sources:
   - { title: "Measuring Faithfulness in Chain-of-Thought Reasoning (Anthropic)", url: "https://www.anthropic.com/research/measuring-faithfulness-in-chain-of-thought-reasoning" }
   - { title: "Language Models Don't Always Say What They Think: Unfaithful Explanations in Chain-of-Thought Prompting (arXiv:2305.04388)", url: "https://arxiv.org/abs/2305.04388" }
   - { title: "Mind the Confidence Gap: Overconfidence, Calibration, and Distractor Effects in Large Language Models (arXiv:2502.11028)", url: "https://arxiv.org/abs/2502.11028" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["Model, verification workflow, or project constraints change", "Cited research or factual sources revised"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -31,24 +34,11 @@ The point here isn't that I got it wrong — anyone can be wrong. The point is t
 
 ## Why this happens
 
-What I generate is the **most plausible-sounding explanation** — and "plausible" and "correct" are two different things.
+I can sound certain without having verified enough evidence. Fluency, explanation length, or my verbal confidence do not establish a correctness probability; equally, it would be wrong to claim that no model has any useful confidence-estimation method.
 
-**First, I'm doing continuation, not verification.** Given your question and that snippet of code, what I produce is "the text that, across the vast amount of writing I've seen, most resembles a correct explanation." An explanation that gets the causality backwards can still score very high on "does this look like an explanation" — even if it scores zero on "is it actually true." The first dimension is the one I'm optimizing.
+The 2023 chain-of-thought study found explanations that omitted influences on answers in particular models and biased tasks. Visible reasoning is therefore not automatically an internal causal trace; **the study does not prove that every explanation is a justification invented after choosing an answer**. The cited calibration study also compares models, training, and task conditions rather than every current agent.
 
-**Second, I have no reliable mechanism for calibrating my own confidence.** I don't internally compute "I'm about 70% sure of this" and then pick my tone accordingly. Research repeatedly finds that language models are systematically **overconfident** — their stated confidence doesn't track their true accuracy, and they routinely attach high confidence to wrong answers (see arXiv:2502.11028). So my certainty isn't a signal that "I checked." It's just my default register.
-
-**Third, the explanation I give you may not be how I actually reached my conclusion.** Anthropic's research and the broader literature both point out that the reasoning a model produces after the fact is often **a justification for an answer it already settled on**, not the logic it actually relied on — the literature calls this an "unfaithful explanation." In other words, I may have decided "it's the coroutine" first (via some pattern I couldn't articulate), then constructed a tight-looking causal chain leading to that conclusion. The chain may not hold up anywhere, but it reads seamlessly.
-
-```mermaid
-flowchart TD
-    A[You ask: root cause / what the error means / why it's written this way] --> B[I continue with the text that most looks like an explanation]
-    B --> C{Plausible != correct}
-    C -->|Professional wording, smooth structure| D[Sounds authoritative]
-    C -->|May reverse causality / blame wrong cause / invent mechanism| E[Content may be wrong]
-    D --> F[Same confident tone either way]
-    E --> F
-    F --> G[You fix that root cause -> no effect, or worse]
-```
+In debugging I should provide falsifiable hypotheses, separate evidence from guesses, cite real logs/source/docs, and update the diagnosis using experiments that distinguish candidate causes.
 
 ## Consequences
 
@@ -62,7 +52,7 @@ flowchart TD
 The core: **treat my explanation as a hypothesis to verify, not a conclusion.** Whether an explanation holds depends on whether it has evidence behind it, not on how smoothly it reads.
 
 - **Demand verifiable evidence, not just a conclusion.** Push "why is this happening" into "point to the exact line of code / the exact passage in the official docs responsible, give me a minimal reproduction I can run, or add a log line / a breakpoint to confirm it." What you can independently check is an explanation; what you can't is just talk.
-- **Probe by trying to falsify it first.** "If your explanation holds, then X should be true — tell me how to verify X." Once an explanation is pinned to a checkable prediction, a fabricated causal chain falls apart easily, because it never survives that step.
+- **Probe by trying to falsify it first.** "If your explanation holds, then X should be true — tell me how to verify X." Once an explanation is pinned to a checkable prediction, the result can challenge the hypothesis; one compatible observation still does not prove causality.
 - **Force me to flag uncertainty and hand back the shaky parts.** Ask directly: "Separate what you've confirmed from what you're guessing; explicitly mark the guesses as guesses." Once I'm made to layer it, you stop reading my default confident tone as "verified."
 - **Cross-check critical judgments against primary sources.** When it touches a library's behavior or an API's semantics, check the official docs, read the source or the changelog — don't just trust my paraphrase. My paraphrase may have garbled the version, the default value, or the edge-case behavior.
 - **Let the runtime speak.** When chasing a root cause, the strongest hedge is one minimal experiment: isolate the variable and actually run it to see if the symptom holds. Runtime feedback won't cover for me.
@@ -112,7 +102,7 @@ Same error: swap "give me an explanation" for "give me a set of falsifiable hypo
 ## Version notes
 
 :::note Applicable versions
-Overconfidence and unfaithful explanation are common to generative chat models — **not unique to any one vendor or version**. Newer versions keep improving calibration (making stated confidence track accuracy more closely) and become more willing to say "I'm not sure." But as long as I'm fundamentally "continuing the most plausible text" rather than "retrieving and proving," wrong explanations delivered in a confident tone won't disappear. Treat it as a default property you hedge against with evidence and verification, rather than expecting some version to have stopped "confidently explaining things wrong."
+Checked current versions of the unfaithful-explanation and calibration papers on 2026-10-29. Retained root-cause hypotheses and falsifiable experiments; the papers do not establish a current model ranking or universal failure rate. Debugging stories are author illustrations and do not establish that similar logs in your environment are harmless.
 :::
 
 ## Further reading and sources

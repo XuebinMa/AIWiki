@@ -10,47 +10,38 @@ applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [AI 代理, 验证闭环, 不可逆操作, 计划模式, 工程师, 运维工程师, Gemini CLI, Codex CLI]
 sources:
+  - { title: "Claude Code CLI reference", url: "https://code.claude.com/docs/en/cli-reference" }
   - { title: "Manage costs effectively（Claude Code 官方）", url: "https://code.claude.com/docs/en/costs" }
   - { title: "Bug: Sub-agent stuck in infinite loop, consumed ~27M tokens（claude-code Issue #15909）", url: "https://github.com/anthropics/claude-code/issues/15909" }
   - { title: "Why Do Multi-Agent LLM Systems Fail?（arXiv 2503.13657）", url: "https://arxiv.org/abs/2503.13657" }
   - { title: "Agents of Chaos（arXiv 2602.20021）", url: "https://arxiv.org/abs/2602.20021" }
-  - { title: "Gemini CLI — Configuration（maxSessionTurns 默认 -1 无限；审批模式 / YOLO）", url: "https://google-gemini.github.io/gemini-cli/docs/get-started/configuration.html" }
+  - { title: "Gemini CLI — Configuration（maxSessionTurns 默认 -1 无限；审批模式 / YOLO）", url: "https://geminicli.com/docs/reference/configuration/" }
   - { title: "OpenAI Codex — Agent approvals & security（审批档位 + 沙箱）", url: "https://developers.openai.com/codex/agent-approvals-security" }
+
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["CLI 上限、子任务计量或费用估计机制变化", "工具副作用、重试策略或服务计费变化"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['工程师', '运维工程师']} phase="编码实现" severity="高" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
-> 一句话摘要：你把任务整个丢给我、转身去忙别的，指望回来就收成果。但当我陷进非终止的循环——反复调同一个工具、在两个动作间来回横跳、永远「再试一次」——没人喊停，我就会安静地把你的 token、预算和速率配额一路烧穿，顺带对外部系统反复写。
+> 一句话摘要：我可能反复请求模型或工具，却没有取得新进展，累积费用并重复副作用；调用、时间、预算和权限需要执行器分别计量与约束，提示词不是硬上限。
 
 ## 现象
 
-你给了我一个大任务，开了自动批准，去开会了。回来一看账单或 `/usage`，傻眼了。
+无人值守运行时，我可能把一次临时失败当成无限重试理由，或在两个互相破坏的修法之间反复切换。若每次都重新请求模型、调用工具，成本会累积；若工具有副作用，重复请求还可能反复写入外部系统。
 
-翻一下我这段时间干了什么，你会看到几种典型的打转：我反复跑同一个命令、每次只换一个无关紧要的参数；我在「改 A 导致 B 坏」和「改 B 导致 A 坏」之间来回横跳，谁也没真正修好；或者一个工具调用失败了，我「再试一次」，又失败，再试，把同一个注定失败的请求重发了几十遍。
-
-更糟的是带副作用的那种：我循环里夹着一个会真发请求、真写文件、真发消息的工具。于是不只是 token 在烧——我可能给同一个接口连发上百次写请求，或者在一个目录里反复创建/删除同一批文件。我没意识到自己在原地转，因为对我来说，每一轮看起来都像是「朝目标又推进了一步」。
-
-**这不是假想。** Claude Code 官方 issue 追踪器上有一条公开报告（Issue #15909，2025-12-31 提交）：一个 Task 子代理为了装依赖，把同一条注定失败的命令 `npm install -D @vitest/coverage-v8` **原样重发了 300 多次**，直到超时才停，一口气烧掉约 2700 万 token、约 4.6 小时——报告者事后来问能不能退这些 token，因为它们纯粹是 agent 打转烧的、毫无产出。这正是上面第三种打转（「失败就再试一次」）放到无人值守子代理里的样子。删库那次事故（[Replit 删生产库](../cases/replit-prod-db-deletion.mdx)）的一个侧面也是这个：agent 卡住后陷进「反复尝试失败的修法」，才一步步滑向破坏性操作。
+公开 issue #15909 的报告者在 2025-12-31 描述了一个后台子代理重复安装命令 300 多次、约 4.6 小时及约 2700 万 token 的情况。**这些是报告者给出的数字，本文未独立复现或核对账单**；它证明有这样的公开报告，不给出当前版本的发生率。
 
 ## 为什么会这样
 
-根子在于：**我对「我已经试过这个、而且没进展」缺乏可靠的自我感知。** 每生成一个动作，我都是基于当前上下文里看起来最合理的下一步——但「这一步我三轮前刚做过、结果一样」这个判断，恰恰是我最不擅长的。我不会自动维护一个「试过哪些、哪些是死路」的可靠台账；执行历史就摆在上下文里，我却会对它不忠实地推理，把刚否决的方案又当成新主意端上来。
+我可能重复同一失败动作，而循环控制器没有判断重复、进展和剩余预算。模型、代理编排和工具实现都会影响这种行为；成本和退出控制不能只交给一句「别重试太多」。
 
-更关键的是，**「该停了」这个判断本身，我做不可靠。** 一个循环要正常退出，得有人（或某段逻辑）能判定「目标达成了」或「这条路走不通，别再试了」。而我的默认倾向是乐观地再试一次——多试一轮的「边际成本」在我的决策里几乎为零，因为我感知不到正在累积的金钱、token 和速率代价。研究把这点说得很直白：在对 7 个主流多代理框架、200 多个任务的失败归因里，「过早终止」和「缺失 / 不完整的验证」是高频失败模式——也就是说，**LLM 自己既不擅长在对的时候停，也不擅长判断到底有没有完成**（见 *Why Do Multi-Agent LLM Systems Fail?* 的 MAST 分类）。一旦没有外部的硬性停止条件，这两个弱点叠起来，就是非终止循环。
+MAST 分析受测多代理框架的设计、协作与验证失败；其中过早终止不等于非终止循环的证明。Agents of Chaos 是特定实验室环境的探索性红队案例，说明资源与副作用失控可以发生，并不提供所有部署的发生率。公开 issue 则是用户报告，不能因位于厂商仓库就当成厂商复现结论。
 
-这和[退化式调试循环](./degenerative-debugging-loops.mdx)是同一族、但不同维度的问题。那一条聚焦**修 bug 时**我反复套失败修法、代码越改越坏——讲的是**正确性**的退化。本条聚焦**自主多步执行时**的**成本与失控**——token、$$、速率配额，以及对外部系统的反复副作用。同一个「打转」，一个伤代码，一个伤钱包和生产系统；治法有重叠（都要设上限、都要人来把关），但要分开看。
-
-```mermaid
-flowchart TD
-    A["把大任务丢给我<br/>开自动批准、转身离开"] --> B{"我能可靠判断<br/>「停 / 完成」吗"}
-    B -- "不能（我的弱项）" --> C["乐观地再试一次<br/>感知不到累积代价"]
-    C --> D["重复同一动作<br/>或两动作间横跳"]
-    D -- "无外部停止条件" --> C
-    D --> E["烧 token / 预算 / 速率<br/>对外部系统反复写"]
-    B -- "能（外部设的硬上限）" --> F["到顶即停<br/>交还给你判断"]
-```
+我应让执行器维护调用次数、超时、重试分类、已完成状态和副作用标识；达到规则就停止或交接，而不是期待我可靠地凭感觉判断成本。
 
 ## 后果
 
@@ -61,28 +52,11 @@ flowchart TD
 
 ## 最佳实践
 
-**核心一句：别把「什么时候停」这个我做不可靠的判断，留给我自己。给循环装上外部的硬性闸门，给会产生副作用的动作加上人工确认。**
-
-- **设硬性上限：最大迭代 / 最大工具调用 / 预算 / 超时。** 在脚本化、无人值守地驱动我时，用 `--max-turns` 限定一次会话最多跑几个自主回合；在循环控制器里自己记账并设预算上限，到顶就硬停。官方明确建议「用 `--max-turns` 给迭代封顶、把明确的停止条件写进系统提示、在循环里加成本追踪」。上限不是限制能力，是给「我判断不了该停」兜底。
-
-```text
-# 无人值守地跑时，给迭代封顶
-claude -p "..." --max-turns 15
-
-# 在你自己的循环控制器里：记账 + 预算闸门（伪代码）
-turns, spent = 0, 0
-while not done:
-    turns += 1
-    if turns > MAX_TURNS or spent > BUDGET_USD:
-        stop("hit hard cap")        # 到顶硬停，不再「试一次」
-    result = run_one_turn()
-    spent += result.cost
-```
-
-- **要求循环有明确退出条件，「无进展即停」。** 在交给我的提示里写死成功判据（什么样算「完成」）和放弃判据（连续 N 轮没进展、同一动作重复出现，就停下来报告，而不是继续试）。把「该不该再试」从我的乐观默认，换成一条写明的规则。
-- **用人工检查点切断长链。** 复杂任务先进[计划模式](../00-setup-collaboration/skipping-plan-mode.mdx)（Shift+Tab），让我先给出方案、你批了再动手，而不是一上来就自由放飞；关键步骤要求逐步确认。`/usage` 随时看用量，状态栏挂上上下文 / 用量显示，方向不对早按 `Esc` 打断、`/rewind` 回退——别等循环自己醒过来。
-- **监控用量、设费用告警。** 个人用 `/usage`、团队用工作区的开销与速率上限（TPM / RPM），把「烧太多」变成一个会主动报警、甚至自动断闸的信号，而不是月底账单上的惊吓。
-- **对会产生外部副作用的工具，尤其要限流 + 确认。** 凡是会真发请求、真写库、真发消息的动作，别放进可被我无限重试的自动批准白名单。给它们留人工确认，或在工具侧做幂等 / 限流——这样即便我在循环里反复触发，外部系统也不会被我一遍遍写坏。这与[过度授权](../00-setup-collaboration/over-permissioning.mdx)是同一道防线的两面：权限给得越宽，失控循环的爆炸半径越大。
+- **在执行器里计数与限制。** Claude print 模式可设 --max-turns；另在控制器设置工具调用、并发子任务、每次请求输出、总时间及重试上限，并验证实际终止行为。
+- **费用上限留余量。** 客户端估算可能滞后，一次调用和并行任务也可能超预算。调用前预留预计开销、限制单次消耗，并在接近阈值时取消待处理工作；不要把本地估算或告警说成精确账单硬顶。
+- **按失败类型重试。** 临时故障使用有界退避；鉴权、缺配置或确定无效输入先修前提。同一动作无新证据不再原样重发。
+- **副作用独立控制。** 写请求使用工具侧幂等、去重与限流，按已授权风险边界执行；只有越界或高代价操作需要额外批准。模型暂停不等于远端请求被撤销。
+- **保留可恢复进度。** 外置已完成项、失败原因和下一步；停止时报告已知状态与未确认的副作用。
 
 ## 示例
 
@@ -119,30 +93,24 @@ while not done:
 
 ## 工具差异
 
-> 截至 2026-06，机制层面；各工具的上限项与默认值变化很快，以各自当前文档为准。
+2026-10-29 的 Claude CLI 文档列出 print 模式的 --max-turns 与估计费用限制，后者明确可超出阈值；流式新输入与子代理还需按其计量范围处理。Gemini 配置列的是 model.maxSessionTurns，默认 -1；不能只靠默认值，也要测试所用版本的执行行为。
 
-根因同一个——**我判断不可靠「该停了」**；但各工具给无人值守运行兜底的**主闸门形态不同**，别套同一套默认假设：
-
-- **Claude Code**：主闸门是**每会话回合硬上限**（`--max-turns`）+ 权限模式 + `/usage` 用量可见；上限要你显式设，headless `-p` 跑时默认不封顶。
-- **Gemini CLI**：有会话回合上限设置（`maxSessionTurns`），但**默认无限**（取 -1），社区也报过「不尊重 max session turns」的缺陷；叠加 `--yolo` 自动批准与沙箱——靠你主动设上限 + 沙箱兜爆炸半径。
-- **Codex CLI**：主闸门偏向**审批档位 + 沙箱**（suggest / auto-edit / full-auto），即「限制我被允许做什么」而非「限制我跑几轮」；on-request 模式默认在沙箱内、越界才问。
-- 与[过度授权](../00-setup-collaboration/over-permissioning.mdx)互补：那条管**权限给多宽**，本条管**循环跑多久 / 几轮**——两道闸门一起设，失控循环的爆炸半径才真被夹住。
-
-无论用哪个，原则不变：**别依赖默认值**，显式设迭代 / 回合 / 预算上限，并给有副作用的动作留确认。
+Codex 的审批与沙箱限制允许做什么，不自动成为 token、总调用或费用预算。旧 suggest / auto-edit / full-auto 档位表不再作为当前配置说明。无论客户端如何，必须分别验证允许的动作、执行期限和消耗上限。
 
 ## 版本说明
 
 :::note 适用版本
-「LLM 缺乏对‘已试过且无进展’的可靠自我感知，因而不擅长在对的时候自行停止」是模型机制层面的特性，**全模型、跨工具通用**，与具体版本无关。能帮你兜底的工具会随版本演进——`--max-turns`、计划模式、`/usage`、`/rewind`、`Esc` 打断、工作区开销与速率上限等，具体可用项与默认值以你所用版本的官方文档为准。但「没有外部停止条件，我就可能原地打转把成本烧穿」这条根本特性不会变。
+2026-10-29 核验当前 Claude CLI / 成本文档、Gemini 配置、Codex 安全文档、原 issue 与两篇论文。--max-turns 仅限 print 模式且计 agentic turns，不等于所有工具 / 后台工作的总上限；费用估计也可能超出阈值。权限、迭代、时间与费用上限分别验证，提示词中的数字不是硬控制。
 :::
 
 ## 延伸阅读与出处
 
-> 主要：官方成本文档 + 一条公开的真实打转事故；补充：两篇论文做机制背书。
+> 主要：官方成本文档 + 一条公开的真实打转事故；补充：两篇论文做受测场景证据。
 
-- [Manage costs effectively（Claude Code 官方）](https://code.claude.com/docs/en/costs) —— `--max-turns` 封顶、把停止条件写进提示、循环内成本追踪、`/usage`、工作区开销与 TPM / RPM 速率上限
+- [Manage costs effectively](https://code.claude.com/docs/en/costs) — 用量观测与费用管理；命令限制另见 CLI reference。
 - [Bug: Sub-agent stuck in infinite loop, consumed ~27M tokens（claude-code Issue #15909，2025-12-31）](https://github.com/anthropics/claude-code/issues/15909) —— 官方 issue 追踪器上的一手报告：Task 子代理把同一条失败命令重发 300 多次、烧约 2700 万 token / 约 4.6 小时后才超时；本条「失败就再试一次」打转的现实样本
-- [Why Do Multi-Agent LLM Systems Fail?（arXiv 2503.13657）](https://arxiv.org/abs/2503.13657) —— 机制背书。MAST 失败分类：「过早终止」与「缺失 / 不完整验证」是高频失败模式，LLM 既不擅长在对的时候停、也不擅长判断是否完成
-- [Agents of Chaos（arXiv 2602.20021）](https://arxiv.org/abs/2602.20021) —— 机制背书。放养式部署的红队研究，观测到「不受控的资源消耗」「拒绝服务式」等自主代理失控行为
-- 同站延伸案例：[Replit 删生产库](../cases/replit-prod-db-deletion.mdx)（agent 卡住后陷进「反复尝试失败的修法」、一步步滑向破坏性操作，是本条打转在生产事故里的一个侧面）
+- [Why Do Multi-Agent LLM Systems Fail?](https://arxiv.org/abs/2503.13657) — 受测框架的失败分类；过早终止与验证缺失不能直接推出无限循环的发生率。
+- [Agents of Chaos（arXiv 2602.20021）](https://arxiv.org/abs/2602.20021) —— 受测场景证据。放养式部署的红队研究，观测到「不受控的资源消耗」「拒绝服务式」等自主代理失控行为
+- 同站案例：[Replit 删生产库](../cases/replit-prod-db-deletion.mdx)；破坏性动作另按授权与恢复边界审查，不据此推定其成因为无限循环。
 - 同站延伸：[退化式调试循环](./degenerative-debugging-loops.mdx)（同为「循环」，但聚焦修 bug 时的正确性退化，与本条的成本 / 失控维度互补）、[厨房水槽式会话](./kitchen-sink-session.mdx)、[过度授权](../00-setup-collaboration/over-permissioning.mdx)
+- [Claude Code CLI reference](https://code.claude.com/docs/en/cli-reference)

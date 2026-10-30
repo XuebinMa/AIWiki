@@ -73,9 +73,9 @@ Claude Code · Cursor · GitHub Copilot · Codex CLI · Gemini CLI · CLAUDE.md 
 | 重复逻辑 | duplicate logic | 违反 DRY |
 | 幻觉 import | hallucinated import | 幻觉出不存在的依赖；参见 slopsquatting |
 | 供应链（攻击）| supply chain (attack) | |
-| 确定性 | determinism | 与「非确定性」成对；hook 是确定性执行 |
+| 确定性 | determinism | 与「非确定性」成对；hook 的触发与执行可由客户端强制，覆盖范围需核对 |
 | 渐进式披露 | progressive disclosure | skill 按需加载的设计 |
-| 强制配置 | enforced configuration | settings 强制生效，区别于「建议性上下文」 |
+| 强制配置 | enforced configuration | 客户端在覆盖路径执行规则，区别于「建议性上下文」 |
 | 建议性上下文 | advisory context | CLAUDE.md 是建议性、非强制 |
 | 多代理协作 | multi-agent collaboration | |
 | 职责边界 | responsibility boundaries | 多 subagent 各自负责范围 |
@@ -144,6 +144,22 @@ Claude Code · Cursor · GitHub Copilot · Codex CLI · Gemini CLI · CLAUDE.md 
 | 清单 | checklist | |
 | 模板 | template | |
 | 任务启动模板 | task-kickoff template | 给 AI 下任务的开场模板 |
+| 代理评测 | agent evaluation | 评估任务结果、轨迹及副作用 |
+| 评测运行器 | evaluation harness | 固定环境和评分流程 |
+| 持久任务 | durable task | 可恢复的长期任务 |
+| 幂等键 | idempotency key | 识别同一业务操作，重试不重复提交 |
+| 持久记忆投毒 | persistent memory poisoning | 外部恶意内容写入记忆后跨会话触发 |
+| 执行轨迹 | execution trace | 工具调用、结果与状态变更的记录 |
+| 情境完整性 | contextual integrity (CI) | 按任务目的和传播条件判断数据流 |
+| 越范围采集 | out-of-scope acquisition | 读取或接收超出任务所需的数据 |
+| 原始推理链 | raw reasoning trace | 区别于摘要或隐藏推理 |
+| 推理摘要 | reasoning summary | 产品提供的推理概述 |
+| 隐藏推理 | hidden reasoning | 未由端点开放的内部推理 |
+| 授权主体 | principal | 用户、服务或其他可授权身份 |
+| 跨主体 | cross-principal | 跨不同授权身份 |
+| 任务相关性 | task appropriateness | 数据是否适合当前任务 |
+| 接收者授权 | recipient authorization | 接收主体是否有权读取 |
+
 
 ## 枚举值映射（frontmatter 与 `<PitfallMeta>`）
 
@@ -314,14 +330,14 @@ DP-SGD · PATE · FHE · HE · MPC · MCP · TEE · MIA · PII · GDPR · NIST �
 | LLM 水印 | LLM watermarking | 生成时嵌入可检测信号（如 green/red list）；改写 / 翻译可削弱 |
 | 数据溯源 | data provenance | 判「内容是否 AI 生成」「我的数据是否被训练」；含版权陷阱 / 成员推断法 |
 | 微调即服务 | fine-tuning-as-a-service (FTaaS) | 厂商托管微调 API；微调数据去向 / 保留与对齐侵蚀是其隐私面 |
-| Agent 隐私评测 | agent privacy evaluation | 用 AgentDojo 等基准把「Agent 注入后外泄」做成可复现、可打分 |
+| Agent 隐私评测 | agent privacy evaluation | 按任务、身份与轨迹评估越范围采集、共享和外泄 |
 | 持久记忆 | persistent memory | 产品级跨会话记忆功能（saved memories / 引用聊天历史）；留存与可删边界在产品与后端，非隔离 bug |
 | 端侧推理 | on-device inference | 模型在用户设备本地跑、prompt 不出设备的隐私姿态；不覆盖回落云 / 遥测 / 本机被攻陷 |
 | 多模态地理定位推断 | VLM geolocation inference | 视觉语言模型从图像画面内容（非 EXIF / GPS）推断拍摄地点；推理期的属性推断 |
 | MCP 数据流 | MCP data flow | Model Context Protocol 下 host↔server 的上下文切片传递；最小采集 / 同意 / 凭据集中是其隐私面 |
 | 最小采集 | least-collection / data minimization | 只把任务所必需的上下文字段交给 server；对应 GDPR 数据最小化原则 |
 | 凭据集中 | credential concentration | 多个 MCP server 的凭据汇聚成单一高价值目标，放大被攻破的爆炸半径 |
-| 推理链泄露 | reasoning-trace leakage | 推理模型的思维轨迹（reasoning trace）携带敏感数据，被展示 / 日志 / 下游读取时成为泄露面；思考越多漏越多 |
+| 推理链泄露 | reasoning-trace leakage | 推理模型的思维轨迹（reasoning trace）携带敏感数据，被展示 / 日志 / 下游读取时成为泄露面；可达对象和预算关系按受测设置限定 |
 | 多智能体内部信道泄露 | multi-agent internal-channel leakage | 敏感数据沿 agent 间消息 / 共享记忆 / 工具参数流动，比对外输出更易被 output-only 审计漏掉 |
 | 屏幕捕获过采 | screen-capture over-collection | computer-use / GUI agent 反复截屏，把整屏（含无关 / 敏感 / 他人内容）一并送进模型 |
 | 适配器泄露 | adapter / LoRA leakage | 发布的 LoRA delta + 公开底座作参照，放大对微调集的成员推断 / 抽取 |

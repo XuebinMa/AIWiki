@@ -11,6 +11,9 @@ severity: Medium
 maturity: Production
 evidence: Research
 tags: [training-data deduplication, near-duplicate, memorization, training-data extraction, membership inference, differential privacy, Privacy Engineer, ML Engineer, Security Engineer]
+verified_at: 2026-10-29
+review_triggers: ["Deduplication algorithms thresholds or incremental corpora change", "Training budgets or DP adjacency definitions change"]
+review_after: 2027-04-29
 sources:
   - { title: "Lee et al., Deduplicating Training Data Makes Language Models Better (ACL 2022; arXiv 2107.06499)", url: "https://aclanthology.org/2022.acl-long.577/" }
   - { title: "Kandpal et al., Deduplicating Training Data Mitigates Privacy Risks in Language Models (ICML 2022; PMLR v162)", url: "https://proceedings.mlr.press/v162/kandpal22a.html" }
@@ -25,9 +28,7 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 ## Mechanism: what happens on my side
 
-Duplication makes a sequence get **reinforced by many gradient updates** during training — memorized harder, higher generation probability. The **superlinear relationship** Kandpal et al. measured is key: count → generation probability is **not linear but superlinearly** amplified (10× ≈ 1000×).
-
-**Deduplication** (exact + near) deletes duplicate documents / substrings down to a single copy **before** training, **directly removing this amplifier**: each sequence is reinforced at most once, so memorization and extractability drop sharply.
+**Deduplication** reduces documents / substrings identified as duplicates by the chosen rule. It does not guarantee each semantic fact appears or is trained on once: epochs, resampling, approximate misses, and incremental corpora repeat exposure. Compare memorization benefits at matched training budgets.
 
 To be clear about the red line: it's not "I decide to memorize duplicates less" — I can't introspect. What's externally measurable is that **duplication is reinforced in the training dynamics, and dedup removes the reinforcement source**, so before/after dedup my memorization degree (exposure) / verbatim extraction rate shows an observable drop (measurable with the probes in [Quantifying memorization & auditing](./quantifying-memorization.mdx)).
 
@@ -36,8 +37,8 @@ flowchart TB
     R["Corpus has many duplicates / near-duplicates"] --> A["Reinforced by many gradient updates"]
     A --> B["Memorized hard + superlinear generation probability<br/>(count ↑ → generation probability superlinearly ↑)"]
     B --> C["Easily extracted verbatim / membership-inferred"]
-    D["Dedup: exact (same doc) + near (near-dup / long repeated substrings)"] --> E["Each sequence down to one copy<br/>amplifier removed"]
-    E --> F["Memorization / extraction rate drops sharply<br/>(but a sample appearing once can still be memorized)"]
+    D["Dedup: exact (same doc) + near (near-dup / long repeated substrings)"] --> E["Fewer rule-detected duplicates<br/>epochs and missed matches still repeat"]
+    E --> F["Measure changes in memorization / extraction<br/>(but a sample appearing once can still be memorized)"]
 ```
 
 ## Threat surface: what dedup lowers, what it doesn't
@@ -58,7 +59,7 @@ flowchart TB
 
 ## How the defense works
 
-Two layers: **exact dedup** (delete identical documents) + **near dedup** (e.g. MinHash to find near-duplicate documents, suffix arrays to find and delete long repeated substrings). The principle is removing the **"count → generation probability"** superlinear amplifier — Lee et al. used suffix arrays to locate long repeated substrings and provided dedup tooling.
+Two layers: **exact dedup** (delete identical documents) + **near dedup** (e.g. MinHash to find near-duplicate documents, suffix arrays to find and delete long repeated substrings). The principle is removing part of the observed **"count → generation probability"** amplification — Lee et al. used suffix arrays to locate long repeated substrings and provided dedup tooling.
 
 To break it down: dedup **lowers frequency / probability, gives no bound**; Lee / Kandpal themselves frame it as **"mitigate," not eliminate**. For a formal guarantee, stack DP. Treating "ran dedup" as "no memorization" is the false security this entry breaks.
 
@@ -83,7 +84,7 @@ Every number is tied to **your corpus and dedup threshold** — the paper's "dow
 **Minimal testable assertions** (turn the dedup gain into a regression check):
 
 - How to test: before/after dedup, measure verbatim memorization / extraction rate with the same canary / extraction probes (see memorization auditing).
-- Pass: verbatim memorization / extraction rate **drops substantially** after dedup; dedup rate / threshold is recorded; sensitive **single-occurrence** samples have DP / minimization as a backstop.
+- Pass: match training tokens / steps, model, and attack budget; report deduplication, false removals / misses, and memorization metrics with intervals against thresholds, and govern unique sensitive samples separately. With DP, dataset-dependent global deduplication can change adjacency sensitivity. Analyze the complete preprocessing-and-training mechanism rather than applying post-dedup record accounting directly to original users.
 - Fail: claiming "no memorization" from dedup alone, or rare samples still extractable with **no DP** backstop, or no before/after comparison → not adequate.
 
 ## Research status (engineering feasibility)
@@ -115,7 +116,7 @@ Breaking the false security item by item:
 ## Version notes
 
 :::note Applicable versions
-"Duplication amplifies memorization, dedup substantially mitigates it" is a **model-independent** empirical regularity (from duplicate samples being reinforced by many gradient updates). But the **reduction factor, superlinear slope, and thresholds** are tied to corpus, dedup method, and model scale — Lee's (~1/10) and Kandpal's (10× → ~1000×) numbers **don't transfer directly** to your setup; you must re-measure with your own memorization audit. Dedup tooling and near-dup algorithms evolve; stamped 2026-06. (Sources verified 2026-06.)
+Checked ACL / ICML 2022 and RefinedWeb primary sources on 2026-10-29. Their empirical improvements and published pipeline practice remain, without assuming the same defaults across all production training. Added repeated-training and data-dependent-preprocessing conditions for DP compatibility. Review by 2027-04-29, earlier for algorithms / thresholds, incremental corpora, training budgets, or DP adjacency.
 :::
 
 ## Further reading and sources

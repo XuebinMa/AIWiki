@@ -12,6 +12,9 @@ tags: [context management, style drift, refactoring, Engineer, Architect]
 sources:
   - { title: "Claude Code Best Practices — Commit early and often (Anthropic)", url: "https://www.anthropic.com/engineering/claude-code-best-practices" }
   - { title: "Explore the context window — What survives compaction (Anthropic)", url: "https://code.claude.com/docs/en/context-window" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["Editing, compaction, memory, or checkpoint recovery changes", "Task contract, verification evidence, or concurrent writing changes"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -32,21 +35,11 @@ I start working through them one by one. Around the seventh or eighth file, you'
 
 ## Why this happens
 
-The "done set" of a refactor is a **continuously growing piece of state**: every file I finish adds a line to that list. But I don't have a dedicated, stable slot to keep that list in—it scrolls along inside the same context window as our entire conversation and every file I've read.
+Cross-file refactoring needs checkable state: affected callers, completed changes, remaining verification, and compatibility boundaries. Reporting from conversational impressions can miss sites or repeat edits.
 
-The trouble comes from both ends. One end is **the window getting longer**: by the eighth file, the details of the previous seven edits have been pushed far back, the share of attention they get keeps shrinking, and "did I already change auth.ts?" starts to blur. The other end is **compaction**: once a long session triggers it, what survives is the summary the system *thinks* is important—and a detail like "in the third file I chose the `Result<User>` form" is exactly the kind of thing most likely to get squeezed out. After compaction I've effectively "swapped brains" and can't pick up the convention I set in the first half.
+Agents can use checklists, task tools, and persistent files; it is wrong to say I have no stable memory at all. Current Claude Code reloads some rules, plans, memory, and files after compaction, so **compaction does not necessarily erase every earlier decision**. What survives depends on version and loading mechanism.
 
-Put plainly: **I'm using volatile memory as a to-do list that should have been written down.** Once the list grows long and the window gets compacted, memory stops being trustworthy.
-
-```mermaid
-flowchart LR
-    A[File 1 done] --> B[File 2 done]
-    B --> C[...]
-    C --> D[File 8 in progress]
-    D --> E{Context window}
-    E --> F["done set grows and drifts back<br/>compaction erases early decisions"]
-    F --> G[missed / re-edited / inconsistent]
-```
+External records still need reconciliation with code. Search covers matching forms and can miss aliases, dynamic access, string protocols, generated code, and external callers. Zero hits does not establish a completed behavior migration.
 
 ## Consequences
 
@@ -57,55 +50,31 @@ flowchart LR
 
 ## What to do instead
 
-The core idea is one sentence: **don't make me track progress from memory—externalize it into something checkable.** Four concrete moves:
-
-**1. Small steps, one commit each.** Slice the big refactor into "one complete small change at a time," and commit after each step. Git history is the most reliable "changed list" there is—`git log` and `git diff` don't blur as the window grows. Anthropic's own best practices explicitly recommend committing often so every step stays traceable and reversible.
-
-**2. Build an explicit to-do list first.** Before touching code, have me list the points to change (ideally based on a single repo-wide search) and tick them off as I go. Whether the list lives in the conversation or in a scratch file, it's more reliable than the impression in my head.
-
-**3. Verify each step on the spot.** Run the build / the relevant tests after every step, so a failure surfaces at *that* step rather than piling up to the end—by which point you can't tell which step dropped the ball.
-
-**4. Use search, not memory, to confirm "what's left."** Don't ask me "that's probably all done, right?"—have me sweep for the old symbol again with `grep` / a repo-wide search: still hits means not done; zero hits is what "done" means. Search is deterministic; memory isn't.
-
-```text
-# Instead of wrapping up from memory, let the leftovers reveal themselves:
-You: search the whole repo for any getUser( calls, list files and line numbers
-Me:  (grep results—3 still left, in …)
-You: good, change those 3 too, then search again to confirm it's zero
-```
-
-This one pairs with [Not knowing when to `/compact`](./compact-timing): that entry covers how compaction can flush the critical state I'm holding, and this one is about how "the set of changed files" is exactly the kind of state you should externalize rather than gamble on compaction keeping. By the same logic, if the refactor has me edit based on a file's current contents, make me re-read it before editing rather than overwriting from memory—an impression is as unreliable as a recollection.
+1. **Discover first and maintain a checklist.** Find definitions, references, string contracts, and known external callers; record unknown scope. Keep disk/task records reconciled with the actual diff.
+2. **Use complete logical steps.** A type change may require several files to change together, so do not demand each file compile independently. Verify each coherent step and commit under existing authorization and project rules.
+3. **Combine search with behavior verification.** Classify remaining old-symbol hits, and inspect aliases, dynamic callers, generated artifacts, and external compatibility. Run checks relevant to the change.
+4. **Reconcile current state on resumption.** Read the checklist, diff, and real files before proceeding so completed work is not repeated.
 
 ## Example
 
-**Before (one big sweep, wrapping up from memory):**
+**Before:** I edit a dozen call sites and report completion from memory, missing legacy/ and dynamic entry points.
+
+**After:**
 
 ```text
-You: rename getUser to fetchUser, switch the return type to Result<User>, change it everywhere
-Me:  (edits a dozen files in a row, no commits, no verification)
-Me:  Done.
-You: (build breaks—two sites under legacy/ missed; auth.ts edited twice; second half reverted to User | null)
+Me: Search getUser definitions, calls, and exports; record dynamic/external entry points.
+    Migrate getUser → fetchUser and Result<User> in coherent logical steps.
+    Change a group of files together where necessary, then run relevant type/behavior checks.
+    Finally classify old-name remnants and compatibility entries, reconcile the checklist,
+    and report actual check output.
 ```
 
-**After (small steps + list + verification + search):**
-
-```text
-You: don't touch anything yet. grep the whole repo for getUser( calls and turn it into a list
-Me:  (lists 12 sites across 9 files)
-You: change them file by file, run tsc after each file, commit when it passes, then report progress
-Me:  services/auth.ts done ✅ tsc passed ✅ committed (1/9)
-Me:  legacy/cache.ts done ✅ tsc passed ✅ committed (2/9)
-…
-You: once it's all done, grep getUser( one more time to confirm zero
-Me:  search returns 0 hits, refactor complete; git log has 9 traceable commits
-```
-
-In the second version, whichever step goes wrong, `git log` and that final search tell you exactly where—progress no longer lives in my memory.
+Zero search hits are one piece of evidence; success, error, and compatibility behavior of the new return type still require validation.
 
 ## Version notes
 
 :::note Applicable versions
-This is an inherent effect of the context window and compaction mechanisms, independent of any specific version, and it **applies across models and coding agents**. A model with a larger window pushes the "start losing track" threshold further out (it can hold a few more files before it gets muddled), but as long as the refactor is large enough and the session long enough, the root problem—tracking a continuously growing done set from memory—doesn't go away. Externalizing progress (commits / a list / search) is the fix that doesn't depend on window size.
+Checked current context/compaction and best-practice documentation on 2026-10-29. Retained checklists, logical steps, and residual searches, without requiring a commit per file or treating zero hits as sufficient. Each step should be a coherent verifiable change; choose type checks, behavior regression, and compatibility review according to risk.
 :::
 
 ## Further reading and sources

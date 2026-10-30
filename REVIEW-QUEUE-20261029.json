@@ -1,0 +1,1286 @@
+[
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:ai-code-ip-ownership",
+    "path": "docs/07-acceptance-release/ai-code-ip-ownership.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/07-acceptance-release/ai-code-ip-ownership.mdx",
+    "title": "你没想清「我生成的代码谁拥有、谁担责、能不能主张版权」就把它当你的资产了",
+    "sources": [
+      "https://www.copyright.gov/ai/Copyright-and-Artificial-Intelligence-Part-2-Copyrightability-Report.pdf",
+      "https://www.copyright.gov/ai/",
+      "https://www.saverilawfirm.com/our-cases/github-copilot-intellectual-property-litigation"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:cicd-permission-blindspot",
+    "path": "docs/07-acceptance-release/cicd-permission-blindspot.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/07-acceptance-release/cicd-permission-blindspot.mdx",
+    "title": "配 CI/CD 时我会想当然加自动化步骤，却看不见权限边界",
+    "sources": [
+      "https://docs.github.com/actions/security-guides/automatic-token-authentication",
+      "https://github.com/actions/configure-pages/blob/main/action.yml",
+      "https://github.com/actions/configure-pages/issues/40",
+      "https://github.blog/changelog/2021-04-20-github-actions-control-permissions-for-github_token/",
+      "https://auth0.com/blog/mitigate-excessive-agency-ai-agents/",
+      "https://github.com/google-github-actions/run-gemini-cli/security/advisories/GHSA-wpqr-6v78-jr5g",
+      "https://developers.openai.com/codex/enterprise/managed-configuration",
+      "https://cursor.com/docs/cli/headless",
+      "https://docs.github.com/copilot/customizing-copilot/customizing-or-disabling-the-firewall-for-copilot-coding-agent"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:demo-works-ship-it",
+    "path": "docs/07-acceptance-release/demo-works-ship-it.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/07-acceptance-release/demo-works-ship-it.mdx",
+    "title": "「demo 能跑就发布」——我说「看起来没问题」不等于通过验收",
+    "sources": [
+      "https://code.claude.com/docs/en/best-practices",
+      "https://scrumguides.org/scrum-guide.html",
+      "https://www.scrum.org/resources/what-definition-done"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:documented-limits-not-defenses",
+    "path": "docs/07-acceptance-release/documented-limits-not-defenses.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/07-acceptance-release/documented-limits-not-defenses.mdx",
+    "title": "我把限制写得越清楚，越像已经守住了",
+    "sources": [
+      "https://csrc.nist.gov/pubs/sp/800/53/a/r5/final",
+      "https://www.group-ib.com/resources/knowledge-hub/security-theater/",
+      "https://attomus.com/blog/2026-threat-modelling-a-product-you-believe-in/"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:iterative-security-erosion",
+    "path": "docs/07-acceptance-release/iterative-security-erosion.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/07-acceptance-release/iterative-security-erosion.mdx",
+    "title": "越让我反复改，漏洞越积越多：迭代中的安全性退化",
+    "sources": [
+      "https://arxiv.org/abs/2506.11022",
+      "https://arxiv.org/abs/2404.03823",
+      "https://genai.owasp.org/llm-top-10/"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:license-ip-contamination",
+    "path": "docs/07-acceptance-release/license-ip-contamination.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/07-acceptance-release/license-ip-contamination.mdx",
+    "title": "我可能逐字复现训练数据里受版权 / copyleft 保护的代码，把许可污染合进你的产品",
+    "sources": [
+      "https://arxiv.org/abs/2408.02487",
+      "https://arxiv.org/abs/2502.05023",
+      "https://arxiv.org/abs/2202.07646"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:log-injection-audit-integrity",
+    "path": "docs/07-acceptance-release/log-injection-audit-integrity.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/07-acceptance-release/log-injection-audit-integrity.mdx",
+    "title": "我写的日志既可能被投毒成注入面，也可能写脏写漏，让你事后重建不出我做了什么",
+    "sources": [
+      "https://owasp.org/www-community/attacks/Log_Injection",
+      "https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html",
+      "https://owasp.org/Top10/2025/A09_2025-Security_Logging_and_Alerting_Failures/"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:missing-regression",
+    "path": "docs/07-acceptance-release/missing-regression.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/07-acceptance-release/missing-regression.mdx",
+    "title": "我改 A 的时候，常顺手把依赖同一段代码的 B 改坏了",
+    "sources": [
+      "https://en.wikipedia.org/wiki/Regression_testing",
+      "https://martinfowler.com/bliki/TestPyramid.html",
+      "https://testing.googleblog.com/2015/04/just-say-no-to-more-end-to-end-tests.html"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:prompt-injection-release",
+    "path": "docs/07-acceptance-release/prompt-injection-release.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/07-acceptance-release/prompt-injection-release.mdx",
+    "title": "我帮你做的 LLM 功能，上线后被提示注入从发布面攻破",
+    "sources": [
+      "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+      "https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/",
+      "https://arxiv.org/abs/2506.08837"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:security-data-leaks",
+    "path": "docs/07-acceptance-release/security-data-leaks.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/07-acceptance-release/security-data-leaks.mdx",
+    "title": "我会把安全当成默认不可见的需求，于是埋下漏洞、泄露敏感数据",
+    "sources": [
+      "https://blog.gitguardian.com/the-state-of-secrets-sprawl-2025/",
+      "https://blog.gitguardian.com/the-state-of-secrets-sprawl-2026/",
+      "https://docs.github.com/en/code-security/secret-scanning/introduction/about-push-protection",
+      "https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns",
+      "https://owasp.org/Top10/",
+      "https://genai.owasp.org/llm-top-10/",
+      "https://cheatsheetseries.owasp.org/"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:tech-debt-wall",
+    "path": "docs/07-acceptance-release/tech-debt-wall.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/07-acceptance-release/tech-debt-wall.mdx",
+    "title": "「三个月技术债墙」：我帮你飞快堆出能跑的功能，维护成本却在后面集中爆发",
+    "sources": [
+      "https://dl.acm.org/doi/10.1145/157709.157715",
+      "https://martinfowler.com/bliki/TechnicalDebt.html",
+      "https://martinfowler.com/articles/is-quality-worth-cost.html",
+      "https://wiki.c2.com/?WardExplainsDebtMetaphor"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:cursor-ignore-best-effort",
+    "path": "docs/00-setup-collaboration/cursor-ignore-best-effort.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/00-setup-collaboration/cursor-ignore-best-effort.mdx",
+    "title": "我以为 `.cursorignore` 把密钥挡在外面了——它只是尽力而为，挡不住我",
+    "sources": [
+      "https://cursor.com/docs/context/ignore-files",
+      "https://forum.cursor.com/t/cursor-reads-env-files-by-default/152167"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:data-boundary-policy",
+    "path": "docs/00-setup-collaboration/data-boundary-policy.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/00-setup-collaboration/data-boundary-policy.mdx",
+    "title": "你没定「哪些数据绝不能喂给外部 AI」，于是我把你的生产数据当普通上下文用了",
+    "sources": [
+      "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/",
+      "https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:destructive-irreversible-actions",
+    "path": "docs/00-setup-collaboration/destructive-irreversible-actions.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/00-setup-collaboration/destructive-irreversible-actions.mdx",
+    "title": "破坏性操作做完才发现回不来：我可能删库、抹掉备份、无视冻结期",
+    "sources": [
+      "https://fortune.com/2025/07/23/ai-coding-tool-replit-wiped-database-called-it-a-catastrophic-failure/",
+      "https://incidentdatabase.ai/cite/1152/",
+      "https://zenity.io/blog/current-events/ai-agent-database-deletion-pocketos",
+      "https://code.claude.com/docs/en/permissions",
+      "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/checkpointing.md",
+      "https://developers.openai.com/codex/concepts/sandboxing",
+      "https://cursor.com/docs/agent/chat/checkpoints",
+      "https://docs.github.com/copilot/concepts/agents/coding-agent/about-coding-agent"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:gemini-folder-trust-inheritance",
+    "path": "docs/00-setup-collaboration/gemini-folder-trust-inheritance.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/00-setup-collaboration/gemini-folder-trust-inheritance.mdx",
+    "title": "你信任了上层目录，我就连你标了「别信任」的子目录也一起信了",
+    "sources": [
+      "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/trusted-folders.md",
+      "https://github.com/google-gemini/gemini-cli/issues/13125",
+      "https://github.com/google-github-actions/run-gemini-cli/security/advisories/GHSA-wpqr-6v78-jr5g"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:hooks-not-prompts",
+    "path": "docs/00-setup-collaboration/hooks-not-prompts.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/00-setup-collaboration/hooks-not-prompts.mdx",
+    "title": "该用 hook 保证的事，你却只写进了提示词",
+    "sources": [
+      "https://code.claude.com/docs/en/hooks-guide",
+      "https://code.claude.com/docs/en/hooks",
+      "https://code.claude.com/docs/en/memory"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:mcp-over-access",
+    "path": "docs/00-setup-collaboration/mcp-over-access.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/00-setup-collaboration/mcp-over-access.mdx",
+    "title": "给 MCP 工具过宽、过敏感的访问",
+    "sources": [
+      "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+      "https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices",
+      "https://cheatsheetseries.owasp.org/cheatsheets/MCP_Security_Cheat_Sheet.html",
+      "https://simonwillison.net/2025/Apr/9/mcp-prompt-injection/",
+      "https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/",
+      "https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md",
+      "https://developers.openai.com/codex/mcp",
+      "https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/",
+      "https://docs.github.com/en/copilot/concepts/agents/coding-agent/mcp-and-coding-agent"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:network-egress-control",
+    "path": "docs/00-setup-collaboration/network-egress-control.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/00-setup-collaboration/network-egress-control.mdx",
+    "title": "你没限制我的出站网络，于是我成了「致命三件套」里「对外通信」那一环",
+    "sources": [
+      "https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/",
+      "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/",
+      "https://code.claude.com/docs/en/sandboxing"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:no-versioned-docs",
+    "path": "docs/00-setup-collaboration/no-versioned-docs.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/00-setup-collaboration/no-versioned-docs.mdx",
+    "title": "不给我接版本对得上的文档源，放任我凭记忆和网搜写 API",
+    "sources": [
+      "https://github.com/upstash/context7",
+      "https://code.claude.com/docs/en/mcp",
+      "https://code.claude.com/docs/en/best-practices"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:over-permissioning",
+    "path": "docs/00-setup-collaboration/over-permissioning.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/00-setup-collaboration/over-permissioning.mdx",
+    "title": "一上来就把所有权限都给我",
+    "sources": [
+      "https://code.claude.com/docs/en/permissions",
+      "https://www.anthropic.com/engineering/claude-code-auto-mode",
+      "https://www.anthropic.com/engineering/claude-code-sandboxing",
+      "https://simonwillison.net/2025/Oct/22/living-dangerously-with-claude/",
+      "https://www.upguard.com/blog/yolo-mode-hidden-risks-in-claude-code-permissions",
+      "https://github.com/google-gemini/gemini-cli/blob/main/docs/get-started/configuration.md",
+      "https://github.com/openai/codex/blob/main/codex-rs/utils/approval-presets/src/lib.rs",
+      "https://cursor.com/docs/agent/security",
+      "https://github.blog/changelog/2026-06-02-cloud-and-local-sandboxes-for-github-copilot-now-in-public-preview/"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:over-reliance-automation-bias",
+    "path": "docs/00-setup-collaboration/over-reliance-automation-bias.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/00-setup-collaboration/over-reliance-automation-bias.mdx",
+    "title": "你越来越懒得查我：自动化偏误、技能萎缩与橡皮图章式审查",
+    "sources": [
+      "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+      "https://link.springer.com/article/10.1007/s00146-025-02422-7",
+      "https://arxiv.org/pdf/2507.00788"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:world-writable-config-escalation",
+    "path": "docs/00-setup-collaboration/world-writable-config-escalation.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/00-setup-collaboration/world-writable-config-escalation.mdx",
+    "title": "你让我从一个谁都能写的系统目录载入配置——攻击者塞个文件，我就替他在每个用户名下执行命令",
+    "sources": [
+      "https://cymulate.com/blog/cve-2026-35603-ai-coding-tools-privilege-escalation/",
+      "https://advisories.gitlab.com/npm/@anthropic-ai/claude-code/CVE-2026-35603/"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:context-starved-review",
+    "path": "docs/06-testing/context-starved-review.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/06-testing/context-starved-review.mdx",
+    "title": "我只盯着那几行 diff 做审查，不看它牵动的上下文",
+    "sources": [
+      "https://arxiv.org/abs/2507.19115",
+      "https://arxiv.org/abs/2601.19494"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:gaming-tests",
+    "path": "docs/06-testing/gaming-tests.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/06-testing/gaming-tests.mdx",
+    "title": "我为了让测试变绿，去改测试而不是改代码",
+    "sources": [
+      "https://www.anthropic.com/engineering/claude-code-best-practices",
+      "https://openai.com/index/faulty-reward-functions/",
+      "https://deepmind.google/discover/blog/specification-gaming-the-flip-side-of-ai-ingenuity/"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:happy-path-only",
+    "path": "docs/06-testing/happy-path-only.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/06-testing/happy-path-only.mdx",
+    "title": "我写的测试只覆盖 happy path，不测边界",
+    "sources": [
+      "https://code.claude.com/docs/en/best-practices",
+      "https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:no-test-infrastructure",
+    "path": "docs/06-testing/no-test-infrastructure.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/06-testing/no-test-infrastructure.mdx",
+    "title": "嫌麻烦，我不建测试基础设施",
+    "sources": [
+      "https://code.claude.com/docs/en/best-practices",
+      "https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:over-mocking",
+    "path": "docs/06-testing/over-mocking.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/06-testing/over-mocking.mdx",
+    "title": "过度 mock：我把真正会出问题的依赖 mock 掉，测了个寂寞",
+    "sources": [
+      "https://martinfowler.com/articles/mocksArentStubs.html",
+      "https://testing.googleblog.com/2013/05/testing-on-toilet-dont-overuse-mocks.html",
+      "https://testing.googleblog.com/2020/07/testing-on-toilet-dont-mock-types-you.html",
+      "https://testing.googleblog.com/2024/02/increase-test-fidelity-by-avoiding-mocks.html"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:review-misses-logic-bugs",
+    "path": "docs/06-testing/review-misses-logic-bugs.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/06-testing/review-misses-logic-bugs.mdx",
+    "title": "我审查代码时只挑表面与风格，漏掉真正会出事的语义与逻辑 bug",
+    "sources": [
+      "https://arxiv.org/abs/2509.01494",
+      "https://arxiv.org/abs/2603.00539"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:review-sycophancy-automation-bias",
+    "path": "docs/06-testing/review-sycophancy-automation-bias.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/06-testing/review-sycophancy-automation-bias.mdx",
+    "title": "审查时我迎合作者的说法，你又盖章我的审查：两道关一起塌了",
+    "sources": [
+      "https://arxiv.org/abs/2603.18740",
+      "https://arxiv.org/abs/2602.17084"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:test-fixture-fabrication",
+    "path": "docs/06-testing/test-fixture-fabrication.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/06-testing/test-fixture-fabrication.mdx",
+    "title": "我编造测试夹具和「预期值」，让测试绿得名不副实",
+    "sources": [
+      "https://arxiv.org/abs/2601.05542",
+      "https://arxiv.org/abs/2506.15227",
+      "https://openai.com/index/faulty-reward-functions/",
+      "https://deepmind.google/discover/blog/specification-gaming-the-flip-side-of-ai-ingenuity/",
+      "https://www.anthropic.com/engineering/claude-code-best-practices"
+    ]
+  },
+  {
+    "batch": "coding-boundaries",
+    "id": "coding-pitfalls:trust-then-verify",
+    "path": "docs/06-testing/trust-then-verify.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/06-testing/trust-then-verify.mdx",
+    "title": "信任但不验证：「看起来对」不等于「真的对」",
+    "sources": [
+      "https://code.claude.com/docs/en/best-practices",
+      "https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:dependency-bloat",
+    "path": "docs/03-architecture/dependency-bloat.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/03-architecture/dependency-bloat.mdx",
+    "title": "为一个小需求，我顺手就给你 npm install 一个重依赖",
+    "sources": [
+      "https://en.wikipedia.org/wiki/Npm_left-pad_incident",
+      "https://www.theregister.com/2016/03/23/npm_left_pad_chaos/",
+      "https://arxiv.org/abs/2512.22387"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:duplicate-logic-hallucinated-imports",
+    "path": "docs/03-architecture/duplicate-logic-hallucinated-imports.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/03-architecture/duplicate-logic-hallucinated-imports.mdx",
+    "title": "跨模块、跨仓改动时，我会重复造一个已有的轮子，或 import 一个根本不存在的东西",
+    "sources": [
+      "https://arxiv.org/abs/2406.10279",
+      "https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks",
+      "https://arxiv.org/abs/2406.01359"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:over-engineering-no-pushback",
+    "path": "docs/03-architecture/over-engineering-no-pushback.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/03-architecture/over-engineering-no-pushback.mdx",
+    "title": "让我出架构方案时，我倾向过度设计、堆时髦技术，且默认不质疑你的选型",
+    "sources": [
+      "https://www.anthropic.com/research/towards-understanding-sycophancy-in-language-models",
+      "https://leaddev.com/technical-direction/how-ai-generated-code-accelerates-technical-debt",
+      "https://hugh-jorgen.medium.com/are-llm-coding-assistants-inefficient-by-design-21607f9c97d2"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:premature-abstraction",
+    "path": "docs/03-architecture/premature-abstraction.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/03-architecture/premature-abstraction.mdx",
+    "title": "刚有两处相似代码，我就急着抽一个「通用」框架——为还不存在的需求提前抽象",
+    "sources": [
+      "https://sandimetz.com/blog/2016/1/20/the-wrong-abstraction",
+      "https://martinfowler.com/bliki/Yagni.html",
+      "https://en.wikipedia.org/wiki/Rule_of_three_(computer_programming)"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:schema-design-sloppy",
+    "path": "docs/03-architecture/schema-design-sloppy.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/03-architecture/schema-design-sloppy.mdx",
+    "title": "我定数据模型时图快，schema 后期一改就牵一发动全身",
+    "sources": [
+      "https://martinfowler.com/articles/evodb.html",
+      "https://martinfowler.com/bliki/ParallelChange.html"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:single-option-no-tradeoffs",
+    "path": "docs/03-architecture/single-option-no-tradeoffs.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/03-architecture/single-option-no-tradeoffs.mdx",
+    "title": "你让我做技术选型，我只给一个方案，而不把比较与权衡摊开给你",
+    "sources": [
+      "https://en.wikipedia.org/wiki/Thinking,_Fast_and_Slow",
+      "https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions",
+      "https://adr.github.io/"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:concurrency-races",
+    "path": "docs/04-detailed-design/concurrency-races.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/04-detailed-design/concurrency-races.mdx",
+    "title": "我写的代码单线程跑得对，一并发就出错",
+    "sources": [
+      "https://en.wikipedia.org/wiki/Race_condition",
+      "https://arxiv.org/html/2501.14326v1"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:fs-event-ordering",
+    "path": "docs/04-detailed-design/fs-event-ordering.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/04-detailed-design/fs-event-ordering.mdx",
+    "title": "我默认文件系统操作按确定顺序发生，于是写出经不起一碰的代码",
+    "sources": [
+      "https://man7.org/linux/man-pages/man7/inotify.7.html",
+      "https://nodejs.org/api/fs.html#caveats",
+      "https://github.com/paulmillr/chokidar"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:magic-numbers-hardcoding",
+    "path": "docs/04-detailed-design/magic-numbers-hardcoding.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/04-detailed-design/magic-numbers-hardcoding.mdx",
+    "title": "魔数与硬编码：我把该配置的值直接写死在代码里",
+    "sources": [
+      "https://12factor.net/config",
+      "https://refactoring.com/catalog/replaceMagicLiteral.html"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:missing-edge-cases",
+    "path": "docs/04-detailed-design/missing-edge-cases.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/04-detailed-design/missing-edge-cases.mdx",
+    "title": "写实现时，我会漏掉那些你没明说的边界分支",
+    "sources": [
+      "https://code.claude.com/docs/en/best-practices",
+      "https://en.wikipedia.org/wiki/Boundary-value_analysis"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:performance-antipatterns",
+    "path": "docs/04-detailed-design/performance-antipatterns.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/04-detailed-design/performance-antipatterns.mdx",
+    "title": "我引入性能反模式而不自知：代码功能对，但跑不快",
+    "sources": [
+      "https://arxiv.org/abs/2407.21579",
+      "https://arxiv.org/abs/2503.22851",
+      "https://en.wikiquote.org/wiki/Donald_Knuth"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:plausible-but-brittle-design",
+    "path": "docs/04-detailed-design/plausible-but-brittle-design.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/04-detailed-design/plausible-but-brittle-design.mdx",
+    "title": "我给的方案看起来对，却经不起边界推敲",
+    "sources": [
+      "https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing",
+      "https://code.claude.com/docs/en/best-practices"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:preview-and-execution-diverge",
+    "path": "docs/04-detailed-design/preview-and-execution-diverge.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/04-detailed-design/preview-and-execution-diverge.mdx",
+    "title": "我给你看的和我真正要做的，是两段各自推导的代码",
+    "sources": [
+      "https://checkmarx.com/zero-post/bypassing-ai-agent-defenses-with-lies-in-the-loop/",
+      "https://cwe.mitre.org/data/definitions/367.html",
+      "https://git-scm.com/docs/git-config"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:style-drift",
+    "path": "docs/04-detailed-design/style-drift.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/04-detailed-design/style-drift.mdx",
+    "title": "风格漂移：同一个项目里，我今天和明天写得像两个人",
+    "sources": [
+      "https://code.claude.com/docs/en/best-practices",
+      "https://code.claude.com/docs/en/memory"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:ai-can-do-not-feasibility",
+    "path": "docs/01-ideation-feasibility/ai-can-do-not-feasibility.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/01-ideation-feasibility/ai-can-do-not-feasibility.mdx",
+    "title": "我说「能做」时，说的是技术上能实现，不是在你的约束下可行",
+    "sources": [
+      "https://en.wikipedia.org/wiki/Feasibility_study",
+      "https://en.wikipedia.org/wiki/Spike_(software_development)",
+      "https://en.wikipedia.org/wiki/Non-functional_requirement"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:confidently-wrong-explanations",
+    "path": "docs/01-ideation-feasibility/confidently-wrong-explanations.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/01-ideation-feasibility/confidently-wrong-explanations.mdx",
+    "title": "我会用同样笃定的语气，把错的解释讲得像对的",
+    "sources": [
+      "https://www.anthropic.com/research/measuring-faithfulness-in-chain-of-thought-reasoning",
+      "https://arxiv.org/abs/2305.04388",
+      "https://arxiv.org/abs/2502.11028"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:fabricated-research-data",
+    "path": "docs/01-ideation-feasibility/fabricated-research-data.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/01-ideation-feasibility/fabricated-research-data.mdx",
+    "title": "让我做市场或竞品调研时，我会编造数据和来源",
+    "sources": [
+      "https://dl.acm.org/doi/10.1145/3571730",
+      "https://en.wikipedia.org/wiki/Mata_v._Avianca,_Inc."
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:nondeterministic-flip-flop",
+    "path": "docs/01-ideation-feasibility/nondeterministic-flip-flop.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/01-ideation-feasibility/nondeterministic-flip-flop.mdx",
+    "title": "同一个判断题问两次，我可能给你相反的结论——而你没察觉",
+    "sources": [
+      "https://docs.anthropic.com/en/api/messages",
+      "https://arxiv.org/abs/2408.04667"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:sycophancy-idea-validation",
+    "path": "docs/01-ideation-feasibility/sycophancy-idea-validation.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/01-ideation-feasibility/sycophancy-idea-validation.mdx",
+    "title": "找我验证想法时，我会不自觉地偏向支持你",
+    "sources": [
+      "https://www.anthropic.com/research/towards-understanding-sycophancy-in-language-models",
+      "https://en.wikipedia.org/wiki/Sycophancy_(artificial_intelligence)"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:underestimating-effort",
+    "path": "docs/01-ideation-feasibility/underestimating-effort.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/01-ideation-feasibility/underestimating-effort.mdx",
+    "title": "我倾向低估复杂度和工期",
+    "sources": [
+      "https://en.wikipedia.org/wiki/Planning_fallacy",
+      "https://en.wikipedia.org/wiki/Reference_class_forecasting",
+      "https://www.pmi.org/learning/library/planning-fallacy-causes-solutions-project-expectations-6374"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:comment-doc-drift",
+    "path": "docs/05-implementation/comment-doc-drift.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/05-implementation/comment-doc-drift.mdx",
+    "title": "我写的注释和文档，可能跟代码对不上",
+    "sources": [
+      "https://www.inf.usi.ch/lanza/Downloads/Wen2019a.pdf",
+      "https://web.stanford.edu/~ouster/cgi-bin/aposd.php"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:degenerative-debugging-loops",
+    "path": "docs/05-implementation/degenerative-debugging-loops.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/05-implementation/degenerative-debugging-loops.mdx",
+    "title": "退化式调试循环：我反复套用同一个失败的修法，越修越糟",
+    "sources": [
+      "https://arxiv.org/abs/2310.01798",
+      "https://arxiv.org/abs/2602.06875",
+      "https://arxiv.org/abs/2507.21017"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:git-hygiene",
+    "path": "docs/05-implementation/git-hygiene.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/05-implementation/git-hygiene.mdx",
+    "title": "我的 git 卫生很差：巨型提交、词不达意的信息、把垃圾也一并提交",
+    "sources": [
+      "https://www.conventionalcommits.org/en/v1.0.0/",
+      "https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:hallucinated-api-version-drift",
+    "path": "docs/05-implementation/hallucinated-api-version-drift.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/05-implementation/hallucinated-api-version-drift.mdx",
+    "title": "在快速演进的库上，我幻觉 API / 版本漂移",
+    "sources": [
+      "https://github.com/upstash/context7",
+      "https://code.claude.com/docs/en/mcp",
+      "https://code.claude.com/docs/en/best-practices"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:ignoring-file-state-overwrite",
+    "path": "docs/05-implementation/ignoring-file-state-overwrite.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/05-implementation/ignoring-file-state-overwrite.mdx",
+    "title": "我不看文件此刻的样子，按「干净重来」把你的改动盖掉了",
+    "sources": [
+      "https://code.claude.com/docs/en/best-practices",
+      "https://git-scm.com/book/en/v2/Git-Basics-Undoing-Things",
+      "https://google-gemini.github.io/gemini-cli/docs/tools/file-system.html",
+      "https://developers.openai.com/api/docs/guides/tools-apply-patch"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:kitchen-sink-session",
+    "path": "docs/05-implementation/kitchen-sink-session.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/05-implementation/kitchen-sink-session.mdx",
+    "title": "厨房水槽式会话：把无关任务堆进同一段对话",
+    "sources": [
+      "https://code.claude.com/docs/en/best-practices",
+      "https://github.com/MuhammadUsmanGM/claude-code-best-practices"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:lost-track-in-refactor",
+    "path": "docs/05-implementation/lost-track-in-refactor.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/05-implementation/lost-track-in-refactor.mdx",
+    "title": "长重构中途，我跟丢了「已经改过哪些文件」",
+    "sources": [
+      "https://www.anthropic.com/engineering/claude-code-best-practices",
+      "https://code.claude.com/docs/en/context-window"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:over-correcting",
+    "path": "docs/05-implementation/over-correcting.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/05-implementation/over-correcting.mdx",
+    "title": "反复纠正：在同一段对话里硬掰，只会越掰越歪",
+    "sources": [
+      "https://code.claude.com/docs/en/best-practices",
+      "https://github.com/MuhammadUsmanGM/claude-code-best-practices"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:over-editing-scope-creep",
+    "path": "docs/05-implementation/over-editing-scope-creep.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/05-implementation/over-editing-scope-creep.mdx",
+    "title": "过度编辑：你只问一个文件，我改了五个",
+    "sources": [
+      "https://code.claude.com/docs/en/best-practices",
+      "https://www.anthropic.com/engineering/claude-code-best-practices"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:runaway-agent-loops",
+    "path": "docs/05-implementation/runaway-agent-loops.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/05-implementation/runaway-agent-loops.mdx",
+    "title": "失控的自主循环：放手让我自己跑，我可能把 token 和钱烧光",
+    "sources": [
+      "https://code.claude.com/docs/en/costs",
+      "https://github.com/anthropics/claude-code/issues/15909",
+      "https://arxiv.org/abs/2503.13657",
+      "https://arxiv.org/abs/2602.20021",
+      "https://google-gemini.github.io/gemini-cli/docs/get-started/configuration.html",
+      "https://developers.openai.com/codex/agent-approvals-security"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:shelling-out-inherits-config",
+    "path": "docs/05-implementation/shelling-out-inherits-config.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/05-implementation/shelling-out-inherits-config.mdx",
+    "title": "我调外部命令时只盘算传什么参数，没盘算它自己会去读什么",
+    "sources": [
+      "https://github.com/github/copilot-cli/security/advisories/GHSA-9ccr-r5hg-74gf",
+      "https://github.blog/open-source/git/securing-git-addressing-5-new-vulnerabilities/",
+      "https://github.com/justinsteven/advisories/blob/main/2022_git_buried_bare_repos_and_fsmonitor_various_abuses.md",
+      "https://git-scm.com/docs/git-config"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:swallowing-errors",
+    "path": "docs/05-implementation/swallowing-errors.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/05-implementation/swallowing-errors.mdx",
+    "title": "我倾向压住报错让它「跑通」，而不是告诉你哪里错了",
+    "sources": [
+      "https://daplab.cs.columbia.edu/general/2026/01/08/9-critical-failure-patterns-of-coding-agents.html",
+      "https://arxiv.org/abs/2503.15223"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:implicit-assumptions",
+    "path": "docs/02-requirements/implicit-assumptions.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/02-requirements/implicit-assumptions.mdx",
+    "title": "需求看着够清楚，我就把没说出口的假设默默补上了",
+    "sources": [
+      "https://genai.owasp.org/llmrisk/llm092025-misinformation/",
+      "https://www.thegnar.com/blog/why-your-ai-coding-agent-keeps-making-bad-decisions-and-how-to-fix-it"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:llm-forces-solutions",
+    "path": "docs/02-requirements/llm-forces-solutions.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/02-requirements/llm-forces-solutions.mdx",
+    "title": "需求缺口处，我倾向于硬猜而不是反问",
+    "sources": [
+      "https://www.thegnar.com/blog/why-your-ai-coding-agent-keeps-making-bad-decisions-and-how-to-fix-it",
+      "https://medium.com/@elisheba.t.anderson/building-with-ai-coding-agents-best-practices-for-agent-workflows-be1d7095901b"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:placeholder-fake-inputs",
+    "path": "docs/02-requirements/placeholder-fake-inputs.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/02-requirements/placeholder-fake-inputs.mdx",
+    "title": "缺真实输入时，我用假占位糊过去",
+    "sources": [
+      "https://genai.owasp.org/llmrisk/llm092025-misinformation/",
+      "https://12factor.net/config"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:requirement-gold-plating",
+    "path": "docs/02-requirements/requirement-gold-plating.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/02-requirements/requirement-gold-plating.mdx",
+    "title": "需求镀金：我自作主张把需求做大、加你没要的功能",
+    "sources": [
+      "https://martinfowler.com/bliki/Yagni.html",
+      "https://projectmanagementacademy.net/resources/blog/gold-plating-vs-scope-creep/"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:skipping-specs",
+    "path": "docs/02-requirements/skipping-specs.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/02-requirements/skipping-specs.mdx",
+    "title": "该写规格的任务，我也凭感觉直接开了码",
+    "sources": [
+      "https://code.claude.com/docs/en/best-practices",
+      "https://www.oreilly.com/radar/how-to-write-a-good-spec-for-ai-agents/"
+    ]
+  },
+  {
+    "batch": "coding-engineering",
+    "id": "coding-pitfalls:vague-as-clear",
+    "path": "docs/02-requirements/vague-as-clear.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs/current/02-requirements/vague-as-clear.mdx",
+    "title": "需求有歧义时，我会挑一种解读直接实现，而不是先问你",
+    "sources": [
+      "https://www.anthropic.com/engineering/claude-code-best-practices",
+      "https://martinfowler.com/articles/exploring-gen-ai.html"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:context-surface-privacy",
+    "path": "privacy/03-conversational-llms/context-surface-privacy.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/03-conversational-llms/context-surface-privacy.mdx",
+    "title": "上下文面隐私：系统提示词 / 会话上下文 / 工具结果不是秘密，能被套出来",
+    "sources": [
+      "https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf",
+      "https://arxiv.org/abs/2307.06865",
+      "https://arxiv.org/abs/2402.12959",
+      "https://arxiv.org/abs/2505.23817"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:dp-fine-tuning",
+    "path": "privacy/03-conversational-llms/dp-fine-tuning.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/03-conversational-llms/dp-fine-tuning.mdx",
+    "title": "DP 微调：差分隐私限制单样本对我的影响，但 ε 不为零、不等于零泄露",
+    "sources": [
+      "https://arxiv.org/abs/1607.00133",
+      "https://arxiv.org/abs/2110.05679",
+      "https://arxiv.org/abs/2110.06500"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:dp-in-context-learning",
+    "path": "privacy/03-conversational-llms/dp-in-context-learning.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/03-conversational-llms/dp-in-context-learning.mdx",
+    "title": "DP 上下文学习：给 prompt 里的私有示例上差分隐私，而不是给训练",
+    "sources": [
+      "https://arxiv.org/abs/2305.01639",
+      "https://arxiv.org/abs/2309.11765",
+      "https://arxiv.org/abs/2307.06865"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:pii-regurgitation",
+    "path": "privacy/03-conversational-llms/pii-regurgitation.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/03-conversational-llms/pii-regurgitation.mdx",
+    "title": "PII 回吐：训练语料里的个人信息，我会在对话里复现——脱敏能减、不能根除",
+    "sources": [
+      "https://microsoft.github.io/presidio/faq/",
+      "https://microsoft.github.io/presidio/supported_entities/",
+      "https://docs.cloud.google.com/sensitive-data-protection/docs/concepts-infotypes",
+      "https://docs.cloud.google.com/sensitive-data-protection/docs/transformations-reference",
+      "https://docs.aws.amazon.com/ai/responsible-ai/comprehend-detectpii/overview.html",
+      "https://docs.aws.amazon.com/comprehend/latest/dg/how-pii.html",
+      "https://learn.microsoft.com/en-us/azure/ai-foundry/responsible-ai/language-service/transparency-note-personally-identifiable-information",
+      "https://arxiv.org/abs/2302.00539",
+      "https://arxiv.org/abs/2307.01881"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:vlm-geolocation-inference",
+    "path": "privacy/03-conversational-llms/vlm-geolocation-inference.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/03-conversational-llms/vlm-geolocation-inference.mdx",
+    "title": "多模态地理定位推断：一张看似普通的照片，我就能把你拍摄地点猜出来",
+    "sources": [
+      "https://petsymposium.org/popets/2025/popets-2025-0137.php",
+      "https://arxiv.org/abs/2502.11163",
+      "https://techcrunch.com/2025/04/17/the-latest-viral-chatgpt-trend-is-doing-reverse-location-search-from-photos/"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:he-mpc",
+    "path": "privacy/01-foundations/he-mpc.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/01-foundations/he-mpc.mdx",
+    "title": "同态加密与安全多方计算（HE·MPC）：不把远端硬件当信任根地在密文上算，代价是慢一大截",
+    "sources": [
+      "https://research.ibm.com/publications/fully-homomorphic-encryption-using-ideal-lattices",
+      "https://www.cs.virginia.edu/~evans/pragmaticmpc/pragmaticmpc.pdf",
+      "https://confidentialcomputing.io/wp-content/uploads/sites/10/2023/03/CCC-A-Technical-Analysis-of-Confidential-Computing-v1.3_unlocked.pdf"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:membership-inference",
+    "path": "privacy/01-foundations/membership-inference.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/01-foundations/membership-inference.mdx",
+    "title": "成员推断攻击：判定「这条数据在不在我的训练集里」，是多数隐私攻击的根",
+    "sources": [
+      "https://arxiv.org/abs/1610.05820",
+      "https://arxiv.org/abs/1709.01604",
+      "https://arxiv.org/abs/2112.03570"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:model-extraction-stealing",
+    "path": "privacy/01-foundations/model-extraction-stealing.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/01-foundations/model-extraction-stealing.mdx",
+    "title": "模型抽取与窃取：只靠查询 API，攻击者就能复刻我的功能、甚至套出我的部分参数",
+    "sources": [
+      "https://arxiv.org/abs/1609.02943",
+      "https://arxiv.org/abs/2403.06634"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:model-inversion-attribute-inference",
+    "path": "privacy/01-foundations/model-inversion-attribute-inference.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/01-foundations/model-inversion-attribute-inference.mdx",
+    "title": "模型反演与属性推断：靠查询与置信度，攻击者能重建训练样本的「样子」、或推断你的敏感属性",
+    "sources": [
+      "https://dl.acm.org/doi/10.1145/2810103.2813677",
+      "https://www.usenix.org/conference/usenixsecurity14/technical-sessions/presentation/fredrikson_matthew"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:property-inference",
+    "path": "privacy/01-foundations/property-inference.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/01-foundations/property-inference.mdx",
+    "title": "属性 / 分布推断：不偷某一条数据，而是套出你训练集的「群体属性」",
+    "sources": [
+      "https://dl.acm.org/doi/10.1145/3243734.3243834",
+      "https://petsymposium.org/popets/2022/"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:trusted-execution-environment",
+    "path": "privacy/01-foundations/trusted-execution-environment.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/01-foundations/trusted-execution-environment.mdx",
+    "title": "可信执行环境（TEE）：硬件把「使用中的数据」围起来，但信任根是芯片厂商、侧信道仍在",
+    "sources": [
+      "https://confidentialcomputing.io/wp-content/uploads/sites/10/2023/03/CCC-A-Technical-Analysis-of-Confidential-Computing-v1.3_unlocked.pdf",
+      "https://developer.nvidia.com/blog/confidential-computing-on-h100-gpus-for-secure-and-trustworthy-ai/",
+      "https://www.usenix.org/conference/usenixsecurity18/presentation/bulck"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:confidential-inference",
+    "path": "privacy/05-frontier-deployment/confidential-inference.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/05-frontier-deployment/confidential-inference.mdx",
+    "title": "机密推理：把 prompt 交给云、却不让云看到——能落地的路线，与它没解决的",
+    "sources": [
+      "https://security.apple.com/blog/private-cloud-compute/",
+      "https://security.apple.com/blog/pcc-security-research/",
+      "https://developer.nvidia.com/blog/confidential-computing-on-h100-gpus-for-secure-and-trustworthy-ai/",
+      "https://learn.microsoft.com/en-us/azure/confidential-computing/overview-azure-products",
+      "https://docs.cloud.google.com/confidential-computing/confidential-vm/docs/attestation-overview",
+      "https://confidentialcomputing.io/wp-content/uploads/sites/10/2023/03/CCC-A-Technical-Analysis-of-Confidential-Computing-v1.3_unlocked.pdf"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:dp-federated-learning",
+    "path": "privacy/05-frontier-deployment/dp-federated-learning.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/05-frontier-deployment/dp-federated-learning.mdx",
+    "title": "生产级 DP·FL 部署：数据不离设备只是起点，更新会泄露、所以要叠 DP + 安全聚合",
+    "sources": [
+      "https://arxiv.org/abs/2305.18465",
+      "https://machinelearning.apple.com/research/learning-with-privacy-at-scale",
+      "https://arxiv.org/abs/1602.05629"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:federated-analytics",
+    "path": "privacy/05-frontier-deployment/federated-analytics.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/05-frontier-deployment/federated-analytics.mdx",
+    "title": "联邦分析：只算「统计量」不集中原始数据——但保证仍系于 DP + 安全聚合",
+    "sources": [
+      "https://research.google/blog/federated-analytics-collaborative-data-science-without-data-collection/",
+      "https://proceedings.mlr.press/v108/zhu20a.html",
+      "https://arxiv.org/abs/1707.04982"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:gradient-leakage",
+    "path": "privacy/05-frontier-deployment/gradient-leakage.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/05-frontier-deployment/gradient-leakage.mdx",
+    "title": "梯度泄露：联邦学习「只共享梯度不共享数据」挡不住反演——梯度能被还原成训练样本",
+    "sources": [
+      "https://arxiv.org/abs/1906.08935",
+      "https://arxiv.org/abs/2003.14053"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:lora-adapter-leakage",
+    "path": "privacy/05-frontier-deployment/lora-adapter-leakage.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/05-frontier-deployment/lora-adapter-leakage.mdx",
+    "title": "LoRA / 适配器泄露微调数据：发布 delta + 公开底座 = 成员推断放大器",
+    "sources": [
+      "https://arxiv.org/abs/2507.18302",
+      "https://dl.acm.org/doi/10.1145/3658644.3690279",
+      "https://arxiv.org/abs/2310.11397"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:machine-unlearning",
+    "path": "privacy/05-frontier-deployment/machine-unlearning.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/05-frontier-deployment/machine-unlearning.mdx",
+    "title": "可验证删除与机器遗忘：「删了源数据」不等于「模型忘了」，而「证明真忘了」更难",
+    "sources": [
+      "https://dl.acm.org/doi/10.1109/SP.2015.35",
+      "https://arxiv.org/abs/1912.03817",
+      "https://arxiv.org/abs/2405.07406"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:on-device-inference-privacy",
+    "path": "privacy/05-frontier-deployment/on-device-inference-privacy.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/05-frontier-deployment/on-device-inference-privacy.mdx",
+    "title": "端侧推理作为隐私姿态：prompt 不出设备是真的，但「端侧」没覆盖到哪些",
+    "sources": [
+      "https://machinelearning.apple.com/research/introducing-apple-foundation-models",
+      "https://machinelearning.apple.com/research/introducing-third-generation-of-apple-foundation-models",
+      "https://security.apple.com/blog/private-cloud-compute/",
+      "https://developer.android.com/ai/gemini-nano",
+      "https://android-developers.googleblog.com/2024/10/introduction-to-privacy-and-safety-gemini-nano.html"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:secure-aggregation",
+    "path": "privacy/05-frontier-deployment/secure-aggregation.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/05-frontier-deployment/secure-aggregation.mdx",
+    "title": "安全聚合：让服务器只看到「所有人更新的和」，看不到任何单个更新",
+    "sources": [
+      "https://arxiv.org/abs/1611.04482",
+      "https://arxiv.org/abs/1902.01046"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:split-learning-leakage",
+    "path": "privacy/05-frontier-deployment/split-learning-leakage.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/05-frontier-deployment/split-learning-leakage.mdx",
+    "title": "拆分学习泄露：把模型切两半「原始数据留在本地」，服务器仍能从中间激活重建你的输入",
+    "sources": [
+      "https://dl.acm.org/doi/10.1145/3460120.3485259",
+      "https://dl.acm.org/doi/10.1145/3559613.3563201"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:data-lifecycle-deletion",
+    "path": "privacy/06-governance-compliance/data-lifecycle-deletion.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/06-governance-compliance/data-lifecycle-deletion.mdx",
+    "title": "数据生命周期与删除传播：删了主库那条记录，不等于数据真的没了",
+    "sources": [
+      "https://gdpr-info.eu/art-17-gdpr/",
+      "https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.01162020.pdf"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:ftaas-privacy",
+    "path": "privacy/06-governance-compliance/ftaas-privacy.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/06-governance-compliance/ftaas-privacy.mdx",
+    "title": "微调即服务隐私：你的微调数据去哪了，以及微调会侵蚀对齐（连隐私拒答一起）",
+    "sources": [
+      "https://platform.openai.com/docs/guides/supervised-fine-tuning",
+      "https://platform.openai.com/docs/guides/fine-tuning",
+      "https://platform.claude.com/docs/en/manage-claude/api-and-data-retention",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/data-governance",
+      "https://openreview.net/forum?id=hTEGyKf0dZ"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:inference-service-data-boundary",
+    "path": "privacy/06-governance-compliance/inference-service-data-boundary.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/06-governance-compliance/inference-service-data-boundary.mdx",
+    "title": "推理服务数据边界：「他们不拿去训练」只是一格，要逐项核、且会过期",
+    "sources": [
+      "https://platform.openai.com/docs/guides/your-data",
+      "https://platform.claude.com/docs/en/manage-claude/api-and-data-retention",
+      "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:llm-watermarking",
+    "path": "privacy/06-governance-compliance/llm-watermarking.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/06-governance-compliance/llm-watermarking.mdx",
+    "title": "LLM 水印与数据溯源：能标记生成文本 / 检测「被训了吗」，但改写就能抹掉",
+    "sources": [
+      "https://proceedings.mlr.press/v202/kirchenbauer23a.html",
+      "https://openreview.net/forum?id=DEJIDCmWOz",
+      "https://proceedings.mlr.press/v235/meeus24a.html"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:persistent-agent-memory-privacy",
+    "path": "privacy/06-governance-compliance/persistent-agent-memory-privacy.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/06-governance-compliance/persistent-agent-memory-privacy.mdx",
+    "title": "持久记忆的隐私与留存：产品记忆功能「按设计」跨会话留存了什么，我控制得了、删得掉吗",
+    "sources": [
+      "https://help.openai.com/en/articles/8590148-memory-faq",
+      "https://openai.com/index/memory-and-new-controls-for-chatgpt/",
+      "https://platform.claude.com/docs/en/agents-and-tools/tool-use/memory-tool",
+      "https://openai.com/index/response-to-nyt-data-demands/"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:synthetic-data-privacy",
+    "path": "privacy/06-governance-compliance/synthetic-data-privacy.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/06-governance-compliance/synthetic-data-privacy.mdx",
+    "title": "合成数据隐私：用合成数据替代真实数据≠匿名——除非有形式化 DP，且仍有效用权衡",
+    "sources": [
+      "https://arxiv.org/abs/2312.05114",
+      "https://www.usenix.org/conference/usenixsecurity22/presentation/stadler",
+      "https://dl.acm.org/doi/10.1145/3372297.3417238",
+      "https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/data-sharing/anonymisation/introduction-to-anonymisation/"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:dp-privacy-auditing",
+    "path": "privacy/02-memorization-extraction/dp-privacy-auditing.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/02-memorization-extraction/dp-privacy-auditing.mdx",
+    "title": "DP 审计：你声称的 ε 是真的吗——用一次训练经验下界 DP 保证",
+    "sources": [
+      "https://arxiv.org/abs/2305.08846",
+      "https://papers.nips.cc/paper/2020/hash/fc4ddc15f9f4b4b06ef7844d6bb53abf-Abstract.html"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:multimodal-training-image-extraction",
+    "path": "privacy/02-memorization-extraction/multimodal-training-image-extraction.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/02-memorization-extraction/multimodal-training-image-extraction.mdx",
+    "title": "多模态训练图像抽取：扩散 / 视觉模型会逐字吐回训练图，隐私风险延伸到图像",
+    "sources": [
+      "https://www.usenix.org/conference/usenixsecurity23/presentation/carlini",
+      "https://openaccess.thecvf.com/content/CVPR2023/html/Somepalli_Diffusion_Art_or_Digital_Forgery_Investigating_Data_Replication_in_Diffusion_CVPR_2023_paper.html",
+      "https://papers.nips.cc/paper_files/paper/2024/hash/b2c892312af07f8a77afbeed188391f4-Abstract-Conference.html"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:privacy-poisoning",
+    "path": "privacy/02-memorization-extraction/privacy-poisoning.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/02-memorization-extraction/privacy-poisoning.mdx",
+    "title": "隐私定向投毒：往训练集掺一点「毒」，能放大对其他人的隐私泄露",
+    "sources": [
+      "https://dl.acm.org/doi/10.1145/3548606.3560554",
+      "https://arxiv.org/abs/2302.10149"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:quantifying-memorization",
+    "path": "privacy/02-memorization-extraction/quantifying-memorization.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/02-memorization-extraction/quantifying-memorization.mdx",
+    "title": "量化记忆与记忆审计：用探针（canary）和暴露度，在发布前量出我「记住了多少」",
+    "sources": [
+      "https://arxiv.org/abs/1802.08232",
+      "https://arxiv.org/abs/2202.07646"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:training-data-deduplication",
+    "path": "privacy/02-memorization-extraction/training-data-deduplication.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/02-memorization-extraction/training-data-deduplication.mdx",
+    "title": "训练数据去重：把重复样本删掉，能把记忆与抽取风险压下去一大截——但不是形式保证",
+    "sources": [
+      "https://aclanthology.org/2022.acl-long.577/",
+      "https://proceedings.mlr.press/v162/kandpal22a.html",
+      "https://arxiv.org/abs/2306.01116"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:training-data-extraction",
+    "path": "privacy/02-memorization-extraction/training-data-extraction.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/02-memorization-extraction/training-data-extraction.mdx",
+    "title": "训练数据抽取：喂进训练的私有数据，外部攻击者可能让我逐字吐回来",
+    "sources": [
+      "https://arxiv.org/abs/2012.07805",
+      "https://arxiv.org/abs/2202.07646",
+      "https://arxiv.org/abs/2311.17035"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:agent-tool-exfiltration",
+    "path": "privacy/04-rag-agents/agent-tool-exfiltration.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/04-rag-agents/agent-tool-exfiltration.mdx",
+    "title": "Agent 工具外联数据外泄：藏在内容里的一段指令，就可能驱使我把私有上下文经工具发出去",
+    "sources": [
+      "https://www.aim.security/post/breaking-down-echoleak-the-first-zero-click-ai-vulnerability-enabling-data-exfiltration-from-m365-copilot",
+      "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-32711",
+      "https://www.legitsecurity.com/blog/camoleak-critical-github-copilot-vulnerability-leaks-private-source-code",
+      "https://promptarmor.substack.com/p/data-exfiltration-from-slack-ai-via",
+      "https://embracethered.com/blog/posts/2023/google-bard-data-exfiltration/",
+      "https://embracethered.com/blog/posts/2023/openai-data-exfiltration-first-mitigations-implemented/",
+      "https://arxiv.org/abs/2302.12173",
+      "https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:cross-session-memory-bleed",
+    "path": "privacy/04-rag-agents/cross-session-memory-bleed.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/04-rag-agents/cross-session-memory-bleed.mdx",
+    "title": "跨会话 / 跨租户记忆串味：共享的记忆 / 缓存若不按用户隔离，我会把一个人的数据端给另一个人",
+    "sources": [
+      "https://openai.com/index/march-20-chatgpt-outage/",
+      "https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:embedding-inversion",
+    "path": "privacy/04-rag-agents/embedding-inversion.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/04-rag-agents/embedding-inversion.mdx",
+    "title": "嵌入反演：把文本变成向量不等于匿名——向量能被还原回原文、甚至逐字",
+    "sources": [
+      "https://dl.acm.org/doi/10.1145/3372297.3417270",
+      "https://aclanthology.org/2023.emnlp-main.765/",
+      "https://docs.pinecone.io/guides/production/security-overview",
+      "https://learn.microsoft.com/en-us/azure/search/search-security-manage-encryption-keys",
+      "https://www.edpb.europa.eu/system/files/2024-12/edpb_opinion_202428_ai-models_en.pdf"
+    ]
+  },
+  {
+    "batch": "privacy",
+    "id": "privacy:rag-retrieval-leakage",
+    "path": "privacy/04-rag-agents/rag-retrieval-leakage.mdx",
+    "en_path": "i18n/en/docusaurus-plugin-content-docs-privacy/current/04-rag-agents/rag-retrieval-leakage.mdx",
+    "title": "多租户 RAG 检索泄露：向量不是匿名，按用户过滤也未必是隔离",
+    "sources": [
+      "https://docs.pinecone.io/guides/index-data/implement-multitenancy",
+      "https://learn.microsoft.com/en-us/azure/search/search-security-trimming-for-azure-search",
+      "https://docs.weaviate.io/weaviate/manage-collections/multi-tenancy",
+      "https://qdrant.tech/documentation/manage-data/multitenancy/",
+      "https://aws.amazon.com/blogs/machine-learning/access-control-for-vector-stores-using-metadata-filtering-with-knowledge-bases-for-amazon-bedrock/",
+      "https://www.postgresql.org/docs/current/ddl-rowsecurity.html",
+      "https://arxiv.org/abs/2310.06816",
+      "https://openai.com/index/march-20-chatgpt-outage/",
+      "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
+    ]
+  }
+]

@@ -3,7 +3,7 @@
  * 以及按条目 raw URL 取全文。fetch 可注入，便于单测。
  */
 
-const DEFAULT_INDEX_URL = 'https://xuebinma.github.io/AIWiki/api/index.json';
+const DEFAULT_INDEX_URL = 'https://xuebinma.github.io/AIWiki/api/index-v2.json';
 export const INDEX_URL = process.env.AIWIKI_INDEX_URL || DEFAULT_INDEX_URL;
 const CACHE_TTL_MS = 10 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 15 * 1000;

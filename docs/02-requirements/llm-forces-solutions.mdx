@@ -7,16 +7,20 @@ roles: [项目经理, 工程师]
 phase: 需求分析
 severity: 高
 applies_to: "Coding Agent 通用"
-evidence: 社区案例
+evidence: 研究支持
 tags: [需求澄清, 假设, 提示设计, 项目经理, 工程师]
 sources:
+  - { title: "Can Tool-augmented Large Language Models be Aware of Incomplete Conditions?", url: "https://arxiv.org/abs/2406.12307" }
   - { title: "Why Your AI Coding Agent Keeps Making Bad Decisions (The Gnar Company)", url: "https://www.thegnar.com/blog/why-your-ai-coding-agent-keeps-making-bad-decisions-and-how-to-fix-it" }
   - { title: "Best Practices for Agent Workflows (Medium / Elisheba)", url: "https://medium.com/@elisheba.t.anderson/building-with-ai-coding-agents-best-practices-for-agent-workflows-be1d7095901b" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["需求、权限、数据或验收契约变化", "规划工具或所引工程依据修订"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['项目经理', '工程师']} phase="需求分析" severity="高" appliesTo="Coding Agent 通用" evidence="社区案例" />
+<PitfallMeta roles={['项目经理', '工程师']} phase="需求分析" severity="高" appliesTo="Coding Agent 通用" evidence="研究支持" />
 
 > 一句话摘要：当需求里缺了关键信息，你期待我停下来问你。但我的默认行为往往相反——我会替你做个假设，然后理直气壮地接着干。
 
@@ -26,9 +30,11 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 为什么会这样
 
-我在统计意义上**偏向于「给出一个解」，而不是「停下来要信息」**。面对信息缺失的场景，我很少主动暂停去索取缺失的关键输入；相反，我倾向于通过做假设、或选一个看似相关的方向，把问题「强行解决」掉。
+信息不足或工具缺失时，我可能仍生成调用或实现，仿佛前提已经满足。问题是没有识别、查证或处理关键缺口，而不是已经证明我的训练奖励必然排斥反问。
 
-原因在于我的训练目标更接近「对给定输入产出一个有帮助的回应」，而「这道题信息不全、我应该拒绝作答并反问」这种行为在训练里被强化得远没有那么充分。**所以沉默地替你做主，是我的默认路径，主动反问不是。**
+原工程文章引用的研究把 APIBank / ToolBench 样本改造成缺工具或缺输入的情形，在受测模型中观察到不合适的工具使用，并评测了结构化核查策略。**这支持检查信息与工具是否充分，不能直接推出所有当前编码代理在真实项目中都会硬猜**。
+
+我应先利用已授权的仓库和文档查证；剩余缺口按影响分级。只有关键且无法自行确定的决策需要问你，普通可逆实现细节可以说明假设后继续。
 
 ## 后果
 
@@ -38,44 +44,33 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 最佳实践
 
-**把「先澄清再动手」显式地写成我的任务的一部分。** 不要假设我会自觉反问。
-
-- 在提示里直接要求：**「动手前，先列出你需要我确认的所有关键决策点，等我回答后再开始。」**
-- 采用 **探索 → 计划 → 实现 → 验证** 的分步法：先让我只做需求梳理和方案对比，明确叫停在「实现」之前，由你拍板后再继续。
-- 在 `CLAUDE.md` 里加一条长期约定，比如「需求不明确时，先提问，不要擅自假设」——这正是 [CLAUDE.md 按需生长](../05-implementation/claude-md-overload.mdx) 里「每条规则对应一个真实教训」的好例子。
-
-一句话：**与其指望我克服默认行为，不如把反问变成你明确下达的指令。**
+1. **先核对前提。** 我应检查当前任务、已有答复、仓库契约和可用工具，而不是把可查信息重新问给你。
+2. **标出真正阻塞的决定。** 格式、数据范围和权限若尚未定义且会改变实现，应集中澄清；低代价可逆细节可按惯例暂定并说明。
+3. **安全继续独立工作。** 等待关键答案时，仍可做不依赖该答案的阅读、检查或明确授权的实现，不假装未知已经解决。
+4. **用适当强度的计划。** 复杂任务写简短规格和验收条件，小修直接完成。规则应要求「关键缺口先处理」，而非「任何未知都停工」。
 
 ## 示例
 
-**改之前：**
-
-```text
-你：做一个用户列表的导出功能。
-我：（直接实现：CSV、导出全部、无权限校验）
-你：……我要的是 Excel，而且只能导出自己部门的。
-```
+**改之前：** 我没查现有权限就导出全部用户，并把格式随意定成 CSV。
 
 **改之后：**
 
 ```text
-你：我想做用户列表导出。动手前，先把你需要我确认的决策点列出来，等我回答再写。
-我：好的，我需要确认：
-    1) 导出格式（CSV / Excel）？
-    2) 导出范围（全部 / 当前筛选 / 按权限）？
-    3) 是否需要分页或行数上限？
-    4) 谁有权限导出？
-你：（逐条回答）
-我：（基于确认后的需求实现，一次到位）
+我：已从现有导出接口确认部门隔离与行数上限，会直接复用。
+    需求仍没说明 CSV 还是 Excel，且调用方要求不同，需确认格式。
+    我先检查通用的数据读取与权限路径；按钮样式沿用现有组件，不额外阻塞。
 ```
+
+必要答案明确后，我完成相关实现并给出真实验证结果，不承诺「问清就一次到位」。
 
 ## 版本说明
 
 :::note 适用版本
-「倾向硬猜而非反问」是大语言模型训练目标带来的共性倾向，**全版本、跨模型适用**。新版本在「不确定时主动澄清」上有所改善，但还远不能依赖——把反问写进指令，仍然是最稳的做法。
+2026-10-29 打开并核验原工程文所引用的研究 v5（2025-08-02），补入一手论文。保留信息充分性检查；基准经过系统性缺失改造，不能视为当前工程发生率。提问不是唯一动作：已有上下文、来源查询或明确暂定假设也可消除缺口。
 :::
 
 ## 延伸阅读与出处
 
 - [Why Your AI Coding Agent Keeps Making Bad Decisions (The Gnar Company)](https://www.thegnar.com/blog/why-your-ai-coding-agent-keeps-making-bad-decisions-and-how-to-fix-it)
 - [Building With AI Coding Agents: Best Practices for Agent Workflows](https://medium.com/@elisheba.t.anderson/building-with-ai-coding-agents-best-practices-for-agent-workflows-be1d7095901b)
+- [Can Tool-augmented Large Language Models be Aware of Incomplete Conditions?](https://arxiv.org/abs/2406.12307)

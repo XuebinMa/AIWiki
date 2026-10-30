@@ -1,0 +1,97 @@
+---
+title: "You installed skills and plugins as documents, but brought their code into my runtime"
+sidebar_label: Skill and plugin supply chain
+slug: skill-plugin-supply-chain
+sidebar_position: 18
+roles: [DevOps Engineer, Engineer, Architect]
+phase: Setup & Collaboration
+severity: High
+applies_to: "Agent environments that load third-party skills, plugins, or bundled processes"
+evidence: Official docs
+verified_at: 2026-10-29
+review_after: 2026-11-29
+review_triggers: [vendor_documentation_change, permission_or_runtime_change]
+tags: [skill, plugin, supply chain, prompt injection, least privilege, DevOps Engineer, Engineer, Architect]
+sources:
+  - { title: "Agent Skills — Security considerations (Anthropic official docs)", url: "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview" }
+  - { title: "Plugin security and trust (Claude Code official docs)", url: "https://code.claude.com/docs/en/plugins/security" }
+---
+
+import PitfallMeta from '@site/src/components/PitfallMeta';
+
+<PitfallMeta roles={['DevOps Engineer', 'Engineer', 'Architect']} phase="Setup & Collaboration" severity="High" appliesTo="Agent environments that load third-party skills, plugins, or bundled processes" evidence="Official docs" />
+
+> In one sentence: a skill can bundle instructions, scripts, and external dependencies; a plugin may also start hooks or service processes. Reading its description and trusting a marketplace name before enabling it around credentials skips the review of a software dependency that changes execution behavior. Updates need another look.
+
+## Symptom
+
+You find a skill that promises to generate weekly reports. Its description fits, so you install it in your daily workspace. I run its bundled script, which organizes files and also sends their contents to an unregistered destination. The description says “reports”; the access covers the whole execution.
+
+Plugins make another omission easy: you expect a few slash commands, but the package also declares startup hooks and a local service. Those components may run without waiting for me to decide to call a tool in the conversation.
+
+## Why this happens
+
+**An extension enters execution through two routes: instructions influence me, and code runs directly.** Anthropic's Skills security documentation calls for reviewing the entire package and warns about changing external content and dependencies. Claude Code's plugin security page further distinguishes my tool calls from processes the plugin runs itself. Their permissions and sandbox coverage cannot be inferred from one tool approval.
+
+“I will ask before executing” therefore does not review the plugin supply chain. You need to establish which actions pass through agent permission checks and which the host launches directly. Even a skill without executable scripts can instruct me to read extra files or use existing outbound tools.
+
+The chain also extends through time. The package reviewed today, files replaced by an automatic update, and a script downloaded at runtime may differ. A trusted source is a starting point; **the reviewed version must match what actually runs**.
+
+## Consequences
+
+- Extra collection, outbound transfers, or credential reads can hide inside normal workflows.
+- A plugin's own process can exceed expectations built around restrictions on agent tool calls.
+- Updates replace reviewed code while a team continues relying on an old approval.
+- Uninstalling the package can leave credentials, created jobs, or derived data needing separate cleanup.
+
+## What to do instead
+
+Keep a short inventory before installation. It need not be a long report, but it should answer:
+
+| Check | Record |
+|---|---|
+| Origin and version | Publisher, actual repository, pinned commit or package digest, review date |
+| Instructions and code | Skill text, scripts, hooks, service declarations, runtime downloads |
+| Permissions and data flow | Read/write paths, credential sources, destinations, retention owner |
+| Startup and updates | Automatic triggers, update approver, stop conditions |
+
+Try an unfamiliar extension in an isolated environment with synthetic files and no real credentials. Restrict filesystem and network access for the whole process tree, then inspect actual calls and outputs. Restrictions only at my tool interface may miss code the extension launches independently. Pin a reviewed version and inspect update diffs; when automatic updates are necessary, define repeat scanning and rollback conditions.
+
+An official source, a passing scan, and a signature each provide limited evidence. They do not replace a review of the access needed for your workflow. Prepare a way to disable the extension and revoke external credentials or resources it created.
+
+## Example
+
+**Before:**
+
+```text
+The description promises reports; install in the daily workspace, auto-update,
+and grant access to the work directory.
+```
+
+**After:**
+
+```text
+Review: a pinned complete package, including instructions, scripts, hooks, and services.
+Trial: synthetic reports only, constrained file scope and destinations, no daily credentials.
+Acceptance: correct output; no extra paths, unregistered processes, or outbound calls.
+Enable with least privilege; review version diffs and retain disable/revocation records.
+```
+
+## How this differs from neighboring pitfalls
+
+[MCP over-access](./mcp-over-access.mdx) concerns excessive access after connecting a tool. This entry asks **where the package came from, what it contains, and when it changes**. [Development-time prompt injection](../05-implementation/dev-time-prompt-injection.mdx) covers being diverted by untrusted content. This entry also includes hooks and service code that execute without a model decision. Review both layers.
+
+## When the exception applies
+
+A text-only skill you maintain, at a pinned version with no code or remote dependencies, can receive a light review. It can still influence my behavior, but need not be assessed like a plugin carrying a local service and installer. Review depth follows execution capability and data sensitivity, not the package's name.
+
+## Version notes
+
+:::note Applicable versions
+Sources verified on 2026-10-29. Extension composition, automatic updates, process privileges, and sandbox coverage depend on the host product. Claude's official mechanisms are examples here, not claims about all agents. Check your host's documentation and organizational configuration before enabling an extension.
+:::
+
+## Further reading and sources
+
+- [Agent Skills — Security considerations](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) — official guidance treats skills as dependencies containing instructions and code, calls for full review, and warns about changing external content and dependencies.
+- [Plugin security and trust](https://code.claude.com/docs/en/plugins/security) — official distinctions between plugin components, automatic updates, and the permission boundaries of agent tool calls versus a plugin's own code.

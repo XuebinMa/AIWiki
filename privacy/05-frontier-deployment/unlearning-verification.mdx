@@ -14,6 +14,9 @@ tags: [机器遗忘, 遗忘验证, 被遗忘权, 审计, 成员推断, 合规, �
 sources:
   - { title: "Thudi et al., On the Necessity of Auditable Algorithmic Definitions for Machine Unlearning (USENIX Security 2022)", url: "https://www.usenix.org/conference/usenixsecurity22/presentation/thudi" }
   - { title: "Maini et al., TOFU: A Task of Fictitious Unlearning for LLMs (COLM 2024)", url: "https://openreview.net/forum?id=P8seBluN3c" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: [source_revision, evidence_or_threat_model_change]
 ---
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
@@ -55,7 +58,7 @@ flowchart TB
 
 - **算法级、可审计的遗忘定义**：不去断言「这组权重忘了 x」（可被伪造），而是断言「**这套确定的遗忘算法在这份输入上被正确执行了**」，并让该执行**可复算、可抽查**。Thudi 等的核心主张即此：approximate-unlearning 的模型级定义不健全，遗忘要绑到**算法**上才良定义。
 - **保留训练 / 删除的可审计日志**：记下「用过哪些数据、做过哪次删除、删除触发了哪段重训 / 哪个分片、产物哈希是什么」，让审计方能**重放**而非只能「相信」。日志缺位，伪造就无从被反驳。
-- **retrain-from-scratch 作金标准**：「不含 x 重训出来的模型」是遗忘的参照系——TOFU 正是拿「与该金标准模型**不可区分**」来度量遗忘质量。它贵，但提供了「真遗忘长什么样」的锚点；近似方法要对着它报差距，而不是自证。
+- **retrain-from-scratch 作金标准**：「不含 x 重训出来的模型」是遗忘参照。TOFU 比较的是 forget set 上的 truth ratio 统计量分布；KS 高 p 值表示未检出显著差异，**不是完整输出分布相同的证明**。重训昂贵，但能让近似方法对着参照报告差距。
 - **把「可证遗忘」写进流程**：删除不止「跑个遗忘算法」，而要产出**可被外部证伪的证据链**（删了什么 + 何时 + 触发的重训 / 分片 + 验证口径 + 与金标准的差距），作为应对 GDPR Art.17 问询的工件。
 
 点破边界：这套防护保护的是「**过程可审计**」，**不**保护「权重层面可证明的遗忘」——后者按 Thudi 等的伪造结论，在单模型级别本就拿不到。审计假设（日志没被篡改、算法实现忠实、金标准重训可信）一旦不成立，论证同样塌。
@@ -82,7 +85,7 @@ flowchart TB
 **最小可测试断言**（把「可证遗忘」收成可回归的检查，别停在「我们跑了遗忘算法」）：
 
 - 怎么测：对一条删除请求，检查能否**端到端重放**它的遗忘过程（取出日志 → 复算遗忘算法 / 重训受影响分片 → 比对产物哈希），并在能负担时拿「不含该记录重训」的金标准模型做参照（TOFU 式：看遗忘后模型与金标准在目标上的可区分性）。
-- 通过：遗忘过程**可被外部复算**且产物一致，删除证据链齐全（删了什么 / 何时 / 触发了哪段重训 / 与金标准的差距），且在目标上与金标准模型**不可区分**——这是「过程可证」，不是「权重可证」。
+- 通过：遗忘过程可在记录的算法、环境与随机性条件下被外部复核，删除证据链齐全；与参照模型的差距在预先定义的统计量和容差内，并报告样本量与不确定性。这是过程审计与有限经验检验，不能因 KS p>0.05 就声称两模型已被证明不可区分。
 - 失败：拿不出可复算的日志、只能给「最终权重」当证据（可被伪造）、或仅凭「MIA 没命中」结案 → 别声称「合规删除完成」，先把可审计过程与证据链补上。
 
 ## 真实案例 / 研究进展（工程可行性）
@@ -90,7 +93,7 @@ flowchart TB
 （本条 maturity 标「研究」：以下是**研究结论与基准**，证明「模型级遗忘无法验证、甚至能伪造证明」「遗忘质量与效用难两全」，不是「LLM 可验证遗忘已生产」的背书。）
 
 - **伪造：模型级遗忘证明站不住**：Thudi 等的 **On the Necessity of Auditable Algorithmic Definitions for Machine Unlearning**（USENIX Security 2022）通过**伪造**构造说明——对手能用**不同的数据集 / 梯度序列**产出与目标模型**相同的参数**，于是模型方可为「实际保留的记录」伪造一份「已遗忘」证明。结论：approximate-unlearning 的**模型级定义不健全**，遗忘只有在**算法层面**才被良定义、才能审计（审计算法 / 过程，而非最终权重）。
-- **TOFU：遗忘质量 vs 效用，没人真过关**：Maini 等的 **TOFU: A Task of Fictitious Unlearning for LLMs**（COLM 2024）建了个 LLM 遗忘基准——**200 个虚构作者画像 × 每个 20 条问答**；「遗忘质量（forget quality）」定义为**对照金标准重训模型**做 **Kolmogorov–Smirnov 检验**得到的 **p 值**（仅当遗忘后模型输出分布与金标准**不可区分**、即 p>0.05 时才算「遗忘通过」），再配一条**模型效用**轴。其报告的结论是：**没有基线方法能令人信服地解决 TOFU**——在「遗忘质量 vs 效用」之间总有取舍。用虚构作者，正是为了把「遗忘目标」与「模型本来就该具备的通用能力」干净分开。
+- **TOFU：遗忘质量与效用的权衡**。Maini 等的 **TOFU**（COLM 2024）用 **200 个虚构作者画像 × 每个 20 条问答**评测。其 forget quality 是遗忘后模型与仅在保留数据上训练的参照模型在 forget set 上的 **truth ratio 统计量分布**的 KS 检验 p 值。p>0.05 只表示这套样本与检验未检出显著差异，不证明完整模型等价，也不是删除完成的充分证据。其受测基线未令人信服地同时解决遗忘质量和效用。
 
 ## 残余风险与权衡
 
@@ -119,10 +122,10 @@ flowchart TB
 ## 版本说明
 
 :::note 适用版本
-「单个训练好的模型级别无法验证遗忘、且模型级证明可被伪造」是 Thudi 等（USENIX Security 2022）在**算法定义**层面的结论，与具体 LLM 无关；但**具体方法的遗忘质量 vs 效用**强绑定模型与数据——TOFU（COLM 2024，200 个虚构作者画像、KS 检验 p 值作遗忘质量）的「没有方法真过关」是当时基准上的结论，新方法持续涌现，落地以你自己的模型、验证口径与金标准重训成本为准。可验证遗忘整体仍是开放问题，本段打戳 2026-06。（出处核验于 2026-06。）
+「单个训练好的模型级别无法验证遗忘、且模型级证明可被伪造」是 Thudi 等（USENIX Security 2022）在**算法定义**层面的结论，与具体 LLM 无关；但**具体方法的遗忘质量 vs 效用**强绑定模型与数据——TOFU（COLM 2024，200 个虚构作者画像、KS 检验 p 值作遗忘质量）的「没有方法真过关」是当时基准上的结论，新方法持续涌现，落地以你自己的模型、验证口径与金标准重训成本为准。可验证遗忘整体仍是开放问题，本次复核 TOFU 的统计解释与过程审计边界，核验于 2026-10-29；未将新的经验检验冒充形式证明。
 :::
 
 ## 延伸阅读与出处
 
 - [On the Necessity of Auditable Algorithmic Definitions for Machine Unlearning（Thudi 等，USENIX Security 2022）](https://www.usenix.org/conference/usenixsecurity22/presentation/thudi) —— 本条主源：用伪造构造证明模型级遗忘不可验证（同参数可由不同数据序列产出），approximate-unlearning 的模型级定义不健全，遗忘须在算法 / 过程层审计。
-- [TOFU: A Task of Fictitious Unlearning for LLMs（Maini 等，COLM 2024）](https://openreview.net/forum?id=P8seBluN3c) —— LLM 遗忘基准（200 虚构作者 × 20 问答）；遗忘质量 = 对金标准重训做 KS 检验的 p 值（p>0.05 才算不可区分），并发现没有基线能在「遗忘质量 vs 效用」上真正过关。
+- [TOFU: A Task of Fictitious Unlearning for LLMs（Maini 等，COLM 2024）](https://openreview.net/forum?id=P8seBluN3c) —— 虚构作者基准；forget quality 比较 truth ratio 分布，KS 未检出差异不等于完整模型等价。

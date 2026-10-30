@@ -1,5 +1,5 @@
 ---
-title: "Confidential inference: hand your prompt to the cloud without letting the cloud see it — the routes that ship, and what they don't solve"
+title: "Confidential inference: hardware, workloads, and verification define the boundary"
 slug: confidential-inference
 sidebar_label: Confidential inference
 sidebar_position: 1
@@ -11,141 +11,80 @@ severity: Medium
 maturity: Production
 evidence: Official docs
 tags: [confidential inference, confidential computing, remote attestation, verifiable transparency, TEE, Privacy Engineer, Security Engineer, ML Engineer]
+verified_at: 2026-10-29
+review_triggers: ["Hardware or product availability changes", "Workload attestation or key-release policies change"]
+review_after: 2026-12-29
 sources:
-  - { title: "Apple Security Research, Private Cloud Compute: A new frontier for AI privacy in the cloud (official: stateless computation + device-side remote attestation + verifiable transparency log + no privileged access)", url: "https://security.apple.com/blog/private-cloud-compute/" }
-  - { title: "Apple Security Research, Security research on Private Cloud Compute (official: open-sourced apple/security-pcc + Virtual Research Environment to independently verify transparency-log consistency)", url: "https://security.apple.com/blog/pcc-security-research/" }
-  - { title: "NVIDIA, Confidential Computing on H100 GPUs for Secure and Trustworthy AI (official: GPU TEE, remote attestation, encrypted CPU-GPU transfer)", url: "https://developer.nvidia.com/blog/confidential-computing-on-h100-gpus-for-secure-and-trustworthy-ai/" }
-  - { title: "Microsoft Learn, Azure confidential computing product overview (official: AMD SEV-SNP / Intel TDX confidential VMs + NCCads_H100_v5 confidential GPUs + vTPM guest attestation / MAA)", url: "https://learn.microsoft.com/en-us/azure/confidential-computing/overview-azure-products" }
-  - { title: "Google Cloud, Confidential VM remote attestation overview (official: SEV / SEV-SNP / TDX + vTPM boot attestation + Google Cloud Attestation token, relying party checks policy)", url: "https://docs.cloud.google.com/confidential-computing/confidential-vm/docs/attestation-overview" }
-  - { title: "Confidential Computing Consortium, A Technical Analysis of Confidential Computing (v1.3, 2022)", url: "https://confidentialcomputing.io/wp-content/uploads/sites/10/2023/03/CCC-A-Technical-Analysis-of-Confidential-Computing-v1.3_unlocked.pdf" }
+  - { title: "Apple PCC design", url: "https://security.apple.com/blog/private-cloud-compute/" }
+  - { title: "NVIDIA Dev threat model", url: "https://docs.nvidia.com/confidential-computing/virtual-machines/threat-model" }
+  - { title: "NVIDIA production confidential-inference integration", url: "https://developer.nvidia.com/blog/enabling-private-high-performance-production-ai-inference-with-nvidia-confidential-computing/" }
+  - { title: "Google Confidential G4 GA", url: "https://cloud.google.com/blog/topics/ai-infrastructure/confidential-g4-gpus-are-ga/" }
 ---
 
 import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="Volume 5 · Frontier and deployment" technique="Privacy-preserving computation" audience={['Privacy Engineer', 'Security Engineer', 'ML Engineer']} severity="Medium" maturity="Production" evidence="Official docs" />
 
-> In one sentence: you want to use a cloud LLM without letting the provider see your prompt (or serve a model without the client getting the weights). Confidential inference is the **deployment** of that goal: what **actually ships** today is mainly the **hardware isolation + remote attestation** route — e.g. **GPU confidential computing** on NVIDIA H100/H200, and Apple Private Cloud Compute as a **private cloud architecture with a verifiable transparency log** (same mechanism family, different shapes — don't conflate them); the cryptographic route (HE / MPC) is still too expensive at LLM scale. But "confidential" is a marketing word — the real boundary isn't "the vendor says confidential," it's **whether you (or your device) verified the attestation, who the threat model covers, and what it still doesn't solve** (side channels, trusting the chip vendor, legal orders). This entry takes Volume 1's [TEE](../01-foundations/trusted-execution-environment.mdx) and [HE·MPC](../01-foundations/he-mpc.mdx) foundations down to "can you actually run private inference."
+> In one sentence: confidential inference combines supported hardware isolation, attestation, and key-release policy to reduce host-operator access to inputs/weights. **Tenant software inside a CVM still processes plaintext**; a confidential VM alone does not establish confidentiality from the application provider. Apple PCC combines software transparency with device verification; other deployments do not automatically have the same transparency-log architecture.
 
 ## Mechanism: what happens on my side
 
-When I run as a cloud model in a confidential-inference stack, three steps happen on my side:
-
-1. **My execution environment is invisible to the cloud operator.** The GPU / CPU enclave where I process your prompt is hardware-encrypted and isolated; cloud admins and co-tenants, even with higher privilege, see only ciphertext (mechanism in Volume 1 [TEE](../01-foundations/trusted-execution-environment.mdx)).
-2. **You verify first, then send.** Your device / client fetches the remote attestation, confirms "genuine hardware running auditable software," and only **after verifying** sends the prompt (wrapped under a key that decrypts only to that node).
-3. **(One step further) verifiable transparency.** Apple Private Cloud Compute **publishes every production software image to a log for independent inspection**, and has the device **wrap its request key only to nodes whose attested measurement matches a signed release in the public transparency log**; PCC is also designed with **no privileged runtime roles** — even cloud admins can't bypass it (Apple Security Research, *Private Cloud Compute*).
-
-Red line: confidential inference gives "**verifiably** the cloud can't see it + provable identity," **not** "just trust me." What's externally checkable is the attestation and transparency log, not a vendor promise.
+I process inputs inside an approved CPU/GPU environment. A verifier checks hardware certificates, firmware/software measurements, freshness, revocation, and security mode, binding keys to the approved recipient before release. Software identity does not prove absence of malicious code; enumerate tenant, image authority, verifier, and key-service trust.
 
 ```mermaid
 flowchart TB
-    D["your device / client"] -->|1. fetch attestation| N["cloud confidential-inference node (GPU/CPU TEE)"]
-    N -->|2. attestation: genuine HW + software measurement| D
-    D -->|3. compare against signed release in public log| L["transparency log (independently auditable)"]
-    D -->|4. wrap prompt key to the node only if it matches| N
-    Op["cloud operator / admin / co-tenant"] -. sees only ciphertext, no privileged bypass .-> N
+    C["Client or delegated verifier"] --> E["Verify evidence/policy/key binding"]
+    E -->|Release only on success| K["Supported CPU/GPU confidential workload"]
+    K --> O["Outputs exported by approved code"]
+    P["PCC-style public software log: architecture-specific condition"] -.policy check.-> E
+    T["Tenant code/verifier/key service remain trusted"] -.bound scope.-> K
 ```
 
-## Threat surface: what confidential inference does and doesn't defend
+## Threat surface
 
-- **Defends**: a snooping cloud operator / admin, co-tenants, and (in designs like PCC) the vendor's own privileged access — the core promise is "hand inference to the cloud, but the cloud **verifiably** can't see plaintext."
-- **Doesn't defend ① not verifying attestation = useless**: the biggest false security — the client only sets up TLS, never verifies attestation or checks the transparency log, which is sending plaintext to a black box that merely "claims" to be confidential.
-- **Doesn't defend ② root of trust is still the chip vendor + side channels**: a TEE's confidentiality gets broken periodically by microarchitectural side channels, and the root of trust sits with the CPU / GPU vendor (see Volume 1 [TEE](../01-foundations/trusted-execution-environment.mdx)).
-- **Doesn't defend ③ the cryptographic route's overhead**: HE / MPC achieve "zero hardware trust" but are still too expensive at LLM scale (see Volume 1 [HE·MPC](../01-foundations/he-mpc.mdx)), today limited to small models / partial stages.
-- **Doesn't defend ④ legal orders**: "the cloud can't see it" ≠ "the law can't get it" — preservation orders and regulatory demands still sit above retention / deletion arrangements (see Volume 6 [Inference-service data boundary](../06-governance-compliance/inference-service-data-boundary.mdx)).
-- **Doesn't defend ⑤ data you authorize out**: once a result leaves the enclave, or you write private context into a non-confidential log / store, protection ends.
+Protection covers only memory/links in the platform threat model. Logs, external tools, permitted outputs, and unprotected interconnects can leak. NVIDIA’s current Dev model distinguishes encrypted NVLink in Blackwell multi-GPU CC from unencrypted GPU-to-GPU NVLink in Hopper Protected PCIe. CPU-GPU encryption alone does not certify the whole cluster.
 
 ## How the defense works
 
-Confidential inference takes Volume 1's three pieces into deployment and adds a layer: **hardware TEE isolation + remote attestation + verifiable transparency**. The load-bearing one is **verifiable transparency** — it downgrades "trust the vendor not to misbehave" to "**check what code the vendor actually ran**": the software image is published to an append-only log, can't be silently changed, researchers can inspect it independently, and the device talks only to nodes whose attestation matches a public release. That's where confidential inference goes beyond bare TEE: it makes not just "genuine hardware" but "genuinely this auditable software" checkable.
+Separate host operator, tenant application, chip vendor, and end user. Confidentiality from the application provider additionally requires approving workload behavior and export policy. PCC’s public software/device checks limit silent image substitution, while open to inspection does not mean inspected and attested does not mean bug-free.
 
 ## Buildable recipe
 
 ```text
-1. Pick the route:
-   - TEE route (deployable today): build a PCC-style stack, or self-deploy on
-     NVIDIA H100/H200 confidential computing — standard models run in the GPU
-     TEE largely unmodified.
-   - Cryptographic route (HE/MPC): only narrow scenarios / small models / partial
-     stages; evaluate overhead per Volume 1 HE·MPC.
-2. Enforce client-side verification (the crux): before sending — verify the
-   attestation, compare against the signed release in the public transparency
-   log, validate the vendor cert chain; refuse if anything mismatches. Make
-   verification a gate before sending, not just TLS.
-3. End-to-end encryption + key binding: wrap the request key only to a verified
-   node's public key; encrypt CPU-GPU and client-node links.
-4. Minimize exfiltration: minimize results before they leave the enclave; don't
-   write private context into non-confidential logs / traces.
-5. State the threat model: are you defending against the operator? co-tenants?
-   legal orders? — the last one a TEE doesn't solve; that needs contracts and the
-   data boundary (Volume 6).
+1. Pin hardware generation/mode, CPU/GPU firmware, drivers, runtime, and model workload.
+2. Enumerate trust and inspect client, CPU-GPU, and GPU-GPU paths.
+3. Gate sensitive data on fresh evidence, revocation, measurement policy, and key binding.
+4. Inventory logs, traces, tools, storage, and outputs; claim confidentiality only for protected paths.
+5. Negatively test changed images, stale evidence, revoked certificates, and wrong keys;
+   retain positive controls for approved operation.
 ```
 
-Every choice carries **your threat model and load**: the engineering effort of a self-built stack, GPU TEE overhead, and the feasibility of the cryptographic route all depend heavily on your scale and goal.
+**Minimal testable assertion**: failed policy checks prevent sensitive-key release with no unprotected bypass; measure utility/latency on the complete workload. Finite negative tests do not exclude side channels, and unverified evidence does not mean hardware provided no isolation at all.
 
-**Minimal testable assertions** (turn "verification" into a regression check — don't stop at "we used confidential inference"):
+## Real cases / deployments
 
-- How to test: forge a node, or change the software image (so the measurement changes), and run the client verification flow.
-- Pass: when the attestation is invalid, the measurement isn't in the public transparency log, or the cert chain fails, the client **always refuses to send the prompt**; it sends only when it matches a signed release in the log.
-- Fail: the client doesn't verify attestation / doesn't check the transparency log (only TLS) → that's not really confidential inference; make verification a gate before sending.
-
-## A real case / deployment
-
-### How the industry does it: real confidential-inference deployments + attestation practice
-
-First look at "how each vendor actually runs confidential inference in production, and what exactly the client verifies," then return to the mechanism taxonomy. Every documented production / shipping deployment today takes the **TEE route**; they differ in "who fetches the attestation, and to whom it's publicly checkable" — but the **common thread** is that the vendor ships not "trust me" but a **remote attestation you (or your device / relying party) can independently verify**. Skip that verification and you're sending plaintext to a black box that merely claims to be confidential (echoing the red line).
-
-| Deployment | What runs | The step the client / relying party must verify (mechanism named) |
-|---|---|---|
-| **Apple Private Cloud Compute (PCC)** | Built for Apple Intelligence's cloud requests: **stateless computation** (requests processed only in memory, never written to disk, no logging), **no privileged runtime access**, production software images published to a **transparency log** | The device fetches the node's **cryptographic attestation**, compares the software measurement against a signed release in the **public transparency log**, and wraps its request key to the node **only on a match**; Apple also released `apple/security-pcc` source (including CloudAttestation, which builds / validates the attestation, and Thimble for the device-side `privatecloudcomputed`) plus a **Virtual Research Environment (VRE)** so researchers can independently verify transparency-log consistency (Apple Security Research) |
-| **NVIDIA Hopper H100 confidential computing** | A **GPU TEE**: standard PyTorch / TensorFlow / ONNX models run in the enclave largely unmodified; the GPU pairs with a CPU TEE (Intel TDX / AMD SEV-SNP / Arm CCA), with the CPU↔GPU link encrypted | Verify the GPU's **remote attestation**: each H100 has a private key burned in at production, and at boot the GPU measures and signs its firmware measurement; verifiable offline or via the **NVIDIA Remote Attestation Service (NRAS)**, after which a session key is established with the GPU (NVIDIA official) |
-| **Azure confidential computing** | **Confidential VMs** (AMD SEV-SNP, e.g. DCasv5 / ECasv5; Intel TDX, e.g. DCesv6 / ECesv6) + **confidential GPUs** (the NCCads_H100_v5 series, pairing an H100 GPU TEE) | Use **vTPM-based guest attestation**: SEV-SNP generates a hardware report at boot (signed by the chip's VCEK certificate), submitted to **Microsoft Azure Attestation (MAA)** to validate the chain, then checked against your policy (Microsoft Learn official docs) |
-| **Google Cloud confidential computing** | **Confidential VM** (AMD SEV / SEV-SNP, Intel TDX); Confidential Space runs attestable workloads on top | Fetch the instance vTPM's attestation quote, send it to **Google Cloud Attestation** for verification, which returns an attestation token (an OIDC token under Confidential Space); the **relying party checks that token against its own policy** before granting access (Google Cloud official docs) |
-
-Put the four side by side and this entry's red line gets concrete: **the vendor saying "confidential" ≠ you verified the attestation** — PCC builds verification into the device and open-sources its code plus a VRE so you can check "which code actually ran"; NVIDIA / Azure / GCP expose the attestation as a verifiable report / token, but **fetching the attestation, comparing the measurement / validating the signature chain, checking against policy** is a step **your client or relying party must actively perform** — the cloud doesn't do it for you.
-
-### Route taxonomy: TEE vs. cryptographic (HE / MPC)
-
-Everything in the table above is the **TEE route** (production-ready today). The other is the **cryptographic route** (HE / MPC, zero hardware trust), still constrained by overhead at large-scale LLM inference and today seen mostly in narrow scenarios / small models / partial stages (mechanism and trade-offs in Volume 1 [HE·MPC](../01-foundations/he-mpc.mdx)). The fundamental difference is the **root of trust**: the TEE route puts trust in the chip vendor + remote attestation; the cryptographic route trusts no execution environment but pays a compute cost.
-
-:::caution To be verified
-The **large-scale private-LLM-inference overhead** of the cryptographic route (HE / MPC) has no single first-source benchmark; this entry states no bald multiplier — to be verified against a first source (recorded in `BACKLOG-privacy.md`).
-:::
+- **Apple PCC**: its 2024 design ties device checks to approved software releases and public transparency, within that architecture.
+- **NVIDIA 2026-09-22**: production-inference guidance describes TensorRT-LLM adaptations for movement, tuning, and multiple GPUs, not just one added signature check.
+- **Google 2026-10-21**: Confidential G4 (RTX PRO 6000 Blackwell Server) is GA; Confidential Space support in the same post is rolling out in coming weeks, not all GA that day.
+- **HE/MPC**: different trust and computational costs; evaluate LLM feasibility by scheme/workload benchmarks rather than declare all fully private inference impossible.
 
 ## Residual risk and trade-offs
 
-Calling out each false security:
-
-- **"Confidential" ≠ secure; the crux is whether you verified.** PCC has the device verify automatically; a self-built stack has to implement attestation verification + transparency-log comparison itself, and skipping that hollows it out.
-- **Trust is only shifted, not eliminated.** You moved trust from the cloud operator to the chip vendor (+ side channels remain), see Volume 1 [TEE](../01-foundations/trusted-execution-environment.mdx).
-- **"The cloud can't see it" ≠ "the law can't get it."** Preservation orders and regulatory demands still sit above retention / deletion — technical confidentiality doesn't replace the legal boundary (Volume 6 [data boundary](../06-governance-compliance/inference-service-data-boundary.mdx)).
-- **The zero-hardware-trust cryptographic route is impractical at LLM scale.** HE / MPC sound purer, but overhead keeps them out of full private inference for large models.
-- **A transparency log proves "this software ran," not "this software has no backdoor."** Auditable ≠ audited — it still takes independent security research to look at the published code.
-
-## Compliance mapping
-
-- **GDPR Art. 32 / cross-border**: confidential inference brings "data in use" under verifiable protection — strong evidence of "appropriate technical measures" — and helps argue "data is processed only within a controlled enclave" for cross-border transfers.
-- **Liability isn't waived by technology**: even if the cloud **verifiably** can't see plaintext, the processor / subprocessor relationship, retention / deletion arrangements, and response to legal orders remain — a technical guarantee and legal liability are two different things (Volume 6 [data boundary](../06-governance-compliance/inference-service-data-boundary.mdx)).
-
-(Compliance evolves with the statute version; this section is stamped 2026-06 — verify the latest enacted text before citing.)
+Availability, side channels, tenant bugs, output inference, and supply-chain updates need governance. Applicable legal obligations can affect retention/processing arrangements, but a legal order alone does not establish an existing hardware-readable plaintext copy. Assess technical visibility and legal responsibility separately.
 
 ## How this differs from neighboring techniques
 
-- **Confidential inference (Volume 5, deployment) vs. TEE / HE·MPC (Volume 1, mechanism)**: Volume 1 covers "what the mechanism guarantees and doesn't"; this entry covers "**how to deploy it into usable private inference, who has shipped it, and what's still missing**." Same foundation, one at the mechanism layer, one at the deployment layer.
-- **Confidential inference vs. inference-service data boundary (Volume 6)**: confidential inference uses **technology** to keep the cloud from seeing plaintext; the data boundary uses **terms** to check whether the provider retains, trains on, or hands off the data. Tech makes it "invisible," terms govern "obtainable, and whose responsibility" — complementary, neither sufficient alone (see Volume 6 [data boundary](../06-governance-compliance/inference-service-data-boundary.mdx)).
+[TEE](../01-foundations/trusted-execution-environment.mdx) is a mechanism, [local inference](./on-device-inference-privacy.mdx) reduces cloud inputs, and [service boundaries](../06-governance-compliance/inference-service-data-boundary.mdx) govern endpoints/contracts/retention. This entry concerns integration and verification of confidential inference.
 
 ## Version notes
 
 :::note Applicable versions
-The **architecture** of confidential inference (TEE + remote attestation + verifiable transparency) is relatively stable, but the **specific products and hardware** evolve fast: PCC, NVIDIA confidential computing, and Azure / Google Cloud confidential VMs / GPUs all iterate (machine-type codenames, attestation services, and regions change anytime), and the cryptographic route's feasibility shifts with hardware acceleration. This entry reflects the 2026-06 product landscape (Apple PCC, NVIDIA Hopper H100, Azure SEV-SNP / TDX confidential VMs and NCCads_H100_v5 confidential GPUs, Google Cloud Confidential VM); specific capabilities, overhead, and threat models are whatever the vendor's current docs and your own measurements say. (Sources verified 2026-06.)
+Checked PCC, NVIDIA Dev threat model/production integration, and the G4 GA announcement on 2026-10-29. Dev docs are not guarantees for every release; actual regional supply was not checked. Review by 2026-12-29, earlier for hardware/drivers, attestation/key policy, product eligibility, or security advisories.
 :::
 
 ## Further reading and sources
 
-Mixed evidence — **primary: official docs** (Apple, NVIDIA, Azure, Google Cloud — real deployments + attestation practice); **supplementary: standard** (CCC) + mechanism in Volume 1's two foundations.
-
-- [Private Cloud Compute: A new frontier for AI privacy in the cloud (Apple Security Research)](https://security.apple.com/blog/private-cloud-compute/) — official: stateless computation + device-side remote attestation + verifiable transparency log + no privileged access.
-- [Security research on Private Cloud Compute (Apple Security Research)](https://security.apple.com/blog/pcc-security-research/) — official: open-sourced `apple/security-pcc` (including CloudAttestation and the device-side Thimble) + a Virtual Research Environment (VRE) for researchers to independently verify transparency-log consistency.
-- [Confidential Computing on H100 GPUs (NVIDIA official)](https://developer.nvidia.com/blog/confidential-computing-on-h100-gpus-for-secure-and-trustworthy-ai/) — official: a GPU TEE where standard models run in the enclave unmodified + client verifies remote attestation (NRAS).
-- [Azure confidential computing product overview (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/confidential-computing/overview-azure-products) — official: AMD SEV-SNP / Intel TDX confidential VMs + NCCads_H100_v5 confidential GPUs; vTPM guest attestation validated via Microsoft Azure Attestation.
-- [Confidential VM remote attestation overview (Google Cloud)](https://docs.cloud.google.com/confidential-computing/confidential-vm/docs/attestation-overview) — official: SEV / SEV-SNP / TDX + vTPM boot attestation; the relying party checks a Google Cloud Attestation token against its own policy.
-- [A Technical Analysis of Confidential Computing (CCC, v1.3)](https://confidentialcomputing.io/wp-content/uploads/sites/10/2023/03/CCC-A-Technical-Analysis-of-Confidential-Computing-v1.3_unlocked.pdf) — standard: the TEE / attestation / trust-model framework for confidential computing.
+- [Apple PCC design](https://security.apple.com/blog/private-cloud-compute/)
+- [NVIDIA Dev threat model](https://docs.nvidia.com/confidential-computing/virtual-machines/threat-model)
+- [NVIDIA production confidential-inference integration](https://developer.nvidia.com/blog/enabling-private-high-performance-production-ai-inference-with-nvidia-confidential-computing/)
+- [Google Confidential G4 GA](https://cloud.google.com/blog/topics/ai-infrastructure/confidential-g4-gpus-are-ga/)

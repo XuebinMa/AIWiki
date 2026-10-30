@@ -11,7 +11,11 @@ severity: Medium
 maturity: Experimental
 evidence: Research
 tags: [differential privacy, DP-SGD, fine-tuning, privacy budget, membership inference, Privacy Engineer, ML Engineer]
+verified_at: 2026-10-29
+review_triggers: ["Adjacency unit or sampling changes", "Clipping accounting or release composition changes"]
+review_after: 2027-04-29
 sources:
+  - { title: "NIST SP 800-226 final (2025)", url: "https://csrc.nist.gov/pubs/sp/800/226/final" }
   - { title: "Abadi et al., Deep Learning with Differential Privacy (ACM CCS 2016; arXiv 1607.00133)", url: "https://arxiv.org/abs/1607.00133" }
   - { title: "Li et al., Large Language Models Can Be Strong Differentially Private Learners (ICLR 2022; arXiv 2110.05679)", url: "https://arxiv.org/abs/2110.05679" }
   - { title: "Yu et al., Differentially Private Fine-tuning of Language Models (ICLR 2022; arXiv 2110.06500)", url: "https://arxiv.org/abs/2110.06500" }
@@ -55,9 +59,9 @@ But it has clear boundaries, and does **not** defend these:
 
 ## How the defense works
 
-The definition of (ε, δ)-differential privacy: for two **neighboring** datasets (differing by exactly one sample), the ratio of probabilities that the mechanism's output lands in any set is bounded by e^ε, plus a δ slack term. Intuitively — whether your record is in or out barely changes the distribution of "what I turn into," so an attacker can hardly infer your presence from me.
+The definition of (ε, δ)-DP: for every pair D, D′ adjacent under the declared relation and every event S, `Pr[M(D) ∈ S] ≤ exp(ε) Pr[M(D′) ∈ S] + δ`. Adjacency defines the protected unit. This bounds distributional differences; it does not guarantee a sensitive text can never appear.
 
-In engineering it's two pieces: **clip + noise** give the per-step privacy loss, and **privacy accounting** sums many steps into a total budget — Abadi et al.'s moments accountant makes that summation far tighter than naive composition, so you add much less noise at the same privacy and keep more utility (Abadi et al., 2016). The point: **ε is a budget not a switch, δ is the small probability you allow it to "fail," and the privacy unit decides who is protected** — without spelling out all three, the letters "DP" mean nothing.
+In engineering it's two pieces: **clip + noise** give the per-step privacy loss, and **privacy accounting** sums many steps into a total budget — Abadi et al.'s moments accountant makes that summation far tighter than naive composition, so you add much less noise at the same privacy and keep more utility (Abadi et al., 2016). The point: **ε is a budget not a switch, δ is an additive slack in the event-probability bound, not a general probability of complete privacy failure and the privacy unit decides who is protected** — without spelling out all three, the letters "DP" mean nothing.
 
 ## Buildable recipe
 
@@ -85,7 +89,7 @@ Every number (C, σ, the final ε) must carry **your own data and model conditio
 **Minimal testable assertions** (turn the recipe above into a regression check):
 
 - How to test: re-derive the reported (ε, δ) with an independent privacy accountant (moments / RDP), and check the privacy unit matches the clipping / noise configuration.
-- Pass: (ε, δ) re-derives to the same order of magnitude; clipping norm / noise multiplier / sampling rate / steps are all present; the privacy unit matches what you mean to protect (sample / user).
+- Pass: an independent accountant agrees within a documented numerical tolerance using the same adjacency, privacy unit, sampling, clipping, noise, and step count; include private tuning, evaluation, and other releases in composition. Clipping / noise plus one MIA test are not a complete proof, and DP fine-tuning does not erase private data already leaked by pretraining.
 - Fail: can't re-derive / no accounting / mismatched privacy unit → it isn't formal DP; don't label it "DP added."
 
 ## A real case / engineering feasibility
@@ -129,7 +133,7 @@ The differences are mainly in **how per-sample gradients are computed, which acc
 ## Version notes
 
 :::note Applicable versions
-The DP-SGD skeleton (clip + noise + moments accounting) has held since 2016 (Abadi, CCS); it's a **model-agnostic** training mechanism, common across vendors. Getting it to "acceptable utility" on large-language-model fine-tuning is roughly a 2022 advance (Li / Yu, ICLR 2022), engineered further via libraries like Opacus. **Note**: the ε values and utility conclusions in the papers are tied to specific models, data, and tasks and don't transfer directly; deployment must re-derive them with your own privacy accounting. (Sources verified 2026-06.)
+Rechecked Li / Yu (2022) and the final NIST SP 800-226 (2025-03-06) on 2026-10-29, correcting the interpretation of δ and the “same order” accounting criterion. Paper utility results depend on models / tasks; library defaults and all production settings were not individually retested. Review by 2027-04-29, earlier for changes to accountants, sampling, privacy units, clipping, or release composition.
 :::
 
 ## Further reading and sources
@@ -137,3 +141,5 @@ The DP-SGD skeleton (clip + noise + moments accounting) has held since 2016 (Aba
 - [Deep Learning with Differential Privacy (Abadi et al., ACM CCS 2016; arXiv 1607.00133)](https://arxiv.org/abs/1607.00133) — the DP-SGD foundation: per-sample clipping + Gaussian noise give (ε, δ)-DP, with the moments accountant tightening the multi-step budget.
 - [Large Language Models Can Be Strong Differentially Private Learners (Li et al., ICLR 2022; arXiv 2110.05679)](https://arxiv.org/abs/2110.05679) — a large pretrained model + DP-suited hyperparameters + ghost clipping beats the best prior DP models at the same privacy budget.
 - [Differentially Private Fine-tuning of Language Models (Yu et al., ICLR 2022; arXiv 2110.06500)](https://arxiv.org/abs/2110.06500) — parameter-efficient fine-tuning (LoRA / adapters) combined with DP improves utility / privacy / compute at once.
+
+- [NIST SP 800-226 final (2025)](https://csrc.nist.gov/pubs/sp/800/226/final)

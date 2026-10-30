@@ -11,7 +11,11 @@ severity: High
 maturity: Research
 evidence: Research
 tags: [data poisoning, privacy amplification, membership inference, training-data extraction, data supply chain, Privacy Engineer, Security Engineer, ML Engineer]
+verified_at: 2026-10-29
+review_triggers: ["Corpus snapshots domains or poisoning privileges change", "Target knowledge or DP privacy units change"]
+review_after: 2027-04-29
 sources:
+  - { title: "Truth Serum author full text", url: "https://arxiv.org/html/2204.00032" }
   - { title: "Tramèr et al., Truth Serum: Poisoning Machine Learning Models to Reveal Their Secrets (ACM CCS 2022)", url: "https://dl.acm.org/doi/10.1145/3548606.3560554" }
   - { title: "Carlini et al., Poisoning Web-Scale Training Datasets is Practical (IEEE S&P 2024; arXiv 2302.10149)", url: "https://arxiv.org/abs/2302.10149" }
 ---
@@ -20,7 +24,7 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 <PrivacyMeta era="Volume 2 · Memorization and extraction" technique="Memorization & training-data extraction" audience={['Privacy Engineer', 'Security Engineer', 'ML Engineer']} severity="High" maturity="Research" evidence="Research" />
 
-> In one sentence: poisoning isn't only an integrity ("corrupt the model") problem — it's a privacy problem too. Tramèr et al. (*Truth Serum*, CCS 2022) show that inserting a **tiny amount (< 0.1%)** of carefully crafted poison into the training set raises the success of membership inference / attribute inference / data extraction against **other, non-poisoned** records by **1–2 orders of magnitude**; their signature number — inserting just **8 poison samples into CIFAR-10 (0.03% of the set)** lifts membership-inference **true-positive rate (TPR) from 7% to 59% (at 0.1% FPR)** for a targeted image. And web-scale poisoning is **cheap and practical**: by buying expired domains for a "split-view," you can **control ~0.01% of LAION-400M for ~\$60** (Carlini et al., S&P 2024 — this is a **feasibility** result, not itself a privacy-leak result). Conclusion first: **training-data integrity = a privacy problem; an untrusted data source is a privacy amplifier.**
+> In one sentence: poisoning isn't only an integrity ("corrupt the model") problem — it's a privacy problem too. Tramèr et al. (*Truth Serum*, CCS 2022) show that inserting a **tiny amount (< 0.1%)** of carefully crafted poison into the training set raises the success of membership inference / attribute inference / data extraction against **other, non-poisoned** records by **1–2 orders of magnitude**; their signature number — inserting just **8 poison samples into CIFAR-10 (about 0.03% of that sampled training set)** lifts membership-inference **true-positive rate (TPR) from 7% to 59% (at 0.1% FPR)** for a targeted image. And web-scale poisoning is **cheap and practical**: by buying expired domains for a "split-view," you can **control ~0.01% of LAION-400M for ~\$60** (Carlini et al., S&P 2024 — this is a **feasibility** result, not itself a privacy-leak result). Conclusion first: **training-data integrity = a privacy problem; an untrusted data source is a privacy amplifier.**
 
 ## Mechanism: what happens on my side
 
@@ -45,11 +49,11 @@ flowchart TB
 Attacker model (matching Truth Serum's setup):
 
 - **The attacker can inject a small number of samples into the training data** — this is the core premise. In a web-scale crawling scenario, this amounts to "getting attacker-controlled content into the next training corpus" (see "split-view" feasibility below).
-- **Poison budget is tiny**: Truth Serum uses < 0.1% of the training set; on CIFAR-10 it's concretely **8 samples / 0.03%**.
+- **Poison budget is tiny**: Truth Serum uses < 0.1% of the training set; in the sampled CIFAR-10 training setup it is **8 samples / about 0.03%**.
 - **The attack target is other records**: the attacker wants to know whether some **honest** record is in the training set (membership inference), one of its hidden attributes (attribute inference), or to coax it out (extraction). Poisoning is just the amplifier.
 - **Scoring metric**: still read at low false-positive rate — Truth Serum reports exactly the **TPR at 0.1% FPR: from 7% to 59%** (for a target image). Don't use average accuracy, which washes out this real "tail samples singled out with high confidence" risk (same metric as [Membership inference attacks](../01-foundations/membership-inference.mdx)).
 
-To state the amplification clearly: Truth Serum measured that poisoning raises membership-inference / attribute-inference / data-extraction success by **1–2 orders of magnitude** over the un-poisoned baseline. These numbers are tied to its image-classification setup (CIFAR-10, etc.) and **don't transfer directly** to your model and data.
+To state the amplification clearly: Truth Serum measured that poisoning raises membership-inference / attribute-inference / data-extraction success by **1–2 orders of magnitude** over the un-poisoned baseline. The 7%→59% MIA result uses sampled CIFAR-10 training; attribute inference uses Adult, and language-model canary extraction uses WikiText and **don't transfer directly** to your model and data.
 
 ## How the defense works
 
@@ -89,14 +93,14 @@ Every quantitative parameter (ε, dedup / anomaly thresholds, poison-budget tier
 **Minimal testable assertions** (turn poisoning-amplification assessment into a regression check):
 
 - How to test: in red teaming / auditing, actively inject a small number of **deletable, traceable, no-real-PII** poison samples (targeting several canary targets) into the training set; after training, measure the target canaries' membership-inference TPR at low FPR — comparing "no poison" vs. "< 0.1% poison" tiers.
-- Pass: the poison tier's TPR amplification over the clean tier is **controlled** (within your acceptable range); sources have lineage, poison samples are flagged by anomaly detection; high-sensitivity targets have DP bounding them.
+- Pass: fix target canaries, training, and query budgets; report clean / poisoned low-FPR metrics, intervals, and poison-fraction denominator against thresholds, alongside snapshot provenance and detector coverage. DP protection of target membership requires target-record adjacency and worst-case auxiliary data; a one-record DP bound is not the same bound on arbitrary k-poison influence.
 - Fail: a small amount of poison significantly raises a target canary's low-FPR TPR with **no DP** backstop, or you can't produce data lineage, or anomaly detection is blind to clustered poison → not adequate; go back to guard the source / add DP and re-test.
 
 ## Research status (engineering feasibility)
 
 (This entry's maturity is "Research": Truth Serum is a research-grade attack demonstration; below distinguishes two kinds of evidence — the "privacy result" and the "feasibility support.")
 
-- **Privacy result (Truth Serum, CCS 2022)**: Tramèr et al. show poisoning can act as a **privacy amplifier** — poisoning < 0.1% of the training set raises membership inference / attribute inference / data extraction against **other, non-poisoned records** by 1–2 orders of magnitude. The most concrete example: on CIFAR-10, **inserting 8 poison samples (0.03%)** lifts a target image's membership-inference **TPR from 7% to 59% (at 0.1% FPR)**. This directly connects "training-data integrity" with "privacy."
+- **Privacy result (Truth Serum, CCS 2022)**: Tramèr et al. show poisoning can act as a **privacy amplifier** — poisoning < 0.1% of the training set raises membership inference / attribute inference / data extraction against **other, non-poisoned records** by 1–2 orders of magnitude. The most concrete example: on CIFAR-10, **inserting 8 poison samples (about 0.03% of sampled training data)** lifts a target image's membership-inference **TPR from 7% to 59% (at 0.1% FPR)**. This directly connects "training-data integrity" with "privacy."
 - **Feasibility support (Carlini et al., S&P 2024 — note: this is an integrity / feasibility result, not itself a privacy leak)**: *Poisoning Web-Scale Training Datasets is Practical* shows web-scale data poisoning is **cheap and practical**. Its **split-view** poisoning exploits the reality that "datasets store only URLs and fetch at training time": buying an expired domain still referenced by the dataset lets you create a divergence between "what was seen at annotation time" and "what is fetched at training time" — from which the authors estimate **~\$60 suffices to control ~0.01% of LAION-400M's samples**. It does **not** directly give a privacy-leak magnitude; its role is to show that "getting attacker-controlled content into training" — Truth Serum's premise — is **extremely cheap in real web corpora**.
 
 Putting the two together: the poisoning premise needed to amplify privacy leakage is **cheaply attainable** in a real data supply chain — which is exactly why "training-data integrity" should be treated as a privacy problem.
@@ -109,7 +113,7 @@ Breaking the false security item by item:
 - **Dedup / anomaly detection can miss.** Poison samples aren't necessarily duplicated or obviously outlying; a small, carefully crafted set can slip past thresholds. Dedup works on **duplicate-type** poison, not necessarily **single-shot, stealthy** poison.
 - **DP isn't zero amplification.** DP-SGD's ε is nonzero — it gives a "single-sample influence is bounded" cap, thus **limiting** how much poison can lever, but not "poison is fully neutralized." The tighter ε, the more utility drops; account for it openly.
 - **What's amplified is someone else.** The most counterintuitive point of this threat: the poison samples are placed by the attacker, but what leaks is an **honest third party's** record — watching only "was my data altered" misses "someone else's privacy is amplified because my data was poisoned."
-- **Magnitude is tied to the experimental setup.** "1–2 orders of magnitude" and "8 samples → 7%→59%" come from image classification (CIFAR-10, etc.); the amplification on your modality / model / data must be self-measured — don't copy the optimistic number.
+- **Magnitude is tied to the experimental setup.** "1–2 orders of magnitude" and "8 samples → 7%→59%" are tied separately to CIFAR-10 MIA, Adult attribute inference, and WikiText extraction settings; the amplification on your modality / model / data must be self-measured — don't copy the optimistic number.
 
 ## How this differs from neighboring techniques
 
@@ -120,12 +124,14 @@ Breaking the false security item by item:
 ## Version notes
 
 :::note Applicable versions
-"Poisoning can act as a privacy amplifier" is a research conclusion established by Tramèr et al. in an **image-classification** setup (CIFAR-10, etc.) (CCS 2022); its magnitudes — "< 0.1% poison amplifies 1–2 orders of magnitude," "8 samples / 0.03% lifts target MIA TPR 7%→59% @ 0.1% FPR" — are **tied to that experimental setup and don't transfer directly** to LLMs / your model and data; you must self-measure at deployment. The feasibility of split-view poisoning and "~\$60 controls ~0.01% of LAION-400M" are Carlini et al.'s estimates based on the 2023 dataset ecosystem (S&P 2024), an **integrity / feasibility** support rather than a privacy-leak magnitude; expired-domain prices and dataset snapshot policies change over time. Both attack and defense evolve; stamped 2026-06. (Sources verified 2026-06.)
+Rechecked the Truth Serum full text and web-poisoning manuscript on 2026-10-29. The study includes image-classification MIA and language-model canary extraction, not only CIFAR results. Its 0.03% uses the paper’s sampled-training denominator, not all 50,000 CIFAR10 images. The $60 domain estimate is historical feasibility, not a current price. Review by 2027-04-29, earlier for snapshot / domain threats, poisoning privileges, target knowledge, or DP privacy units.
 :::
 
 ## Further reading and sources
 
 Mixed-evidence note — primary: Truth Serum (the privacy result); supplementary: Poisoning Web-Scale Datasets (integrity / feasibility support, not a privacy-leak magnitude).
 
-- [Truth Serum: Poisoning Machine Learning Models to Reveal Their Secrets (Tramèr et al., ACM CCS 2022)](https://dl.acm.org/doi/10.1145/3548606.3560554) — this entry's primary source. Poisoning < 0.1% of the training set amplifies membership / attribute inference / extraction against **other, non-poisoned records** by 1–2 orders of magnitude; on CIFAR-10, 8 samples (0.03%) lift a target image's MIA TPR from 7% to 59% (at 0.1% FPR).
+- [Truth Serum: Poisoning Machine Learning Models to Reveal Their Secrets (Tramèr et al., ACM CCS 2022)](https://dl.acm.org/doi/10.1145/3548606.3560554) — this entry's primary source. Poisoning < 0.1% of the training set amplifies membership / attribute inference / extraction against **other, non-poisoned records** by 1–2 orders of magnitude; on CIFAR-10, 8 samples (about 0.03% of sampled training data) lift a target image's MIA TPR from 7% to 59% (at 0.1% FPR).
 - [Poisoning Web-Scale Training Datasets is Practical (Carlini et al., IEEE S&P 2024; arXiv 2302.10149)](https://arxiv.org/abs/2302.10149) — **feasibility support (an integrity result, not a privacy leak)**. Split-view poisoning: buy expired domains, ~\$60 controls ~0.01% of LAION-400M, showing the premise "get attacker-controlled content into training" is extremely cheap in real web corpora.
+
+- [Truth Serum author full text](https://arxiv.org/html/2204.00032)

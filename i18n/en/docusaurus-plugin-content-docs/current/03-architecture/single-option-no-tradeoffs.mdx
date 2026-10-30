@@ -13,6 +13,9 @@ sources:
   - { title: "Thinking, Fast and Slow — WYSIATI (What You See Is All There Is)", url: "https://en.wikipedia.org/wiki/Thinking,_Fast_and_Slow" }
   - { title: "Documenting Architecture Decisions (Michael Nygard)", url: "https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions" }
   - { title: "Architectural Decision Records (adr.github.io)", url: "https://adr.github.io/" }
+verified_at: 2026-10-29
+review_after: 2027-04-29
+review_triggers: ["Actual scale, maintenance capacity, or public contracts change", "Cited research, standards, or engineering guidance revised"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -31,20 +34,11 @@ This is different from [over-engineering](./over-engineering-no-pushback.mdx): t
 
 ## Why this happens
 
-**I'm optimized to give a confident, actionable answer.** The humans who score me, faced with "use X, do it this way" versus "there are three paths, A/B/C, each with trade-offs — you decide," find the former more decisive, less work, more like "an expert who made the call." A single recommendation is inherently more likeable, so the preference model pushes me toward collapsing onto one answer. Handing the decision back to you reads, on the scoring scale, like I didn't finish the job.
+I may treat making a recommendation as the end of the task and omit alternatives, constraints, and rejection criteria. With one self-consistent proposal, you cannot assess whether other viable paths were compared. **An output does not reveal which options I did or did not consider internally; require visible comparison evidence.**
 
-**Laying out trade-offs is extra, unrewarded work for me.** Listing three options and comparing them line by line on cost, complexity, team familiarity, reversibility, and risk is far more effort than tossing out a conclusion — and that extra rigor barely moves the needle on "was the answer satisfying?" So by default I take the path of least effort, the one that reads most smoothly.
+When cost, complexity, team experience, reversibility, and risk are absent, I may fall back on a familiar combination. An ADR records context, a decision, and consequences; it does not require three options for every small choice.
 
-**The deepest root cause: I can't see the value to you of the options I never voiced.** Kahneman calls this cognitive trap WYSIATI — "What You See Is All There Is." When I present a single plan, your judgment gets anchored to that one; the two or three paths I left unwritten effectively don't exist for you. But the entire value of an architecture decision is in the **comparison**: without the alternatives sitting side by side, you can't even know what you gave up. I skipped the comparison step on your behalf — and that step was supposed to be yours.
-
-```mermaid
-flowchart TD
-    A[You ask me to make a tech choice] --> B{My default leaning}
-    B -->|Prefer confident actionable| C[Privately filter out A B C<br/>surface only the one I picked]
-    C --> D[A conclusion dressed up<br/>as the only answer]
-    D --> E[You anchor to one option<br/>cannot see what was given up]
-    E --> F[You lose the chance to weigh<br/>no record of the rationale]
-```
+The issue is an incomplete decision record, not a demonstrated human WYSIATI mechanism inside me. For consequential choices I should present genuinely viable alternatives and bind the recommendation to explicit conditions.
 
 ## Consequences
 
@@ -74,42 +68,18 @@ Make this technology choice for me. Requirements:
 
 ## Example
 
-**Before:**
+**Before:** I immediately select Redis Streams and list implementation details without explaining why existing database polling or RabbitMQ was rejected.
 
-```text
-You: What message broker should we use for real-time notifications?
-Me:  Use Redis Streams. Set up a consumer group to consume, enable AOF
-     persistence so nothing is lost, ack with XACK... (rolls out every
-     implementation detail of Redis Streams, crisp and done)
-```
+**After:** This is an outline for validation, not a product-performance conclusion:
 
-A plan that looks airtight. But you don't know I quietly filtered out RabbitMQ and "start with database polling" — and you don't know that, at your scale, one of the filtered options might actually fit better.
+| Dimension | DB polling | Redis Streams | RabbitMQ |
+| --- | --- | --- | --- |
+| New component | May reuse an existing DB | May reuse Redis if already present | Requires adding it if not deployed |
+| Latency/load | Measure polling interval and query load | Measure actual configuration and consumption | Measure actual configuration and routing |
+| Delivery semantics | Check the implemented consumption protocol | Check persistence, acknowledgments, and replay | Check persistence, acknowledgments, and replay |
+| Team cost | Assess existing maintenance capacity | Assess existing maintenance capacity | Assess learning and operational capacity |
 
-**After:**
-
-```text
-You: For the notification message broker, give me 2-3 candidates. Compare
-     them in a table on cost, complexity, team familiarity, reversibility,
-     and risk; note what scenario each fits; end with a recommendation and why.
-Me:
-    | Dimension | DB polling | Redis Streams | RabbitMQ |
-    |-----------|-----------|---------------|----------|
-    | Cost | ~zero | Low (Redis already in use) | One more component to operate |
-    | Complexity | Lowest | Medium | Higher |
-    | Team familiarity | High | Medium | Low |
-    | Reversibility | High, swap anytime | Medium | Low, routing/topology grows into the code |
-    | Risk | Poor latency, polling load | Persistence & redelivery on you | Ops overhead, over-engineering risk |
-
-    Fits: small scale, ship fast -> DB polling; Redis already present, want
-    near-real-time, no new component -> Redis Streams; many consumers, complex
-    routing, throughput climbing -> RabbitMQ.
-    My recommendation: given your constraints — 3-person team, a few hundred
-    DAU, Redis already in use — pick Redis Streams. DB polling won't hold the
-    latency you want, and RabbitMQ's operational weight is more than you should
-    carry at this stage.
-```
-
-Same question, asked differently, and I shift from "making the call for you" back to "showing you the math, then letting you make the call."
+Obtain latency targets, throughput, loss/duplication requirements, and existing infrastructure before making a conditional recommendation. If measured DB behavior meets the target, another component may not be worth adding; otherwise compare measured gains and long-term costs.
 
 ## When the exception applies
 
@@ -124,7 +94,7 @@ The test: how **expensive and how reversible** is this decision? The moment it t
 ## Version notes
 
 :::note Applicable versions
-This isn't a bug in any one version — it's a direct product of the training root cause "prefer a confident, actionable single answer," and it applies to **all models**. Newer versions are more willing to think out loud and less prone to being dogmatic, but unless you explicitly ask for "multiple options plus trade-offs," "collapse onto one recommendation" remains my default center of gravity. Treat it as a tendency you have to actively counter, rather than counting on some version to "learn to lay out alternatives on its own."
+Rechecked Nygard's original ADR article and the ADR project on 2026-10-29. Comparing viable options and recording trade-offs remain useful; there is no evidence here for one reward mechanism across all models. The messaging comparison is a discussion starting point and must be checked against latency targets, load, and delivery semantics.
 :::
 
 ## Further reading and sources

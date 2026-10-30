@@ -13,6 +13,9 @@ sources:
   - { title: "Context7 (upstash/context7, versioned-docs MCP source whose stated purpose is to avoid hallucinated APIs and outdated code)", url: "https://github.com/upstash/context7" }
   - { title: "Connect Claude Code to tools via MCP (official, bringing external data sources into context)", url: "https://code.claude.com/docs/en/mcp" }
   - { title: "Claude Code Best Practices (official)", url: "https://code.claude.com/docs/en/best-practices" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["Installed version, API signatures, or doc coverage changes", "Retrieval client or MCP policy changes"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -33,25 +36,11 @@ The faster a library iterates, the more likely I am to trip here—frontend fram
 
 ## Why this happens
 
-The root cause is one sentence: **my training has a cutoff date, and I have no awareness of the specific version you've pinned right now.** That unpacks into three things:
+I may reuse old documentation or a familiar call shape without checking the installed version, exports, signatures, and migration notes. Training knowledge can lag, but agents can read manifests and current sources; they are not necessarily unaware of the present version.
 
-**First, I fall back on the version that appears most in my memory—usually an old one.** I haven't read the version pinned in your `package.json` or `requirements.txt`—unless you show me. Without that fact, I can only reach for the "most familiar" usage from training data, and an older version of a library tends to appear more often and sit longer in that data than the newest one. So what I emit by default is often the version you upgraded away from long ago.
+Naming a version is insufficient: a package.json range may differ from the lockfile or runtime resolution, and online docs may default to latest. I should check the actual dependency and first-party docs for that version, then use types, compilation, or a minimal call to validate the visible contract.
 
-**Second, lacking a real signature, I fill in with a shape that "looks right."** Generating code is, at bottom, predicting the token sequence "most like a correct answer." A method with a smooth name and a plausible signature that doesn't actually exist looks just as credible to me as a real one—that's where a hallucinated API comes from. I'm not lying to you; without a factual anchor, I mistake the statistically most likely shape for the truth.
-
-**Third, version mixing happens because I've stitched corpora from multiple versions together.** The 2.x tutorials and 3.x docs for a library both live in my training data, and when I generate I can't always cleanly separate them—so I copy initialization from one place and calls from another. Each line reads as "right," but together they won't run.
-
-```mermaid
-flowchart TD
-    A[Ask me to call a library] --> B{Do I have the real, version-correct signature?}
-    B -- No --> C[Fill in from training memory]
-    C --> D["Old API / mixed versions / hallucinated method<br/>all of it looks right"]
-    D --> E[Compiler may not catch it → blows up at runtime]
-    B -- Yes --> F[Write against the real signature]
-    F --> G[Version-correct calls]
-```
-
-This is the flip side of [*You don't connect me to a version-matched doc source*](../00-setup-collaboration/no-versioned-docs.mdx): that entry is about the **setup** phase—no version-correct source of truth wired into the environment; this one is about how that gap shows up in the **implementation** phase as a concrete line of stale or hallucinated code, and how to fix it on the spot. Leave the hole open in setup, and this is how the code derails during implementation.
+Context7 can retrieve version-related material; it is a documentation connector rather than proof of API correctness. Check library identity, version coverage, and the returned excerpt's origin. Disclose missing coverage instead of treating a nearby version as verified.
 
 ## Consequences
 
@@ -62,20 +51,10 @@ This is the flip side of [*You don't connect me to a version-matched doc source*
 
 ## What to do instead
 
-The core, in one line: **don't make me gamble from memory—give me a real signature to check against, and use tooling to disprove me on the spot.**
-
-1. **Pin the version and tell me.** Name the version number in the prompt; don't make me guess: "write X with `<lib>@3.4`." If I know the version, at least I won't default back into old-version memory.
-
-2. **Connect a versioned doc source so I check signatures instead of recalling them.** Wire in an MCP doc source like [Context7](https://github.com/upstash/context7); it feeds the official signatures for your specified library and version into my context. For the upstream fix, see [*You don't connect me to a version-matched doc source*](../00-setup-collaboration/no-versioned-docs.mdx)—that's the cure in the setup phase; this entry is the safety net at the moment of writing.
-
-```text
-# Name the version in the prompt, and have me check the doc source first, docs over memory
-You: write an X with <lib>@3.4. First check Context7 for the real 3.4 signature, go by the docs, not your memory.
-```
-
-3. **Run type checks / compile / tests to disprove me on the spot.** This is the hardest gate: have me run `tsc`, the compiler, or a minimal smoke test the moment I finish. Hallucinated methods and wrong signatures show themselves here, not in production. Hand this step to me to run, read the errors, and fix—don't wire it up by hand yourself.
-
-4. **For unfamiliar or fast-moving APIs, make me cite the source.** Have me confirm every method name and parameter I use against the doc source, one by one, and annotate it "per `<lib>` 3.4 official docs." When I'm unsure, I'd rather say "I couldn't find this in the docs, please confirm" than guess my way through.
+1. **Check the actual version first.** Read manifests, lockfiles, and available runtime information before deciding whether to ask you. A version range or a number in the prompt is not proof of what is installed.
+2. **Use first-party sources for that version.** Context7 and similar retrieval can help, but returned material needs a verifiable origin and version. If coverage is missing, check official versioned docs/source or disclose that verification is unavailable.
+3. **Validate the visible contract.** Run types, compilation, or a minimal smoke call according to risk. Passing supports tested paths rather than every parameter and semantic behavior.
+4. **Separate facts from illustrations.** Label fictional libraries, unexecuted code, and inferred migrations. Cite the matching source for real methods and parameters.
 
 ## Example
 
@@ -99,21 +78,14 @@ The difference isn't that I understand the library better—it's that I now hold
 
 ## Tool differences
 
-> As of 2026-07, mechanism level; grounding capabilities and default availability change fast across versions / plan tiers — defer to each tool's current docs.
+Web fetching, documentation indexes, and MCP retrieval differ in client availability, permissions, and version coverage. This review checked Context7's version-retrieval description and Claude Code's MCP integration docs; neither guarantees that every client retrieves proactively or every library has complete historical coverage.
 
-Same root cause — **my memory has a cutoff; fast-moving libraries must be grounded in current docs** — but each tool builds "grounding" as a different mechanism:
-
-- **Claude Code**: built-in on-demand web tools (WebFetch / WebSearch); availability depends on environment and permission configuration.
-- **Gemini CLI**: built-in Google Search grounding and web-fetch tools; retrieved results go straight into context.
-- **Cursor**: `@Docs` works "**index first, reference later**" — pre-indexed docs for common libraries, plus custom URLs you can crawl into the index; well suited to pinning the **specific version** of docs your team actually uses.
-- **GitHub Copilot (VS Code)**: the built-in `#fetch` tool pulls a given web page into context (asks for confirmation before accessing external URLs).
-
-Different mechanisms, one usage rule: **explicitly feed version-pinned official docs into context** — "it can reach the web" doesn't mean "it will go look."
+Record the library, version, and source actually retrieved, then compare them with the installed dependency.
 
 ## Version notes
 
-:::note Applies to
-"Training has a cutoff date, and I have no awareness of the specific version you've pinned" is an inherent property of every large model—**independent of the specific model.** A newer model only pushes the cutoff later; it doesn't change the fact that everything after the cutoff is unknown. The faster a library updates, the wider the gap between memory and reality. Versioned doc sources (MCP doc tools like Context7) are a newer external capability; it depends on whether your client supports MCP and whether the doc source covers your library. This entry and [*You don't connect me to a version-matched doc source*](../00-setup-collaboration/no-versioned-docs.mdx) (Setup & Collaboration phase) are two sides of the same root cause: that one seals the hole at the source in the setup phase; this one fixes it at the moment of writing the code.
+:::note Applicable versions
+Checked the Context7 README and Claude Code MCP/best-practice guidance on 2026-10-29. Retained version pinning and signature checks, while validating retrieval availability, document version, and call behavior separately. Types do not catch every runtime or semantic difference. The somelib example is fictional, not a migration claim about a real library.
 :::
 
 ## Further reading and sources

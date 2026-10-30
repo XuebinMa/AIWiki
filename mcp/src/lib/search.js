@@ -39,7 +39,7 @@ function scoreEntry(entry, tokens) {
     title: entry.title.toLowerCase(),
     title_en: (entry.title_en || '').toLowerCase(),
     id: entry.id.toLowerCase(),
-    tagsText: (entry.tags || []).join(' ').toLowerCase(),
+    tagsText: [...(entry.tags || []), ...(entry.tags_en || [])].join(' ').toLowerCase(),
     summary: (entry.summary || '').toLowerCase(),
     summary_en: (entry.summary_en || '').toLowerCase(),
   };

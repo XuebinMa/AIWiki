@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createLoader } from '../src/lib/loader.js';
+import { createLoader, INDEX_URL } from '../src/lib/loader.js';
 
 const INDEX_BODY = {
   site: 'https://example.test',
@@ -27,7 +27,7 @@ function fakeFetch(bodyByUrl, { failStatus } = {}) {
 
 test('getIndex fetches, validates, and caches within TTL', async () => {
   let t = 0;
-  const fetchFn = fakeFetch({ 'https://xuebinma.github.io/AIWiki/api/index.json': INDEX_BODY });
+  const fetchFn = fakeFetch({ [INDEX_URL]: INDEX_BODY });
   const loader = createLoader({ fetchFn, now: () => t });
 
   const first = await loader.getIndex();
@@ -48,7 +48,7 @@ test('getIndex throws on non-OK response', async () => {
 
 test('getIndex throws on malformed payload', async () => {
   const fetchFn = fakeFetch({
-    'https://xuebinma.github.io/AIWiki/api/index.json': { nope: true },
+    [INDEX_URL]: { nope: true },
   });
   const loader = createLoader({ fetchFn });
   await assert.rejects(() => loader.getIndex(), /Unexpected index format/);

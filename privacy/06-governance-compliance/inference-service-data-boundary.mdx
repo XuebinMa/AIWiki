@@ -11,8 +11,11 @@ severity: 中
 maturity: 生产
 evidence: 官方文档
 tags: [数据边界, 数据保留, 零数据保留, 子处理方, 合规, 隐私工程师, 合规工程师, 安全工程师]
+verified_at: 2026-10-29
+review_triggers: ["合同账户授权或模型资格变化", "端点缓存或第三方留存政策变化"]
+review_after: 2026-11-29
 sources:
-  - { title: "OpenAI, Data controls in the OpenAI platform（官方：API 默认不用于训练、滥用日志保留期、ZDR）", url: "https://platform.openai.com/docs/guides/your-data" }
+  - { title: "OpenAI, Data controls in the OpenAI platform（官方：API 默认不用于训练、滥用日志保留期、ZDR）", url: "https://developers.openai.com/api/docs/guides/your-data" }
   - { title: "Anthropic, API and data retention（官方：商用条款不用于训练、日志保留期、ZDR）", url: "https://platform.claude.com/docs/en/manage-claude/api-and-data-retention" }
   - { title: "OWASP Top 10 for LLM Applications, LLM02:2025 Sensitive Information Disclosure", url: "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/" }
 ---
@@ -25,7 +28,7 @@ import PrivacyMeta from '@site/src/components/PrivacyMeta';
 
 ## 机制：我这边发生了什么（视角）
 
-你的 prompt 发到我这，是一次**数据出境**——它离开你的信任边界，进入服务方的系统。在那里它会经过一串跳转，每一跳都是一个可能的保留或泄露点：
+你的 prompt 发给服务方，是离开自身信任边界；是否构成法律上的跨境传输取决于区域、处理实体与法域。训练使用、滥用日志、人工审查、应用状态、缓存与第三方流转都要分开核。
 
 是否用于改进 / 训练模型 → 是否写进**滥用监控日志**、留多久 → 是否经过**人工审查** → 是否经过**子处理方**（云、向量库、监控）→ 落在哪个**区域** → 是否进**缓存 / 评估集**。
 
@@ -78,7 +81,7 @@ flowchart TB
 **最小可测试断言**（把这张核查表当可回归的工件）：
 
 - 怎么测：每个厂商存一份填好的核查表，每格带「条款出处 + 版本日期」，按季度复核。
-- 通过：每一格都有出处与日期、且与你签的合同 / DPA 一致；无空格、无过期格。
+- 通过：核查表逐格有当前条款、账户授权与实际请求配置；状态化功能、后台轮询、缓存、文件和远程工具单独核资格 / 保留 / 删除。no-training 与 ZDR 不得当作全端点零应用状态；合同与监控记录的覆盖差异已解释。
 - 失败：某格无出处 / 与合同不符 / 超过复核期 → 标记为「未核」，落地决策前补齐。
 
 ## 真实案例 / 厂商现状（打戳 2026-06，落地前核当下条款）
@@ -88,7 +91,7 @@ flowchart TB
 
 | 厂商 | 范围 | 默认用于训练 | 默认保留 | ZDR / 例外 |
 |---|---|---|---|---|
-| OpenAI | API（多数端点） | 否（除非显式 opt-in） | 滥用监控日志常见约 30 天后删（法律 / 防滥用时更久）；**但 application state、保留期与 ZDR 资格按端点 / 功能而异** | 对合格企业提供 ZDR，非自助开关、需账户团队按端点开通 |
+| OpenAI | 按账户 / 项目、端点、模型与功能核 | 默认不用于训练，除非主动共享 | 滥用日志、application state、缓存与文件分开核 | ZDR / MAM / 其他保留控制各有资格和例外；GPU 加密 KV 缓存可作为应用状态保留至 24 小时，remote MCP 另受第三方政策 |
 | Anthropic | API（商用条款） | 否（未经明确许可不用于训练） | **对话内容（你的输入与 Claude 输出）默认不保留**；需存储的功能按最短 TTL 留；**特定模型（Covered Models）要求 30 天保留** | ZDR 覆盖 Messages 与 Token Counting API；**不**覆盖 Console / Workbench、消费产品、Teams / Enterprise 界面、Managed Agents；违规或法律要求下可留至 2 年 |
 
 - **逐端点核，别拿一格套全平台。** 同一厂商不同 API / 功能 / 模型，保留与 ZDR 资格可天差地别（例：Anthropic 的 Batch 约 29 天、Code execution 容器约 30 天、Files 至显式删除为止）。把「某一格」当整条边界，正是本条要破的假安全。
@@ -126,13 +129,13 @@ flowchart TB
 ## 版本说明
 
 :::note 适用版本
-数据生命周期这套核查框架是**与厂商无关**的方法论，长期稳定。但框架里填的**具体值**（保留天数、是否默认训练、ZDR 条件、子处理方清单）属厂商条款，**变动频繁**——本条所有厂商数字打戳 2026-06，且仅作示例；任何落地决策都必须以你查到的**当下**官方文档与你签下的合同为准，并按季度复核。（出处核验于 2026-06。）
+2026-10-29 实际核对 OpenAI 当前数据控制与 Claude API 留存页：ZDR 是账户 / 组织、模型与功能资格组合，非整个平台无状态；Claude 表格的 Yes (qualified) 仍可能短暂保留限定技术工件，No 功能使用会离开该数据的 ZDR 安排。2026-11-29 前，或合同、账户授权、端点 / 缓存 / 第三方政策变化时复核。
 :::
 
 ## 延伸阅读与出处
 
 证据为混合——**主要：官方文档**（OpenAI / Anthropic 官方页）；**补充：框架**（OWASP LLM02）。
 
-- [Data controls in the OpenAI platform（OpenAI 官方）](https://platform.openai.com/docs/guides/your-data) —— 官方文档：API 默认不训练、滥用日志保留期、企业零数据保留（ZDR）。
+- [Data controls in the OpenAI platform（OpenAI 官方）](https://developers.openai.com/api/docs/guides/your-data) —— 官方文档：API 默认不训练、滥用日志保留期、企业零数据保留（ZDR）。
 - [API and data retention（Anthropic 官方）](https://platform.claude.com/docs/en/manage-claude/api-and-data-retention) —— 商用条款不用于训练、API 日志保留期、ZDR。
 - [OWASP LLM02:2025 Sensitive Information Disclosure](https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/) —— 含「输入被留存 / 用于训练」一面的敏感信息泄露风险与缓解。

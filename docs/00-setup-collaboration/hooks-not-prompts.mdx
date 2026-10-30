@@ -6,85 +6,73 @@ sidebar_position: 4
 roles: [工程师, 运维工程师]
 phase: 准备与协作
 severity: 高
-applies_to: "Claude Code 全版本"
+applies_to: "Claude Code（支持 hooks 的版本）"
 evidence: 官方文档
 tags: [hooks, CLAUDE.md, 确定性, 提示词, 工程师, 运维工程师]
 sources:
-  - { title: "Automate actions with hooks（Claude Code 官方）", url: "https://code.claude.com/docs/en/hooks-guide" }
-  - { title: "Hooks reference（Claude Code 官方）", url: "https://code.claude.com/docs/en/hooks" }
-  - { title: "Manage Claude's memory / CLAUDE.md（Claude Code 官方）", url: "https://code.claude.com/docs/en/memory" }
+  - { title: "Hooks reference (Claude Code)", url: "https://code.claude.com/docs/en/hooks" }
+  - { title: "Configure the sandboxed Bash tool (Claude Code)", url: "https://code.claude.com/docs/en/sandboxing" }
+verified_at: 2026-10-29
+review_after: 2026-11-29
+review_triggers: [vendor_documentation_change, permission_or_runtime_change]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
-<PitfallMeta roles={['工程师', '运维工程师']} phase="准备与协作" severity="高" appliesTo="Claude Code 全版本" evidence="官方文档" />
+<PitfallMeta roles={['工程师', '运维工程师']} phase="准备与协作" severity="高" appliesTo="Claude Code（支持 hooks 的版本）" evidence="官方文档" />
 
-> 一句话摘要：你在 CLAUDE.md 里写了「改完代码必须跑 format」「提交前必须跑测试」「这些文件不许动」，然后指望我每次都照做。但提示词对我只是「建议」，不是「机制」——我会忘、会忽略、上下文一长就漂。要它必然发生，就别交给我的自觉，做成 hook。
+> 一句话摘要：提示词能表达要求，但不能代替执行检查。把格式化等可机械判断的要求接到 hook 或 CI，同时测试事件覆盖、错误处理和绕过路径。
 
 ## 现象
 
 我常看到你这样立规矩：在 CLAUDE.md 里写下「每次编辑后运行 `prettier`」「提交前先 `npm test`」「不要修改 `package-lock.json` 和 `.env`」，写得清清楚楚，然后就当这事办妥了。
 
-前几轮我确实照做了。可会话一长，任务一多，你会发现：我改了三个文件却只格式化了一个；我直接提交，跳过了测试；甚至有一次，我「顺手」改了你明令禁止的 `.env`。你以为白纸黑字写下的就是铁律，但从我这边看，它们一直只是「希望我注意的事」，而不是「必然发生的事」。
+前几轮我确实照做了。可会话一长，任务一多，你会发现：我改了三个文件却只格式化了一个；我直接提交，跳过了测试；甚至有一次，我「顺手」改了你明令禁止的 `.env`。你以为白纸黑字写下的就是铁律，但从我这边看，它们一直只是「我需要遵守的要求，但未被强制执行」，而不是「必然发生的事」。
 
 ## 为什么会这样
 
-CLAUDE.md 和提示词进入的是我的上下文窗口——它们是**建议性**的。每一轮我都要在「当前窗口里的全部内容」上重新分配注意力，决定这一步做什么。你那句「提交前必须跑测试」，和其余几千 token 的代码、报错、对话挤在一起，会被稀释、会被更紧急的指令盖过，也会在 `/compact` 之后丢失部分细节。我不是故意违规，我只是**概率性地**倾向于遵守，而你要的是 100%。
+CLAUDE.md 提供持续指令，但不是强制执行层。指令可能被遗漏；这不表示它们没有优先级或允许我忽略，也不能推定压缩必然删除它们。
 
-把「必须发生」的需求托付给一个概率性执行者，这本身就是错配。确定性需求需要确定性机制。
+**command hook 的触发由客户端控制；检查正确性仍由实现决定。** 还要满足事件、matcher 和配置条件，并处理命令失败、超时及未覆盖工具。prompt / agent 类型 hook 会调用模型，语义判断不能统称确定性。
 
-这正是 hook 的定位。官方原话是：hooks「provide deterministic control over Claude Code's behavior, ensuring certain actions always happen rather than relying on the LLM to choose to run them」——它们由 harness 在生命周期的固定节点上确定性地触发，不经过我的判断。`PostToolUse` 在我每次 `Edit`/`Write` 之后必跑，`PreToolUse` 在危险命令落地前必拦，退出码 2 能直接否决一个动作。这些不是我「选择」执行的，是 harness 替你执行的。
-
-一句话区分：**提示词是建议，hook 是机制。** 凡是「每次都必然要发生」的事，归 hook；凡是「希望我留意」的软约束，才归提示词。
+退出码的作用依事件不同：`PreToolUse` 的退出码 2 可以阻止该次工具调用；`PostToolUse` 时工具已经执行，不能追回副作用；`PermissionRequest` 的拒绝应按文档返回相应 JSON，不能套用统一的 exit 2 规则。
 
 ```mermaid
 flowchart TB
-    subgraph P[写进提示词 / CLAUDE.md]
-        P1["进入上下文窗口"] --> P2["我概率性遵守<br/>会忘 / 会漂 / 压缩后丢失"]
-    end
-    subgraph H[做成 hook]
-        H1["harness 在固定节点触发"] --> H2["确定性执行<br/>不经过我的判断"]
-    end
-    P2 -.->|需要必然发生时错配| X[规则被跳过]
+    P[项目指令] --> M[模型选择动作]
+    M --> H{匹配前置事件与检查?}
+    H -->|拒绝| B[阻止该次调用]
+    H -->|允许或未覆盖| T[工具执行]
+    T --> A[后置检查与反馈<br/>不能撤销已有副作用]
 ```
 
 ## 后果
 
-- **该跑的没跑。** format/lint 漏执行，风格漂移悄悄进了仓库；测试被跳过，回归在更晚的阶段才暴露，定位成本翻倍。
-- **该拦的没拦。** 你写「不要碰 `.env`」只是建议，真到某一步我判断「需要改一下」时，没有任何东西在机制层面拦住我。
-- **不可复现的纪律。** 同一条规则，这次遵守、下次忽略，团队里没人能依赖它——而 CI 最终会把这些漏网之鱼拦下，把本可在本地秒级解决的问题，拖成一次失败的流水线。
-- **CLAUDE.md 越写越长。** 你不断往里加「请务必……」来补偿我的不可靠，文件膨胀反而稀释了所有指令，恶性循环。
+- **该跑的没跑。** format/lint 漏执行，风格漂移悄悄进了仓库；测试被跳过，回归在更晚的阶段才暴露，增加排查成本。
+- **该拦的没拦。** 「不要碰 `.env`」是我必须遵守的要求，但它不是访问控制规则；若没有其他控制，违反指令的调用仍可能执行。
+- **不可复现的纪律。** 同一条规则，这次遵守、下次忽略，团队里没人能依赖它——若 CI 覆盖了对应问题，可能在更晚阶段才发现，把本可在本地秒级解决的问题，拖成一次失败的流水线。
+- **CLAUDE.md 越写越长。** 你不断往里加「请务必……」来补偿我的不可靠，继续叠加指令未必补上执行检查，还可能增加维护负担。
 
 ## 最佳实践
 
-**先问一句「这事是必须每次发生，还是希望我注意」。必须发生的，做成 hook；希望注意的，才留在提示词里。**
-
-几个可直接照做的落点（配置进 `.claude/settings.json`）：
-
-1. **改完即格式化** —— `PostToolUse` 配 `Edit|Write` matcher，每次文件编辑后自动跑 formatter，不靠我记得：
+1. **编辑后格式化。** 使用 `PostToolUse` 的 `Edit|Write` matcher。例如下面配置调用仓库内可信脚本；脚本须自行实现、审查并测试，不是仅复制配置就完成：
 
 ```json
 {
   "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          { "type": "command", "command": "jq -r '.tool_input.file_path' | xargs prettier --write" }
-        ]
-      }
-    ]
+    "PostToolUse": [{
+      "matcher": "Edit|Write",
+      "hooks": [{"type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/format-file.cjs\""}]
+    }]
   }
 }
 ```
 
-2. **禁止改的文件，用 hook 钉死** —— `PreToolUse` 里检查目标路径，命中受保护模式（`.env`、`package-lock.json`、`.git/**`）就 `exit 2` 否决，并把原因写到 stderr 让我知道为什么被拦、好换条路。这比在 CLAUDE.md 写「请不要修改」可靠得多。
+脚本从 stdin 解析事件 JSON，校验 `tool_input.file_path` 在允许项目范围内，以独立参数调用已安装的固定 formatter，并处理失败。不要把文件名经 `xargs` 或字符串拼接送进 shell；路径可能带空格或选项字符。
 
-3. **提交/收尾前必跑的检查，挂到对应事件** —— 把测试、lint 这类「收尾闸门」放到合适的 hook 节点上由 harness 执行，而不是写一句「记得跑测试」就指望我自觉。
-
-4. **提示词只承载软约束。** 「优先用项目已有的工具函数」「注释用中文」这类需要判断、偶尔可以变通的事，留在 CLAUDE.md 正合适——它们本来就不要求 100% 触发。
-
-这条和本书《一上来就把所有权限都给我》是同一条主线的两面：**确定性的需求要交给确定性的机制（hook、settings、CI），别交给建议性的载体（提示词、CLAUDE.md）。**
+2. **前置拒绝与实际访问隔离配合。** 在 `PreToolUse` 校验目标路径，用文档规定的阻断返回值；测试 shell、其他写工具、符号链接和路径变化。路径正则不覆盖所有写入方式。command / HTTP hook 在多数事件中缺失、崩溃或超时通常会放行动作；Claude Code v2.1.295+ 可设 `onFailure: "block"`，并测试这些故障确实阻断。未配置时 Windows 无 Git Bash 等情况另有例外；旧版不能依赖这一字段，应使用外部访问控制。详见[失败处理](https://code.claude.com/docs/en/hooks#block-the-action-when-a-hook-fails)。
+3. **提交与发布使用真正的闸门。** 运行与变更相称的检查，检查返回状态；CI 必须设为必需检查才构成合并闸门。测试超时或失败不能被当成通过。
+4. **保留需要判断的项目指令。** 复用策略、风格取舍适合写进 CLAUDE.md；缺少 hook 事件时，也可用外部策略、权限或流程约束，而非只剩提示词。
 
 ## 示例
 
@@ -107,7 +95,7 @@ flowchart TB
 ```text
 # .claude/settings.json 里：
 # PostToolUse(Edit|Write) → 每个被改文件自动 prettier
-# PreToolUse → 命中 .env 即 exit 2 否决
+# PreToolUse → 命中 .env 即 exit 2 否决；v2.1.295+ 配 onFailure: "block" 并测故障
 
 我：改了 a.ts、b.ts、c.ts
 harness：（三个文件逐一自动格式化，无需我记得）
@@ -116,7 +104,7 @@ harness：exit 2，拦截 →「Blocked: .env matches protected pattern」
 我：（收到反馈，改走配置注入，不碰 .env）
 ```
 
-差别不在我变得更自律，而在于「必须发生」的那几件事，被移出了我的自觉范围，交给了一个不会忘、不会漂的执行者。
+差别不在我变得更自律，而在于「必须发生」的那几件事，被移出了我的自觉范围，交给明确的事件处理器；还需验证它覆盖了实际工具路径并正确处理失败。
 
 ## 什么时候例外
 
@@ -124,7 +112,7 @@ harness：exit 2，拦截 →「Blocked: .env matches protected pattern」
 
 - **要求本身就是软的、靠判断的。** 「优先复用已有工具函数」「命名跟着模块走」——这类需要我当场权衡、偶尔可以变通的事，做成 hook 只会把合理的例外也一并拒掉，反而碍事。
 - **规则还在快速变动、或只用一次。** 探索期天天改的临时约定、一次性脚本里的检查，hook 的维护成本（写、调、跟着改）高过它买到的那点可靠性，先写进提示词更划算。
-- **没有可用的拦截点。** 我要管的东西命不中任何确定性触发点（不对应某次工具调用、某个文件路径），硬塞进 hook 也拦不住，只能靠提示词承载。
+- **没有对应事件。** 考虑将要求移到 CI、受控工具或服务端策略；若只能给提示，说明它没有机械强制保证。
 
 判据一句话：**先问「漏一次会不会出事」——会出事且能挂上确定性触发点，做成 hook；不会出事、或根本挂不上钩，才留提示词。**
 
@@ -137,11 +125,10 @@ harness：exit 2，拦截 →「Blocked: .env matches protected pattern」
 ## 版本说明
 
 :::note 适用版本
-「CLAUDE.md / 提示词是建议性、hook 是确定性」是 Claude Code 的设计区分，官方文档明确表述为 hooks 提供「deterministic control … ensuring certain actions always happen rather than relying on the LLM to choose to run them」。具体的 hook 事件名与配置格式随版本演进（如 `PostToolUse`、`PreToolUse` 及其 matcher、退出码语义），以你所用版本的官方 Hooks 文档为准；本条引用的格式以官方 hooks-guide 为基线。
+2026-10-29 核对当前 Hooks reference。事件、退出码、模型 hook 和失败策略随版本变化；先在所用版本验证允许、拒绝与错误路径。不要把 hook 脚本自身的执行权限误当成受 Bash 沙箱保护。
 :::
 
 ## 延伸阅读与出处
 
-- [Automate actions with hooks（Claude Code 官方）](https://code.claude.com/docs/en/hooks-guide)
-- [Hooks reference（Claude Code 官方）](https://code.claude.com/docs/en/hooks)
-- [Manage Claude's memory / CLAUDE.md（Claude Code 官方）](https://code.claude.com/docs/en/memory)
+- [Hooks reference (Claude Code)](https://code.claude.com/docs/en/hooks)
+- [Configure the sandboxed Bash tool (Claude Code)](https://code.claude.com/docs/en/sandboxing)

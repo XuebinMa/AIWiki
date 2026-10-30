@@ -36,10 +36,20 @@ function countEntries(srcRoot) {
 
 const docsCount = countEntries('docs');
 const privacyCount = countEntries('privacy');
+const toolkitCount = fs.readdirSync(path.join(REPO, 'docs/toolkit')).filter((name) => /\.mdx?$/.test(name)).length;
+const caseCount = fs.readdirSync(path.join(REPO, 'docs/cases')).filter((name) => /\.mdx?$/.test(name)).length;
 
 // 声称清单：文件 × 锚定正则（捕获组 1 = 声称的数字）× 应等于的实际数。
 // 新增「手写计数」时必须在这里登记；改措辞时同步改正则。
 const CLAIMS = [
+  { file: 'README.md', pattern: /\*\*(\d+) pitfall entries\*\*/, expect: docsCount, label: 'README coding entries' },
+  { file: 'README.zh-CN.md', pattern: /\*\*(\d+) 条误区\*\*/, expect: docsCount, label: 'README 编码条目' },
+  { file: 'README.md', pattern: /\*\*(\d+) privacy entries\*\*/, expect: privacyCount, label: 'README privacy entries' },
+  { file: 'README.zh-CN.md', pattern: /\*\*(\d+) 条隐私条目\*\*/, expect: privacyCount, label: 'README 隐私条目' },
+  { file: 'README.md', pattern: /\*\*(\d+) toolkit pieces\*\*/, expect: toolkitCount, label: 'README toolkit' },
+  { file: 'README.zh-CN.md', pattern: /\*\*(\d+) 份工具箱\*\*/, expect: toolkitCount, label: 'README 工具箱' },
+  { file: 'README.md', pattern: /\*\*(\d+) real-world case studies\*\*/, expect: caseCount, label: 'README cases' },
+  { file: 'README.zh-CN.md', pattern: /\*\*(\d+) 个真实事故案例\*\*/, expect: caseCount, label: 'README 事故案例' },
   {
     file: 'docs/core-20.mdx',
     pattern: /全书 \[(\d+) 条\]/,

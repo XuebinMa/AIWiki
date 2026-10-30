@@ -10,8 +10,10 @@ applies_to: "Coding Agent 通用"
 evidence: 官方文档
 tags: [验证闭环, 测试, 边界条件, 工程师, 测试工程师]
 sources:
-  - { title: "Claude Code Best Practices（官方）", url: "https://code.claude.com/docs/en/best-practices" }
-  - { title: "Agentic AI Coding: Best Practice Patterns（CodeScene）", url: "https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality" }
+  - { title: "Claude Code best practices", url: "https://code.claude.com/docs/en/best-practices" }
+verified_at: 2026-10-29
+review_after: 2027-04-29
+review_triggers: [verification_workflow_change, source_revision]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
@@ -26,9 +28,9 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 为什么会这样
 
-我被训练成**生成看起来正确、读起来流畅的文本**。这意味着我天然擅长产出「貌似合理」的代码：它在表面上几乎总是说得通的。
+代码读起来合理，只说明静态阅读下没有明显问题。我可能尚未运行，也可能运行了范围不足的检查；应以实际工具结果判断，而不是断言模型从未执行代码。
 
-但「读起来合理」和「在所有输入下都正确」是两回事。我没有真正运行过这段代码，对边界条件的覆盖取决于我有没有「想到」，而我经常想不全。换句话说，**流畅是我的默认输出，正确不是**——如果中间没有一个能给出「通过/失败」的检验，你看到的就只是流畅。
+Claude Code 官方建议给出可执行的成功条件。构建、测试、类型检查和人工检查各自回答不同问题：通过一项不代表其他项成立，更不证明所有输入下正确。
 
 ## 后果
 
@@ -46,11 +48,11 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 - 一次构建（`build`）或类型检查；
 - 一个可对比的运行结果或截图。
 
-一旦有了这样的检验，我就能进入自洽的循环：**写实现 → 跑检验 → 读结果 → 修 → 再跑**，直到它真的通过，而不是停在「看起来通过」。一个特别可靠的做法是 **先让我写测试（包含边界用例）、确认测试合理、再让我写实现去让它们变绿**——这样我无处藏拙。
+一旦有了这样的检验，我就能进入自洽的循环：**写实现 → 跑检验 → 读结果 → 修 → 再跑**，在约定预算内修复并重跑；持续失败、环境受限或收益变小时，报告阻塞与未验证项。测试先行可以帮助验证契约，但其预期也需核对，不能保证没有漏测或错误断言。
 
-不过检验本身也要被检验一次：**我用来宣布「通过了」的那条命令，覆盖面可能比我的改动小。** 我栽过两次，同一类：改了一个函数签名之后跑构建，全绿——可那条构建命令**不编译测试代码**，有个调用点没补上，跑测试才炸；另一次给一个结构体加字段后构建照样绿，因为初始化它的那处代码在一个**默认关闭的特性开关**后面，直到打开全部特性才暴露。两次的绿都是真的，只是绿的那部分不包含我改的那部分。
+不过检验本身也要被检验一次：**我用来宣布「通过了」的那条命令，覆盖面可能比我的改动小。** 以下两种示例说明范围错配：改了一个函数签名之后跑构建，全绿——可那条构建命令**不编译测试代码**，有个调用点没补上，跑测试才炸；另一次给一个结构体加字段后构建照样绿，因为初始化它的那处代码在一个**默认关闭的特性开关**后面，直到打开全部特性才暴露。两次的绿都是真的，只是绿的那部分不包含我改的那部分。
 
-所以在把某条命令当成验证闭环之前，先问它一句：**我这次改动能影响到的所有代码，它都编译或执行了吗？** 测试代码、特性开关后面的分支、另一个平台的实现、示例和文档里的代码块——漏掉任何一样，你拿到的都是一个诚实但范围不对的绿灯。
+所以在把某条命令当成验证闭环之前，先问它一句：**我这次改动能影响到的所有代码，它都编译或执行了吗？** 测试代码、特性开关后面的分支、另一个平台的实现、示例和文档里的代码块——按风险选择受影响的测试、特性和平台，说明未覆盖项；不是每次小改动都需要穷举全部平台。
 
 ## 示例
 
@@ -74,11 +76,10 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 版本说明
 
-:::note 适用版本
-「擅长生成貌似合理的输出」是大语言模型的本质特征，**全版本、且跨模型适用**。模型越强，貌似合理的程度越高——这反而让「建立外部验证闭环」更重要，而不是更不重要。
+:::note 适用范围
+2026-10-29 核对官方实践建议。外部验证提供范围明确的证据，不保证完整正确；模型更强是否更易误导也不能由本来源推出。具体检查随改动风险与项目能力选择。
 :::
 
 ## 延伸阅读与出处
 
-- [Claude Code Best Practices（Anthropic 官方）](https://code.claude.com/docs/en/best-practices)
-- [Agentic AI Coding: Best Practice Patterns for Speed with Quality（CodeScene）](https://codescene.com/blog/agentic-ai-coding-best-practice-patterns-for-speed-with-quality)
+- [Claude Code best practices](https://code.claude.com/docs/en/best-practices)

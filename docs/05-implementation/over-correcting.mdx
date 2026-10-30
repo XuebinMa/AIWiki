@@ -1,5 +1,5 @@
 ---
-title: 反复纠正：在同一段对话里硬掰，只会越掰越歪
+title: 反复纠正：同一段对话里硬掰，可能越纠越偏
 sidebar_label: "同一会话反复硬纠"
 slug: over-correcting
 sidebar_position: 3
@@ -10,15 +10,20 @@ applies_to: "Claude Code（支持 /rewind 的版本效果最佳）"
 evidence: 官方文档
 tags: [上下文管理, 纠错, 回滚, 工程师]
 sources:
+  - { title: "Claude Code memory", url: "https://code.claude.com/docs/en/memory" }
+  - { title: "Claude Code checkpointing", url: "https://code.claude.com/docs/en/checkpointing" }
   - { title: "Claude Code Best Practices（官方）", url: "https://code.claude.com/docs/en/best-practices" }
   - { title: "MuhammadUsmanGM/claude-code-best-practices", url: "https://github.com/MuhammadUsmanGM/claude-code-best-practices" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: ["编辑、压缩、记忆或检查点恢复机制变化", "任务契约、验证证据或并行写入方式变化"]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['工程师']} phase="编码实现" severity="高" appliesTo="Claude Code（支持 /rewind 的版本效果最佳）" evidence="官方文档" />
 
-> 一句话摘要：我做错了，你纠正，我还是错，你再纠正……三四个回合下来越来越离谱。问题在于：我的错误推理还留在上下文里，正被我自己当成线索。
+> 一句话摘要：反复纠正若没有增加可靠证据，我可能继续沿用失败假设；应保留已知事实、排除的方案与下一项验证，并把精简上下文和恢复代码分开处理。
 
 ## 现象
 
@@ -26,19 +31,11 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 为什么会这样
 
-每一轮纠正，我之前那段**错误的推理和错误的代码都仍然留在上下文里**。我生成新回答时会参考全部历史——于是我很容易被自己先前的错误逻辑「带跑」，在错误的地基上继续盖楼。
+我可能把之前失败的假设继续作为前提，即使你已指出错误；但纠正并非只会越纠越差。新日志、最小反例和明确的规格也能让同一会话收敛。问题是后续尝试有没有增加可靠信息，而不是轮数本身。
 
-这就像让一个人「忘掉刚才那个错误答案，重新想」——但那个错误答案还白纸黑字摆在他面前。纠正得越多，错误线索堆积得越厚，我挣脱原始误解的难度反而越大。
+旧消息可能被压缩、裁剪或检索回来，不能说每轮的全部错误始终原样占在窗口里。跨会话规则和持久记忆也因产品而异；纠正并不自动训练模型，但可以更新显式记录，供后续读取。
 
-```mermaid
-flowchart TD
-    A[我的错误实现] --> B[你纠正]
-    B --> C[我参考含错误的历史再答]
-    C --> D[仍然带偏]
-    D --> E[你再纠正]
-    E --> C
-    C -. 越掰越歪 .-> F[偏离越来越远]
-```
+我应提炼已排除的方案、当前证据和待验证假设；必要时换一份精简上下文，而不是机械地删除所有历史或恢复所有文件。
 
 ## 后果
 
@@ -48,42 +45,35 @@ flowchart TD
 
 ## 最佳实践
 
-**不要在污染的上下文里硬掰，回滚到出错前。**
-
-- 在 Claude Code 里，连按两次 `Esc`，或使用 `/rewind`，直接回退到上一个检查点，把错误的那几轮从上下文里彻底拿掉。
-- 然后**重写你的初始提示**：把这一轮学到的东西（「方案 A 不行，因为……，要用 B」）直接写进新的、干净的指令里。
-- 一个经验法则：**同一个问题纠正两次仍不对，就停止纠正，回滚 + 重写。**
-
-你不是在「教会」我——每段对话我都不会跨会话记住。你真正该做的是给我一个更好的起点，而不是在坏起点上不断打补丁。
+- **先问这一轮学到了什么。** 我应列出已否定假设与新证据；没有新信息的重复尝试先停下来重新定位。
+- **精简上下文时保留证据。** 把目标、约束、失败原因与最小复现写成简短摘要，再决定继续原会话、开新会话或清理上下文。
+- **代码回退单独处理。** 使用 /rewind 或双按 Esc 打开菜单后，核对所选的代码 / 对话恢复范围；先保护用户及并行工作。外部 API、数据库或只由 shell 修改的未追踪文件不能假定一起撤销。
+- **把经验存成显式规则。** 只保存已验证、仍适用的结论；不要把一次猜测写进长期记忆。
 
 ## 示例
 
-**改之前：**
-
-```text
-我：（用了递归，栈溢出）
-你：别用递归
-我：（还是递归，只是加了个计数器）
-你：我说了别用递归！
-我：（改成递归 + 缓存，依然递归）
-```
+**改之前：** 我反复把递归换个写法，仍未解决栈溢出。
 
 **改之后：**
 
 ```text
-我：（用了递归，栈溢出）
-你：[按 Esc Esc 回滚]
-你：用迭代实现这个遍历，不要递归——输入可能有十万层，会栈溢出。
-我：（直接给出迭代版本）
+我：已知要求是深层遍历；递归版本在受测深度失败。
+    下一次只验证迭代实现，并保留失败用例。
+    若需清理对话，先保存这些事实；若需撤回代码，先检查当前 diff，
+    在恢复菜单中选择准确范围，保护其它改动。
 ```
+
+这会给下一轮提供可检查的起点；是否成功仍以实际用例和资源限制验证。
 
 ## 版本说明
 
 :::note 适用版本
-「污染上下文导致越纠越偏」是机制层面的现象，全版本适用。但**回滚能力依赖具体版本**：`/rewind` 与 `Esc` 检查点回退是较新版本的特性。若你的版本不支持，可用 `/clear` 后重写初始提示达到类似效果（只是无法保留 `/clear` 之前的有用部分）。
+2026-10-29 核验当前最佳实践、memory 与 checkpointing。两次纠正可作复盘提醒，不是硬阈值。/rewind 会打开可选恢复 / 摘要操作；对话与代码恢复应分开判断，当前追踪文件上的后续外部改动也可能被恢复覆盖，链接路径另有限制。
 :::
 
 ## 延伸阅读与出处
 
 - [Claude Code Best Practices（Anthropic 官方）](https://code.claude.com/docs/en/best-practices)
 - [MuhammadUsmanGM/claude-code-best-practices](https://github.com/MuhammadUsmanGM/claude-code-best-practices)
+- [Claude Code checkpointing](https://code.claude.com/docs/en/checkpointing)
+- [Claude Code memory](https://code.claude.com/docs/en/memory)

@@ -5,8 +5,8 @@
 <h1 align="center">AiWiki</h1>
 
 <p align="center">
-  <strong>用 AI 第一人称视角写的「AI 编码误区与最佳实践」百科。</strong><br/>
-  <sub>An encyclopedia of AI-coding pitfalls, written from the AI's own perspective.</sub>
+  <strong>用 AI 第一人称视角写的工程百科：AI 编码与 LLM 隐私保护。</strong><br/>
+  <sub>An engineering encyclopedia of AI coding and LLM privacy, written from the AI's perspective.</sub>
 </p>
 
 <p align="center">
@@ -21,9 +21,9 @@
 
 ---
 
-> AI 最理解 AI。这是一本**从 AI 视角写的「AI 使用误区与最佳实践」百科**——告诉你人们在使用 AI 时反复踩的坑，以及怎么绕开它们。
+> **从 AI 第一人称讲清工程失败模式，以外部证据判断结论。** 本项目包含「AI 编码误区」与「LLM 隐私保护」两个并列主题。
 
-**聚焦：用 AI 编码工具做软件工程**，覆盖从灵感、调研、需求、设计、编码、测试到发布的完整流程。绝大多数误区是范式级的、跨工具通用；当前以 [Claude Code](https://code.claude.com/docs) 覆盖最深，并已把 Cursor、GitHub Copilot、Codex CLI、Gemini CLI 的差异补进各条目。
+**编码主题：用 AI 编码工具做软件工程**，覆盖从灵感、调研、需求、设计、编码、测试到发布的完整流程。绝大多数误区是范式级的、跨工具通用；当前以 [Claude Code](https://code.claude.com/docs) 覆盖最深，并已把 Cursor、GitHub Copilot、Codex CLI、Gemini CLI 的差异补进各条目。
 
 > 📖 **完全双语。** 每条都有中文与 English 两版（中文为创作源，英文为 1:1 镜像），用站点右上角的语言开关切换。
 
@@ -33,7 +33,7 @@
 
 ## 这本书为什么不一样
 
-市面上已有大量 AI 编码工具的「最佳实践清单」「配置合集」和「教程翻译」。本项目的差异化在于一个尚无人占住的组合：
+市面上已有大量 AI 编码工具的「最佳实践清单」「配置合集」和「教程翻译」。本项目采用以下写法：
 
 - **AI 第一人称叙述** —— 不是第三人称教程，而是「我作为模型，看到你常这样做」。
 - **从机制讲根因** —— 把表面现象追到模型的工作方式，让最佳实践成为能自己推导的常识。
@@ -42,9 +42,10 @@
 
 ## 内容结构
 
-- **76 条误区**，按软件工程生命周期的 8 个阶段组织
+- **85 条误区**，按软件工程生命周期的 8 个阶段组织
+- **45 条隐私条目**，覆盖六卷，提供[隐私地图](https://xuebinma.github.io/AIWiki/privacy/map)、[最小基线](https://xuebinma.github.io/AIWiki/privacy/baseline)与[必读 12 条](https://xuebinma.github.io/AIWiki/privacy/core-12)
 - **5 个真实事故案例**（3 例带 CVE 编号）
-- **12 份工具箱** —— 清单、提示词模板、可直接照搬的工作流
+- **14 份工具箱** —— 清单、提示词模板、可直接照搬的工作流
 - **5 个编码工具**，收在一页[工具矩阵](https://xuebinma.github.io/AIWiki/tool-matrix)里对照
 
 | 阶段 | 目录 |
@@ -58,7 +59,9 @@
 | 测试 | `docs/06-testing/` |
 | 验收与发布 | `docs/07-acceptance-release/` |
 
-每一条都用统一结构呈现：现象 → 为什么会这样 → 后果 → 最佳实践 → 示例 → 版本说明 → 出处。
+隐私主题覆盖训练数据抽取、推断攻击、RAG 与 Agent 数据流、隐私保护计算、机器遗忘和治理；条目分别说明机制、落地配方、证据、成熟度与残余风险。
+
+编码条目用统一结构呈现：现象 → 为什么会这样 → 后果 → 最佳实践 → 示例 → 版本说明 → 出处。
 
 ## 从这里开始
 

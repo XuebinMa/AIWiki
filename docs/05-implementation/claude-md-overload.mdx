@@ -1,5 +1,5 @@
 ---
-title: CLAUDE.md 过载：规则写得越多，被遵守的越少
+title: "CLAUDE.md 过载：规则冗长或冲突，关键约定被漏用"
 sidebar_label: "CLAUDE.md 过载"
 slug: claude-md-overload
 sidebar_position: 2
@@ -16,13 +16,16 @@ sources:
   - { title: "Codex — config reference (project doc discovery & limit)", url: "https://developers.openai.com/codex/config-reference" }
   - { title: "Cursor — Rules (official docs)", url: "https://cursor.com/docs/context/rules" }
   - { title: "5 tips for writing better custom instructions for Copilot (GitHub Blog)", url: "https://github.blog/ai-and-ml/github-copilot/5-tips-for-writing-better-custom-instructions-for-copilot/" }
+verified_at: 2026-10-29
+review_after: 2027-01-29
+review_triggers: [source_revision, evidence_or_threat_model_change]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['工程师', '架构师']} phase="编码实现" severity="中" appliesTo="Coding Agent 通用" evidence="官方文档" />
 
-> 一句话摘要：你把所有想到的规范都写进 `CLAUDE.md`，希望我面面俱到。结果规则太多，我反而抓不住重点，把一半都漏掉了。
+> 一句话摘要：你把所有想到的规范都写进 `CLAUDE.md`，希望我面面俱到。规则过多或互相冲突时，我可能漏掉关键要求；要检查实际加载与任务结果。
 
 ## 现象
 
@@ -30,9 +33,9 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 为什么会这样
 
-我能稳定遵守的指令数量是有限的。经验上，当前的前沿模型能可靠跟随的指令大约在 **150–200 条量级**，而 Claude Code 自身的系统提示已经占掉了其中一部分。`CLAUDE.md` 里每多一条规则，都在和其它规则争夺这份有限的「注意力预算」。
+常驻指令占用上下文，也可能相互冲突、包含过期约定或与代码现状不一致。规则越多，维护和验证越困难；但没有一个对所有前沿模型都成立的“可靠遵循 150–200 条指令”定额。
 
-更关键的是：规则之间没有优先级标记时，我无法判断哪条是「红线」、哪条是「偏好」。写得越多，**真正重要的约束就越容易和琐碎条目一起被平均稀释**。这和[厨房水槽式会话](./kitchen-sink-session.mdx)是同一类问题——信噪比，只不过这次噪声来自配置文件本身。
+不要只数行数。更该检查：哪些信息我能从仓库直接发现，哪些只对局部路径有效，哪些是真正的团队约定，以及哪些红线应该由权限、hook 或 CI 执行。
 
 ## 后果
 
@@ -42,14 +45,13 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 最佳实践
 
-**让 `CLAUDE.md` 从小开始，按需生长。** 具体做法：
+**保留有用途的短指令，并验证实际加载与效果。**
 
-1. 初始只写真正必要的少数几条（构建/测试命令、最核心的风格约定）。
-2. **每次我犯了某个错，再补一条对应的规则**——这样每条规则都有它存在的理由，而不是凭空预设。
-3. 定期回看：删掉那些「写了但其实从没被违反过」的条目。
-4. 不要在 `CLAUDE.md` 里到处用 `@文件引用`——每个引用都会把整个被引文件加载进上下文，是体积膨胀的常见来源。
-
-判断标准很简单：**如果一条规则你说不出「它是为了防止哪个具体错误」，它大概率不该在这里。**
+1. 留下真实构建/测试入口、无法从代码推得的决定和容易踩错的约定。
+2. 重复错误先诊断：是没加载、互相冲突、过期，还是需要执行控制；不要每次都追加一条“务必”。
+3. 删除过期、冗余或已迁移到执行控制的规则；“从没违反过”不能单独证明一条安全约定多余。
+4. 局部规则按路径加载，多步流程按需放入 skill；核查引用与自动记忆实际增加了哪些内容。
+5. 用代表任务检查关键约束是否被用到，比较删减前后结果，别把文件短当作唯一指标。
 
 ## 示例
 
@@ -78,18 +80,12 @@ import PitfallMeta from '@site/src/components/PitfallMeta';
 
 ## 工具差异
 
-**Gemini CLI（截至 2026-06）**：Gemini CLI 把这个坑放大了一档：它的上下文是**层级式全量拼接**进每个 prompt——全局 `~/.gemini/GEMINI.md` + 项目根 `./GEMINI.md` + 你所在子目录的 `src/GEMINI.md` 一起塞进去，比扁平加载更容易堆到过载。两个对策：用 `/memory show` 看我**真正**收到的拼接结果（而不是你以为的那份），再把局部规则下沉到对应子目录的 `GEMINI.md` 里，让它只在相关路径下生效，控制总 footprint。
-
-**Codex CLI（截至 2026-06）**：Codex 的对应文件是 `AGENTS.md`，从 cwd 一路向上合并到项目根（还含 `~/.codex/AGENTS.md`），同样会层级式膨胀。但它有个硬上限：`project_doc_max_bytes` 默认 32 KiB，超了直接截断——「把它写短」在这里是被工具强制的，不只是劝你。
-
-**Cursor（截至 2026-06）**：Cursor 的 `.mdc` 规则带**激活模式**，能把 footprint 变成条件式而非永远占用：Always（`alwaysApply: true`，每次都载——过载陷阱）、Auto Attached（`globs:` 命中文件才载）、Agent Requested（只给 description、模型按需取）、Manual（`@规则名`）。所以减负不是简单「写短」，而是把 always 规则降级成 glob 范围或 agent-requested。官方也提醒：always 规则每个 token 都在每次请求里被消耗。
-
-**GitHub Copilot（截至 2026-06）**：同样的稀释，外加两个硬上限。GitHub 明说「过长的指令文件会让部分指令被忽略」，而且 Copilot code review **只读自定义指令文件的前 4000 字**——超出部分静默失效，我连读都读不到。方向因此一致：写短、写具体，而不是堆。
+截至 2026-10-29：Gemini CLI 的层级上下文、Codex 的 `AGENTS.md`、Cursor 的条件规则、Copilot 不同产品形态的自定义指令，都有各自发现与加载方式。核查累计加载、作用域、长度限制和截断提示；不要只看你编辑的那一个文件。具体上限与默认值以当前官方文档为准。
 
 ## 版本说明
 
-:::note 适用版本
-「可靠遵循的指令数量有限」是当前所有前沿大模型的共性，**全模型、跨工具通用**。随着模型能力提升，这个上限会上移，但「精简、有优先级、每条有理由」永远比「大而全」更可靠。
+:::note 2026-10-29 核查
+指令数量、冲突、加载方式与模型能力共同影响效果。本条不设置跨模型的条数阈值；各工具的层级、截断与路径作用域以当前官方文档和实际加载结果为准。
 :::
 
 ## 延伸阅读与出处

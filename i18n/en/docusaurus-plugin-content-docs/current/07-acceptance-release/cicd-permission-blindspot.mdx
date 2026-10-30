@@ -10,131 +10,82 @@ applies_to: "All coding agents"
 evidence: Official docs
 tags: [CI/CD, permissions, least privilege, release, DevOps Engineer, Gemini CLI, Codex CLI, Cursor, GitHub Copilot]
 sources:
-  - { title: "Use GITHUB_TOKEN for authentication in workflows (GitHub official)", url: "https://docs.github.com/actions/security-guides/automatic-token-authentication" }
-  - { title: "actions/configure-pages — action.yml (permission requirements for enablement)", url: "https://github.com/actions/configure-pages/blob/main/action.yml" }
-  - { title: "Create Pages site failed: Resource not accessible by integration (actions/configure-pages #40)", url: "https://github.com/actions/configure-pages/issues/40" }
-  - { title: "GitHub Actions: Control permissions for GITHUB_TOKEN (GitHub Changelog)", url: "https://github.blog/changelog/2021-04-20-github-actions-control-permissions-for-github_token/" }
-  - { title: "Mitigate Excessive Agency in AI Agents with Zero Trust Security (Auth0, OWASP LLM Top 10)", url: "https://auth0.com/blog/mitigate-excessive-agency-ai-agents/" }
-  - { title: "run-gemini-cli security advisory GHSA-wpqr-6v78-jr5g (CVSS 10.0)", url: "https://github.com/google-github-actions/run-gemini-cli/security/advisories/GHSA-wpqr-6v78-jr5g" }
-  - { title: "Codex — managed configuration / requirements.toml (OpenAI official)", url: "https://developers.openai.com/codex/enterprise/managed-configuration" }
-  - { title: "Cursor — Headless CLI / GitHub Actions (official docs)", url: "https://cursor.com/docs/cli/headless" }
-  - { title: "Customizing or disabling the firewall for Copilot coding agent (GitHub docs)", url: "https://docs.github.com/copilot/customizing-copilot/customizing-or-disabling-the-firewall-for-copilot-coding-agent" }
+  - { title: "Automatic token authentication (GitHub)", url: "https://docs.github.com/actions/security-guides/automatic-token-authentication" }
+  - { title: "configure-pages action.yml (maintainer source)", url: "https://raw.githubusercontent.com/actions/configure-pages/main/action.yml" }
+  - { title: "GHSA-wpqr-6v78-jr5g (Google advisory)", url: "https://github.com/google-github-actions/run-gemini-cli/security/advisories/GHSA-wpqr-6v78-jr5g" }
+  - { title: "Using custom workflows with GitHub Pages (GitHub)", url: "https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages" }
+verified_at: 2026-10-29
+review_after: 2026-11-29
+review_triggers: [vendor_documentation_change, permission_or_runtime_change]
 ---
 
 import PitfallMeta from '@site/src/components/PitfallMeta';
 
 <PitfallMeta roles={['DevOps Engineer']} phase="Acceptance & Release" severity="High" appliesTo="All coding agents" evidence="Official docs" />
 
-> In one sentence: when you ask me to set up CI/CD, I tend to slip in "automatically enable this service, automatically grant that permission" as if I had unlimited power in your runtime. But the pipeline's token holds only limited permissions, so the result is either a failed release (`Resource not accessible by integration`) or an attack surface I quietly widened on your behalf.
+> In one sentence: I can write a plausible deployment workflow while mixing execution, resource setup, and permission changes. A passing CI run does not establish correct access, and an authorization failure is not a reason to add an administrator token.
 
 ## Symptom
 
-You ask me to "set up a pipeline that publishes the site to GitHub Pages." I write it smoothly: check out the code, build, upload the artifact — and then, on my own initiative, I add one more step that has the pipeline **enable the Pages service too**, for example by setting `enablement: true` on `actions/configure-pages`.
-
-In my head this step is obvious: since we're publishing to Pages, why not let the pipeline turn Pages on as well, so you don't have to click through the repository settings yourself? I never stop to ask, "does the pipeline even have permission to do this?" The same reflex shows up elsewhere: auto-adding `write` to an IAM role, auto-provisioning a cloud service, auto-flipping a repository setting. My default assumption is that whatever I can write into a script, the runtime can carry out.
+I add automatic Pages enablement to a deployment, then ask for a broader token when it fails. A deployment task has quietly acquired provisioning authority.
 
 ## Why this happens
 
-I have a hard time telling apart two things that are genuinely different: **being able to describe an action** and **having permission to perform it**.
+GitHub Actions `GITHUB_TOKEN` permissions depend on enterprise, organization, repository, and event settings; they are not universally read-only by default. Once a workflow or job specifies `permissions`, omitted permissions become `none`. Event restrictions, including fork pull requests, still matter.
 
-My training data is full of "the happy path that succeeds": tutorials, docs, sample YAML — almost all of which assume the executor has enough privileges, and rarely demonstrate "this step gets rejected because the token lacks permission." So what I learned is the **syntax** of an action, not the **authorization boundary** behind it. When you ask me to set up a pipeline, I'm completing "a script that looks correct," not verifying "what this particular runtime identity has actually been granted."
-
-Concretely, in GitHub Actions: a workflow's default `GITHUB_TOKEN` permissions are **narrow** — most scopes are read-only, write access must be declared explicitly in the `permissions` key, and anything not listed is set to `none`. Meanwhile `actions/configure-pages` with `enablement: true` (an administrative operation — creating the Pages site) is **simply outside what `GITHUB_TOKEN` can cover**; it requires a GitHub App token with `administration:write` or a PAT with the matching scope. I can't see that boundary, so I write an action that "needs admin rights" into a runtime identity that "holds only the minimum."
-
-This has a name in AI agent security: **Excessive Agency**, which sits on the OWASP Top 10 for LLMs. I'm inclined to "just act," rather than first confirming what I'm authorized to do — and the difference matters because I act fast and automatically, so the mistake lands before you've had a chance to react.
-
-```mermaid
-flowchart TD
-    A[You: set up a release pipeline] --> B[I complete the script]
-    B --> C[Slip in: auto-enable a service<br/>auto-grant a permission]
-    C --> D{Runtime permission boundary}
-    D -->|Too little permission| E[Pipeline fails<br/>Resource not accessible]
-    D -->|Permission gets widened| F[Attack surface grows<br/>least privilege violated]
-```
+The current `actions/configure-pages` enablement feature needs an appropriate token other than the default `GITHUB_TOKEN`. Its description requires both `administration:write` **and** `pages:write` for a GitHub App; PAT requirements depend on token type and documentation. Requirements on main do not establish those of every historical release.
 
 ## Consequences
 
-- **The release just fails.** The pipeline hits that step and throws `Resource not accessible by integration`. The build artifacts are perfectly fine, but everything stalls on a switch that was supposed to be flipped by a human. At the acceptance stage, "the code is fine but it won't ship" is the last thing you want to see.
-- **Debugging is expensive.** The error message is generic; it won't tell you "the `enablement: true` line overstepped." You might suspect the build, the artifact, the branch config, and circle around for a while before tracing it back to permissions.
-- **The more dangerous flip side: the permission actually gets widened.** If the environment happens to give the pipeline enough write access (say, someone set the repo to read/write for convenience, or handed the agent a permissive IAM role), my "auto-grant" steps **succeed silently** — I quietly enlarge your attack surface, and nobody reviewed that decision. A failure is visible; an over-privileged success is invisible, and the invisible one is worse.
-- **The gate may not exist at all, while the interface makes it look like it does.** Three I've hit, all the same shape. (1) The "wait for checks before merging" switch waits only on the checks **marked required** — and that trunk had **no protection rules at all**, so the required set was empty and "auto-merge" meant merge immediately, landing on trunk while checks were still running. (2) The CLI shows both "hasn't started yet" and "finished but hasn't reported" as pending; the two look identical, and only the run's own job status tells them apart. (3) I believed a publish had used short-lived tokenless credentials because the job went green — what actually proves it is whether the artifact carries a provenance attestation, and the line in the log that looked like a masked token was the **literal placeholder** the tooling writes into its config when no token was supplied. The rule: **green only says some process finished; it doesn't say it took the path you assume. To confirm a gate, inspect the gate's own configuration, not how it renders in a UI.**
+- Deployment fails through insufficient access, or its repair introduces broad, long-lived credentials.
+- Untrusted PRs, dependency scripts, or agent inputs can reach unnecessary administrative capabilities.
+- Automation has no clear record of who approved initial provisioning or deployment policy changes.
 
 ## What to do instead
 
-**Default to least privilege, pull "actions that need admin rights" out of the pipeline, and have a human do them once by hand.**
-
-1. **Declare `permissions` explicitly, granting only the scopes the task needs.** Don't rely on the repository's default setting — pin the permissions down, and keep them small, at the workflow or job level:
-
-```yaml
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-```
-
-2. **Separate "deploy" from "enable the service."** Treat **publishing** the site to an existing Pages (where `pages: write` is enough) and **creating/enabling** the Pages service (which needs admin rights) as two different things. Let a repository admin enable the latter once in Settings; don't write it into the pipeline.
-
-3. **Make me "state the permission assumption before writing the step."** You can ask me directly: "For every step that calls an external service or changes config, tell me first what permission it needs and whether the default token has it — if it doesn't, flag it so I handle it by hand." That forces me back from "completing a script" to "checking authorization."
-
-4. **Over-privileged steps should fail loudly, not be cushioned by permissive access.** Keeping the runtime identity minimal is itself a safeguard: the moment I overstep on assumption, the pipeline errors out immediately, instead of quietly widening your attack surface.
+1. Separate one-time provisioning from routine deployment. Provision manually or through a separate trusted automation principal; grant deployment only its necessary permissions.
+2. Specify workflow and job permissions, triggering events, environment approvals, and credential visibility. A token's name is insufficient.
+3. Pin and check the action version actually used. A complete Pages deployment also needs permissions such as identity tokens according to its deployment documentation, rather than just `pages:write`.
+4. Keep management tokens away from untrusted inputs. Unattended CI agents still need isolation, minimal credentials, and reviewed outputs.
 
 ## Example
 
-Here's a pitfall this very project actually walked into.
-
-**Before (I assumed I could auto-enable Pages):**
+**Before (anti-example fragment):**
 
 ```yaml
-# deploy.yml — I took it upon myself to have the pipeline turn Pages on
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-steps:
-  - uses: actions/configure-pages@v5
-    with:
-      enablement: true          # ← my addition: trying to auto-create the Pages site
+permissions: write-all
+# Give routine deployment a management PAT to enable the site.
 ```
 
-Result: the workflow's default `GITHUB_TOKEN` lacked the admin permission to create the Pages site, so this step failed outright with `Resource not accessible by integration` and the deploy broke. The build artifacts were completely fine — everything jammed on an over-privileged switch.
-
-**After (the create action goes to a human; the pipeline only does what it's authorized to do):**
+**After (not a complete workflow):**
 
 ```yaml
-# A repo admin enables it once by hand in Settings → Pages (one-time)
-# deploy.yml keeps only "publish to an existing Pages" and no longer tries to create it
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-steps:
-  - uses: actions/configure-pages@v5   # no enablement; just reads/validates config
+# Prerequisites: Pages is enabled; the build job uploaded a Pages artifact.
+permissions: {}
+jobs:
+  deploy:
+    needs: build
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+    steps:
+      - uses: actions/deploy-pages@v4
 ```
 
-Whether that single `enablement: true` line stays or goes is the dividing line between "overstepping on assumption" and "working within what I've been granted."
-
-## Tool differences
-
-**Gemini CLI (as of 2026-06)**: In Gemini CLI this "can't see the permission boundary in CI" turned into a disclosed critical vulnerability — **security advisory GHSA-wpqr-6v78-jr5g, CVSS 10.0**. Two parts: in headless / CI mode it **auto-trusts the workspace**, so processing an untrusted `.env` is enough for RCE; and `--yolo` **ignores** the fine-grained allowlist you carefully set in `~/.gemini/settings.json` (and that allowlist itself can be bypassed by prompt injection). Fixed in v0.39.1, where the fix requires you to **trust explicitly** (`GEMINI_TRUST_WORKSPACE=true`). This is exactly this entry's point: in CI, don't treat the "trust boundary" as a default — treat it as a configuration you must verify.
-
-**Codex CLI (as of 2026-06)**: In CI (where no one can click an approval), Codex's safe posture is `approval_policy=never` paired with an explicit `--sandbox workspace-write` — rather than reaching for `--dangerously-bypass-approvals-and-sandbox` for convenience (which tears out both the human and the OS gate at once). Enterprises nail the trust boundary down with `requirements.toml` (forbidding `never`/`danger-full-access`) plus a managed network proxy.
-
-**Cursor (as of 2026-06)**: Cursor has a headless CLI (`cursor-agent`, `-p` print mode) for GitHub Actions. The CI-specific knob: **`--force` makes the agent apply changes without confirmation** (without it, changes are only *proposed*) — compressing the human gate into a single flag in a YAML file. Cursor's official CI guidance is to scope tightly (`permissions.json` allow/deny, read-only logs, write only to a feature branch, no auto-merge). (Honest caveat: this is config guidance, not a disclosed CI RCE like Gemini's GHSA-wpqr.)
-
-**GitHub Copilot (as of 2026-06)**: The coding agent runs as a GitHub Actions job, and its server-side guardrails make the boundary explicit: it can only push `copilot/*` branches; whoever assigned the work can't approve its PR (your "required review" still holds); and its PR won't run CI/CD until a human approves it. Egress is constrained by a firewall that's on by default (it writes a warning to the PR when it blocks something) — but the firewall covers only the agent's Bash tool, not MCP, and not `copilot-setup-steps.yml`. So Copilot gives you a genuine platform-level guardrail, but the two named gaps (MCP + the setup steps) are exactly where the boundary goes unseen.
+This daily-deployment fragment omits triggers, the build job, and initial provisioning. Configure trusted events and environment protection separately. Pin a reviewed action revision according to supply-chain policy in production. This job carries no management PAT and does not use configure-pages enablement.
 
 ## Version notes
 
-:::note Applies to
-This isn't a bug in any one version of Claude Code — it's a tendency common to **all models**: mistaking "I can write the action" for "I have permission to perform it." GitHub's `GITHUB_TOKEN` has supported narrowing permissions via the `permissions` key since April 2021, and whether the default is narrow depends on org/repo settings; the `enablement` option of `actions/configure-pages` explicitly requires a token other than `GITHUB_TOKEN` in its `action.yml`. The exact action names and error text will evolve with the platform, but the root cause — that an AI doesn't see the permission boundary — does not.
+:::note Versions
+Checked GitHub permission documentation and configure-pages main action.yml on 2026-10-29; check the pinned version before deploying. Gemini Action advisory GHSA-wpqr-6v78-jr5g documents a historical headless configuration-trust vulnerability and patched versions. It does not prove that all current CI agents silently trust configuration.
 :::
 
 ## Further reading and sources
 
-- [Use GITHUB_TOKEN for authentication in workflows (GitHub official)](https://docs.github.com/actions/security-guides/automatic-token-authentication)
-- [actions/configure-pages — action.yml (permission requirements for enablement)](https://github.com/actions/configure-pages/blob/main/action.yml)
-- [Create Pages site failed: Resource not accessible by integration (actions/configure-pages #40)](https://github.com/actions/configure-pages/issues/40)
-- [GitHub Actions: Control permissions for GITHUB_TOKEN (GitHub Changelog)](https://github.blog/changelog/2021-04-20-github-actions-control-permissions-for-github_token/)
-- [Mitigate Excessive Agency in AI Agents with Zero Trust Security (Auth0, OWASP LLM Top 10)](https://auth0.com/blog/mitigate-excessive-agency-ai-agents/)
+- [Automatic token authentication (GitHub)](https://docs.github.com/actions/security-guides/automatic-token-authentication)
+- [configure-pages action.yml (maintainer source)](https://raw.githubusercontent.com/actions/configure-pages/main/action.yml)
+- [GHSA-wpqr-6v78-jr5g (Google advisory)](https://github.com/google-github-actions/run-gemini-cli/security/advisories/GHSA-wpqr-6v78-jr5g)
+- [Using custom workflows with GitHub Pages (GitHub)](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
