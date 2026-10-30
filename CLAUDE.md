@@ -24,6 +24,7 @@ AiWiki：一本**从 AI 第一人称视角写的百科**，内含若干**并列�
 - 写 / 改一条「LLM 隐私保护」条目：`aiwiki-privacy-entry-author`（九节结构 + 第一人称红线 + 三道硬闸门，privacy/）
 - 出对应英文版（两主题通用）：`aiwiki-translator`
 - 定期研究扩充新选题（去重 + 质量把关 + 走流水线）：「AI 编码误区」用 `aiwiki-research-refresh`；「LLM 隐私保护」用 `aiwiki-research-refresh-privacy`（去重基线 `privacy/`、三道硬闸门、一手出处、密码学存疑即 `:::caution`）。均适合月度定时触发器或手动跑。
+- 把维护者明确授权的项目经验分诊成通用条目或补例：`aiwiki-lessons-refresh`（沿用研究刷新流水线，要求外部可核查佐证，排除仓库特定运维知识；本地来源清单与扫描状态不入库，公开前脱敏并核对授权）。适合里程碑触发或手动跑。
 
 ## 保持连贯的硬规则（防止跨会话的风格 / 内容漂移）
 

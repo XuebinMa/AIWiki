@@ -9,6 +9,12 @@
 # Generated files
 .cache-loader
 
+# Daily patrol reports (personal ops notes, not part of the book)
+/.claude/patrol-reports
+
+# Internal lessons-harvest scan state (not part of the book)
+/.claude/lessons-harvest-state.md
+
 # Misc
 .DS_Store
 .env.local
