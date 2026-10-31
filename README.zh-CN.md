@@ -90,6 +90,17 @@ npm run start -- --locale en  # 英文站点
 npm run build                 # 全量构建（两个语言）
 ```
 
+## 可运行的工程示例
+
+[示例指南](./examples/README.zh-CN.md)包含 Node 原生权限检查、真实只读 MCP stdio 客户端 / 服务端，以及丢失响应后的重试恢复。使用合成数据，以断言检查允许、拒绝和防重复结果。
+
+在仓库根目录执行，需要 Node.js 22.13+（22.x）或 24+：
+
+```bash
+npm ci --prefix mcp --ignore-scripts
+npm run test:examples
+```
+
 ## 参与贡献
 
 这是一个开放的、长期演进的项目。欢迎补充新的误区条目、修正错误、完善翻译。

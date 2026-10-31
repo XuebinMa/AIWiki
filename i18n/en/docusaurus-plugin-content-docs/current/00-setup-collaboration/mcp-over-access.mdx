@@ -105,6 +105,19 @@ Me: (this request is denied; a read-only account can still disclose readable dat
 
 The difference isn't that I got smarter. It's that when the injected instruction reaches my hands, the "hand" either can't reach the dangerous action or has to clear you first before it moves.
 
+### Runnable MCP with narrow permissions
+
+From the repository root, install the locked dependencies and run a real stdio client/server:
+
+```bash
+npm ci --prefix mcp --ignore-scripts
+node mcp/examples/least-privilege/demo.mjs
+```
+
+Use Node.js 22.13 or later in the 22.x line, or Node.js 24+. The [example source and instructions](https://github.com/XuebinMa/AIWiki/blob/main/examples/README.md) expose only `read_note`, using fixed note identifiers rather than arbitrary paths. Assertions check a successful read and rejection of invalid identifiers, extra path/URL arguments, and unknown write tools. SDK 1.29.0 performs initialization, tool discovery, and calls; running needs no network or model account.
+
+A synthetic note contains instruction-like text. This example only verifies its return as data without execution; it does not test model resistance to injection. Fixed objects and schema constraints do not replace real identity, tenant/object authorization, or process isolation. The production AiWiki MCP server is unchanged by this exercise.
+
 ## Tool differences
 
 **Gemini CLI** currently documents environment filtering, explicit `env` forwarding, and a confirmation bypass through `trust: true`. Filtering is not secret isolation; explicit configuration can still expose data. The docs also warn that underscores in server names can break policy parsing. Prefer hyphens and test effective rules.

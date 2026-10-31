@@ -17,11 +17,12 @@ const path = require('path');
 const REPO = path.resolve(__dirname, '..');
 
 // 实际条目数：主题源目录下、数字开头的阶段/卷子目录里，frontmatter 含 severity 的文档。
-function countEntries(srcRoot) {
+function countEntries(srcRoot, onlyDirectory) {
   let count = 0;
   const base = path.join(REPO, srcRoot);
   for (const dirName of fs.readdirSync(base)) {
     if (!/^\d/.test(dirName)) continue;
+    if (onlyDirectory && dirName !== onlyDirectory) continue;
     const dir = path.join(base, dirName);
     if (!fs.statSync(dir).isDirectory()) continue;
     for (const f of fs.readdirSync(dir)) {
@@ -38,10 +39,35 @@ const docsCount = countEntries('docs');
 const privacyCount = countEntries('privacy');
 const toolkitCount = fs.readdirSync(path.join(REPO, 'docs/toolkit')).filter((name) => /\.mdx?$/.test(name)).length;
 const caseCount = fs.readdirSync(path.join(REPO, 'docs/cases')).filter((name) => /\.mdx?$/.test(name)).length;
+const privacyDirectories = fs.readdirSync(path.join(REPO, 'privacy')).filter((name) => /^\d+-/.test(name)).sort();
 
 // 声称清单：文件 × 锚定正则（捕获组 1 = 声称的数字）× 应等于的实际数。
 // 新增「手写计数」时必须在这里登记；改措辞时同步改正则。
 const CLAIMS = [
+  {
+    file: 'BACKLOG-privacy.md',
+    pattern: /当前攻防条目：\*\*(\d+) 条\*\*/,
+    expect: privacyCount,
+    label: '当前攻防条目总数',
+  },
+  ...privacyDirectories.map((directory, index) => ({
+    file: 'BACKLOG-privacy.md',
+    pattern: new RegExp(`分卷：[ \\t]*\\*\\*${privacyDirectories.map((_, position) => position === index ? '(\\d+)' : '\\d+').join('[ \\t]*/[ \\t]*')}\\*\\*`),
+    expect: countEntries('privacy', directory),
+    label: `当前进度第 ${index + 1} 卷`,
+  })),
+  {
+    file: 'BACKLOG.md',
+    pattern: /^\| \*\*合计\*\*[^\n]*\|[ \t]*\*\*(\d+)\*\*[ \t]*\|[ \t]*$/m,
+    expect: docsCount,
+    label: '当前进度表总条目数',
+  },
+  ...fs.readdirSync(path.join(REPO, 'docs')).filter((name) => /^0[0-7]-/.test(name)).map((directory) => ({
+    file: 'BACKLOG.md',
+    pattern: new RegExp(`^\\| ${directory.slice(0, 2)} [^\\n]*\\|[ \\t]*(\\d+)[ \\t]*\\|[ \\t]*$`, 'm'),
+    expect: countEntries('docs', directory),
+    label: `当前进度表 ${directory.slice(0, 2)} 阶段`,
+  })),
   { file: 'README.md', pattern: /\*\*(\d+) pitfall entries\*\*/, expect: docsCount, label: 'README coding entries' },
   { file: 'README.zh-CN.md', pattern: /\*\*(\d+) 条误区\*\*/, expect: docsCount, label: 'README 编码条目' },
   { file: 'README.md', pattern: /\*\*(\d+) privacy entries\*\*/, expect: privacyCount, label: 'README privacy entries' },

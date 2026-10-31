@@ -59,6 +59,18 @@ Place it in the project's `.claude/settings.json`, or adapt it for personal sett
 - **Restrict data and egress separately.** Avoid mounting sensitive files or injecting credentials. Restrict egress in an environment that covers the relevant processes. Claude Code's shell sandbox excludes MCP, hooks, and built-in file/web tools; see [sandbox isolation](../00-setup-collaboration/sandbox-filesystem-isolation.mdx) and [network egress control](../00-setup-collaboration/network-egress-control.mdx).
 - **Verify the boundary.** With dummy files containing no real secrets, check ordinary reads, protected paths, branch deletion, and unapproved scripts. A configuration that parses is not enough evidence.
 
+## Runnable check
+
+From the repository root:
+
+```bash
+node examples/permissions/demo.mjs
+```
+
+The [source and run instructions](https://github.com/XuebinMa/AIWiki/blob/main/examples/README.md) create synthetic files and start real Node child processes with `--permission`. Assertions verify allowed reads and writes, denied unapproved access and child-process creation, and the final files. Use Node.js 22.13 or later in the 22.x line, or Node.js 24+. No dependency installation is required.
+
+This exercise distinguishes a written rule from an enforced denial. It tests Node process permissions, not the Claude Code rules above. [Node's documentation](https://nodejs.org/docs/latest-v22.x/api/permissions.html) describes a seat belt for trusted code, with limitations involving malicious code, symbolic links, and existing file descriptors. It cannot replace an OS sandbox or network isolation.
+
 ## Applicability boundaries
 
 ### When to use it

@@ -81,7 +81,19 @@ If retrying, verify deduplication semantics and reuse the key. Without them, sto
 replay for human reconciliation. Save verifiable remote completion before the next step.
 ```
 
-This is a state-transition sketch, not executable API code. Fields, transaction boundaries, and failure handling must match the actual service.
+This is a state-transition sketch. Fields, transaction boundaries, and failure handling must match the actual service.
+
+### Runnable lost-response recovery
+
+From the repository root, without installing dependencies:
+
+```bash
+node examples/retry/demo.mjs
+```
+
+Use Node.js 22.13 or later in the 22.x line, or Node.js 24+. The [complete example](https://github.com/XuebinMa/AIWiki/blob/main/examples/README.md) first saves the business key, request digest, and budget. The simulated service completes an export, then loses the response and exits the caller. A new process reads the checkpoint, queries the service using the original key, and retrieves the successful result. Assertions check that only one export exists, changed parameters are rejected under the same key, permanent errors are not retried, and restarts do not reset the budget.
+
+The service ledger and caller checkpoint are separate temporary files. Short waits illustrate backoff. This is a single-writer teaching implementation with no real export service or MCP Tasks implementation; it does not establish concurrency, power-loss, or production exactly-once guarantees.
 
 ## How this differs from neighboring pitfalls
 
