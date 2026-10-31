@@ -69,5 +69,11 @@ jobs:
       - name: MCP 回归（含真实内容索引与跨主题取文）
         run: npm run test:mcp
 
+      - name: 安装 MCP 示例依赖（使用现有锁文件）
+        run: npm ci --prefix mcp --ignore-scripts
+
+      - name: 可运行示例（权限、MCP stdio、重试与恢复）
+        run: npm run test:examples
+
       - name: 构建（两 locale；连带校验 MDX / import / 死内链）
         run: npm run build

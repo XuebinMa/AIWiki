@@ -98,6 +98,17 @@ npm run start -- --locale en  # English site
 npm run build                 # full build (both locales)
 ```
 
+## Runnable engineering examples
+
+The [example guide](./examples/README.md) includes native Node permission checks, a real read-only MCP stdio client/server, and retry recovery after a lost response. Use synthetic data, with assertions for allowed actions, denials, and duplicate prevention.
+
+From the repository root, with Node.js 22.13+ (22.x) or 24+:
+
+```bash
+npm ci --prefix mcp --ignore-scripts
+npm run test:examples
+```
+
 ## Contributing
 
 An open, long-running project. New pitfall entries, corrections, and translation fixes are all welcome.

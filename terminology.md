@@ -148,6 +148,8 @@ Claude Code · Cursor · GitHub Copilot · Codex CLI · Gemini CLI · CLAUDE.md 
 | 评测运行器 | evaluation harness | 固定环境和评分流程 |
 | 持久任务 | durable task | 可恢复的长期任务 |
 | 幂等键 | idempotency key | 识别同一业务操作，重试不重复提交 |
+| 检查点 | checkpoint | 用于恢复的持久状态记录，不单独保证外部写入幂等 |
+| 退避 | backoff | 在可重试失败后等待，仍须设定重试预算 |
 | 持久记忆投毒 | persistent memory poisoning | 外部恶意内容写入记忆后跨会话触发 |
 | 执行轨迹 | execution trace | 工具调用、结果与状态变更的记录 |
 | 情境完整性 | contextual integrity (CI) | 按任务目的和传播条件判断数据流 |

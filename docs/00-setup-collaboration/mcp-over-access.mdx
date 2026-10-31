@@ -105,6 +105,19 @@ flowchart LR
 
 差别不在我变聪明了，而在于注入指令落到我手里时，那只「手」要么够不到危险动作，要么在动手前还得过你这一关。
 
+### 可运行的最小权限 MCP
+
+在仓库根目录安装已锁定依赖，再运行真实 stdio 客户端 / 服务端：
+
+```bash
+npm ci --prefix mcp --ignore-scripts
+node mcp/examples/least-privilege/demo.mjs
+```
+
+需要 Node.js 22.13 或更新的 22.x，或 Node.js 24+。[示例源码与说明](https://github.com/XuebinMa/AIWiki/blob/main/examples/README.zh-CN.md)只公开 `read_note`，以固定笔记标识代替任意路径；断言正常读取成功，非法标识、额外路径 / URL 参数及未知写工具被拒绝。通过锁定 SDK 1.29.0 完成握手、工具发现和调用，运行时无需联网或模型账号。
+
+一条合成笔记含指令样文本；本例只验证它作为数据返回，没有执行，也没有测模型抗注入能力。固定对象与 schema 约束不替代真实身份、租户 / 对象授权和进程隔离；正式 AiWiki MCP 服务不受此练习修改。
+
 ## 工具差异
 
 **Gemini CLI** 当前 MCP 文档描述环境变量过滤、显式 `env` 转发和 `trust: true` 的确认旁路；过滤不是秘密隔离，显式配置仍可暴露数据。官方还警告 server 名含下划线可能导致策略解析错误，建议用连字符，并测试实际规则。

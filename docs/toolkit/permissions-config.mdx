@@ -59,6 +59,18 @@ sources:
 - **单独限制数据与出口。** 敏感文件不要挂载或注入凭据；网络出口在覆盖相应进程的环境层限制。Claude Code 的内置 shell 沙箱不覆盖 MCP、hooks 或内置文件/网页工具，见[沙箱隔离](../00-setup-collaboration/sandbox-filesystem-isolation.mdx)与[网络出口控制](../00-setup-collaboration/network-egress-control.mdx)。
 - **确认边界真的生效。** 用不含真实秘密的测试文件，检查普通读取、受保护路径、分支删除和未批准脚本分别如何处理。只检查配置能解析还不够。
 
+## 可运行检查
+
+在仓库根目录执行：
+
+```bash
+node examples/permissions/demo.mjs
+```
+
+[源码与运行说明](https://github.com/XuebinMa/AIWiki/blob/main/examples/README.zh-CN.md)使用合成文件，启动带 `--permission` 的真实 Node 子进程，断言允许的读写成功、未授权读写及子进程创建被拒绝，并核对文件最终状态。需要 Node.js 22.13 或更新的 22.x，或 Node.js 24+，无需安装依赖。
+
+这个练习帮你区分“规则写出来了”和“执行时确实拒绝了”。它测试 Node 的进程权限，不测试上面的 Claude Code 匹配规则；[Node 官方](https://nodejs.org/docs/latest-v22.x/api/permissions.html)将其定位为可信代码的安全带，恶意代码、符号链接、既有文件描述符等存在边界，不能替代 OS 沙箱或网络隔离。
+
 ## 适用边界
 
 ### 适合什么时候用

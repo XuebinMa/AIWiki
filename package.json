@@ -23,7 +23,8 @@
     "check:counts": "node scripts/check-counts.js",
     "check:content": "node scripts/check-content.js",
     "review:queue": "node scripts/check-content.js --review-queue",
-    "test:mcp": "node --test mcp/test/*.test.js"
+    "test:mcp": "node --test mcp/test/*.test.js",
+    "test:examples": "node examples/permissions/demo.mjs && node mcp/examples/least-privilege/demo.mjs && node examples/retry/demo.mjs && node --test examples/retry/retry.test.mjs mcp/examples/least-privilege/session.test.mjs"
   },
   "dependencies": {
     "@docusaurus/core": "^3.8.0",
